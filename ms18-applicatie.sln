@@ -1,6 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ms18-applicatie", "ms18-applicatie\ms18-applicatie.csproj", "{A42ABEFA-3E92-401B-BA55-A2B0F56507AC}"
+# Visual Studio Version 17
+VisualStudioVersion = 17.7.34031.279
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ms18-applicatie", "ms18-applicatie\ms18-applicatie.csproj", "{A42ABEFA-3E92-401B-BA55-A2B0F56507AC}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ms18-database", "ms18-database\ms18-database.csproj", "{4C7B4B5F-651F-47DE-9EA3-E827F8965208}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -12,5 +17,12 @@ Global
 		{A42ABEFA-3E92-401B-BA55-A2B0F56507AC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A42ABEFA-3E92-401B-BA55-A2B0F56507AC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A42ABEFA-3E92-401B-BA55-A2B0F56507AC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4C7B4B5F-651F-47DE-9EA3-E827F8965208}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4C7B4B5F-651F-47DE-9EA3-E827F8965208}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4C7B4B5F-651F-47DE-9EA3-E827F8965208}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4C7B4B5F-651F-47DE-9EA3-E827F8965208}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
 	EndGlobalSection
 EndGlobal
