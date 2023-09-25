@@ -37,9 +37,9 @@ namespace Maasgroep.Database
 
 			//FK
 			modelBuilder.Entity<Photo>()
-				.HasOne(p => p.Receipt)
+				.HasOne(p => p.ReceiptInstance)
 				.WithOne(r => r.Photo)
-				.HasForeignKey<Photo>(p => p.ReceiptId)
+				.HasForeignKey<Photo>(p => p.Receipt)
 				.HasConstraintName("FK_Photo_Receipt")
 				.OnDelete(DeleteBehavior.NoAction);
 		}
@@ -69,23 +69,23 @@ namespace Maasgroep.Database
 
 			//FK
 			modelBuilder.Entity<Receipt>()
-				.HasOne(r => r.Store)
+				.HasOne(r => r.StoreInstance)
 				.WithMany(s => s.Receipt)
-				.HasForeignKey(r => r.StoreId)
+				.HasForeignKey(r => r.Store)
 				.HasConstraintName("FK_Receipt_StoreId")
 				.OnDelete(DeleteBehavior.NoAction);
 
 			modelBuilder.Entity<Receipt>()
-				.HasOne(r => r.CostCentre)
+				.HasOne(r => r.CostCentreInstance)
 				.WithMany(c => c.Receipt)
-				.HasForeignKey(r => r.CostCentreId)
+				.HasForeignKey(r => r.CostCentre)
 				.HasConstraintName("FK_Receipt_CostCentre")
 				.OnDelete(DeleteBehavior.NoAction);
 
 			modelBuilder.Entity<Receipt>()
-				.HasOne(r => r.ReceiptStatus)
+				.HasOne(r => r.ReceiptStatusInstance)
 				.WithMany(rs => rs.Receipt)
-				.HasForeignKey(r => r.ReceiptStatusId)
+				.HasForeignKey(r => r.ReceiptStatus)
 				.HasConstraintName("FK_Receipt_ReceiptStatus")
 				.OnDelete(DeleteBehavior.NoAction);
 		}
@@ -98,9 +98,9 @@ namespace Maasgroep.Database
 
 			//FK
 			modelBuilder.Entity<ReceiptApproval>()
-				.HasOne(ra => ra.Receipt)
+				.HasOne(ra => ra.ReceiptInstance)
 				.WithOne(r => r.ReceiptApproval)
-				.HasForeignKey<ReceiptApproval>(ra => ra.ReceiptId)
+				.HasForeignKey<ReceiptApproval>(ra => ra.Receipt)
 				.HasConstraintName("FK_ReceiptApproval_Receipt")
 				.OnDelete(DeleteBehavior.NoAction);
 
