@@ -7,7 +7,7 @@ namespace Maasgroep.Database
 		[Key]
 		public long ReceiptId { get; set; }
 		public DateTime Approved { get; set; }
-		public long ApprovedBy { get; set; }
+		public int ApprovedBy { get; set; }
 		public string Note { get; set; }
 
 

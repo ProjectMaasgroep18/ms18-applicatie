@@ -12,7 +12,7 @@ namespace Maasgroep.Database
 		public decimal Amount { get; set; }
 		public long StoreId { get; set; }
 		public long CostCentreId { get; set; }
-		public long ReceiptStatusId { get; set; }
+		public short ReceiptStatusId { get; set; }
 		public string? Location { get; set; }//TODO: Kevin; GPS zie ik nog even niet vliegen?
 
 
