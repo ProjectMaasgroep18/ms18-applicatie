@@ -14,7 +14,15 @@ namespace Maasgroep.Database
 		public long CostCentre { get; set; }
 		public short ReceiptStatus { get; set; }
 		public string? Location { get; set; }//TODO: Kevin; GPS zie ik nog even niet vliegen?
+		[Column(TypeName = "varchar(2048)")]
+		public string? Note { get; set; }
 
+
+		//Generic
+		public int UserCreated { get; set; }
+		public int UserModified { get; set; }
+		public DateTime DateTimeCreated { get; set; }
+		public DateTime DateTimeModified { get; set; }
 
 
 
@@ -24,5 +32,7 @@ namespace Maasgroep.Database
 		public ReceiptStatus ReceiptStatusInstance { get; set; }
 		public Photo? Photo { get; set; }
 		public ReceiptApproval? ReceiptApproval { get; set; }
+		public MaasgroepMember UserCreatedInstance { get; set; }
+		public MaasgroepMember UserModifiedInstance { get; set; }
 	}
 }
