@@ -19,7 +19,7 @@ namespace Maasgroep.Database
 
 		// Ef
 		public Receipt ReceiptInstance { get; set; }
-		public MaasgroepMember MaasGroepMember { get; set; }
+		public MaasgroepMember UserCreatedInstance { get; set; }
 		public MaasgroepMember UserModifiedInstance { get; set; }
 	}
 }

@@ -12,7 +12,6 @@ namespace Maasgroep.Database
 
 
 		//Ef
-		public ReceiptApproval? ReceiptApproval { get; set; }
 		public ICollection<CostCentre> CostCentres { get; set; }
 		public ICollection<Store> Stores { get; set; }
 		public ICollection<ReceiptStatus> ReceiptStatuses { get; set; }

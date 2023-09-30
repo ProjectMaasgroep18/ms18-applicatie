@@ -26,9 +26,12 @@ namespace Maasgroep.Database
 			CreateReceipt(modelBuilder);
 			CreatePhoto(modelBuilder);
 			CreateMaasgroepMember(modelBuilder);
+
+			CreateGenericMemberLogging(modelBuilder);
 		}
 
-		private void CreatePhoto(ModelBuilder modelBuilder)
+
+        private void CreatePhoto(ModelBuilder modelBuilder)
 		{
 			modelBuilder.Entity<Photo>().ToTable("Photo", "photos");
 			modelBuilder.HasSequence<long>("PhotoSeq", schema: "photos").StartsAt(1).IncrementsBy(1);
@@ -117,6 +120,7 @@ namespace Maasgroep.Database
 			modelBuilder.Entity<ReceiptStatus>().ToTable("Status", "receipts");
 			modelBuilder.HasSequence<short>("ReceiptStatusSeq", schema: "receipts").StartsAt(1).IncrementsBy(1);
 			modelBuilder.Entity<ReceiptStatus>().Property(r => r.Id).HasDefaultValueSql("nextval('receipts.\"ReceiptStatusSeq\"')");
+			modelBuilder.Entity<ReceiptStatus>().HasIndex(r => r.Name).IsUnique();
 		}
 
 		private void CreateMaasgroepMember(ModelBuilder modelBuilder)
@@ -126,5 +130,68 @@ namespace Maasgroep.Database
 			modelBuilder.Entity<MaasgroepMember>().Property(m => m.Id).HasDefaultValueSql("nextval('admin.\"MemberSeq\"')");
 			modelBuilder.Entity<MaasgroepMember>().HasIndex(m => m.Name).IsUnique();
 		}
-	}
+
+        private void CreateGenericMemberLogging(ModelBuilder modelBuilder)
+        {
+			modelBuilder.Entity<CostCentre>()
+				.HasOne(cc => cc.UserCreatedInstance)
+				.WithMany(m => m.CostCentres)
+				.HasForeignKey(cc => cc.UserCreated)
+				.HasConstraintName("FK_CostCentre_MemberCreated");
+
+            modelBuilder.Entity<CostCentre>()
+				.HasOne(cc => cc.UserModifiedInstance)
+				.WithMany(m => m.CostCentres)
+				.HasForeignKey(cc => cc.UserModified)
+				.HasConstraintName("FK_CostCentre_MemberModified");
+
+            modelBuilder.Entity<Store>()
+                .HasOne(s => s.UserCreatedInstance)
+                .WithMany(m => m.Stores)
+                .HasForeignKey(s => s.UserCreated)
+                .HasConstraintName("FK_Store_MemberCreated");
+
+            modelBuilder.Entity<Store>()
+                .HasOne(s => s.UserModifiedInstance)
+                .WithMany(m => m.Stores)
+                .HasForeignKey(s => s.UserModified)
+                .HasConstraintName("FK_Store_MemberModified");
+
+            modelBuilder.Entity<ReceiptStatus>()
+				.HasOne(rs => rs.UserCreatedInstance)
+				.WithMany(m => m.ReceiptStatuses)
+				.HasForeignKey(rs => rs.UserCreated)
+				.HasConstraintName("FK_ReceiptStatus_MemberCreated");
+
+            modelBuilder.Entity<ReceiptStatus>()
+                .HasOne(rs => rs.UserModifiedInstance)
+                .WithMany(m => m.ReceiptStatuses)
+                .HasForeignKey(rs => rs.UserModified)
+                .HasConstraintName("FK_ReceiptStatus_MemberModified");
+
+            modelBuilder.Entity<ReceiptApproval>()
+                .HasOne(ra => ra.UserCreatedInstance)
+                .WithMany(m => m.ReceiptApprovals)
+                .HasForeignKey(ra => ra.ApprovedBy)
+                .HasConstraintName("FK_ReceiptApproval_MemberCreated");
+
+            modelBuilder.Entity<ReceiptApproval>()
+                .HasOne(ra => ra.UserModifiedInstance)
+                .WithMany(m => m.ReceiptApprovals)
+                .HasForeignKey(ra => ra.UserModified)
+                .HasConstraintName("FK_ReceiptApproval_MemberModified");
+
+            modelBuilder.Entity<Receipt>()
+                .HasOne(ra => ra.UserCreatedInstance)
+                .WithMany(m => m.Receipts)
+                .HasForeignKey(ra => ra.UserCreated)
+                .HasConstraintName("FK_Receipt_ApprovedBy");
+
+            modelBuilder.Entity<Receipt>()
+                .HasOne(ra => ra.UserModifiedInstance)
+                .WithMany(m => m.Receipts)
+                .HasForeignKey(ra => ra.UserModified)
+                .HasConstraintName("FK_Receipt_MemberModified");
+        }
+    }
 }

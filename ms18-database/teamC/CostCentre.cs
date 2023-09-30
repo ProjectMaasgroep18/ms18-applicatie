@@ -10,6 +10,7 @@ namespace Maasgroep.Database
 		[Column(TypeName = "varchar(256)")]
 		public string Name { get; set; } //Unique constraint in Builder.
 
+
 		//Generic
 		public int UserCreated { get; set; }
 		public int UserModified { get; set; }

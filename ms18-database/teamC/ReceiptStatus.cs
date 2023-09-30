@@ -8,11 +8,11 @@ namespace Maasgroep.Database
 		[Key]
 		public short Id { get; set; }
 		[Column(TypeName = "varchar(256)")]
-		public string Name { get; set; }
+		public string Name { get; set; } //Unique constraint in Builder.
 
-		
-		//Generic
-		public int UserCreated { get; set; }
+
+        //Generic
+        public int UserCreated { get; set; }
 		public int UserModified { get; set; }
 		public DateTime DateTimeCreated { get; set; }
 		public DateTime DateTimeModified { get; set; }
