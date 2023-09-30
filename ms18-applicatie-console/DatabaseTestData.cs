@@ -9,6 +9,7 @@ namespace ms18_applicatie_console
         internal void CreateTestDataAll()
         {
             CreateTestDataMember();
+            CreateTestDataCostCentre();
         }
 
         internal void CreateTestDataMember()
@@ -30,18 +31,23 @@ namespace ms18_applicatie_console
             }
         }
 
-        //internal void CreateTestDataCostCentre()
-        //{
-        //    using (var db = new MaasgroepContext())
-        //    {
-        //        var members = new List<CostCentre>()
-        //        {
-        //            new CostCentre() { Name = "da Gama"}
-        //        };
+        internal void CreateTestDataCostCentre()
+        {
+            using (var db = new MaasgroepContext())
+            {
 
-        //        db.AddRange(members);
-        //        SaveChanges(db);
-        //    }
-        //}
+                var member = db.MaasgroepMember.Where(m => m.Id == 1).FirstOrDefault()!;
+
+                var costCentres = new List<CostCentre>()
+                {
+                    new CostCentre() { Name = "Albert Heijn", UserCreatedInstance = member}
+                };
+
+                db.CostCentre.AddRange(costCentres);
+
+                var rows = db.SaveChanges();
+                Console.WriteLine($"Number of rows: {rows}");
+            }
+        }
     }
 }

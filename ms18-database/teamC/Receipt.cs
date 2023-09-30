@@ -9,9 +9,9 @@ namespace Maasgroep.Database
 		public long Id { get; set; }
 		public DateTime Created { get; set; }
 		[Column(TypeName = "decimal(18,2)")]
-		public decimal Amount { get; set; }
-		public long Store { get; set; }
-		public long CostCentre { get; set; }
+		public decimal? Amount { get; set; }
+		public long? Store { get; set; }
+		public long? CostCentre { get; set; }
 		public long ReceiptStatus { get; set; }
 		public string? Location { get; set; }//TODO: Kevin; GPS zie ik nog even niet vliegen?
 		[Column(TypeName = "varchar(2048)")]
@@ -21,7 +21,6 @@ namespace Maasgroep.Database
 		//Generic
 		public long UserCreated { get; set; }
 		public long? UserModified { get; set; }
-		public DateTime DateTimeCreated { get; set; }
 		public DateTime? DateTimeModified { get; set; }
 
 

@@ -31,13 +31,13 @@ namespace Maasgroep.Database
 
         private void CreatePhoto(ModelBuilder modelBuilder)
 		{
-			modelBuilder.Entity<Photo>().ToTable("Photo", "photos");
+			modelBuilder.Entity<Photo>().ToTable("photo", "photos");
 			modelBuilder.HasSequence<long>("PhotoSeq", schema: "photos").StartsAt(1).IncrementsBy(1);
 			modelBuilder.Entity<Photo>().Property(p => p.Created).HasDefaultValueSql("now()");
 			modelBuilder.Entity<Photo>().Property(p => p.Id).HasDefaultValueSql("nextval('photos.\"PhotoSeq\"')");
 
-			//FK
-			modelBuilder.Entity<Photo>()
+            //FK
+            modelBuilder.Entity<Photo>()
 				.HasOne(p => p.ReceiptInstance)
 				.WithOne(r => r.Photo)
 				.HasForeignKey<Photo>(p => p.Receipt)
@@ -47,10 +47,11 @@ namespace Maasgroep.Database
 
 		private void CreateCostCentre(ModelBuilder modelBuilder)
 		{
-			modelBuilder.Entity<CostCentre>().ToTable("CostCentre", "receipts");
-			modelBuilder.HasSequence<long>("CostCentreSeq", schema: "receipts").StartsAt(1).IncrementsBy(1);
-			modelBuilder.Entity<CostCentre>().HasIndex(c => c.Name).IsUnique();
+			modelBuilder.Entity<CostCentre>().ToTable("costCentre", "receipts");
+			modelBuilder.HasSequence<long>("CostCentreSeq", schema: "receipts").StartsAt(1).IncrementsBy(1);			
 			modelBuilder.Entity<CostCentre>().Property(c => c.Id).HasDefaultValueSql("nextval('receipts.\"CostCentreSeq\"')");
+            modelBuilder.Entity<CostCentre>().Property(c => c.DateTimeCreated).HasDefaultValueSql("now()");
+            modelBuilder.Entity<CostCentre>().HasIndex(c => c.Name).IsUnique();
 
             modelBuilder.Entity<CostCentre>()
                 .HasOne(cc => cc.UserCreatedInstance)
@@ -69,10 +70,11 @@ namespace Maasgroep.Database
 
 		private void CreateStore(ModelBuilder modelBuilder)
 		{
-			modelBuilder.Entity<Store>().ToTable("Store", "receipts");
-			modelBuilder.HasSequence<long>("StoreSeq", schema: "receipts").StartsAt(1).IncrementsBy(1);
-			modelBuilder.Entity<Store>().HasIndex(s => s.Name).IsUnique();
+			modelBuilder.Entity<Store>().ToTable("store", "receipts");
+			modelBuilder.HasSequence<long>("StoreSeq", schema: "receipts").StartsAt(1).IncrementsBy(1);			
 			modelBuilder.Entity<Store>().Property(s => s.Id).HasDefaultValueSql("nextval('receipts.\"StoreSeq\"')");
+            modelBuilder.Entity<Store>().Property(s => s.DateTimeCreated).HasDefaultValueSql("now()");
+            modelBuilder.Entity<Store>().HasIndex(s => s.Name).IsUnique();
 
             modelBuilder.Entity<Store>()
 				.HasOne(s => s.UserCreatedInstance)
@@ -91,13 +93,13 @@ namespace Maasgroep.Database
 
 		private void CreateReceipt(ModelBuilder modelBuilder)
 		{
-			modelBuilder.Entity<Receipt>().ToTable("Receipt", "receipts");
+			modelBuilder.Entity<Receipt>().ToTable("receipt", "receipts");
 			modelBuilder.HasSequence<long>("ReceiptSeq", schema: "receipts").StartsAt(1).IncrementsBy(1);
-			modelBuilder.Entity<Receipt>().Property(r => r.Created).HasDefaultValueSql("now()");
 			modelBuilder.Entity<Receipt>().Property(r => r.Id).HasDefaultValueSql("nextval('receipts.\"ReceiptSeq\"')");
+            modelBuilder.Entity<Receipt>().Property(r => r.Created).HasDefaultValueSql("now()");
 
-			//FK
-			modelBuilder.Entity<Receipt>()
+            //FK
+            modelBuilder.Entity<Receipt>()
 				.HasOne(r => r.StoreInstance)
 				.WithMany(s => s.Receipt)
 				.HasForeignKey(r => r.Store)
@@ -135,12 +137,11 @@ namespace Maasgroep.Database
 
 		private void CreateReceiptApproval(ModelBuilder modelBuilder)
 		{
-			modelBuilder.Entity<ReceiptApproval>().ToTable("Approval", "receipts");
-			modelBuilder.HasSequence<long>("ReceiptApprovalSeq", schema: "receipts").StartsAt(1).IncrementsBy(1);
-			modelBuilder.Entity<ReceiptApproval>().Property(r => r.Approved).HasDefaultValueSql("now()");
+			modelBuilder.Entity<ReceiptApproval>().ToTable("approval", "receipts");
+            modelBuilder.Entity<ReceiptApproval>().Property(ra => ra.Approved).HasDefaultValueSql("now()");
 
-			//FK
-			modelBuilder.Entity<ReceiptApproval>()
+            //FK
+            modelBuilder.Entity<ReceiptApproval>()
 				.HasOne(ra => ra.ReceiptInstance)
 				.WithOne(r => r.ReceiptApproval)
 				.HasForeignKey<ReceiptApproval>(ra => ra.Receipt)
@@ -164,10 +165,11 @@ namespace Maasgroep.Database
 
 		private void CreateReceiptStatus(ModelBuilder modelBuilder)
 		{
-			modelBuilder.Entity<ReceiptStatus>().ToTable("Status", "receipts");
+			modelBuilder.Entity<ReceiptStatus>().ToTable("status", "receipts");
 			modelBuilder.HasSequence<short>("ReceiptStatusSeq", schema: "receipts").StartsAt(1).IncrementsBy(1);
 			modelBuilder.Entity<ReceiptStatus>().Property(r => r.Id).HasDefaultValueSql("nextval('receipts.\"ReceiptStatusSeq\"')");
-			modelBuilder.Entity<ReceiptStatus>().HasIndex(r => r.Name).IsUnique();
+            modelBuilder.Entity<ReceiptStatus>().Property(r => r.DateTimeCreated).HasDefaultValueSql("now()");
+            modelBuilder.Entity<ReceiptStatus>().HasIndex(r => r.Name).IsUnique();
 
             modelBuilder.Entity<ReceiptStatus>()
                 .HasOne(rs => rs.UserCreatedInstance)
@@ -187,10 +189,11 @@ namespace Maasgroep.Database
 
         private void CreateMaasgroepMember(ModelBuilder modelBuilder)
 		{
-			modelBuilder.Entity<MaasgroepMember>().ToTable("Member", "admin");
+			modelBuilder.Entity<MaasgroepMember>().ToTable("member", "admin");
 			modelBuilder.HasSequence<long>("MemberSeq", schema: "admin").StartsAt(1).IncrementsBy(1);
 			modelBuilder.Entity<MaasgroepMember>().Property(m => m.Id).HasDefaultValueSql("nextval('admin.\"MemberSeq\"')");
-			modelBuilder.Entity<MaasgroepMember>().HasIndex(m => m.Name).IsUnique();
+            modelBuilder.Entity<MaasgroepMember>().Property(m => m.DateTimeCreated).HasDefaultValueSql("now()");
+            modelBuilder.Entity<MaasgroepMember>().HasIndex(m => m.Name).IsUnique();
 
 			modelBuilder.Entity<MaasgroepMember>()
 				.HasOne(m => m.UserCreatedInstance)
