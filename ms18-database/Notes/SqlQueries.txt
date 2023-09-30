@@ -1,0 +1,24 @@
+/*
+1. Uitvoeren database update
+2. Uitvoeren console app
+3. Uitvoeren deletes
+4. Uitvoeren console app
+5. Zien dat alles werkt :)
+*/
+
+select * from "admin"."member";
+select * from "receipt"."costCentre";
+select * from "receipt"."store";
+select * from "receipt"."status";
+select * from "receipt"."receipt";
+select * from "receipt"."approval";
+
+
+/*
+delete from "receipt"."approval";
+delete from "receipt"."receipt";
+delete from "receipt"."costCentre";
+delete from "receipt"."store";
+delete from "receipt"."status";
+delete from "admin"."member";
+*/

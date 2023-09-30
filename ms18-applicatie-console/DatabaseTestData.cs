@@ -8,11 +8,12 @@ namespace ms18_applicatie_console
 
         internal void CreateTestDataAll()
         {
-            //CreateTestDataMember();
-            //CreateTestDataCostCentre();
-            //CreateTestDataStore();
-            //CreateTestDataReceiptStatus();
+            CreateTestDataMember();
+            CreateTestDataCostCentre();
+            CreateTestDataStore();
+            CreateTestDataReceiptStatus();
             CreateTestDataReceipt();
+            CreateTestDataReceiptApproval();
         }
 
 
@@ -42,6 +43,7 @@ namespace ms18_applicatie_console
 
                 borgia.UserCreated = borgia;
                 borgia.UserModified = borgia;
+                borgia.DateTimeModified = DateTime.UtcNow;
 
                 db.MaasgroepMember.AddRange(members);
 
@@ -54,7 +56,7 @@ namespace ms18_applicatie_console
             using (var db = new MaasgroepContext())
             {
 
-                var member = db.MaasgroepMember.Where(m => m.Id == 1).FirstOrDefault()!;
+                var member = db.MaasgroepMember.Where(m => m.Name == "Borgia").FirstOrDefault()!;
 
                 var costCentres = new List<CostCentre>()
                 {
@@ -74,7 +76,7 @@ namespace ms18_applicatie_console
             using (var db = new MaasgroepContext())
             {
 
-                var member = db.MaasgroepMember.Where(m => m.Id == 1).FirstOrDefault()!;
+                var member = db.MaasgroepMember.Where(m => m.Name == "Borgia").FirstOrDefault()!;
 
                 var stores = new List<Store>()
                 {
@@ -93,7 +95,7 @@ namespace ms18_applicatie_console
             using (var db = new MaasgroepContext())
             {
 
-                var member = db.MaasgroepMember.Where(m => m.Id == 1).FirstOrDefault()!;
+                var member = db.MaasgroepMember.Where(m => m.Name == "Borgia").FirstOrDefault()!;
 
                 var receiptStati = new List<ReceiptStatus>()
                 {
@@ -113,13 +115,12 @@ namespace ms18_applicatie_console
         {
             using (var db = new MaasgroepContext())
             {
-
-                var member = db.MaasgroepMember.Where(m => m.Id == 1).FirstOrDefault()!;
-                var costCentre = db.CostCentre.Where(cc => cc.Id == 3).FirstOrDefault()!;
-                var store = db.Store.Where(s => s.Id == 1).FirstOrDefault()!;
-                var receiptStatusIngediend = db.ReceiptStatus.Where(rs => rs.Id == 1).FirstOrDefault()!;
-                var receiptStatusGoedgekeurd = db.ReceiptStatus.Where(rs => rs.Id == 2).FirstOrDefault()!;
-                var receiptStatusAfgekeurd = db.ReceiptStatus.Where(rs => rs.Id == 3).FirstOrDefault()!;
+                var member = db.MaasgroepMember.Where(m => m.Name == "Borgia").FirstOrDefault()!;
+                var costCentre = db.CostCentre.Where(cc => cc.Name == "Moeder van Joopie").FirstOrDefault()!;
+                var store = db.Store.Where(s => s.Name == "Supboards Limited").FirstOrDefault()!;
+                var receiptStatusIngediend = db.ReceiptStatus.Where(rs => rs.Name == "Ingediend").FirstOrDefault()!;
+                var receiptStatusGoedgekeurd = db.ReceiptStatus.Where(rs => rs.Name == "Goedgekeurd").FirstOrDefault()!;
+                var receiptStatusAfgekeurd = db.ReceiptStatus.Where(rs => rs.Name == "Afgekeurd").FirstOrDefault()!;
 
                 var receipts = new List<Receipt>()
                 {
@@ -135,6 +136,31 @@ namespace ms18_applicatie_console
                 };
 
                 db.Receipt.AddRange(receipts);
+
+                var rows = db.SaveChanges();
+                Console.WriteLine($"Number of rows: {rows}");
+            }
+        }
+        internal void CreateTestDataReceiptApproval()
+        {
+            using (var db = new MaasgroepContext())
+            {
+                var member = db.MaasgroepMember.Where(m => m.Name == "Borgia").FirstOrDefault()!;
+                var costCentre = db.CostCentre.Where(cc => cc.Name == "Moeder van Joopie").FirstOrDefault()!;
+                var store = db.Store.Where(s => s.Name == "Supboards Limited").FirstOrDefault()!;
+                var receiptStatusIngediend = db.ReceiptStatus.Where(rs => rs.Name == "Ingediend").FirstOrDefault()!;
+                var receiptStatusGoedgekeurd = db.ReceiptStatus.Where(rs => rs.Name == "Goedgekeurd").FirstOrDefault()!;
+                var receiptStatusAfgekeurd = db.ReceiptStatus.Where(rs => rs.Name == "Afgekeurd").FirstOrDefault()!;
+                var receiptGoedgekeurd = db.Receipt.Where(r => r.ReceiptStatus == receiptStatusGoedgekeurd).FirstOrDefault()!;
+                var receiptAfgekeurd = db.Receipt.Where(r => r.ReceiptStatus == receiptStatusAfgekeurd).FirstOrDefault()!;
+
+                var receiptApprovals = new List<ReceiptApproval>()
+                {
+                    new ReceiptApproval() { Receipt = receiptGoedgekeurd, Note = "Lekker duidelijk met zo'n foto!", UserCreated = member }
+                ,   new ReceiptApproval() { Receipt = receiptAfgekeurd, Note = "Dit is niet het soort plug dat we nodig hebben.", UserCreated = member }
+                };
+
+                db.ReceiptApproval.AddRange(receiptApprovals);
 
                 var rows = db.SaveChanges();
                 Console.WriteLine($"Number of rows: {rows}");
