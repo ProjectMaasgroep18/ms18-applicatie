@@ -83,7 +83,7 @@ namespace ms18_applicatie_console
 
                 var approve = db.Permission.Where(p => p.Name == "receipt.approve").FirstOrDefault()!;
                 var reject = db.Permission.Where(p => p.Name == "receipt.reject").FirstOrDefault()!;
-                var handIn = db.Permission.Where(p => p.Name == "receipt.HandIn").FirstOrDefault()!;
+                var handIn = db.Permission.Where(p => p.Name == "receipt.handIn").FirstOrDefault()!;
 
                 var memberPermissions = new List<MemberPermission>()
                 {

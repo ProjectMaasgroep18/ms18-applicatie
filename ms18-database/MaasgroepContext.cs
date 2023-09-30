@@ -227,6 +227,16 @@ namespace Maasgroep.Database
                 .HasForeignKey(m => m.UserModifiedId)
                 .HasConstraintName("FK_member_memberModified")
 				.OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<Member>()
+                .HasMany(m => m.MemberPermissions)
+                .WithOne(mp => mp.Member)
+                .HasForeignKey(mp => mp.MemberId)
+                .HasConstraintName("FK_memberPermission_member");
+                //.UsingEntity<MemberPermission>(
+                //    q => q.HasOne<Member>().WithMany().HasForeignKey(mp => mp.MemberId)
+                //, v => v.HasOne<Permission>().WithMany().HasForeignKey(mp => mp.PermissionId)
+                //);
         }
 
         private void CreatePermission(ModelBuilder modelBuilder)
@@ -239,6 +249,12 @@ namespace Maasgroep.Database
             modelBuilder.Entity<Permission>().HasIndex(p => p.Name).IsUnique();
 
             // Foreign keys
+
+            modelBuilder.Entity<Permission>()
+                .HasMany(p => p.MemberPermissions)
+                .WithOne(mp => mp.Permission)
+                .HasForeignKey(mp => mp.PermissionId)
+                .HasConstraintName("FK_memberPermission_permission");
 
             modelBuilder.Entity<Permission>()
                 .HasOne(p => p.UserCreated)
@@ -262,19 +278,19 @@ namespace Maasgroep.Database
             modelBuilder.Entity<MemberPermission>().Property(mp => mp.DateTimeCreated).HasDefaultValueSql("now()");
 
             // Foreign Keys
-            modelBuilder.Entity<MemberPermission>()
-                .HasOne(mp => mp.Permission)
-                .WithMany(p => p.MemberPermissions)
-                .HasForeignKey(mp => mp.PermissionId)
-                .HasConstraintName("FK_memberPermission_permission")
-                .OnDelete(DeleteBehavior.NoAction);
+            //modelBuilder.Entity<MemberPermission>()
+            //    .HasOne(mp => mp.Permission)
+            //    .WithMany(p => p.MemberPermissions)
+            //    .HasForeignKey(mp => mp.PermissionId)
+            //    .HasConstraintName("FK_memberPermission_permission")
+            //    .OnDelete(DeleteBehavior.NoAction);
 
-            modelBuilder.Entity<MemberPermission>()
-                .HasOne(mp => mp.Member)
-                .WithMany(m => m.MemberPermissions)
-                .HasForeignKey(mp => mp.MemberId)
-                .HasConstraintName("FK_memberPermission_member")
-                .OnDelete(DeleteBehavior.NoAction);
+            //modelBuilder.Entity<MemberPermission>()
+            //    .HasOne(mp => mp.Member)
+            //    .WithMany(m => m.MemberPermissions)
+            //    .HasForeignKey(mp => mp.MemberId)
+            //    .HasConstraintName("FK_memberPermission_member")
+            //    .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<MemberPermission>()
                 .HasOne(mp => mp.UserCreated)

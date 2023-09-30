@@ -34,7 +34,7 @@ namespace Maasgroep.Database
 
         //Ef admin properties
         public ICollection<MemberPermission> MemberPermissions { get; set; }
-        public ICollection<Permission> Permissions { get; set; }
+        //public ICollection<Permission> Permissions { get; set; }
 
         //Ef generic properties
         public Member? UserCreated { get; set; }
