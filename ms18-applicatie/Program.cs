@@ -1,4 +1,10 @@
+using Microsoft.Extensions.DependencyInjection;
+using ms18_applicatie.Database;
+
 var builder = WebApplication.CreateBuilder(args);
+
+// Add database context
+builder.Services.AddDbContext<MaasgroepContext>();
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();

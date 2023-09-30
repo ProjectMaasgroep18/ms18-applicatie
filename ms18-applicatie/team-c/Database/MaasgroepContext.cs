@@ -1,7 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.Security;
+using ms18_applicatie.Models;
 
-namespace Maasgroep.Database
+namespace ms18_applicatie.Database
 {
 	public class MaasgroepContext : DbContext
 	{

@@ -3,17 +3,20 @@ using System;
 using ms18_applicatie.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace ms18_database.Migrations
+namespace ms18_applicatie.Migrations
 {
     [DbContext(typeof(MaasgroepContext))]
-    partial class MaasgroepContextModelSnapshot : ModelSnapshot
+    [Migration("20230930135312_initial")]
+    partial class initial
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -36,7 +39,7 @@ namespace ms18_database.Migrations
 
             modelBuilder.HasSequence("storeSeq", "receipt");
 
-            modelBuilder.Entity("ms18_applicatie.Database.CostCentre", b =>
+            modelBuilder.Entity("ms18_applicatie.Models.CostCentre", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -74,7 +77,7 @@ namespace ms18_database.Migrations
                     b.ToTable("costCentre", "receipt");
                 });
 
-            modelBuilder.Entity("ms18_applicatie.Database.Member", b =>
+            modelBuilder.Entity("ms18_applicatie.Models.Member", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -112,7 +115,7 @@ namespace ms18_database.Migrations
                     b.ToTable("member", "admin");
                 });
 
-            modelBuilder.Entity("ms18_applicatie.Database.MemberPermission", b =>
+            modelBuilder.Entity("ms18_applicatie.Models.MemberPermission", b =>
                 {
                     b.Property<long>("MemberId")
                         .HasColumnType("bigint");
@@ -145,7 +148,7 @@ namespace ms18_database.Migrations
                     b.ToTable("memberPermission", "admin");
                 });
 
-            modelBuilder.Entity("ms18_applicatie.Database.Permission", b =>
+            modelBuilder.Entity("ms18_applicatie.Models.Permission", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -183,7 +186,7 @@ namespace ms18_database.Migrations
                     b.ToTable("permission", "admin");
                 });
 
-            modelBuilder.Entity("ms18_applicatie.Database.Photo", b =>
+            modelBuilder.Entity("ms18_applicatie.Models.Photo", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -213,7 +216,7 @@ namespace ms18_database.Migrations
                     b.ToTable("photo", "photo");
                 });
 
-            modelBuilder.Entity("ms18_applicatie.Database.Receipt", b =>
+            modelBuilder.Entity("ms18_applicatie.Models.Receipt", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -269,7 +272,7 @@ namespace ms18_database.Migrations
                     b.ToTable("receipt", "receipt");
                 });
 
-            modelBuilder.Entity("ms18_applicatie.Database.ReceiptApproval", b =>
+            modelBuilder.Entity("ms18_applicatie.Models.ReceiptApproval", b =>
                 {
                     b.Property<long>("ReceiptId")
                         .HasColumnType("bigint");
@@ -301,7 +304,7 @@ namespace ms18_database.Migrations
                     b.ToTable("approval", "receipt");
                 });
 
-            modelBuilder.Entity("ms18_applicatie.Database.ReceiptStatus", b =>
+            modelBuilder.Entity("ms18_applicatie.Models.ReceiptStatus", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -339,7 +342,7 @@ namespace ms18_database.Migrations
                     b.ToTable("status", "receipt");
                 });
 
-            modelBuilder.Entity("ms18_applicatie.Database.Store", b =>
+            modelBuilder.Entity("ms18_applicatie.Models.Store", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -377,16 +380,16 @@ namespace ms18_database.Migrations
                     b.ToTable("store", "receipt");
                 });
 
-            modelBuilder.Entity("ms18_applicatie.Database.CostCentre", b =>
+            modelBuilder.Entity("ms18_applicatie.Models.CostCentre", b =>
                 {
-                    b.HasOne("ms18_applicatie.Database.Member", "UserCreated")
+                    b.HasOne("ms18_applicatie.Models.Member", "UserCreated")
                         .WithMany("CostCentresCreated")
                         .HasForeignKey("UserCreatedId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired()
                         .HasConstraintName("FK_costCentre_memberCreated");
 
-                    b.HasOne("ms18_applicatie.Database.Member", "UserModified")
+                    b.HasOne("ms18_applicatie.Models.Member", "UserModified")
                         .WithMany("CostCentresModified")
                         .HasForeignKey("UserModifiedId")
                         .OnDelete(DeleteBehavior.NoAction)
@@ -397,15 +400,15 @@ namespace ms18_database.Migrations
                     b.Navigation("UserModified");
                 });
 
-            modelBuilder.Entity("ms18_applicatie.Database.Member", b =>
+            modelBuilder.Entity("ms18_applicatie.Models.Member", b =>
                 {
-                    b.HasOne("ms18_applicatie.Database.Member", "UserCreated")
+                    b.HasOne("ms18_applicatie.Models.Member", "UserCreated")
                         .WithMany("MembersCreated")
                         .HasForeignKey("UserCreatedId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .HasConstraintName("FK_member_memberCreated");
 
-                    b.HasOne("ms18_applicatie.Database.Member", "UserModified")
+                    b.HasOne("ms18_applicatie.Models.Member", "UserModified")
                         .WithMany("MembersModified")
                         .HasForeignKey("UserModifiedId")
                         .OnDelete(DeleteBehavior.NoAction)
@@ -416,30 +419,30 @@ namespace ms18_database.Migrations
                     b.Navigation("UserModified");
                 });
 
-            modelBuilder.Entity("ms18_applicatie.Database.MemberPermission", b =>
+            modelBuilder.Entity("ms18_applicatie.Models.MemberPermission", b =>
                 {
-                    b.HasOne("ms18_applicatie.Database.Member", "Member")
+                    b.HasOne("ms18_applicatie.Models.Member", "Member")
                         .WithMany("Permissions")
                         .HasForeignKey("MemberId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired()
                         .HasConstraintName("FK_memberPermission_member");
 
-                    b.HasOne("ms18_applicatie.Database.Permission", "Permission")
+                    b.HasOne("ms18_applicatie.Models.Permission", "Permission")
                         .WithMany("Members")
                         .HasForeignKey("PermissionId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired()
                         .HasConstraintName("FK_memberPermission_permission");
 
-                    b.HasOne("ms18_applicatie.Database.Member", "UserCreated")
+                    b.HasOne("ms18_applicatie.Models.Member", "UserCreated")
                         .WithMany("MemberPermissionsCreated")
                         .HasForeignKey("UserCreatedId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired()
                         .HasConstraintName("FK_memberPermission_memberCreated");
 
-                    b.HasOne("ms18_applicatie.Database.Member", "UserModified")
+                    b.HasOne("ms18_applicatie.Models.Member", "UserModified")
                         .WithMany("MemberPermissionsModified")
                         .HasForeignKey("UserModifiedId")
                         .OnDelete(DeleteBehavior.NoAction)
@@ -454,16 +457,16 @@ namespace ms18_database.Migrations
                     b.Navigation("UserModified");
                 });
 
-            modelBuilder.Entity("ms18_applicatie.Database.Permission", b =>
+            modelBuilder.Entity("ms18_applicatie.Models.Permission", b =>
                 {
-                    b.HasOne("ms18_applicatie.Database.Member", "UserCreated")
+                    b.HasOne("ms18_applicatie.Models.Member", "UserCreated")
                         .WithMany("PermissionsCreated")
                         .HasForeignKey("UserCreatedId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired()
                         .HasConstraintName("FK_permission_memberCreated");
 
-                    b.HasOne("ms18_applicatie.Database.Member", "UserModified")
+                    b.HasOne("ms18_applicatie.Models.Member", "UserModified")
                         .WithMany("PermissionsModified")
                         .HasForeignKey("UserModifiedId")
                         .OnDelete(DeleteBehavior.NoAction)
@@ -474,46 +477,46 @@ namespace ms18_database.Migrations
                     b.Navigation("UserModified");
                 });
 
-            modelBuilder.Entity("ms18_applicatie.Database.Photo", b =>
+            modelBuilder.Entity("ms18_applicatie.Models.Photo", b =>
                 {
-                    b.HasOne("ms18_applicatie.Database.Receipt", "ReceiptInstance")
+                    b.HasOne("ms18_applicatie.Models.Receipt", "ReceiptInstance")
                         .WithOne("Photo")
-                        .HasForeignKey("ms18_applicatie.Database.Photo", "Receipt")
+                        .HasForeignKey("ms18_applicatie.Models.Photo", "Receipt")
                         .OnDelete(DeleteBehavior.NoAction)
                         .HasConstraintName("FK_Photo_Receipt");
 
                     b.Navigation("ReceiptInstance");
                 });
 
-            modelBuilder.Entity("ms18_applicatie.Database.Receipt", b =>
+            modelBuilder.Entity("ms18_applicatie.Models.Receipt", b =>
                 {
-                    b.HasOne("ms18_applicatie.Database.CostCentre", "CostCentre")
+                    b.HasOne("ms18_applicatie.Models.CostCentre", "CostCentre")
                         .WithMany("Receipt")
                         .HasForeignKey("CostCentreId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .HasConstraintName("FK_receipt_costCentre");
 
-                    b.HasOne("ms18_applicatie.Database.ReceiptStatus", "ReceiptStatus")
+                    b.HasOne("ms18_applicatie.Models.ReceiptStatus", "ReceiptStatus")
                         .WithMany("Receipt")
                         .HasForeignKey("ReceiptStatusId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired()
                         .HasConstraintName("FK_receipt_receiptStatus");
 
-                    b.HasOne("ms18_applicatie.Database.Store", "Store")
+                    b.HasOne("ms18_applicatie.Models.Store", "Store")
                         .WithMany("Receipt")
                         .HasForeignKey("StoreId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .HasConstraintName("FK_receipt_store");
 
-                    b.HasOne("ms18_applicatie.Database.Member", "UserCreated")
+                    b.HasOne("ms18_applicatie.Models.Member", "UserCreated")
                         .WithMany("ReceiptsCreated")
                         .HasForeignKey("UserCreatedId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired()
                         .HasConstraintName("FK_receipt_memberCreated");
 
-                    b.HasOne("ms18_applicatie.Database.Member", "UserModified")
+                    b.HasOne("ms18_applicatie.Models.Member", "UserModified")
                         .WithMany("ReceiptsModified")
                         .HasForeignKey("UserModifiedId")
                         .OnDelete(DeleteBehavior.NoAction)
@@ -530,23 +533,23 @@ namespace ms18_database.Migrations
                     b.Navigation("UserModified");
                 });
 
-            modelBuilder.Entity("ms18_applicatie.Database.ReceiptApproval", b =>
+            modelBuilder.Entity("ms18_applicatie.Models.ReceiptApproval", b =>
                 {
-                    b.HasOne("ms18_applicatie.Database.Receipt", "Receipt")
+                    b.HasOne("ms18_applicatie.Models.Receipt", "Receipt")
                         .WithOne("ReceiptApproval")
-                        .HasForeignKey("ms18_applicatie.Database.ReceiptApproval", "ReceiptId")
+                        .HasForeignKey("ms18_applicatie.Models.ReceiptApproval", "ReceiptId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired()
                         .HasConstraintName("FK_receiptApproval_receipt");
 
-                    b.HasOne("ms18_applicatie.Database.Member", "UserCreated")
+                    b.HasOne("ms18_applicatie.Models.Member", "UserCreated")
                         .WithMany("ReceiptApprovalsCreated")
                         .HasForeignKey("UserCreatedId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired()
                         .HasConstraintName("FK_receiptApproval_memberCreated");
 
-                    b.HasOne("ms18_applicatie.Database.Member", "UserModified")
+                    b.HasOne("ms18_applicatie.Models.Member", "UserModified")
                         .WithMany("ReceiptApprovalsModified")
                         .HasForeignKey("UserModifiedId")
                         .OnDelete(DeleteBehavior.NoAction)
@@ -559,16 +562,16 @@ namespace ms18_database.Migrations
                     b.Navigation("UserModified");
                 });
 
-            modelBuilder.Entity("ms18_applicatie.Database.ReceiptStatus", b =>
+            modelBuilder.Entity("ms18_applicatie.Models.ReceiptStatus", b =>
                 {
-                    b.HasOne("ms18_applicatie.Database.Member", "UserCreated")
+                    b.HasOne("ms18_applicatie.Models.Member", "UserCreated")
                         .WithMany("ReceiptStatusesCreated")
                         .HasForeignKey("UserCreatedId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired()
                         .HasConstraintName("FK_receiptStatus_memberCreated");
 
-                    b.HasOne("ms18_applicatie.Database.Member", "UserModified")
+                    b.HasOne("ms18_applicatie.Models.Member", "UserModified")
                         .WithMany("ReceiptStatusesModified")
                         .HasForeignKey("UserModifiedId")
                         .OnDelete(DeleteBehavior.NoAction)
@@ -579,16 +582,16 @@ namespace ms18_database.Migrations
                     b.Navigation("UserModified");
                 });
 
-            modelBuilder.Entity("ms18_applicatie.Database.Store", b =>
+            modelBuilder.Entity("ms18_applicatie.Models.Store", b =>
                 {
-                    b.HasOne("ms18_applicatie.Database.Member", "UserCreated")
+                    b.HasOne("ms18_applicatie.Models.Member", "UserCreated")
                         .WithMany("StoresCreated")
                         .HasForeignKey("UserCreatedId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired()
                         .HasConstraintName("FK_store_memberCreated");
 
-                    b.HasOne("ms18_applicatie.Database.Member", "UserModified")
+                    b.HasOne("ms18_applicatie.Models.Member", "UserModified")
                         .WithMany("StoresModified")
                         .HasForeignKey("UserModifiedId")
                         .OnDelete(DeleteBehavior.NoAction)
@@ -599,12 +602,12 @@ namespace ms18_database.Migrations
                     b.Navigation("UserModified");
                 });
 
-            modelBuilder.Entity("ms18_applicatie.Database.CostCentre", b =>
+            modelBuilder.Entity("ms18_applicatie.Models.CostCentre", b =>
                 {
                     b.Navigation("Receipt");
                 });
 
-            modelBuilder.Entity("ms18_applicatie.Database.Member", b =>
+            modelBuilder.Entity("ms18_applicatie.Models.Member", b =>
                 {
                     b.Navigation("CostCentresCreated");
 
@@ -641,24 +644,24 @@ namespace ms18_database.Migrations
                     b.Navigation("StoresModified");
                 });
 
-            modelBuilder.Entity("ms18_applicatie.Database.Permission", b =>
+            modelBuilder.Entity("ms18_applicatie.Models.Permission", b =>
                 {
                     b.Navigation("Members");
                 });
 
-            modelBuilder.Entity("ms18_applicatie.Database.Receipt", b =>
+            modelBuilder.Entity("ms18_applicatie.Models.Receipt", b =>
                 {
                     b.Navigation("Photo");
 
                     b.Navigation("ReceiptApproval");
                 });
 
-            modelBuilder.Entity("ms18_applicatie.Database.ReceiptStatus", b =>
+            modelBuilder.Entity("ms18_applicatie.Models.ReceiptStatus", b =>
                 {
                     b.Navigation("Receipt");
                 });
 
-            modelBuilder.Entity("ms18_applicatie.Database.Store", b =>
+            modelBuilder.Entity("ms18_applicatie.Models.Store", b =>
                 {
                     b.Navigation("Receipt");
                 });

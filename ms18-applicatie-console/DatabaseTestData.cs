@@ -1,4 +1,4 @@
-﻿using Maasgroep.Database;
+﻿using ms18_applicatie.Database;
 
 namespace ms18_applicatie_console
 {

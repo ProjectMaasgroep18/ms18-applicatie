@@ -1,5 +1,6 @@
-﻿
-namespace Maasgroep.Database
+﻿using ms18_applicatie.Models;
+
+namespace ms18_applicatie.Models
 {
 	public record Photo
 	{

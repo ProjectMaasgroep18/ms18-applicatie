@@ -1,0 +1,17 @@
+@{
+    ViewData["Title"] = "Declaratie indienen";
+    var Member = ViewData["Member"] as Member;
+}
+<h1>@ViewData["Title"]</h1>
+
+
+@if (@Member != null) {
+
+    <p>Hallo @(Member.Name)!</p>
+
+    <p>...</p>
+
+} else {
+
+    <p>Niet ingelogd</p>
+}

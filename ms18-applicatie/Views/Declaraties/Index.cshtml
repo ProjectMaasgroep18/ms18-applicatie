@@ -1,0 +1,19 @@
+@{
+    ViewData["Title"] = "Declaraties";
+    var Member = ViewData["Member"] as Member;
+}
+<h1>@ViewData["Title"]</h1>
+
+
+@if (@Member != null) {
+
+    <p>Hallo @(Member.Name)!</p>
+
+    <p>Hier kan je je bonnetjes inleveren:</p>
+
+    <a asp-action="Nieuw"><button class="btn btn-primary">Nieuwe declaratie</button></a>
+
+} else {
+
+    <p>Niet ingelogd</p>
+}

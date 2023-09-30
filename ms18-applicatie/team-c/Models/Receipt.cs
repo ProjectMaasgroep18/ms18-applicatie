@@ -1,6 +1,16 @@
-﻿
-namespace Maasgroep.Database
+﻿using ms18_applicatie.Models;
+
+namespace ms18_applicatie.Models
 {
+
+	// Waarom niet gewoon zo (in plaats van een speciale "ReceiptStatus[es]" database tabel)?
+	public enum ReceiptStatusSUGGESTIE {
+		Incomplete,
+		Submitted,
+		Approved,
+		Rejected,
+	}
+
 	public record Receipt
 	{
 		public long Id { get; set; }
