@@ -7,12 +7,16 @@
 */
 
 select * from "admin"."member";
+select * from "admin"."permission";
+select * from "admin"."memberPermission";
 select * from "receipt"."costCentre";
 select * from "receipt"."store";
 select * from "receipt"."status";
 select * from "receipt"."receipt";
 select * from "receipt"."approval";
 
+--insert into "admin"."memberPermission" ("MemberId", "PermissionId", "UserCreatedId", "DateTimeCreated")
+--values (1, 1, 1, now())
 
 /*
 delete from "receipt"."approval";
@@ -20,5 +24,7 @@ delete from "receipt"."receipt";
 delete from "receipt"."costCentre";
 delete from "receipt"."store";
 delete from "receipt"."status";
+delete from "admin"."memberPermission";
+delete from "admin"."permission";
 delete from "admin"."member";
 */

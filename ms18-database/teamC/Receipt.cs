@@ -31,7 +31,7 @@ namespace Maasgroep.Database
 		public ReceiptStatus ReceiptStatus { get; set; }
 		public Photo? Photo { get; set; }
 		public ReceiptApproval? ReceiptApproval { get; set; }
-		public MaasgroepMember UserCreated { get; set; }
-		public MaasgroepMember? UserModified { get; set; }
+		public Member UserCreated { get; set; }
+		public Member? UserModified { get; set; }
 	}
 }

@@ -20,7 +20,7 @@ namespace Maasgroep.Database
 
 		//Ef
 		public ICollection<Receipt> Receipt { get; set; }
-		public MaasgroepMember UserCreated { get; set; }
-		public MaasgroepMember? UserModified { get; set; }
+		public Member UserCreated { get; set; }
+		public Member? UserModified { get; set; }
 	}
 }

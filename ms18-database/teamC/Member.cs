@@ -1,11 +1,9 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Maasgroep.Database
 {
-	public record MaasgroepMember
+	public record Member
 	{
-		[Key]
 		public long Id { get; set; }
 		[Column(TypeName = "varchar(256)")]
 		public string Name { get; set; }
@@ -29,12 +27,20 @@ namespace Maasgroep.Database
         public ICollection<Receipt> ReceiptsModified { get; set; }
         public ICollection<ReceiptApproval> ReceiptApprovalsCreated { get; set; }
         public ICollection<ReceiptApproval> ReceiptApprovalsModified { get; set; }
+        public ICollection<Permission> PermissionsCreated { get; set; }
+        public ICollection<Permission> PermissionsModified { get; set; }
+        public ICollection<MemberPermission> MemberPermissionsCreated { get; set; }
+        public ICollection<MemberPermission> MemberPermissionsModified { get; set; }
+
+        //Ef admin properties
+        public ICollection<MemberPermission> MemberPermissions { get; set; }
+        public ICollection<Permission> Permissions { get; set; }
 
         //Ef generic properties
-        public MaasgroepMember? UserCreated { get; set; }
-        public MaasgroepMember? UserModified { get; set; }
-        public ICollection<MaasgroepMember>? MembersCreated { get; set; }
-        public ICollection<MaasgroepMember>? MembersModified { get; set; }
+        public Member? UserCreated { get; set; }
+        public Member? UserModified { get; set; }
+        public ICollection<Member>? MembersCreated { get; set; }
+        public ICollection<Member>? MembersModified { get; set; } 
 
     }
 }

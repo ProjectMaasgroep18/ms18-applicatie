@@ -9,6 +9,8 @@ namespace ms18_applicatie_console
         internal void CreateTestDataAll()
         {
             CreateTestDataMember();
+            CreateTestDataPermissions();
+            CreateTestDataMemberPermissions();
             CreateTestDataCostCentre();
             CreateTestDataStore();
             CreateTestDataReceiptStatus();
@@ -16,47 +18,95 @@ namespace ms18_applicatie_console
             CreateTestDataReceiptApproval();
         }
 
-
-
         internal void CreateTestDataMember()
         {
 
             using (var db = new MaasgroepContext())
             {
-                var members = new List<MaasgroepMember>()
+                var members = new List<Member>()
                 {
-                    new MaasgroepMember() { Name = "Borgia"}
+                    new Member() { Name = "Borgia"}
                 };
 
-                db.MaasgroepMember.AddRange(members);
+                db.Member.AddRange(members);
 
                 var rows = db.SaveChanges();
                 Console.WriteLine($"Number of rows: {rows}");
 
-                var borgia = db.MaasgroepMember.FirstOrDefault()!;
+                var borgia = db.Member.FirstOrDefault()!;
 
-                members = new List<MaasgroepMember>()
+                members = new List<Member>()
                 {
-                    new MaasgroepMember() { Name = "da Gama", UserCreated = borgia }
-                ,   new MaasgroepMember() { Name = "Albuquerque", UserCreated = borgia }
+                    new Member() { Name = "da Gama", UserCreated = borgia }
+                ,   new Member() { Name = "Albuquerque", UserCreated = borgia }
                 };
 
                 borgia.UserCreated = borgia;
                 borgia.UserModified = borgia;
                 borgia.DateTimeModified = DateTime.UtcNow;
 
-                db.MaasgroepMember.AddRange(members);
+                db.Member.AddRange(members);
 
                 rows = db.SaveChanges();
                 Console.WriteLine($"Number of rows: {rows}");
             }
         }
+
+        internal void CreateTestDataPermissions()
+        {
+            using (var db = new MaasgroepContext())
+            {
+                var borgia = db.Member.FirstOrDefault()!;
+
+                var permissions = new List<Permission>()
+                {
+                    new Permission() { Name = "receipt.approve", UserCreated = borgia}
+                ,   new Permission() { Name = "receipt.reject", UserCreated = borgia}
+                ,   new Permission() { Name = "receipt.handIn", UserCreated = borgia}
+                ,   new Permission() { Name = "receipt.payOut", UserCreated = borgia}
+                };
+
+                db.Permission.AddRange(permissions);
+
+                var rows = db.SaveChanges();
+                Console.WriteLine($"Number of rows: {rows}");
+            }
+        }
+
+        internal void CreateTestDataMemberPermissions()
+        {
+            using (var db = new MaasgroepContext())
+            {
+                var borgia = db.Member.FirstOrDefault()!;
+                var daGama = db.Member.Where(m => m.Name == "da Gama").FirstOrDefault()!;
+                var alb = db.Member.Where(m => m.Name == "Albuquerque").FirstOrDefault()!;
+
+                var approve = db.Permission.Where(p => p.Name == "receipt.approve").FirstOrDefault()!;
+                var reject = db.Permission.Where(p => p.Name == "receipt.reject").FirstOrDefault()!;
+                var handIn = db.Permission.Where(p => p.Name == "receipt.HandIn").FirstOrDefault()!;
+
+                var memberPermissions = new List<MemberPermission>()
+                {
+                    new MemberPermission() { Member = daGama, Permission = approve, UserCreated = borgia }
+                ,   new MemberPermission() { Member = daGama, Permission = reject, UserCreated = borgia }
+                ,   new MemberPermission() { Member = alb, Permission = handIn, UserCreated = borgia }
+                };
+
+                db.MemberPermission.AddRange(memberPermissions);
+
+                var rows = db.SaveChanges();
+                Console.WriteLine($"Number of rows: {rows}");
+            }
+        }
+
+
+
         internal void CreateTestDataCostCentre()
         {
             using (var db = new MaasgroepContext())
             {
 
-                var member = db.MaasgroepMember.Where(m => m.Name == "Borgia").FirstOrDefault()!;
+                var member = db.Member.Where(m => m.Name == "Borgia").FirstOrDefault()!;
 
                 var costCentres = new List<CostCentre>()
                 {
@@ -76,7 +126,7 @@ namespace ms18_applicatie_console
             using (var db = new MaasgroepContext())
             {
 
-                var member = db.MaasgroepMember.Where(m => m.Name == "Borgia").FirstOrDefault()!;
+                var member = db.Member.Where(m => m.Name == "Borgia").FirstOrDefault()!;
 
                 var stores = new List<Store>()
                 {
@@ -95,7 +145,7 @@ namespace ms18_applicatie_console
             using (var db = new MaasgroepContext())
             {
 
-                var member = db.MaasgroepMember.Where(m => m.Name == "Borgia").FirstOrDefault()!;
+                var member = db.Member.Where(m => m.Name == "Borgia").FirstOrDefault()!;
 
                 var receiptStati = new List<ReceiptStatus>()
                 {
@@ -115,7 +165,7 @@ namespace ms18_applicatie_console
         {
             using (var db = new MaasgroepContext())
             {
-                var member = db.MaasgroepMember.Where(m => m.Name == "Borgia").FirstOrDefault()!;
+                var member = db.Member.Where(m => m.Name == "Borgia").FirstOrDefault()!;
                 var costCentre = db.CostCentre.Where(cc => cc.Name == "Moeder van Joopie").FirstOrDefault()!;
                 var store = db.Store.Where(s => s.Name == "Supboards Limited").FirstOrDefault()!;
                 var receiptStatusIngediend = db.ReceiptStatus.Where(rs => rs.Name == "Ingediend").FirstOrDefault()!;
@@ -145,7 +195,7 @@ namespace ms18_applicatie_console
         {
             using (var db = new MaasgroepContext())
             {
-                var member = db.MaasgroepMember.Where(m => m.Name == "Borgia").FirstOrDefault()!;
+                var member = db.Member.Where(m => m.Name == "Borgia").FirstOrDefault()!;
                 var costCentre = db.CostCentre.Where(cc => cc.Name == "Moeder van Joopie").FirstOrDefault()!;
                 var store = db.Store.Where(s => s.Name == "Supboards Limited").FirstOrDefault()!;
                 var receiptStatusIngediend = db.ReceiptStatus.Where(rs => rs.Name == "Ingediend").FirstOrDefault()!;
