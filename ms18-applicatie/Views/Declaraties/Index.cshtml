@@ -22,7 +22,7 @@
             <th>Opmerking</th>
             <th>Status</th>
         </tr>
-        @if (Receipts == null) {
+        @if (Receipts == null || Receipts.Length == 0) {
         <tr>
             <td colspan="999">Je hebt nog geen bonnetjes ingeleverd.</td>
         </tr>
