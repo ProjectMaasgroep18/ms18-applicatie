@@ -12,8 +12,8 @@ namespace Maasgroep.Database
 
 
 		//Generic
-		public int UserCreated { get; set; }
-		public int UserModified { get; set; }
+		public long UserCreated { get; set; }
+		public long? UserModified { get; set; }
 		public DateTime DateTimeCreated { get; set; }
 		public DateTime DateTimeModified { get; set; }
 
@@ -21,6 +21,6 @@ namespace Maasgroep.Database
 		//Ef
 		public ICollection<Receipt> Receipt { get; set; }
 		public MaasgroepMember UserCreatedInstance { get; set; }
-		public MaasgroepMember UserModifiedInstance { get; set; }
+		public MaasgroepMember? UserModifiedInstance { get; set; }
 	}
 }

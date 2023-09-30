@@ -8,4 +8,8 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\ms18-database\ms18-database.csproj" />
+  </ItemGroup>
+
 </Project>

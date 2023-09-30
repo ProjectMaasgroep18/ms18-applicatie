@@ -6,21 +6,21 @@ namespace Maasgroep.Database
 	public record ReceiptStatus
 	{
 		[Key]
-		public short Id { get; set; }
+		public long Id { get; set; }
 		[Column(TypeName = "varchar(256)")]
 		public string Name { get; set; } //Unique constraint in Builder.
 
 
         //Generic
-        public int UserCreated { get; set; }
-		public int UserModified { get; set; }
+        public long UserCreated { get; set; }
+		public long? UserModified { get; set; }
 		public DateTime DateTimeCreated { get; set; }
-		public DateTime DateTimeModified { get; set; }
+		public DateTime? DateTimeModified { get; set; }
 
 
 		//Ef
 		public ICollection<Receipt> Receipt { get; set; }
 		public MaasgroepMember UserCreatedInstance { get; set; }
-		public MaasgroepMember UserModifiedInstance { get; set; }
+		public MaasgroepMember? UserModifiedInstance { get; set; }
 	}
 }

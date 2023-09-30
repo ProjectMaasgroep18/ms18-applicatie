@@ -191,6 +191,20 @@ namespace Maasgroep.Database
 			modelBuilder.HasSequence<long>("MemberSeq", schema: "admin").StartsAt(1).IncrementsBy(1);
 			modelBuilder.Entity<MaasgroepMember>().Property(m => m.Id).HasDefaultValueSql("nextval('admin.\"MemberSeq\"')");
 			modelBuilder.Entity<MaasgroepMember>().HasIndex(m => m.Name).IsUnique();
-		}
+
+			modelBuilder.Entity<MaasgroepMember>()
+				.HasOne(m => m.UserCreatedInstance)
+				.WithMany(m => m.MembersCreated)
+				.HasForeignKey(m => m.UserCreated)
+				.HasConstraintName("FK_Member_MemberCreated")
+				.OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<MaasgroepMember>()
+                .HasOne(m => m.UserModifiedInstance)
+                .WithMany(m => m.MembersModified)
+                .HasForeignKey(m => m.UserModified)
+                .HasConstraintName("FK_Member_MemberModified")
+				.OnDelete(DeleteBehavior.NoAction);
+        }
     }
 }
