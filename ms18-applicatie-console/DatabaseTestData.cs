@@ -24,18 +24,31 @@ namespace ms18_applicatie_console
             {
                 var members = new List<MaasgroepMember>()
                 {
-                    new MaasgroepMember() { Name = "da Gama"}
-                ,   new MaasgroepMember() { Name = "Borgia"}
-                ,   new MaasgroepMember() { Name = "Albuquerque"}
+                    new MaasgroepMember() { Name = "Borgia"}
                 };
 
                 db.MaasgroepMember.AddRange(members);
 
                 var rows = db.SaveChanges();
                 Console.WriteLine($"Number of rows: {rows}");
+
+                var borgia = db.MaasgroepMember.FirstOrDefault()!;
+
+                members = new List<MaasgroepMember>()
+                {
+                    new MaasgroepMember() { Name = "da Gama", UserCreated = borgia }
+                ,   new MaasgroepMember() { Name = "Albuquerque", UserCreated = borgia }
+                };
+
+                borgia.UserCreated = borgia;
+                borgia.UserModified = borgia;
+
+                db.MaasgroepMember.AddRange(members);
+
+                rows = db.SaveChanges();
+                Console.WriteLine($"Number of rows: {rows}");
             }
         }
-
         internal void CreateTestDataCostCentre()
         {
             using (var db = new MaasgroepContext())
@@ -45,9 +58,9 @@ namespace ms18_applicatie_console
 
                 var costCentres = new List<CostCentre>()
                 {
-                    new CostCentre() { Name = "Bestuur Maasgroep", UserCreatedInstance = member }
-                ,   new CostCentre() { Name = "Penningmeester", UserCreatedInstance = member }
-                ,   new CostCentre() { Name = "Moeder van Joopie", UserCreatedInstance = member }
+                    new CostCentre() { Name = "Bestuur Maasgroep", UserCreated = member }
+                ,   new CostCentre() { Name = "Penningmeester", UserCreated = member }
+                ,   new CostCentre() { Name = "Moeder van Joopie", UserCreated = member }
                 };
 
                 db.CostCentre.AddRange(costCentres);
@@ -65,8 +78,8 @@ namespace ms18_applicatie_console
 
                 var stores = new List<Store>()
                 {
-                    new Store() { Name = "Albert Gein", UserCreatedInstance = member }
-                ,   new Store() { Name = "Supboards Limited", UserCreatedInstance = member }
+                    new Store() { Name = "Albert Gein", UserCreated = member }
+                ,   new Store() { Name = "Supboards Limited", UserCreated = member }
                 };
 
                 db.Store.AddRange(stores);
@@ -84,10 +97,10 @@ namespace ms18_applicatie_console
 
                 var receiptStati = new List<ReceiptStatus>()
                 {
-                    new ReceiptStatus() { Name = "Ingediend", UserCreatedInstance = member }
-                ,   new ReceiptStatus() { Name = "Goedgekeurd", UserCreatedInstance = member }
-                ,   new ReceiptStatus() { Name = "Afgekeurd", UserCreatedInstance = member }
-                ,   new ReceiptStatus() { Name = "Uitbetaald", UserCreatedInstance = member }
+                    new ReceiptStatus() { Name = "Ingediend", UserCreated = member }
+                ,   new ReceiptStatus() { Name = "Goedgekeurd", UserCreated = member }
+                ,   new ReceiptStatus() { Name = "Afgekeurd", UserCreated = member }
+                ,   new ReceiptStatus() { Name = "Uitbetaald", UserCreated = member }
                 };
 
                 db.ReceiptStatus.AddRange(receiptStati);
@@ -110,14 +123,14 @@ namespace ms18_applicatie_console
 
                 var receipts = new List<Receipt>()
                 {
-                    new Receipt()   { UserCreatedInstance = member, ReceiptStatusInstance = receiptStatusIngediend
-                                    , StoreInstance = store, CostCentreInstance = costCentre
+                    new Receipt()   { UserCreated = member, ReceiptStatus = receiptStatusIngediend
+                                    , Store = store, CostCentre = costCentre
                                     }
-                ,   new Receipt()   { UserCreatedInstance = member, ReceiptStatusInstance = receiptStatusGoedgekeurd
-                                    , StoreInstance = store, CostCentreInstance = costCentre
+                ,   new Receipt()   { UserCreated = member, ReceiptStatus = receiptStatusGoedgekeurd
+                                    , Store = store, CostCentre = costCentre
                                     }
-                ,   new Receipt()   { UserCreatedInstance = member, ReceiptStatusInstance = receiptStatusAfgekeurd
-                                    , StoreInstance = store, CostCentreInstance = costCentre
+                ,   new Receipt()   { UserCreated = member, ReceiptStatus = receiptStatusAfgekeurd
+                                    , Store = store, CostCentre = costCentre
                                     }
                 };
 

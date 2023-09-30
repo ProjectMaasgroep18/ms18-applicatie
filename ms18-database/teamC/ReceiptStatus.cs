@@ -12,15 +12,15 @@ namespace Maasgroep.Database
 
 
         //Generic
-        public long UserCreated { get; set; }
-		public long? UserModified { get; set; }
+        public long UserCreatedId { get; set; }
+		public long? UserModifiedId { get; set; }
 		public DateTime DateTimeCreated { get; set; }
 		public DateTime? DateTimeModified { get; set; }
 
 
 		//Ef
 		public ICollection<Receipt> Receipt { get; set; }
-		public MaasgroepMember UserCreatedInstance { get; set; }
-		public MaasgroepMember? UserModifiedInstance { get; set; }
+		public MaasgroepMember UserCreated { get; set; }
+		public MaasgroepMember? UserModified { get; set; }
 	}
 }

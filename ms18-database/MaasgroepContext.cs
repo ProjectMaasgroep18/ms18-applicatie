@@ -48,141 +48,141 @@ namespace Maasgroep.Database
 		private void CreateCostCentre(ModelBuilder modelBuilder)
 		{
 			modelBuilder.Entity<CostCentre>().ToTable("costCentre", "receipt");
-			modelBuilder.HasSequence<long>("CostCentreSeq", schema: "receipt").StartsAt(1).IncrementsBy(1);			
-			modelBuilder.Entity<CostCentre>().Property(c => c.Id).HasDefaultValueSql("nextval('receipt.\"CostCentreSeq\"')");
+			modelBuilder.HasSequence<long>("costCentreSeq", schema: "receipt").StartsAt(1).IncrementsBy(1);			
+			modelBuilder.Entity<CostCentre>().Property(c => c.Id).HasDefaultValueSql("nextval('receipt.\"costCentreSeq\"')");
             modelBuilder.Entity<CostCentre>().Property(c => c.DateTimeCreated).HasDefaultValueSql("now()");
             modelBuilder.Entity<CostCentre>().HasIndex(c => c.Name).IsUnique();
 
             modelBuilder.Entity<CostCentre>()
-                .HasOne(cc => cc.UserCreatedInstance)
+                .HasOne(cc => cc.UserCreated)
                 .WithMany(m => m.CostCentresCreated)
-                .HasForeignKey(cc => cc.UserCreated)
-                .HasConstraintName("FK_CostCentre_MemberCreated")
+                .HasForeignKey(cc => cc.UserCreatedId)
+                .HasConstraintName("FK_costCentre_memberCreated")
                 .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<CostCentre>()
-                .HasOne(cc => cc.UserModifiedInstance)
+                .HasOne(cc => cc.UserModified)
                 .WithMany(m => m.CostCentresModified)
-                .HasForeignKey(cc => cc.UserModified)
-                .HasConstraintName("FK_CostCentre_MemberModified")
+                .HasForeignKey(cc => cc.UserModifiedId)
+                .HasConstraintName("FK_costCentre_memberModified")
                 .OnDelete(DeleteBehavior.NoAction);
         }
 
 		private void CreateStore(ModelBuilder modelBuilder)
 		{
 			modelBuilder.Entity<Store>().ToTable("store", "receipt");
-			modelBuilder.HasSequence<long>("StoreSeq", schema: "receipt").StartsAt(1).IncrementsBy(1);			
-			modelBuilder.Entity<Store>().Property(s => s.Id).HasDefaultValueSql("nextval('receipt.\"StoreSeq\"')");
+			modelBuilder.HasSequence<long>("storeSeq", schema: "receipt").StartsAt(1).IncrementsBy(1);			
+			modelBuilder.Entity<Store>().Property(s => s.Id).HasDefaultValueSql("nextval('receipt.\"storeSeq\"')");
             modelBuilder.Entity<Store>().Property(s => s.DateTimeCreated).HasDefaultValueSql("now()");
             modelBuilder.Entity<Store>().HasIndex(s => s.Name).IsUnique();
 
             modelBuilder.Entity<Store>()
-				.HasOne(s => s.UserCreatedInstance)
+				.HasOne(s => s.UserCreated)
 				.WithMany(m => m.StoresCreated)
-				.HasForeignKey(s => s.UserCreated)
-				.HasConstraintName("FK_Store_MemberCreated")
+				.HasForeignKey(s => s.UserCreatedId)
+				.HasConstraintName("FK_store_memberCreated")
 				.OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<Store>()
-                .HasOne(s => s.UserModifiedInstance)
+                .HasOne(s => s.UserModified)
                 .WithMany(m => m.StoresModified)
-                .HasForeignKey(s => s.UserModified)
-                .HasConstraintName("FK_Store_MemberModified")
+                .HasForeignKey(s => s.UserModifiedId)
+                .HasConstraintName("FK_store_memberModified")
                 .OnDelete(DeleteBehavior.NoAction);
         }
 
 		private void CreateReceipt(ModelBuilder modelBuilder)
 		{
 			modelBuilder.Entity<Receipt>().ToTable("receipt", "receipt");
-			modelBuilder.HasSequence<long>("ReceiptSeq", schema: "receipt").StartsAt(1).IncrementsBy(1);
-			modelBuilder.Entity<Receipt>().Property(r => r.Id).HasDefaultValueSql("nextval('receipt.\"ReceiptSeq\"')");
-            modelBuilder.Entity<Receipt>().Property(r => r.Created).HasDefaultValueSql("now()");
+			modelBuilder.HasSequence<long>("receiptSeq", schema: "receipt").StartsAt(1).IncrementsBy(1);
+			modelBuilder.Entity<Receipt>().Property(r => r.Id).HasDefaultValueSql("nextval('receipt.\"receiptSeq\"')");
+            modelBuilder.Entity<Receipt>().Property(r => r.DateTimeCreated).HasDefaultValueSql("now()");
 
             //FK
             modelBuilder.Entity<Receipt>()
-				.HasOne(r => r.StoreInstance)
+				.HasOne(r => r.Store)
 				.WithMany(s => s.Receipt)
-				.HasForeignKey(r => r.Store)
-				.HasConstraintName("FK_Receipt_StoreId")
+				.HasForeignKey(r => r.StoreId)
+				.HasConstraintName("FK_receipt_store")
 				.OnDelete(DeleteBehavior.NoAction);
 
 			modelBuilder.Entity<Receipt>()
-				.HasOne(r => r.CostCentreInstance)
+				.HasOne(r => r.CostCentre)
 				.WithMany(c => c.Receipt)
-				.HasForeignKey(r => r.CostCentre)
-				.HasConstraintName("FK_Receipt_CostCentre")
+				.HasForeignKey(r => r.CostCentreId)
+				.HasConstraintName("FK_receipt_costCentre")
 				.OnDelete(DeleteBehavior.NoAction);
 
 			modelBuilder.Entity<Receipt>()
-				.HasOne(r => r.ReceiptStatusInstance)
+				.HasOne(r => r.ReceiptStatus)
 				.WithMany(rs => rs.Receipt)
-				.HasForeignKey(r => r.ReceiptStatus)
-				.HasConstraintName("FK_Receipt_ReceiptStatus")
+				.HasForeignKey(r => r.ReceiptStatusId)
+				.HasConstraintName("FK_receipt_receiptStatus")
 				.OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<Receipt>()
-                .HasOne(ra => ra.UserCreatedInstance)
+                .HasOne(ra => ra.UserCreated)
                 .WithMany(m => m.ReceiptsCreated)
-                .HasForeignKey(ra => ra.UserCreated)
-                .HasConstraintName("FK_Receipt_ApprovedBy")
+                .HasForeignKey(ra => ra.UserCreatedId)
+                .HasConstraintName("FK_receipt_memberCreated")
                 .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<Receipt>()
-                .HasOne(ra => ra.UserModifiedInstance)
+                .HasOne(ra => ra.UserModified)
                 .WithMany(m => m.ReceiptsModified)
-                .HasForeignKey(ra => ra.UserModified)
-                .HasConstraintName("FK_Receipt_MemberModified")
+                .HasForeignKey(ra => ra.UserModifiedId)
+                .HasConstraintName("FK_receipt_memberModified")
                 .OnDelete(DeleteBehavior.NoAction);
         }
 
 		private void CreateReceiptApproval(ModelBuilder modelBuilder)
 		{
 			modelBuilder.Entity<ReceiptApproval>().ToTable("approval", "receipt");
-            modelBuilder.Entity<ReceiptApproval>().Property(ra => ra.UserCreatedInstance).HasDefaultValueSql("now()");
+            modelBuilder.Entity<ReceiptApproval>().Property(ra => ra.DateTimeCreated).HasDefaultValueSql("now()");
 
             //FK
             modelBuilder.Entity<ReceiptApproval>()
-				.HasOne(ra => ra.ReceiptInstance)
+				.HasOne(ra => ra.Receipt)
 				.WithOne(r => r.ReceiptApproval)
-				.HasForeignKey<ReceiptApproval>(ra => ra.Receipt)
-				.HasConstraintName("FK_ReceiptApproval_Receipt")
+				.HasForeignKey<ReceiptApproval>(ra => ra.ReceiptId)
+				.HasConstraintName("FK_receiptApproval_receipt")
 				.OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<ReceiptApproval>()
-                .HasOne(ra => ra.UserCreatedInstance)
+                .HasOne(ra => ra.UserCreated)
                 .WithMany(m => m.ReceiptApprovalsCreated)
-                .HasForeignKey(ra => ra.UserCreated)
-                .HasConstraintName("FK_ReceiptApproval_MemberCreated")
+                .HasForeignKey(ra => ra.UserCreatedId)
+                .HasConstraintName("FK_receiptApproval_memberCreated")
                 .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<ReceiptApproval>()
-                .HasOne(ra => ra.UserModifiedInstance)
+                .HasOne(ra => ra.UserModified)
                 .WithMany(m => m.ReceiptApprovalsModified)
-                .HasForeignKey(ra => ra.UserModified)
-                .HasConstraintName("FK_ReceiptApproval_MemberModified")
+                .HasForeignKey(ra => ra.UserModifiedId)
+                .HasConstraintName("FK_receiptApproval_memberModified")
                 .OnDelete(DeleteBehavior.NoAction);
         }
 
 		private void CreateReceiptStatus(ModelBuilder modelBuilder)
 		{
 			modelBuilder.Entity<ReceiptStatus>().ToTable("status", "receipt");
-			modelBuilder.HasSequence<long>("ReceiptStatusSeq", schema: "receipt").StartsAt(1).IncrementsBy(1);
-			modelBuilder.Entity<ReceiptStatus>().Property(r => r.Id).HasDefaultValueSql("nextval('receipt.\"ReceiptStatusSeq\"')");
+			modelBuilder.HasSequence<long>("receiptStatusSeq", schema: "receipt").StartsAt(1).IncrementsBy(1);
+			modelBuilder.Entity<ReceiptStatus>().Property(r => r.Id).HasDefaultValueSql("nextval('receipt.\"receiptStatusSeq\"')");
             modelBuilder.Entity<ReceiptStatus>().Property(r => r.DateTimeCreated).HasDefaultValueSql("now()");
             modelBuilder.Entity<ReceiptStatus>().HasIndex(r => r.Name).IsUnique();
 
             modelBuilder.Entity<ReceiptStatus>()
-                .HasOne(rs => rs.UserCreatedInstance)
+                .HasOne(rs => rs.UserCreated)
                 .WithMany(m => m.ReceiptStatusesCreated)
-                .HasForeignKey(rs => rs.UserCreated)
-                .HasConstraintName("FK_ReceiptStatus_MemberCreated")
+                .HasForeignKey(rs => rs.UserCreatedId)
+                .HasConstraintName("FK_receiptStatus_memberCreated")
                 .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<ReceiptStatus>()
-                .HasOne(rs => rs.UserModifiedInstance)
+                .HasOne(rs => rs.UserModified)
                 .WithMany(m => m.ReceiptStatusesModified)
-                .HasForeignKey(rs => rs.UserModified)
-                .HasConstraintName("FK_ReceiptStatus_MemberModified")
+                .HasForeignKey(rs => rs.UserModifiedId)
+                .HasConstraintName("FK_receiptStatus_memberModified")
                 .OnDelete(DeleteBehavior.NoAction);
 
         }
@@ -190,23 +190,23 @@ namespace Maasgroep.Database
         private void CreateMaasgroepMember(ModelBuilder modelBuilder)
 		{
 			modelBuilder.Entity<MaasgroepMember>().ToTable("member", "admin");
-			modelBuilder.HasSequence<long>("MemberSeq", schema: "admin").StartsAt(1).IncrementsBy(1);
-			modelBuilder.Entity<MaasgroepMember>().Property(m => m.Id).HasDefaultValueSql("nextval('admin.\"MemberSeq\"')");
+			modelBuilder.HasSequence<long>("memberSeq", schema: "admin").StartsAt(1).IncrementsBy(1);
+			modelBuilder.Entity<MaasgroepMember>().Property(m => m.Id).HasDefaultValueSql("nextval('admin.\"memberSeq\"')");
             modelBuilder.Entity<MaasgroepMember>().Property(m => m.DateTimeCreated).HasDefaultValueSql("now()");
             modelBuilder.Entity<MaasgroepMember>().HasIndex(m => m.Name).IsUnique();
 
 			modelBuilder.Entity<MaasgroepMember>()
-				.HasOne(m => m.UserCreatedInstance)
+				.HasOne(m => m.UserCreated)
 				.WithMany(m => m.MembersCreated)
-				.HasForeignKey(m => m.UserCreated)
-				.HasConstraintName("FK_Member_MemberCreated")
+				.HasForeignKey(m => m.UserCreatedId)
+				.HasConstraintName("FK_member_memberCreated")
 				.OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<MaasgroepMember>()
-                .HasOne(m => m.UserModifiedInstance)
+                .HasOne(m => m.UserModified)
                 .WithMany(m => m.MembersModified)
-                .HasForeignKey(m => m.UserModified)
-                .HasConstraintName("FK_Member_MemberModified")
+                .HasForeignKey(m => m.UserModifiedId)
+                .HasConstraintName("FK_member_memberModified")
 				.OnDelete(DeleteBehavior.NoAction);
         }
     }
