@@ -12,11 +12,16 @@ namespace Maasgroep.Database
 
 
 		//Ef
-		public ICollection<CostCentre> CostCentres { get; set; }
-		public ICollection<Store> Stores { get; set; }
-		public ICollection<ReceiptStatus> ReceiptStatuses { get; set; }
-		public ICollection<Receipt> Receipts { get; set; }
-		public ICollection<ReceiptApproval> ReceiptApprovals { get; set; }
+		public ICollection<CostCentre> CostCentresCreated { get; set; }
+        public ICollection<CostCentre> CostCentresModified { get; set; }
+        public ICollection<Store> StoresCreated { get; set; }
+        public ICollection<Store> StoresModified { get; set; }
+        public ICollection<ReceiptStatus> ReceiptStatusesCreated { get; set; }
+        public ICollection<ReceiptStatus> ReceiptStatusesModified { get; set; }
+        public ICollection<Receipt> ReceiptsCreated { get; set; }
+        public ICollection<Receipt> ReceiptsModified { get; set; }
+        public ICollection<ReceiptApproval> ReceiptApprovalsCreated { get; set; }
+        public ICollection<ReceiptApproval> ReceiptApprovalsModified { get; set; }
 
-	}
+    }
 }
