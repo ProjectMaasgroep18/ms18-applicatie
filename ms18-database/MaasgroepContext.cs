@@ -106,13 +106,6 @@ namespace Maasgroep.Database
 				.HasForeignKey<ReceiptApproval>(ra => ra.Receipt)
 				.HasConstraintName("FK_ReceiptApproval_Receipt")
 				.OnDelete(DeleteBehavior.NoAction);
-
-			modelBuilder.Entity<ReceiptApproval>()
-				.HasOne(ra => ra.MaasGroepMember)
-				.WithOne(mm => mm.ReceiptApproval)
-				.HasForeignKey<ReceiptApproval>(ra => ra.ApprovedBy)
-				.HasConstraintName("FK_ReceiptApproval_ApprovedBy")
-				.OnDelete(DeleteBehavior.NoAction);
 		}
 
 		private void CreateReceiptStatus(ModelBuilder modelBuilder)
@@ -137,61 +130,71 @@ namespace Maasgroep.Database
 				.HasOne(cc => cc.UserCreatedInstance)
 				.WithMany(m => m.CostCentres)
 				.HasForeignKey(cc => cc.UserCreated)
-				.HasConstraintName("FK_CostCentre_MemberCreated");
+				.HasConstraintName("FK_CostCentre_MemberCreated")
+				.OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<CostCentre>()
 				.HasOne(cc => cc.UserModifiedInstance)
 				.WithMany(m => m.CostCentres)
 				.HasForeignKey(cc => cc.UserModified)
-				.HasConstraintName("FK_CostCentre_MemberModified");
+				.HasConstraintName("FK_CostCentre_MemberModified")
+                .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<Store>()
                 .HasOne(s => s.UserCreatedInstance)
                 .WithMany(m => m.Stores)
                 .HasForeignKey(s => s.UserCreated)
-                .HasConstraintName("FK_Store_MemberCreated");
+                .HasConstraintName("FK_Store_MemberCreated")
+                .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<Store>()
                 .HasOne(s => s.UserModifiedInstance)
                 .WithMany(m => m.Stores)
                 .HasForeignKey(s => s.UserModified)
-                .HasConstraintName("FK_Store_MemberModified");
+                .HasConstraintName("FK_Store_MemberModified")
+                .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<ReceiptStatus>()
 				.HasOne(rs => rs.UserCreatedInstance)
 				.WithMany(m => m.ReceiptStatuses)
 				.HasForeignKey(rs => rs.UserCreated)
-				.HasConstraintName("FK_ReceiptStatus_MemberCreated");
+				.HasConstraintName("FK_ReceiptStatus_MemberCreated")
+                .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<ReceiptStatus>()
                 .HasOne(rs => rs.UserModifiedInstance)
                 .WithMany(m => m.ReceiptStatuses)
                 .HasForeignKey(rs => rs.UserModified)
-                .HasConstraintName("FK_ReceiptStatus_MemberModified");
+                .HasConstraintName("FK_ReceiptStatus_MemberModified")
+                .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<ReceiptApproval>()
                 .HasOne(ra => ra.UserCreatedInstance)
                 .WithMany(m => m.ReceiptApprovals)
                 .HasForeignKey(ra => ra.ApprovedBy)
-                .HasConstraintName("FK_ReceiptApproval_MemberCreated");
+                .HasConstraintName("FK_ReceiptApproval_MemberCreated")
+                .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<ReceiptApproval>()
                 .HasOne(ra => ra.UserModifiedInstance)
                 .WithMany(m => m.ReceiptApprovals)
                 .HasForeignKey(ra => ra.UserModified)
-                .HasConstraintName("FK_ReceiptApproval_MemberModified");
+                .HasConstraintName("FK_ReceiptApproval_MemberModified")
+                .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<Receipt>()
                 .HasOne(ra => ra.UserCreatedInstance)
                 .WithMany(m => m.Receipts)
                 .HasForeignKey(ra => ra.UserCreated)
-                .HasConstraintName("FK_Receipt_ApprovedBy");
+                .HasConstraintName("FK_Receipt_ApprovedBy")
+                .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<Receipt>()
                 .HasOne(ra => ra.UserModifiedInstance)
                 .WithMany(m => m.Receipts)
                 .HasForeignKey(ra => ra.UserModified)
-                .HasConstraintName("FK_Receipt_MemberModified");
+                .HasConstraintName("FK_Receipt_MemberModified")
+                .OnDelete(DeleteBehavior.NoAction);
         }
     }
 }
