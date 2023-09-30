@@ -1,23 +1,18 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-
+﻿
 namespace Maasgroep.Database
 {
 	public record Receipt
 	{
-		[Key]
 		public long Id { get; set; }
-		[Column(TypeName = "decimal(18,2)")]
 		public decimal? Amount { get; set; }
 		public long? StoreId { get; set; }
 		public long? CostCentreId { get; set; }
 		public long ReceiptStatusId { get; set; }
-		public string? Location { get; set; }//TODO: Kevin; GPS zie ik nog even niet vliegen?
-		[Column(TypeName = "varchar(2048)")]
+		public string? Location { get; set; }
 		public string? Note { get; set; }
 
 
-		//Generic
+		// Generic
 		public long UserCreatedId { get; set; }
 		public long? UserModifiedId { get; set; }
         public DateTime DateTimeCreated { get; set; }
@@ -25,12 +20,15 @@ namespace Maasgroep.Database
 
 
 
-		//Ef
+		// EF receipt properties
 		public Store? Store { get; set; }
 		public CostCentre? CostCentre { get; set; }
 		public ReceiptStatus ReceiptStatus { get; set; }
 		public Photo? Photo { get; set; }
 		public ReceiptApproval? ReceiptApproval { get; set; }
+
+
+		// EF generic properties
 		public Member UserCreated { get; set; }
 		public Member? UserModified { get; set; }
 	}

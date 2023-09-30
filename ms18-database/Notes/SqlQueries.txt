@@ -15,9 +15,6 @@ select * from "receipt"."status";
 select * from "receipt"."receipt";
 select * from "receipt"."approval";
 
---insert into "admin"."memberPermission" ("MemberId", "PermissionId", "UserCreatedId", "DateTimeCreated")
---values (1, 1, 1, now())
-
 /*
 delete from "receipt"."approval";
 delete from "receipt"."receipt";

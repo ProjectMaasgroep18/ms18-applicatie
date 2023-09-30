@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using System.Security;
 
 namespace Maasgroep.Database
 {
@@ -42,11 +43,13 @@ namespace Maasgroep.Database
         private void CreatePhoto(ModelBuilder modelBuilder)
 		{
 			modelBuilder.Entity<Photo>().ToTable("photo", "photo");
+            modelBuilder.Entity<Photo>().HasKey(p => new { p.Id });
 			modelBuilder.HasSequence<long>("PhotoSeq", schema: "photo").StartsAt(1).IncrementsBy(1);
 			modelBuilder.Entity<Photo>().Property(p => p.Created).HasDefaultValueSql("now()");
 			modelBuilder.Entity<Photo>().Property(p => p.Id).HasDefaultValueSql("nextval('photo.\"PhotoSeq\"')");
 
-            //FK
+            //Foreign keys
+
             modelBuilder.Entity<Photo>()
 				.HasOne(p => p.ReceiptInstance)
 				.WithOne(r => r.Photo)
@@ -61,10 +64,14 @@ namespace Maasgroep.Database
         private void CreateCostCentre(ModelBuilder modelBuilder)
 		{
 			modelBuilder.Entity<CostCentre>().ToTable("costCentre", "receipt");
+            modelBuilder.Entity<CostCentre>().HasKey(cc => new { cc.Id });
 			modelBuilder.HasSequence<long>("costCentreSeq", schema: "receipt").StartsAt(1).IncrementsBy(1);			
-			modelBuilder.Entity<CostCentre>().Property(c => c.Id).HasDefaultValueSql("nextval('receipt.\"costCentreSeq\"')");
-            modelBuilder.Entity<CostCentre>().Property(c => c.DateTimeCreated).HasDefaultValueSql("now()");
-            modelBuilder.Entity<CostCentre>().HasIndex(c => c.Name).IsUnique();
+			modelBuilder.Entity<CostCentre>().Property(cc => cc.Id).HasDefaultValueSql("nextval('receipt.\"costCentreSeq\"')");
+            modelBuilder.Entity<CostCentre>().Property(cc => cc.DateTimeCreated).HasDefaultValueSql("now()");
+            modelBuilder.Entity<CostCentre>().Property(cc => cc.Name).HasMaxLength(256);
+            modelBuilder.Entity<CostCentre>().HasIndex(cc => cc.Name).IsUnique();
+
+            // Foreign keys
 
             modelBuilder.Entity<CostCentre>()
                 .HasOne(cc => cc.UserCreated)
@@ -84,10 +91,14 @@ namespace Maasgroep.Database
 		private void CreateStore(ModelBuilder modelBuilder)
 		{
 			modelBuilder.Entity<Store>().ToTable("store", "receipt");
+            modelBuilder.Entity<Store>().HasKey(s => new { s.Id });
 			modelBuilder.HasSequence<long>("storeSeq", schema: "receipt").StartsAt(1).IncrementsBy(1);			
 			modelBuilder.Entity<Store>().Property(s => s.Id).HasDefaultValueSql("nextval('receipt.\"storeSeq\"')");
             modelBuilder.Entity<Store>().Property(s => s.DateTimeCreated).HasDefaultValueSql("now()");
+            modelBuilder.Entity<Store>().Property(s => s.Name).HasMaxLength(256);
             modelBuilder.Entity<Store>().HasIndex(s => s.Name).IsUnique();
+
+            // Foreign keys
 
             modelBuilder.Entity<Store>()
 				.HasOne(s => s.UserCreated)
@@ -107,11 +118,15 @@ namespace Maasgroep.Database
 		private void CreateReceipt(ModelBuilder modelBuilder)
 		{
 			modelBuilder.Entity<Receipt>().ToTable("receipt", "receipt");
+            modelBuilder.Entity<Receipt>().HasKey(r => new { r.Id });
 			modelBuilder.HasSequence<long>("receiptSeq", schema: "receipt").StartsAt(1).IncrementsBy(1);
 			modelBuilder.Entity<Receipt>().Property(r => r.Id).HasDefaultValueSql("nextval('receipt.\"receiptSeq\"')");
             modelBuilder.Entity<Receipt>().Property(r => r.DateTimeCreated).HasDefaultValueSql("now()");
+            modelBuilder.Entity<Receipt>().Property(r => r.Note).HasMaxLength(2048);
+            modelBuilder.Entity<Receipt>().Property(r => r.Amount).HasPrecision(2);
 
-            //FK
+            //Foreign keys
+
             modelBuilder.Entity<Receipt>()
 				.HasOne(r => r.Store)
 				.WithMany(s => s.Receipt)
@@ -151,9 +166,12 @@ namespace Maasgroep.Database
 		private void CreateReceiptApproval(ModelBuilder modelBuilder)
 		{
 			modelBuilder.Entity<ReceiptApproval>().ToTable("approval", "receipt");
+            modelBuilder.Entity<ReceiptApproval>().HasKey(ra => new { ra.ReceiptId });
             modelBuilder.Entity<ReceiptApproval>().Property(ra => ra.DateTimeCreated).HasDefaultValueSql("now()");
+            modelBuilder.Entity<ReceiptApproval>().Property(ra => ra.Note).HasMaxLength(2048);
 
-            //FK
+            //Foreign keys
+
             modelBuilder.Entity<ReceiptApproval>()
 				.HasOne(ra => ra.Receipt)
 				.WithOne(r => r.ReceiptApproval)
@@ -179,10 +197,12 @@ namespace Maasgroep.Database
 		private void CreateReceiptStatus(ModelBuilder modelBuilder)
 		{
 			modelBuilder.Entity<ReceiptStatus>().ToTable("status", "receipt");
+            modelBuilder.Entity<ReceiptStatus>().HasKey(rs => new { rs.Id });
 			modelBuilder.HasSequence<long>("receiptStatusSeq", schema: "receipt").StartsAt(1).IncrementsBy(1);
-			modelBuilder.Entity<ReceiptStatus>().Property(r => r.Id).HasDefaultValueSql("nextval('receipt.\"receiptStatusSeq\"')");
-            modelBuilder.Entity<ReceiptStatus>().Property(r => r.DateTimeCreated).HasDefaultValueSql("now()");
-            modelBuilder.Entity<ReceiptStatus>().HasIndex(r => r.Name).IsUnique();
+			modelBuilder.Entity<ReceiptStatus>().Property(rs => rs.Id).HasDefaultValueSql("nextval('receipt.\"receiptStatusSeq\"')");
+            modelBuilder.Entity<ReceiptStatus>().Property(rs => rs.DateTimeCreated).HasDefaultValueSql("now()");
+            modelBuilder.Entity<ReceiptStatus>().Property(rs => rs.Name).HasMaxLength(256);
+            modelBuilder.Entity<ReceiptStatus>().HasIndex(rs => rs.Name).IsUnique();
 
             modelBuilder.Entity<ReceiptStatus>()
                 .HasOne(rs => rs.UserCreated)
@@ -212,7 +232,10 @@ namespace Maasgroep.Database
             modelBuilder.HasSequence<long>("memberSeq", schema: "admin").StartsAt(1).IncrementsBy(1);
 			modelBuilder.Entity<Member>().Property(m => m.Id).HasDefaultValueSql("nextval('admin.\"memberSeq\"')");
             modelBuilder.Entity<Member>().Property(m => m.DateTimeCreated).HasDefaultValueSql("now()");
+            modelBuilder.Entity<Member>().Property(m => m.Name).HasMaxLength(256);
             modelBuilder.Entity<Member>().HasIndex(m => m.Name).IsUnique();
+
+            // Foreign keys
 
 			modelBuilder.Entity<Member>()
 				.HasOne(m => m.UserCreated)
@@ -228,15 +251,6 @@ namespace Maasgroep.Database
                 .HasConstraintName("FK_member_memberModified")
 				.OnDelete(DeleteBehavior.NoAction);
 
-            modelBuilder.Entity<Member>()
-                .HasMany(m => m.MemberPermissions)
-                .WithOne(mp => mp.Member)
-                .HasForeignKey(mp => mp.MemberId)
-                .HasConstraintName("FK_memberPermission_member");
-                //.UsingEntity<MemberPermission>(
-                //    q => q.HasOne<Member>().WithMany().HasForeignKey(mp => mp.MemberId)
-                //, v => v.HasOne<Permission>().WithMany().HasForeignKey(mp => mp.PermissionId)
-                //);
         }
 
         private void CreatePermission(ModelBuilder modelBuilder)
@@ -246,15 +260,10 @@ namespace Maasgroep.Database
             modelBuilder.HasSequence<long>("permissionSeq", schema: "admin").StartsAt(1).IncrementsBy(1);
             modelBuilder.Entity<Permission>().Property(p => p.Id).HasDefaultValueSql("nextval('admin.\"permissionSeq\"')");
             modelBuilder.Entity<Permission>().Property(p => p.DateTimeCreated).HasDefaultValueSql("now()");
+            modelBuilder.Entity<Permission>().Property(p => p.Name).HasMaxLength(256);
             modelBuilder.Entity<Permission>().HasIndex(p => p.Name).IsUnique();
 
             // Foreign keys
-
-            modelBuilder.Entity<Permission>()
-                .HasMany(p => p.MemberPermissions)
-                .WithOne(mp => mp.Permission)
-                .HasForeignKey(mp => mp.PermissionId)
-                .HasConstraintName("FK_memberPermission_permission");
 
             modelBuilder.Entity<Permission>()
                 .HasOne(p => p.UserCreated)
@@ -277,20 +286,21 @@ namespace Maasgroep.Database
             modelBuilder.Entity<MemberPermission>().HasKey(mp => new { mp.MemberId, mp.PermissionId });
             modelBuilder.Entity<MemberPermission>().Property(mp => mp.DateTimeCreated).HasDefaultValueSql("now()");
 
-            // Foreign Keys
-            //modelBuilder.Entity<MemberPermission>()
-            //    .HasOne(mp => mp.Permission)
-            //    .WithMany(p => p.MemberPermissions)
-            //    .HasForeignKey(mp => mp.PermissionId)
-            //    .HasConstraintName("FK_memberPermission_permission")
-            //    .OnDelete(DeleteBehavior.NoAction);
+            // Foreign keys
 
-            //modelBuilder.Entity<MemberPermission>()
-            //    .HasOne(mp => mp.Member)
-            //    .WithMany(m => m.MemberPermissions)
-            //    .HasForeignKey(mp => mp.MemberId)
-            //    .HasConstraintName("FK_memberPermission_member")
-            //    .OnDelete(DeleteBehavior.NoAction);
+            modelBuilder.Entity<MemberPermission>()
+                .HasOne(mp => mp.Permission)
+                .WithMany(p => p.Members)
+                .HasForeignKey(mp => mp.PermissionId)
+                .HasConstraintName("FK_memberPermission_permission")
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<MemberPermission>()
+                .HasOne(mp => mp.Member)
+                .WithMany(m => m.Permissions)
+                .HasForeignKey(mp => mp.MemberId)
+                .HasConstraintName("FK_memberPermission_member")
+                .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<MemberPermission>()
                 .HasOne(mp => mp.UserCreated)

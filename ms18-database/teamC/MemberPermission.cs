@@ -6,17 +6,20 @@ namespace Maasgroep.Database
         public long MemberId { get; set; }
         public long PermissionId { get; set; }
 
-        //Generic
+
+        // Generic
         public long UserCreatedId { get; set; }
         public long? UserModifiedId { get; set; }
         public DateTime DateTimeCreated { get; set; }
         public DateTime? DateTimeModified { get; set; }
 
-        // Ef admin properties
+
+        // EF admin properties
         public Member Member { get; set; }
         public Permission Permission { get; set; }
 
-        // Ef generic
+
+        // EF generic properties
         public Member UserCreated { get; set; }
         public Member? UserModified { get; set; }
 
