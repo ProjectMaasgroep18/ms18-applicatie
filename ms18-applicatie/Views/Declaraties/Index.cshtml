@@ -1,6 +1,7 @@
 @{
     ViewData["Title"] = "Declaraties";
     var Member = ViewData["Member"] as Member;
+    var Receipts = ViewData["Receipts"] as Receipt[];
 }
 <h1>@ViewData["Title"]</h1>
 
@@ -11,7 +12,30 @@
 
     <p>Hier kan je je bonnetjes inleveren:</p>
 
-    <a asp-action="Nieuw"><button class="btn btn-primary">Nieuwe declaratie</button></a>
+    <p><a asp-action="Nieuw"><button class="btn btn-primary">Nieuwe declaratie</button></a></p>
+
+    <p>Dit zijn je bestaande declaraties in de database:</p>
+
+    <table>
+        <tr>
+            <th>Bedrag</th>
+            <th>Opmerking</th>
+            <th>Status</th>
+        </tr>
+        @if (Receipts == null) {
+        <tr>
+            <td colspan="999">Je hebt nog geen bonnetjes ingeleverd.</td>
+        </tr>
+        } else {
+            @foreach (var Receipt in Receipts) {
+            <tr>
+                <td>@(Receipt.Amount)</td>
+                <td>@(Receipt.Note)</td>
+                <td>@(Receipt.ReceiptStatusId). @(Receipt.ReceiptStatus?.Name)</td> <!-- Receipt.ReceiptStatus lijkt niet te werken -->
+            </tr>
+            }
+        }
+    </table>
 
 } else {
 

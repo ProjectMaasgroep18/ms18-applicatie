@@ -9,7 +9,28 @@
 
     <p>Hallo @(Member.Name)!</p>
 
-    <p>...</p>
+    <p>Vul hier de gegevens van je declaratie in:</p>
+
+    <form method="post" enctype="multipart/form-data" asp-action="Nieuw">
+        <table>
+            <tr>
+                <td>Bedrag: </td>
+                <td><input type="number" name="Amount" value="@ViewData["Amount"]"></td>
+            </tr>
+            <tr>
+                <td>Opmerkingen: </td>
+                <td><textarea name="Note">@ViewData["Note"]</textarea></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td><input type="submit" value="Indienen" class="btn btn-primary"></td>
+            </tr>
+        </table>
+    </form>
+
+    @if (ViewData["Error"] != null) {
+        <p>@ViewData["Error"]</p>
+    }
 
 } else {
 
