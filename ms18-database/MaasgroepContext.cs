@@ -138,7 +138,7 @@ namespace Maasgroep.Database
 		private void CreateReceiptApproval(ModelBuilder modelBuilder)
 		{
 			modelBuilder.Entity<ReceiptApproval>().ToTable("approval", "receipt");
-            modelBuilder.Entity<ReceiptApproval>().Property(ra => ra.Approved).HasDefaultValueSql("now()");
+            modelBuilder.Entity<ReceiptApproval>().Property(ra => ra.UserCreatedInstance).HasDefaultValueSql("now()");
 
             //FK
             modelBuilder.Entity<ReceiptApproval>()
@@ -151,7 +151,7 @@ namespace Maasgroep.Database
             modelBuilder.Entity<ReceiptApproval>()
                 .HasOne(ra => ra.UserCreatedInstance)
                 .WithMany(m => m.ReceiptApprovalsCreated)
-                .HasForeignKey(ra => ra.ApprovedBy)
+                .HasForeignKey(ra => ra.UserCreated)
                 .HasConstraintName("FK_ReceiptApproval_MemberCreated")
                 .OnDelete(DeleteBehavior.NoAction);
 
