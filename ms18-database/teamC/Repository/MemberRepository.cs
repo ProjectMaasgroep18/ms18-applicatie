@@ -3,10 +3,8 @@ namespace Maasgroep.Database.Members
 {
     public class MemberRepository : IMemberRepository
     {
-        private readonly MaasgroepContext _db;
         public MemberRepository()
         { 
-            _db = new MaasgroepContext(); // Ombouwen
         }
 
         public void AddMember()
@@ -28,19 +26,19 @@ namespace Maasgroep.Database.Members
 
         private void CreateTestDataMember()
         {
-            using (_db)
+            using (var db = new MaasgroepContext())
             {
                 var members = new List<Member>()
                 {
                     new Member() { Name = "Borgia"}
                 };
 
-                _db.Member.AddRange(members);
+                db.Member.AddRange(members);
 
-                var rows = _db.SaveChanges();
+                var rows = db.SaveChanges();
                 Console.WriteLine($"Number of rows: {rows}");
 
-                var borgia = _db.Member.FirstOrDefault()!;
+                var borgia = db.Member.FirstOrDefault()!;
 
                 members = new List<Member>()
                 {
@@ -52,18 +50,18 @@ namespace Maasgroep.Database.Members
                 borgia.UserModified = borgia;
                 borgia.DateTimeModified = DateTime.UtcNow;
 
-                _db.Member.AddRange(members);
+                db.Member.AddRange(members);
 
-                rows = _db.SaveChanges();
+                rows = db.SaveChanges();
                 Console.WriteLine($"Number of rows: {rows}");
             }
         }
 
         private void CreateTestDataPermissions()
         {
-            using (_db)
+            using (var db = new MaasgroepContext())
             {
-                var borgia = _db.Member.FirstOrDefault()!;
+                var borgia = db.Member.FirstOrDefault()!;
 
                 var permissions = new List<Permission>()
                 {
@@ -73,24 +71,24 @@ namespace Maasgroep.Database.Members
                 ,   new Permission() { Name = "receipt.payOut", UserCreated = borgia}
                 };
 
-                _db.Permission.AddRange(permissions);
+                db.Permission.AddRange(permissions);
 
-                var rows = _db.SaveChanges();
+                var rows = db.SaveChanges();
                 Console.WriteLine($"Number of rows: {rows}");
             }
         }
 
         private void CreateTestDataMemberPermissions()
         {
-            using (_db)
+            using (var db = new MaasgroepContext())
             {
-                var borgia = _db.Member.FirstOrDefault()!;
-                var daGama = _db.Member.Where(m => m.Name == "da Gama").FirstOrDefault()!;
-                var alb = _db.Member.Where(m => m.Name == "Albuquerque").FirstOrDefault()!;
+                var borgia = db.Member.FirstOrDefault()!;
+                var daGama = db.Member.Where(m => m.Name == "da Gama").FirstOrDefault()!;
+                var alb = db.Member.Where(m => m.Name == "Albuquerque").FirstOrDefault()!;
 
-                var approve = _db.Permission.Where(p => p.Name == "receipt.approve").FirstOrDefault()!;
-                var reject = _db.Permission.Where(p => p.Name == "receipt.reject").FirstOrDefault()!;
-                var handIn = _db.Permission.Where(p => p.Name == "receipt.handIn").FirstOrDefault()!;
+                var approve = db.Permission.Where(p => p.Name == "receipt.approve").FirstOrDefault()!;
+                var reject = db.Permission.Where(p => p.Name == "receipt.reject").FirstOrDefault()!;
+                var handIn = db.Permission.Where(p => p.Name == "receipt.handIn").FirstOrDefault()!;
 
                 var memberPermissions = new List<MemberPermission>()
                 {
@@ -99,9 +97,9 @@ namespace Maasgroep.Database.Members
                 ,   new MemberPermission() { Member = alb, Permission = handIn, UserCreated = borgia }
                 };
 
-                _db.MemberPermission.AddRange(memberPermissions);
+                db.MemberPermission.AddRange(memberPermissions);
 
-                var rows = _db.SaveChanges();
+                var rows = db.SaveChanges();
                 Console.WriteLine($"Number of rows: {rows}");
             }
         }

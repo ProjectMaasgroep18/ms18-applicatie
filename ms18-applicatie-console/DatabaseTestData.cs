@@ -10,8 +10,8 @@ namespace ms18_applicatie_console
 
         internal DatabaseTestData() 
         {
-            _members = new MemberRepository();
-            _receipts = new ReceiptRepository();
+           _members = new MemberRepository();
+           _receipts = new ReceiptRepository();
         }
 
         internal void CreateTestDataAll()
