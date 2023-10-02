@@ -3,10 +3,10 @@ namespace Maasgroep.Database.Photos
 {
     public class PhotoRepository : IPhotoRepository
     {
-        private readonly PhotoContext _db;
+        private readonly MaasgroepContext _db;
         public PhotoRepository() 
         { 
-            _db = new PhotoContext();
+            _db = new MaasgroepContext();
         }
 
         public void AddPhoto()

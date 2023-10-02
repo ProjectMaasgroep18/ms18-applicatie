@@ -4,16 +4,16 @@ namespace Maasgroep.Database.Receipts
 {
     public class ReceiptRepository : IReceiptRepository
     {
-        private readonly ReceiptContext _db;
+        private readonly MaasgroepContext _db;
         private Member _member;
         public ReceiptRepository() 
         { 
-            _db = new ReceiptContext();
+            _db = new MaasgroepContext();
         }
         public void AanmakenTestData()
         {
-            
-            _member = NogTeWijzigen();
+
+            _member = _db.Member.Where(m => m.Name == "Borgia").FirstOrDefault()!;
             CreateTestDataCostCentre();
             CreateTestDataStore();
             CreateTestDataReceiptStatus();
@@ -139,17 +139,6 @@ namespace Maasgroep.Database.Receipts
                 var rows = _db.SaveChanges();
                 Console.WriteLine($"Number of rows: {rows}");
             }
-        }
-        private Member NogTeWijzigen()
-        {
-            Member result = null;
-
-            using (var db = new MemberContext())
-            {
-                result = db.Member.Where(m => m.Name == "Borgia").FirstOrDefault()!;
-            }
-
-            return result;
         }
     }
 }

@@ -3,10 +3,10 @@ namespace Maasgroep.Database.Members
 {
     public class MemberRepository : IMemberRepository
     {
-        private readonly MemberContext _db;
+        private readonly MaasgroepContext _db;
         public MemberRepository()
         { 
-            _db = new MemberContext(); // Ombouwen
+            _db = new MaasgroepContext(); // Ombouwen
         }
 
         public void AddMember()
