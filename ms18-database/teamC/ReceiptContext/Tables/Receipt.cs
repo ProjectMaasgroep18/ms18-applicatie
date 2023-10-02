@@ -1,4 +1,5 @@
 ﻿using Maasgroep.Database.Members;
+using Maasgroep.Database.Photos;
 
 namespace Maasgroep.Database.Receipts
 {

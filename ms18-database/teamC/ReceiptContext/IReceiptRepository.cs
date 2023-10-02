@@ -1,4 +1,5 @@
-﻿
+﻿using Maasgroep.Database.Members;
+
 namespace Maasgroep.Database.Receipts
 {
     public interface IReceiptRepository
@@ -8,5 +9,7 @@ namespace Maasgroep.Database.Receipts
         void ModifyReceipt();
 
         // Nadenken over GetReceipt en model
+
+        void AanmakenTestData();
     }
 }

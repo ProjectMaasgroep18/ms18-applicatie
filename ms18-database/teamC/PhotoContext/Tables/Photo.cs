@@ -1,6 +1,6 @@
 ﻿using Maasgroep.Database.Receipts;
 
-namespace ms18_database.teamC.PhotoContext.Tables
+namespace Maasgroep.Database.Photos
 {
     internal record Photo
     {
