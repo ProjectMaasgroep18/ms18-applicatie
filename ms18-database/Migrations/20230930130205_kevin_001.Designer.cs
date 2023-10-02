@@ -11,7 +11,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace ms18_database.Migrations
 {
-    [DbContext(typeof(MaasgroepContext))]
+    [DbContext(typeof(ReceiptContext))]
     [Migration("20230930130205_kevin_001")]
     partial class kevin_001
     {

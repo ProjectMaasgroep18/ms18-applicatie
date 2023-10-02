@@ -1,10 +1,11 @@
-﻿
-namespace Maasgroep.Database
+﻿using Maasgroep.Database.Receipts;
+
+namespace Maasgroep.Database.Members
 {
-	public record Member
-	{
-		public long Id { get; set; }
-		public string Name { get; set; }
+    internal record Member
+    {
+        public long Id { get; set; }
+        public string Name { get; set; }
 
 
         // Generic

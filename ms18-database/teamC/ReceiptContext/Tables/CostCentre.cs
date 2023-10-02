@@ -1,7 +1,8 @@
-﻿
-namespace Maasgroep.Database
+﻿using Maasgroep.Database.Members;
+
+namespace Maasgroep.Database.Receipts
 {
-	public record CostCentre
+    internal record CostCentre
 	{
 		public long Id { get; set; }
 		public string Name { get; set; }

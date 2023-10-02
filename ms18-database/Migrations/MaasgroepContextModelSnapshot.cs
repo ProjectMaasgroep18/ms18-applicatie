@@ -10,7 +10,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace ms18_database.Migrations
 {
-    [DbContext(typeof(MaasgroepContext))]
+    [DbContext(typeof(ReceiptContext))]
     partial class MaasgroepContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)

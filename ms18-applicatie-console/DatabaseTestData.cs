@@ -21,7 +21,7 @@ namespace ms18_applicatie_console
         internal void CreateTestDataMember()
         {
 
-            using (var db = new MaasgroepContext())
+            using (var db = new ReceiptContext())
             {
                 var members = new List<Member>()
                 {
@@ -54,7 +54,7 @@ namespace ms18_applicatie_console
 
         internal void CreateTestDataPermissions()
         {
-            using (var db = new MaasgroepContext())
+            using (var db = new ReceiptContext())
             {
                 var borgia = db.Member.FirstOrDefault()!;
 
@@ -75,7 +75,7 @@ namespace ms18_applicatie_console
 
         internal void CreateTestDataMemberPermissions()
         {
-            using (var db = new MaasgroepContext())
+            using (var db = new ReceiptContext())
             {
                 var borgia = db.Member.FirstOrDefault()!;
                 var daGama = db.Member.Where(m => m.Name == "da Gama").FirstOrDefault()!;
@@ -103,7 +103,7 @@ namespace ms18_applicatie_console
 
         internal void CreateTestDataCostCentre()
         {
-            using (var db = new MaasgroepContext())
+            using (var db = new ReceiptContext())
             {
 
                 var member = db.Member.Where(m => m.Name == "Borgia").FirstOrDefault()!;
@@ -123,7 +123,7 @@ namespace ms18_applicatie_console
         }
         internal void CreateTestDataStore()
         {
-            using (var db = new MaasgroepContext())
+            using (var db = new ReceiptContext())
             {
 
                 var member = db.Member.Where(m => m.Name == "Borgia").FirstOrDefault()!;
@@ -142,7 +142,7 @@ namespace ms18_applicatie_console
         }
         internal void CreateTestDataReceiptStatus()
         {
-            using (var db = new MaasgroepContext())
+            using (var db = new ReceiptContext())
             {
 
                 var member = db.Member.Where(m => m.Name == "Borgia").FirstOrDefault()!;
@@ -163,7 +163,7 @@ namespace ms18_applicatie_console
         }
         internal void CreateTestDataReceipt()
         {
-            using (var db = new MaasgroepContext())
+            using (var db = new ReceiptContext())
             {
                 var member = db.Member.Where(m => m.Name == "Borgia").FirstOrDefault()!;
                 var costCentre = db.CostCentre.Where(cc => cc.Name == "Moeder van Joopie").FirstOrDefault()!;
@@ -193,7 +193,7 @@ namespace ms18_applicatie_console
         }
         internal void CreateTestDataReceiptApproval()
         {
-            using (var db = new MaasgroepContext())
+            using (var db = new ReceiptContext())
             {
                 var member = db.Member.Where(m => m.Name == "Borgia").FirstOrDefault()!;
                 var costCentre = db.CostCentre.Where(cc => cc.Name == "Moeder van Joopie").FirstOrDefault()!;

@@ -1,7 +1,8 @@
-﻿
-namespace Maasgroep.Database
+﻿using Maasgroep.Database.Members;
+
+namespace Maasgroep.Database.Receipts
 {
-	public record ReceiptApproval
+    internal record ReceiptApproval
 	{
 		public long ReceiptId { get; set; }
 		public string? Note { get; set; }

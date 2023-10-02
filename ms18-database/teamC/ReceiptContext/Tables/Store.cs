@@ -1,7 +1,8 @@
-﻿
-namespace Maasgroep.Database
+﻿using Maasgroep.Database.Members;
+
+namespace Maasgroep.Database.Receipts
 {
-	public record Store
+    internal record Store
 	{
 		public long Id { get; set; }
 		public string Name { get; set; } //Unique constraint in Builder.
