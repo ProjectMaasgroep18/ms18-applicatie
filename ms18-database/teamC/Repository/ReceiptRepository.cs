@@ -9,7 +9,6 @@ namespace Maasgroep.Database.Receipts
         public void AanmakenTestData()
         {
             CreateTestDataCostCentre();
-            CreateTestDataStore();
             CreateTestDataReceiptStatus();
             CreateTestDataReceipt();
             CreateTestDataReceiptApproval();
@@ -37,30 +36,12 @@ namespace Maasgroep.Database.Receipts
 
                 var costCentres = new List<CostCentre>()
                 {
-                    new CostCentre() { Name = "Bestuur Maasgroep", UserCreated = member }
-                ,   new CostCentre() { Name = "Penningmeester", UserCreated = member }
-                ,   new CostCentre() { Name = "Moeder van Joopie", UserCreated = member }
+                    new CostCentre() { Name = "Bestuur Maasgroep", MemberCreated = member }
+                ,   new CostCentre() { Name = "Penningmeester", MemberCreated = member }
+                ,   new CostCentre() { Name = "Moeder van Joopie", MemberCreated = member }
                 };
 
                 db.CostCentre.AddRange(costCentres);
-
-                var rows = db.SaveChanges();
-                Console.WriteLine($"Number of rows: {rows}");
-            }
-        }
-        private void CreateTestDataStore()
-        {
-            using (var db = new MaasgroepContext())
-            {
-                var member = db.Member.Where(m => m.Name == "Borgia").FirstOrDefault()!;
-
-                var stores = new List<Store>()
-                {
-                    new Store() { Name = "Albert Gein", UserCreated = member }
-                ,   new Store() { Name = "Supboards Limited", UserCreated = member }
-                };
-
-                db.Store.AddRange(stores);
 
                 var rows = db.SaveChanges();
                 Console.WriteLine($"Number of rows: {rows}");
@@ -74,10 +55,10 @@ namespace Maasgroep.Database.Receipts
 
                 var receiptStati = new List<ReceiptStatus>()
                 {
-                    new ReceiptStatus() { Name = "Ingediend", UserCreated = member }
-                ,   new ReceiptStatus() { Name = "Goedgekeurd", UserCreated = member }
-                ,   new ReceiptStatus() { Name = "Afgekeurd", UserCreated = member }
-                ,   new ReceiptStatus() { Name = "Uitbetaald", UserCreated = member }
+                    new ReceiptStatus() { Name = "Ingediend", MemberCreated = member }
+                ,   new ReceiptStatus() { Name = "Goedgekeurd", MemberCreated = member }
+                ,   new ReceiptStatus() { Name = "Afgekeurd", MemberCreated = member }
+                ,   new ReceiptStatus() { Name = "Uitbetaald", MemberCreated = member }
                 };
 
                 db.ReceiptStatus.AddRange(receiptStati);
@@ -92,21 +73,20 @@ namespace Maasgroep.Database.Receipts
             {
                 var member = db.Member.Where(m => m.Name == "Borgia").FirstOrDefault()!;
                 var costCentre = db.CostCentre.Where(cc => cc.Name == "Moeder van Joopie").FirstOrDefault()!;
-                var store = db.Store.Where(s => s.Name == "Supboards Limited").FirstOrDefault()!;
                 var receiptStatusIngediend = db.ReceiptStatus.Where(rs => rs.Name == "Ingediend").FirstOrDefault()!;
                 var receiptStatusGoedgekeurd = db.ReceiptStatus.Where(rs => rs.Name == "Goedgekeurd").FirstOrDefault()!;
                 var receiptStatusAfgekeurd = db.ReceiptStatus.Where(rs => rs.Name == "Afgekeurd").FirstOrDefault()!;
 
                 var receipts = new List<Receipt>()
                 {
-                    new Receipt()   { UserCreated = member, ReceiptStatus = receiptStatusIngediend
-                                    , Store = store, CostCentre = costCentre
+                    new Receipt()   { MemberCreated = member, ReceiptStatus = receiptStatusIngediend
+                                    , CostCentre = costCentre
                                     }
-                ,   new Receipt()   { UserCreated = member, ReceiptStatus = receiptStatusGoedgekeurd
-                                    , Store = store, CostCentre = costCentre
+                ,   new Receipt()   { MemberCreated = member, ReceiptStatus = receiptStatusGoedgekeurd
+                                    , CostCentre = costCentre
                                     }
-                ,   new Receipt()   { UserCreated = member, ReceiptStatus = receiptStatusAfgekeurd
-                                    , Store = store, CostCentre = costCentre
+                ,   new Receipt()   { MemberCreated = member, ReceiptStatus = receiptStatusAfgekeurd
+                                    , CostCentre = costCentre
                                     }
                 };
 
@@ -122,7 +102,6 @@ namespace Maasgroep.Database.Receipts
             {
                 var member = db.Member.Where(m => m.Name == "Borgia").FirstOrDefault()!;
                 var costCentre = db.CostCentre.Where(cc => cc.Name == "Moeder van Joopie").FirstOrDefault()!;
-                var store = db.Store.Where(s => s.Name == "Supboards Limited").FirstOrDefault()!;
                 var receiptStatusIngediend = db.ReceiptStatus.Where(rs => rs.Name == "Ingediend").FirstOrDefault()!;
                 var receiptStatusGoedgekeurd = db.ReceiptStatus.Where(rs => rs.Name == "Goedgekeurd").FirstOrDefault()!;
                 var receiptStatusAfgekeurd = db.ReceiptStatus.Where(rs => rs.Name == "Afgekeurd").FirstOrDefault()!;
@@ -131,8 +110,8 @@ namespace Maasgroep.Database.Receipts
 
                 var receiptApprovals = new List<ReceiptApproval>()
                 {
-                    new ReceiptApproval() { Receipt = receiptGoedgekeurd, Note = "Lekker duidelijk met zo'n foto!", UserCreated = member }
-                ,   new ReceiptApproval() { Receipt = receiptAfgekeurd, Note = "Dit is niet het soort plug dat we nodig hebben.", UserCreated = member }
+                    new ReceiptApproval() { Receipt = receiptGoedgekeurd, Note = "Lekker duidelijk met zo'n foto!", MemberCreated = member }
+                ,   new ReceiptApproval() { Receipt = receiptAfgekeurd, Note = "Dit is niet het soort plug dat we nodig hebben.", MemberCreated = member }
                 };
 
                 db.ReceiptApproval.AddRange(receiptApprovals);

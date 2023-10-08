@@ -8,8 +8,8 @@ namespace Maasgroep.Database.Members
 
 
         // Generic
-        public long UserCreatedId { get; set; }
-        public long? UserModifiedId { get; set; }
+        public long MemberCreatedId { get; set; }
+        public long? MemberModifiedId { get; set; }
         public DateTime DateTimeCreated { get; set; }
         public DateTime? DateTimeModified { get; set; }
 
@@ -20,8 +20,8 @@ namespace Maasgroep.Database.Members
 
 
         // EF generic properties
-        public Member UserCreated { get; set; }
-        public Member? UserModified { get; set; }
+        public Member MemberCreated { get; set; }
+        public Member? MemberModified { get; set; }
 
     }
 }

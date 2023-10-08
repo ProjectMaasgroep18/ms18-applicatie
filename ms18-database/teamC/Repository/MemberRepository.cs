@@ -42,12 +42,12 @@ namespace Maasgroep.Database.Members
 
                 members = new List<Member>()
                 {
-                    new Member() { Name = "da Gama", UserCreated = borgia }
-                ,   new Member() { Name = "Albuquerque", UserCreated = borgia }
+                    new Member() { Name = "da Gama", MemberCreated = borgia }
+                ,   new Member() { Name = "Albuquerque", MemberCreated = borgia }
                 };
 
-                borgia.UserCreated = borgia;
-                borgia.UserModified = borgia;
+                borgia.MemberCreated = borgia;
+                borgia.MemberModified = borgia;
                 borgia.DateTimeModified = DateTime.UtcNow;
 
                 db.Member.AddRange(members);
@@ -65,10 +65,10 @@ namespace Maasgroep.Database.Members
 
                 var permissions = new List<Permission>()
                 {
-                    new Permission() { Name = "receipt.approve", UserCreated = borgia}
-                ,   new Permission() { Name = "receipt.reject", UserCreated = borgia}
-                ,   new Permission() { Name = "receipt.handIn", UserCreated = borgia}
-                ,   new Permission() { Name = "receipt.payOut", UserCreated = borgia}
+                    new Permission() { Name = "receipt.approve", MemberCreated = borgia}
+                ,   new Permission() { Name = "receipt.reject", MemberCreated = borgia}
+                ,   new Permission() { Name = "receipt.handIn", MemberCreated = borgia}
+                ,   new Permission() { Name = "receipt.payOut", MemberCreated = borgia}
                 };
 
                 db.Permission.AddRange(permissions);
@@ -92,9 +92,9 @@ namespace Maasgroep.Database.Members
 
                 var memberPermissions = new List<MemberPermission>()
                 {
-                    new MemberPermission() { Member = daGama, Permission = approve, UserCreated = borgia }
-                ,   new MemberPermission() { Member = daGama, Permission = reject, UserCreated = borgia }
-                ,   new MemberPermission() { Member = alb, Permission = handIn, UserCreated = borgia }
+                    new MemberPermission() { Member = daGama, Permission = approve, MemberCreated = borgia }
+                ,   new MemberPermission() { Member = daGama, Permission = reject, MemberCreated = borgia }
+                ,   new MemberPermission() { Member = alb, Permission = handIn, MemberCreated = borgia }
                 };
 
                 db.MemberPermission.AddRange(memberPermissions);

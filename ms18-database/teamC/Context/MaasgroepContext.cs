@@ -17,7 +17,6 @@ namespace Maasgroep.Database
         public DbSet<Receipt> Receipt { get; set; }
         public DbSet<ReceiptApproval> ReceiptApproval { get; set; }
         public DbSet<ReceiptStatus> ReceiptStatus { get; set; }
-        public DbSet<Store> Store { get; set; }
         public DbSet<CostCentre> CostCentre { get; set; }
         #endregion
 
@@ -39,7 +38,6 @@ namespace Maasgroep.Database
             CreateMemberPermission(modelBuilder);
 
             CreateCostCentre(modelBuilder);
-            CreateStore(modelBuilder);
             CreateReceiptApproval(modelBuilder);
             CreateReceiptStatus(modelBuilder);
             CreateReceipt(modelBuilder);
@@ -61,16 +59,16 @@ namespace Maasgroep.Database
             // Foreign keys
 
             modelBuilder.Entity<Member>()
-                .HasOne(m => m.UserCreated)
+                .HasOne(m => m.MemberCreated)
                 .WithMany(m => m.MembersCreated)
-                .HasForeignKey(m => m.UserCreatedId)
+                .HasForeignKey(m => m.MemberCreatedId)
                 .HasConstraintName("FK_member_memberCreated")
                 .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<Member>()
-                .HasOne(m => m.UserModified)
+                .HasOne(m => m.MemberModified)
                 .WithMany(m => m.MembersModified)
-                .HasForeignKey(m => m.UserModifiedId)
+                .HasForeignKey(m => m.MemberModifiedId)
                 .HasConstraintName("FK_member_memberModified")
                 .OnDelete(DeleteBehavior.NoAction);
 
@@ -89,16 +87,16 @@ namespace Maasgroep.Database
             // Foreign keys
 
             modelBuilder.Entity<Permission>()
-                .HasOne(p => p.UserCreated)
+                .HasOne(p => p.MemberCreated)
                 .WithMany(m => m.PermissionsCreated)
-                .HasForeignKey(p => p.UserCreatedId)
+                .HasForeignKey(p => p.MemberCreatedId)
                 .HasConstraintName("FK_permission_memberCreated")
                 .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<Permission>()
-                .HasOne(p => p.UserModified)
+                .HasOne(p => p.MemberModified)
                 .WithMany(m => m.PermissionsModified)
-                .HasForeignKey(p => p.UserModifiedId)
+                .HasForeignKey(p => p.MemberModifiedId)
                 .HasConstraintName("FK_permission_memberModified")
                 .OnDelete(DeleteBehavior.NoAction);
         }
@@ -126,16 +124,16 @@ namespace Maasgroep.Database
                 .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<MemberPermission>()
-                .HasOne(mp => mp.UserCreated)
+                .HasOne(mp => mp.MemberCreated)
                 .WithMany(m => m.MemberPermissionsCreated)
-                .HasForeignKey(mp => mp.UserCreatedId)
+                .HasForeignKey(mp => mp.MemberCreatedId)
                 .HasConstraintName("FK_memberPermission_memberCreated")
                 .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<MemberPermission>()
-                .HasOne(mp => mp.UserModified)
+                .HasOne(mp => mp.MemberModified)
                 .WithMany(m => m.MemberPermissionsModified)
-                .HasForeignKey(mp => mp.UserModifiedId)
+                .HasForeignKey(mp => mp.MemberModifiedId)
                 .HasConstraintName("FK_memberPermission_memberModified")
                 .OnDelete(DeleteBehavior.NoAction);
         }
@@ -155,44 +153,17 @@ namespace Maasgroep.Database
             // Foreign keys
 
             modelBuilder.Entity<CostCentre>()
-                .HasOne(cc => cc.UserCreated)
+                .HasOne(cc => cc.MemberCreated)
                 .WithMany(m => m.CostCentresCreated)
-                .HasForeignKey(cc => cc.UserCreatedId)
+                .HasForeignKey(cc => cc.MemberCreatedId)
                 .HasConstraintName("FK_costCentre_memberCreated")
                 .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<CostCentre>()
-                .HasOne(cc => cc.UserModified)
+                .HasOne(cc => cc.MemberModified)
                 .WithMany(m => m.CostCentresModified)
-                .HasForeignKey(cc => cc.UserModifiedId)
+                .HasForeignKey(cc => cc.MemberModifiedId)
                 .HasConstraintName("FK_costCentre_memberModified")
-                .OnDelete(DeleteBehavior.NoAction);
-        }
-
-        private void CreateStore(ModelBuilder modelBuilder)
-        {
-            modelBuilder.Entity<Store>().ToTable("store", "receipt");
-            modelBuilder.Entity<Store>().HasKey(s => new { s.Id });
-            modelBuilder.HasSequence<long>("storeSeq", schema: "receipt").StartsAt(1).IncrementsBy(1);
-            modelBuilder.Entity<Store>().Property(s => s.Id).HasDefaultValueSql("nextval('receipt.\"storeSeq\"')");
-            modelBuilder.Entity<Store>().Property(s => s.DateTimeCreated).HasDefaultValueSql("now()");
-            modelBuilder.Entity<Store>().Property(s => s.Name).HasMaxLength(256);
-            modelBuilder.Entity<Store>().HasIndex(s => s.Name).IsUnique();
-
-            // Foreign keys
-
-            modelBuilder.Entity<Store>()
-                .HasOne(s => s.UserCreated)
-                .WithMany(m => m.StoresCreated)
-                .HasForeignKey(s => s.UserCreatedId)
-                .HasConstraintName("FK_store_memberCreated")
-                .OnDelete(DeleteBehavior.NoAction);
-
-            modelBuilder.Entity<Store>()
-                .HasOne(s => s.UserModified)
-                .WithMany(m => m.StoresModified)
-                .HasForeignKey(s => s.UserModifiedId)
-                .HasConstraintName("FK_store_memberModified")
                 .OnDelete(DeleteBehavior.NoAction);
         }
 
@@ -204,16 +175,9 @@ namespace Maasgroep.Database
             modelBuilder.Entity<Receipt>().Property(r => r.Id).HasDefaultValueSql("nextval('receipt.\"receiptSeq\"')");
             modelBuilder.Entity<Receipt>().Property(r => r.DateTimeCreated).HasDefaultValueSql("now()");
             modelBuilder.Entity<Receipt>().Property(r => r.Note).HasMaxLength(2048);
-            modelBuilder.Entity<Receipt>().Property(r => r.Amount).HasPrecision(2);
+            modelBuilder.Entity<Receipt>().Property(r => r.Amount).HasPrecision(18,2);
 
             //Foreign keys
-
-            modelBuilder.Entity<Receipt>()
-                .HasOne(r => r.Store)
-                .WithMany(s => s.Receipt)
-                .HasForeignKey(r => r.StoreId)
-                .HasConstraintName("FK_receipt_store")
-                .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<Receipt>()
                 .HasOne(r => r.CostCentre)
@@ -230,16 +194,16 @@ namespace Maasgroep.Database
                 .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<Receipt>()
-                .HasOne(ra => ra.UserCreated)
+                .HasOne(ra => ra.MemberCreated)
                 .WithMany(m => m.ReceiptsCreated)
-                .HasForeignKey(ra => ra.UserCreatedId)
+                .HasForeignKey(ra => ra.MemberCreatedId)
                 .HasConstraintName("FK_receipt_memberCreated")
                 .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<Receipt>()
-                .HasOne(ra => ra.UserModified)
+                .HasOne(ra => ra.MemberModified)
                 .WithMany(m => m.ReceiptsModified)
-                .HasForeignKey(ra => ra.UserModifiedId)
+                .HasForeignKey(ra => ra.MemberModifiedId)
                 .HasConstraintName("FK_receipt_memberModified")
                 .OnDelete(DeleteBehavior.NoAction);
         }
@@ -261,16 +225,16 @@ namespace Maasgroep.Database
                 .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<ReceiptApproval>()
-                .HasOne(ra => ra.UserCreated)
+                .HasOne(ra => ra.MemberCreated)
                 .WithMany(m => m.ReceiptApprovalsCreated)
-                .HasForeignKey(ra => ra.UserCreatedId)
+                .HasForeignKey(ra => ra.MemberCreatedId)
                 .HasConstraintName("FK_receiptApproval_memberCreated")
                 .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<ReceiptApproval>()
-                .HasOne(ra => ra.UserModified)
+                .HasOne(ra => ra.MemberModified)
                 .WithMany(m => m.ReceiptApprovalsModified)
-                .HasForeignKey(ra => ra.UserModifiedId)
+                .HasForeignKey(ra => ra.MemberModifiedId)
                 .HasConstraintName("FK_receiptApproval_memberModified")
                 .OnDelete(DeleteBehavior.NoAction);
         }
@@ -286,16 +250,16 @@ namespace Maasgroep.Database
             modelBuilder.Entity<ReceiptStatus>().HasIndex(rs => rs.Name).IsUnique();
 
             modelBuilder.Entity<ReceiptStatus>()
-                .HasOne(rs => rs.UserCreated)
+                .HasOne(rs => rs.MemberCreated)
                 .WithMany(m => m.ReceiptStatusesCreated)
-                .HasForeignKey(rs => rs.UserCreatedId)
+                .HasForeignKey(rs => rs.MemberCreatedId)
                 .HasConstraintName("FK_receiptStatus_memberCreated")
                 .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<ReceiptStatus>()
-                .HasOne(rs => rs.UserModified)
+                .HasOne(rs => rs.MemberModified)
                 .WithMany(m => m.ReceiptStatusesModified)
-                .HasForeignKey(rs => rs.UserModifiedId)
+                .HasForeignKey(rs => rs.MemberModifiedId)
                 .HasConstraintName("FK_receiptStatus_memberModified")
                 .OnDelete(DeleteBehavior.NoAction);
 
