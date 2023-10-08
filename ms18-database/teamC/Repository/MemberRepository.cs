@@ -1,6 +1,8 @@
-﻿
+﻿using Maasgroep.DependencyInjection;
+
 namespace Maasgroep.Database.Members
 {
+    [Service(ServiceType = typeof(IMemberRepository), Lifetime = Lifetime.Scoped)]
     public class MemberRepository : IMemberRepository
     {
         public MemberRepository()

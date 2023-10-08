@@ -1,13 +1,27 @@
-﻿namespace ms18_applicatie_console
+﻿using Maasgroep.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+
+namespace Maasgroep.Test.ConsoleApp
 {
     internal class Program
     {
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
             Console.WriteLine("Hello, World!");
 
-            var database = new DatabaseTestData();
-            database.CreateTestDataAll();
+            HostApplicationBuilder builder = Host.CreateApplicationBuilder(args);
+            builder.Services.AddHostedService<BackGroundConsole>();
+            var c = new MaasgroepServicesBuilder();
+            var host = c.Iets(builder);
+
+
+
+            await host.RunAsync();
+
+
+
+            Environment.Exit(0);
         }
     }
 }

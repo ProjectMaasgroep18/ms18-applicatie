@@ -1,6 +1,8 @@
-﻿
+﻿using Maasgroep.DependencyInjection;
+
 namespace Maasgroep.Database.Receipts
 {
+    [Service(ServiceType = typeof(IReceiptRepository), Lifetime = Lifetime.Scoped)]
     public class ReceiptRepository : IReceiptRepository
     {
         public ReceiptRepository() 
@@ -14,11 +16,18 @@ namespace Maasgroep.Database.Receipts
             CreateTestDataReceiptApproval();
         }
 
+        public string GetStringDI()
+        {
+            return "Ja, gelukt!";
+        }
+
         public void AddReceipt()
         {
             // Hier logica bouwen
             // ReceiptRepository = zichtbaar voor buitenkant (public)
             // Context = zichtbaar in repository (internal)
+
+            Console.WriteLine("Receipt Added");
         }
 
         public void ModifyReceipt()

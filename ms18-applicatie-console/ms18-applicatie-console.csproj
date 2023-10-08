@@ -10,6 +10,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ms18-database\ms18-database.csproj" />
+    <ProjectReference Include="..\ms18-dependencyInjection\ms18-dependencyInjection.csproj" />
   </ItemGroup>
 
 </Project>

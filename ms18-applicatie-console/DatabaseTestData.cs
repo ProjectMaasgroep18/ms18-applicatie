@@ -1,21 +1,27 @@
 ﻿using Maasgroep.Database.Members;
 using Maasgroep.Database.Receipts;
 
-namespace ms18_applicatie_console
+namespace Maasgroep.Test.ConsoleApp
 {
     internal class DatabaseTestData
     {
-        private readonly MemberRepository _members;
-        private readonly ReceiptRepository _receipts;
+        private readonly IMemberRepository _members;
+        private readonly IReceiptRepository _receipts;
 
-        internal DatabaseTestData() 
+        internal DatabaseTestData(IReceiptRepository receipts, IMemberRepository members)
         {
-           _members = new MemberRepository();
-           _receipts = new ReceiptRepository();
+            _members = members;
+            _receipts = receipts;
+        }
+
+        public string doemijString()
+        {
+            return _receipts.GetStringDI();
         }
 
         internal void CreateTestDataAll()
         {
+
             // Members Repo
             _members.AanmakenTestData();
 

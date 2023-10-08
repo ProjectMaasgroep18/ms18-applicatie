@@ -11,5 +11,7 @@ namespace Maasgroep.Database.Receipts
         // Nadenken over GetReceipt en model
 
         void AanmakenTestData();
+
+        string GetStringDI();
     }
 }
