@@ -20,6 +20,7 @@ public class DeclaratiesController : Controller
     {
         ViewData["Member"] = _context.Member.FirstOrDefault();
         ViewData["Receipts"] = _context.Receipt.Where(r => r.UserCreatedId == (ViewData["Member"] as Member).Id).ToArray();
+        ViewData["ReceiptStatuses"] = _context.ReceiptStatus.ToDictionary(status => status.Id);
         return View();
     }
 

@@ -2,6 +2,7 @@
     ViewData["Title"] = "Declaraties";
     var Member = ViewData["Member"] as Member;
     var Receipts = ViewData["Receipts"] as Receipt[];
+    var ReceiptStatuses = ViewData["ReceiptStatuses"] as Dictionary<long, ReceiptStatus>;
 }
 <h1>@ViewData["Title"]</h1>
 
@@ -31,7 +32,7 @@
             <tr>
                 <td>@(Receipt.Amount)</td>
                 <td>@(Receipt.Note)</td>
-                <td>@(Receipt.ReceiptStatusId). @(Receipt.ReceiptStatus?.Name)</td> <!-- Receipt.ReceiptStatus lijkt niet te werken -->
+                <td>@(Receipt.ReceiptStatusId). @(ReceiptStatuses[Receipt.ReceiptStatusId]?.Name)</td>
             </tr>
             }
         }
