@@ -262,7 +262,10 @@ namespace Maasgroep.Database.Migrations
 
                     b.HasIndex("ReceiptStatusId");
 
-                    b.ToTable("receipt", "receipt");
+                    b.ToTable("receipt", "receipt", t =>
+                        {
+                            t.HasCheckConstraint("CK_receipt_amount", "\"Amount\" >= 0");
+                        });
                 });
 
             modelBuilder.Entity("Maasgroep.Database.Receipts.ReceiptApproval", b =>

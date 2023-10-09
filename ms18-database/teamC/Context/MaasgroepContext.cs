@@ -170,6 +170,7 @@ namespace Maasgroep.Database
         private void CreateReceipt(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Receipt>().ToTable("receipt", "receipt");
+            modelBuilder.Entity<Receipt>().ToTable(t => t.HasCheckConstraint("CK_receipt_amount", "\"Amount\" >= 0"));
             modelBuilder.Entity<Receipt>().HasKey(r => new { r.Id });
             modelBuilder.HasSequence<long>("receiptSeq", schema: "receipt").StartsAt(1).IncrementsBy(1);
             modelBuilder.Entity<Receipt>().Property(r => r.Id).HasDefaultValueSql("nextval('receipt.\"receiptSeq\"')");

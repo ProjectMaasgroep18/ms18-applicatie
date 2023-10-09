@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Maasgroep.Database.Migrations
 {
     [DbContext(typeof(MaasgroepContext))]
-    [Migration("20231008045802_000_initDb")]
-    partial class _000_initDb
+    [Migration("20231009174707_000_init")]
+    partial class _000_init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -265,7 +265,10 @@ namespace Maasgroep.Database.Migrations
 
                     b.HasIndex("ReceiptStatusId");
 
-                    b.ToTable("receipt", "receipt");
+                    b.ToTable("receipt", "receipt", t =>
+                        {
+                            t.HasCheckConstraint("CK_receipt_amount", "\"Amount\" >= 0");
+                        });
                 });
 
             modelBuilder.Entity("Maasgroep.Database.Receipts.ReceiptApproval", b =>

@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Maasgroep.Database.Migrations
 {
     /// <inheritdoc />
-    public partial class _000_initDb : Migration
+    public partial class _000_init : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -221,6 +221,7 @@ namespace Maasgroep.Database.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_receipt", x => x.Id);
+                    table.CheckConstraint("CK_receipt_amount", "\"Amount\" >= 0");
                     table.ForeignKey(
                         name: "FK_receipt_costCentre",
                         column: x => x.CostCentreId,
