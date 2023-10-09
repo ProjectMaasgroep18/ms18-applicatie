@@ -18,7 +18,7 @@ namespace ms18_applicatie.Database
 
 		protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 		{
-			optionsBuilder.UseNpgsql("UserID=postgres;Password=postgres;Host=localhost;port=5432;Database=Maasgroep;Pooling=true");
+			optionsBuilder.UseNpgsql("UserID=postgres;Password=postgres;Host=localhost;port=5410;Database=Maasgroep;Pooling=true");
 		}
 
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
