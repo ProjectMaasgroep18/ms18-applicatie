@@ -1,11 +1,11 @@
-﻿using Maasgroep.Database.Members;
-
+﻿
 namespace Maasgroep.Database.Receipts
 {
-    internal record CostCentre
-	{
-		public long Id { get; set; }
-		public string Name { get; set; }
+    internal record ReceiptStatusHistory
+    {
+        public long Id { get; set; }
+        public long ReceiptStatusId { get; set; }
+        public string Name { get; set; }
 
 
         // Generic
@@ -13,10 +13,11 @@ namespace Maasgroep.Database.Receipts
         public long? MemberModifiedId { get; set; }
         public long? MemberDeletedId { get; set; }
         public DateTime DateTimeCreated { get; set; }
-		public DateTime? DateTimeModified { get; set; }
+        public DateTime? DateTimeModified { get; set; }
         public DateTime? DateTimeDeleted { get; set; }
 
-
+        /* IK DENK DAT DIT NIET NODIG IS
+         * WE ZETTEN DATA DOOR / OVER, GEEN CONTROLE
         // EF receipt properties
         public ICollection<Receipt> Receipt { get; set; }
 
@@ -24,6 +25,6 @@ namespace Maasgroep.Database.Receipts
         // EF generic properties
         public Member MemberCreated { get; set; }
         public Member? MemberModified { get; set; }
-        public Member? MemberDeleted { get; set; }
+        */
     }
 }

@@ -42,6 +42,11 @@ namespace Maasgroep.Database
             CreateReceiptStatus(modelBuilder);
             CreateReceipt(modelBuilder);
 
+            CreateReceiptHistory(modelBuilder);
+            CreateReceiptStatusHistory(modelBuilder);
+            CreateReceiptApprovalHistory(modelBuilder);
+            CreateCostCentreHistory(modelBuilder);
+
             CreatePhoto(modelBuilder);
         }
 
@@ -265,6 +270,42 @@ namespace Maasgroep.Database
                 .OnDelete(DeleteBehavior.NoAction);
 
         }
+        #endregion
+
+        #region ReceiptHistory
+
+        public void CreateReceiptHistory(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<ReceiptHistory>().ToTable("receipt", "receiptHistory");
+            modelBuilder.HasSequence<long>("receiptSeq", schema: "receiptHistory").StartsAt(1).IncrementsBy(1);
+            modelBuilder.Entity<ReceiptHistory>().Property(r => r.Id).HasDefaultValueSql("nextval('receiptHistory.\"receiptSeq\"')");
+            modelBuilder.Entity<ReceiptHistory>().Property(r => r.Note).HasMaxLength(2048);
+            modelBuilder.Entity<ReceiptHistory>().Property(r => r.Amount).HasPrecision(18, 2);
+        }
+
+        public void CreateReceiptStatusHistory(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<ReceiptStatusHistory>().ToTable("status", "receiptHistory");
+            modelBuilder.HasSequence<long>("receiptStatusSeq", schema: "receiptHistory").StartsAt(1).IncrementsBy(1);
+            modelBuilder.Entity<ReceiptStatusHistory>().Property(rs => rs.Id).HasDefaultValueSql("nextval('receiptHistory.\"receiptStatusSeq\"')");
+            modelBuilder.Entity<ReceiptStatusHistory>().Property(rs => rs.Name).HasMaxLength(256);
+        }
+
+        public void CreateReceiptApprovalHistory(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<ReceiptApprovalHistory>().ToTable("approval", "receiptHistory");
+            modelBuilder.Entity<ReceiptApprovalHistory>().Property(ra => ra.Note).HasMaxLength(2048);
+
+        }
+
+        public void CreateCostCentreHistory(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<CostCentreHistory>().ToTable("costCentre", "receiptHistory");
+            modelBuilder.HasSequence<long>("costCentreSeq", schema: "receiptHistory").StartsAt(1).IncrementsBy(1);
+            modelBuilder.Entity<CostCentreHistory>().Property(cc => cc.Id).HasDefaultValueSql("nextval('receiptHistory.\"costCentreSeq\"')");
+            modelBuilder.Entity<CostCentreHistory>().Property(cc => cc.Name).HasMaxLength(256);
+        }
+
         #endregion
 
         #region Photo

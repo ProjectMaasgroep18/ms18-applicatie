@@ -1,12 +1,12 @@
-﻿using Maasgroep.Database.Members;
+﻿using Maasgroep.Database.Interfaces;
 
 namespace Maasgroep.Database.Receipts
 {
     public interface IReceiptRepository
     {
-        void AddReceipt();
+        long AddReceipt(IReceipt receipt);
 
-        void ModifyReceipt();
+        bool ModifyReceipt(IReceipt receipt);
 
         // Nadenken over GetReceipt en model
 

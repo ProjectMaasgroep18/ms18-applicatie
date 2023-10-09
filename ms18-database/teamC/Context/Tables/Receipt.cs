@@ -17,13 +17,14 @@ namespace Maasgroep.Database.Receipts
         // Generic
         public long MemberCreatedId { get; set; }
         public long? MemberModifiedId { get; set; }
+        public long? MemberDeletedId { get; set; }
         public DateTime DateTimeCreated { get; set; }
         public DateTime? DateTimeModified { get; set; }
+        public DateTime? DateTimeDeleted { get; set; }
 
 
-
-		// EF receipt properties
-		public CostCentre? CostCentre { get; set; }
+        // EF receipt properties
+        public CostCentre? CostCentre { get; set; }
 		public ReceiptStatus ReceiptStatus { get; set; }
 		public Photo? Photo { get; set; }
 		public ReceiptApproval? ReceiptApproval { get; set; }
@@ -32,5 +33,6 @@ namespace Maasgroep.Database.Receipts
         // EF generic properties
         public Member MemberCreated { get; set; }
         public Member? MemberModified { get; set; }
+        public Member? MemberDeleted { get; set; }
     }
 }

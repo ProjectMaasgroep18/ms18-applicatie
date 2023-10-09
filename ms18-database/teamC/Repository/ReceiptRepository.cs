@@ -1,4 +1,5 @@
-﻿
+﻿using Maasgroep.Database.Interfaces;
+
 namespace Maasgroep.Database.Receipts
 {
     public class ReceiptRepository : IReceiptRepository
@@ -14,18 +15,22 @@ namespace Maasgroep.Database.Receipts
             CreateTestDataReceiptApproval();
         }
 
-        public void AddReceipt()
+        public long AddReceipt(IReceipt receipt)
         {
             // Hier logica bouwen
             // ReceiptRepository = zichtbaar voor buitenkant (public)
             // Context = zichtbaar in repository (internal)
+
+            return -1;
         }
 
-        public void ModifyReceipt()
+        public bool ModifyReceipt(IReceipt receipt)
         {
             // Hier logica bouwen
             // ReceiptRepository = zichtbaar voor buitenkant (public)
             // Context = zichtbaar in repository (internal)
+
+            return true;
         }
 
         private void CreateTestDataCostCentre()
