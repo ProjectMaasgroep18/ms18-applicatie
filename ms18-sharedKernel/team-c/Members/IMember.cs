@@ -1,5 +1,5 @@
 ﻿
-namespace Maasgroep.SharedKernel.teamC.Members
+namespace Maasgroep.SharedKernel.Members
 {
     internal interface IMember
     {
