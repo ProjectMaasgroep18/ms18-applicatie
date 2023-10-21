@@ -77,4 +77,26 @@ public class DeclaratiesController : Controller
     // {
     //     return View();
     // }
+    
+    //get-routes below should provide JSON response from server, triggered by HTTP request:
+    
+    // One for the /Receipt route:
+    [HttpGet]
+    [Route("api/Receipt")]
+    //(content root path = 
+    ///Users/tedruigrok/Documents/ms18_project_c_DEC/ms18-applicatie/ms18-applicatie/)
+    public IActionResult GetMemberById(int memberId)
+    {
+        //retrieve data for this member ID:
+        var memberData = _context.Member.FirstOrDefault(_ => _.Id == memberId);
+
+        if (memberData == null)
+        {
+            //404 not found exception:
+            return NotFound();
+        }
+        //return data as JSON:
+        return Json(memberData);
+
+    }
 }
