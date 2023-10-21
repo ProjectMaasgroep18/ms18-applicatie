@@ -4,11 +4,11 @@ namespace Maasgroep.Database.Models
 {
     public class Receipt : IReceipt
     {
-        public long Id { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public decimal? Amount { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public ICostCentre? CostCentre { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public IReceiptStatus ReceiptStatus { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public string? Location { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public string? Note { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public long Id { get; set; }
+        public decimal? Amount { get; set; }
+        public ICostCentre? CostCentre { get; set; }
+        public IReceiptStatus ReceiptStatus { get; set; }
+        public string? Location { get; set; }
+        public string? Note { get; set; }
     }
 }

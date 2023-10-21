@@ -4,6 +4,7 @@ namespace Maasgroep.Database.Receipts
     internal record ReceiptHistory
     {
         public long Id { get; set; }
+        public DateTime RecordCreated { get; set; }
         public long ReceiptId { get; set; }
         public decimal? Amount { get; set; }
         public long? StoreId { get; set; }

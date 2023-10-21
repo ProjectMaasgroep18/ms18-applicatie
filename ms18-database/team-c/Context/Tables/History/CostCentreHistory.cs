@@ -4,6 +4,7 @@ namespace Maasgroep.Database.Receipts
     internal record CostCentreHistory
     {
         public long Id { get; set; }
+        public DateTime RecordCreated { get; set; }
         public long CostCentreId { get; set; }
         public string Name { get; set; }
 

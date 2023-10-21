@@ -4,6 +4,7 @@ namespace Maasgroep.Database.Receipts
     internal class ReceiptApprovalHistory
     {
         public long Id { get; set; }
+        public DateTime RecordCreated { get; set; }
         public long ReceiptId { get; set; }
         public string? Note { get; set; }
 
