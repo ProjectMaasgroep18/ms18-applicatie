@@ -1,6 +1,6 @@
 ﻿using Maasgroep.Database.Interfaces;
 
-namespace Maasgroep.Database.teamC.Repository.Models
+namespace Maasgroep.Database.Models
 {
     public class CostCentre : ICostCentre
     {

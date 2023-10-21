@@ -314,7 +314,7 @@ namespace Maasgroep.Database
             modelBuilder.Entity<Photo>().ToTable("photo", "photo");
             modelBuilder.Entity<Photo>().HasKey(p => new { p.Id });
             modelBuilder.HasSequence<long>("PhotoSeq", schema: "photo").StartsAt(1).IncrementsBy(1);
-            modelBuilder.Entity<Photo>().Property(p => p.Created).HasDefaultValueSql("now()");
+            modelBuilder.Entity<Photo>().Property(p => p.DateTimeCreated).HasDefaultValueSql("now()");
             modelBuilder.Entity<Photo>().Property(p => p.Id).HasDefaultValueSql("nextval('photo.\"PhotoSeq\"')");
 
             //Foreign keys
