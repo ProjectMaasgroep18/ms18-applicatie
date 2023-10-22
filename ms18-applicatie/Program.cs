@@ -1,4 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
+using ms18_applicatie.Controllers;
 using ms18_applicatie.Database;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -8,6 +9,8 @@ builder.Services.AddDbContext<MaasgroepContext>();
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+
+builder.Services.AddHttpClient();
 
 var app = builder.Build();
 
@@ -19,12 +22,16 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-app.UseHttpsRedirection();
+// app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
 
 app.UseAuthorization();
+
+app.MapControllerRoute(name: "Receipt",
+                pattern: "api/Receipt/{*receipt}",
+                defaults: new { controller = "DeclarationApi", action = "Index" });
 
 app.MapControllerRoute(
     name: "default",
