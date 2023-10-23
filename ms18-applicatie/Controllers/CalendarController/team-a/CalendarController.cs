@@ -70,7 +70,7 @@ namespace ms18_applicatie.Controllers.CalendarController
                 if (DateTime.TryParse(eventsItem.Start.DateTimeRaw, out var startDate))
                     calenderEvent.StarDateTime = startDate;
                 if (DateTime.TryParse(eventsItem.End.DateTimeRaw, out var endDate))
-                    calenderEvent.StarDateTime = endDate;
+                    calenderEvent.EndDateTime = endDate;
                 calenderEvent.Title = eventsItem.Summary;
                 calenderEvents.Add(calenderEvent);
             }

@@ -2,12 +2,4 @@
 /.vs
 /ms18-applicatie/obj
 /ms18-applicatie/bin
-/ms18-applicatie/obj
-/ms18-applicatie/obj/Debug/net6.0/ms18-applicatie.AssemblyInfoInputs.cache
-/ms18-applicatie/obj/Debug/net6.0/ms18-applicatie.csproj.AssemblyReference.cache
-/ms18-applicatie/obj/Debug/net6.0/ms18-applicatie.GeneratedMSBuildEditorConfig.editorconfig
-/ms18-applicatie/obj/ms18-applicatie.csproj.nuget.dgspec.json
-/ms18-applicatie/obj/Debug/net6.0/ms18-applicatie.assets.cache
-/ms18-applicatie/obj/project.assets.json
-/ms18-applicatie/obj/ms18-applicatie.csproj.nuget.g.props
-/ms18-applicatie/obj/project.nuget.cache
+/ms18-applicatie/obj/*
