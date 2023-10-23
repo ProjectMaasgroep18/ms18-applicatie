@@ -7,5 +7,6 @@
         public string MatrozenId { get; set; } = string.Empty;
         public string WelpenId { get; set; } = string.Empty;
         public string ZeeverkennersId { get; set; } = string.Empty;
+        public string GlobalId { get; set; } = string.Empty;
     }
 }

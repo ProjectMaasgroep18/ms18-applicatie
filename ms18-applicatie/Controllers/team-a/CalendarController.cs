@@ -12,19 +12,19 @@ namespace ms18_applicatie.Controllers.team_a
 
         private readonly CalendarSettings _calendarSettings;
 
-        public CalendarController(ILogger<HomeController> logger, IConfiguration Configuration)
+        public CalendarController(ILogger<HomeController> logger, IConfiguration configuration)
         {
             _logger = logger;
 
             _calendarSettings =
-                Configuration.GetSection("Calendar").Get<CalendarSettings>();
+                configuration.GetSection("Calendar").Get<CalendarSettings>();
         }
 
         [HttpGet]
         [Route("welpen")]
         public async Task<IActionResult> Welpen()
         {
-            var events = await GetCalendar(Calenders.Welpen);
+            var events = await GetCalendar(GetCalenderId(Calenders.Welpen), false);
             return new OkObjectResult(events);
         }
 
@@ -32,7 +32,7 @@ namespace ms18_applicatie.Controllers.team_a
         [Route("matrozen")]
         public async Task<IActionResult> Matrozen()
         {
-            var events = await GetCalendar(Calenders.Matrozen);
+            var events = await GetCalendar(GetCalenderId(Calenders.Matrozen), false);
             return new OkObjectResult(events);
         }
 
@@ -40,7 +40,7 @@ namespace ms18_applicatie.Controllers.team_a
         [Route("ZeeVerkenners")]
         public async Task<IActionResult> ZeeVerkenners()
         {
-            var events = await GetCalendar(Calenders.ZeeVerkenners);
+            var events = await GetCalendar(GetCalenderId(Calenders.ZeeVerkenners), false);
             return new OkObjectResult(events);
         }
 
@@ -48,11 +48,32 @@ namespace ms18_applicatie.Controllers.team_a
         [Route("stam")]
         public async Task<IActionResult> Stam()
         {
-            var events = await GetCalendar(Calenders.Stam);
+            var events = await GetCalendar(GetCalenderId(Calenders.Stam), false);
             return new OkObjectResult(events);
         }
 
-        private async Task<List<CalenderEvent>> GetCalendar(Calenders calenderName)
+        [HttpGet]
+        [Route("global")]
+        public async Task<IActionResult> Global()
+        {
+            var events = await GetCalendar(GetCalenderId(Calenders.Stam), false);
+            return new OkObjectResult(events);
+        }
+
+        [HttpGet]
+        [Route("all")]
+        public async Task<IActionResult> All()
+        {
+            var events = new List<CalenderEvent>();
+            events.AddRange(await GetCalendar(GetCalenderId(Calenders.Matrozen)));
+            events.AddRange(await GetCalendar(GetCalenderId(Calenders.Welpen)));
+            events.AddRange(await GetCalendar(GetCalenderId(Calenders.ZeeVerkenners)));
+            events.AddRange(await GetCalendar(GetCalenderId(Calenders.Stam)));
+            events.AddRange(await GetCalendar(GetCalenderId(Calenders.Global)));
+            return new OkObjectResult(events);
+        }
+
+        private async Task<List<CalenderEvent>> GetCalendar(string calenderId, bool filterGlobal = true)
         {
             var calenderEvents = new List<CalenderEvent>();
             var service = new CalendarService(new BaseClientService.Initializer()
@@ -60,9 +81,18 @@ namespace ms18_applicatie.Controllers.team_a
                 ApiKey = _calendarSettings.ApiKey
             });
 
-            var request = service.Events.List(GetCalenderId(calenderName));
+            var request = service.Events.List(calenderId);
             var response = await request.ExecuteAsync();
-            foreach (var eventsItem in response.Items)
+            var listItems = response.Items.ToList();
+
+            if (!filterGlobal)
+            {
+                request = service.Events.List(calenderId);
+                response = await request.ExecuteAsync();
+                listItems.AddRange(response.Items);
+            }
+
+            foreach (var eventsItem in listItems)
             {
                 if (eventsItem == null)
                     continue;
@@ -91,6 +121,8 @@ namespace ms18_applicatie.Controllers.team_a
                     return _calendarSettings.WelpenId;
                 case Calenders.ZeeVerkenners:
                     return _calendarSettings.ZeeverkennersId;
+                case Calenders.Global:
+                    return _calendarSettings.GlobalId;
             }
             return "";
         }
@@ -100,7 +132,8 @@ namespace ms18_applicatie.Controllers.team_a
             Stam,
             Matrozen,
             Welpen,
-            ZeeVerkenners
+            ZeeVerkenners,
+            Global,
         }
     }
 }
