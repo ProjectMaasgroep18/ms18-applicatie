@@ -1,9 +1,9 @@
 ﻿using Google.Apis.Calendar.v3;
 using Google.Apis.Services;
 using Microsoft.AspNetCore.Mvc;
-using ms18_applicatie.Models;
+using ms18_applicatie.Models.team_a;
 
-namespace ms18_applicatie.Controllers.CalendarController
+namespace ms18_applicatie.Controllers.team_a
 {
     [Route("Calendar")]
     public class CalendarController : Controller
@@ -11,6 +11,7 @@ namespace ms18_applicatie.Controllers.CalendarController
         private readonly ILogger<HomeController> _logger;
 
         private readonly CalendarSettings _calendarSettings;
+
         public CalendarController(ILogger<HomeController> logger, IConfiguration Configuration)
         {
             _logger = logger;
@@ -19,8 +20,6 @@ namespace ms18_applicatie.Controllers.CalendarController
                 Configuration.GetSection("Calendar").Get<CalendarSettings>();
         }
 
-
-
         [HttpGet]
         [Route("welpen")]
         public async Task<IActionResult> Welpen()
@@ -28,6 +27,7 @@ namespace ms18_applicatie.Controllers.CalendarController
             var events = await GetCalendar(Calenders.Welpen);
             return new OkObjectResult(events);
         }
+
         [HttpGet]
         [Route("matrozen")]
         public async Task<IActionResult> Matrozen()
@@ -35,6 +35,7 @@ namespace ms18_applicatie.Controllers.CalendarController
             var events = await GetCalendar(Calenders.Matrozen);
             return new OkObjectResult(events);
         }
+
         [HttpGet]
         [Route("ZeeVerkenners")]
         public async Task<IActionResult> ZeeVerkenners()
@@ -42,6 +43,7 @@ namespace ms18_applicatie.Controllers.CalendarController
             var events = await GetCalendar(Calenders.ZeeVerkenners);
             return new OkObjectResult(events);
         }
+
         [HttpGet]
         [Route("stam")]
         public async Task<IActionResult> Stam()

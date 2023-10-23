@@ -1,4 +1,4 @@
-﻿namespace ms18_applicatie.Models
+﻿namespace ms18_applicatie.Models.team_a
 {
     public class CalenderEvent
     {
