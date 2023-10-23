@@ -6,12 +6,17 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <RootNamespace>ms18_applicatie</RootNamespace>
         <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+        <UserSecretsId>9c7c241f-7783-4d86-b780-c0b6052fafcf</UserSecretsId>
     </PropertyGroup>
 
     <ItemGroup>
       <Content Include="..\.dockerignore">
         <Link>.dockerignore</Link>
       </Content>
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Google.Apis.Calendar.v3" Version="1.62.0.3171" />
     </ItemGroup>
 
 </Project>
