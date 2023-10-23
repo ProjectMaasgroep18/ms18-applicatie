@@ -82,21 +82,21 @@ public class DeclaratiesController : Controller
     
     // One for the /Receipt route:
     [HttpGet]
-    [Route("api/Receipt")]
+    [Route("/Receipt")]
     //(content root path = 
     ///Users/tedruigrok/Documents/ms18_project_c_DEC/ms18-applicatie/ms18-applicatie/)
     public IActionResult GetMemberById(int memberId)
     {
         //retrieve data for this member ID:
-        var memberData = _context.Member.FirstOrDefault(_ => _.Id == memberId);
+        var receiptData = _context.Receipt.FirstOrDefault(_ => _.Id == memberId);
 
-        if (memberData == null)
+        if (receiptData == null)
         {
             //404 not found exception:
             return NotFound();
         }
         //return data as JSON:
-        return Json(memberData);
+        return Json(receiptData);
 
     }
 }
