@@ -1,16 +1,14 @@
-﻿using ms18_applicatie.Models;
-
-namespace ms18_applicatie.Models
+namespace Maasgroep.Database.Members
 {
-    public record Permission
+    internal record Permission
     {
         public long Id { get; set; }
         public string Name { get; set; }
 
 
         // Generic
-        public long UserCreatedId { get; set; }
-        public long? UserModifiedId { get; set; }
+        public long MemberCreatedId { get; set; }
+        public long? MemberModifiedId { get; set; }
         public DateTime DateTimeCreated { get; set; }
         public DateTime? DateTimeModified { get; set; }
 
@@ -20,8 +18,8 @@ namespace ms18_applicatie.Models
 
 
         // EF generic properties
-        public Member UserCreated { get; set; }
-        public Member? UserModified { get; set; }
+        public Member MemberCreated { get; set; }
+        public Member? MemberModified { get; set; }
 
 
     }

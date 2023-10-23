@@ -1,9 +1,16 @@
+<<<<<<<< HEAD:ms18-applicatie/team-c/Models/Permission.cs
+﻿using ms18_applicatie.Models;
+
+namespace ms18_applicatie.Models
+========
+﻿
 namespace Maasgroep.Database.Members
+>>>>>>>> feature/databaseOpzet:ms18-database/team-c/Context/Tables/Permission.cs
 {
-    internal record MemberPermission
+    internal record Permission
     {
-        public long MemberId { get; set; }
-        public long PermissionId { get; set; }
+        public long Id { get; set; }
+        public string Name { get; set; }
 
 
         // Generic
@@ -14,13 +21,13 @@ namespace Maasgroep.Database.Members
 
 
         // EF admin properties
-        public Member Member { get; set; }
-        public Permission Permission { get; set; }
+        public ICollection<MemberPermission> Members { get; set; }
 
 
         // EF generic properties
         public Member MemberCreated { get; set; }
         public Member? MemberModified { get; set; }
+
 
     }
 }
