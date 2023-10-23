@@ -90,7 +90,6 @@ namespace ms18_applicatie.Controllers.CalendarController
                 case Calenders.ZeeVerkenners:
                     return _calendarSettings.ZeeverkennersId;
             }
-
             return "";
         }
 
