@@ -5,7 +5,7 @@ using Maasgroep.Database.Receipts;
 
 namespace Maasgroep.Database
 {
-    internal class MaasgroepContext : DbContext
+    public class MaasgroepContext : DbContext
     {
         #region Members
         public DbSet<Member> Member { get; set; }

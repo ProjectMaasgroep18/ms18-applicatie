@@ -3,7 +3,7 @@ using Maasgroep.Database.Photos;
 
 namespace Maasgroep.Database.Receipts
 {
-    internal record Receipt
+    public record Receipt
 	{
 		public long Id { get; set; }
 		public decimal? Amount { get; set; }

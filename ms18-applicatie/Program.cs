@@ -1,5 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
-using ms18_applicatie.Database;
+using Maasgroep.Database;
 
 var builder = WebApplication.CreateBuilder(args);
 

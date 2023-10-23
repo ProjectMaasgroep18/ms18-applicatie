@@ -1,10 +1,27 @@
 ﻿
+using Maasgroep.Database.ViewModel;
+
 namespace Maasgroep.Database.Members
 {
     public class MemberRepository : IMemberRepository
     {
         public MemberRepository()
         { 
+        }
+
+        public MemberViewModel GetMember()
+        {
+            MemberViewModel result = null;
+
+            using (var db = new MaasgroepContext())
+            {
+                var q=  db.Member.FirstOrDefault()!;
+
+                result.Name = q.Name;
+
+            }
+
+            return result;
         }
 
         public void AddMember()

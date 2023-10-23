@@ -1,25 +1,32 @@
 using System.Diagnostics;
+using Maasgroep.Database;
+using Maasgroep.Database.Members;
+using Maasgroep.Database.Receipts;
 using Microsoft.AspNetCore.Mvc;
-using ms18_applicatie.Database;
-using ms18_applicatie.Models;
+
 
 namespace ms18_applicatie.Controllers;
 
 public class DeclaratiesController : Controller
 {
     private readonly ILogger<DeclaratiesController> _logger;
+    private readonly MemberRepository _memberRepository;
+    private readonly ReceiptRepository _receiptRepository;
     private readonly MaasgroepContext _context;
 
-    public DeclaratiesController(MaasgroepContext context, ILogger<DeclaratiesController> logger)
+    public DeclaratiesController(MaasgroepContext context, MemberRepository memberRepository, ReceiptRepository receiptRepository, ILogger<DeclaratiesController> logger)
     {
-        _context = context;
+        _memberRepository = memberRepository;
+        _receiptRepository = receiptRepository;
         _logger = logger;
+        _context = context;
     }
 
     public IActionResult Index()
     {
+        
         ViewData["Member"] = _context.Member.FirstOrDefault();
-        ViewData["Receipts"] = _context.Receipt.Where(r => r.UserCreatedId == (ViewData["Member"] as Member).Id).ToArray();
+        ViewData["Receipts"] = _context.Receipt.Where(r => r.MemberCreatedId == (ViewData["Member"] as Member).Id).ToArray();
         ViewData["ReceiptStatuses"] = _context.ReceiptStatus.ToDictionary(status => status.Id);
         return View();
     }
@@ -41,7 +48,7 @@ public class DeclaratiesController : Controller
             Amount = Amount,
             Note = Note,
             ReceiptStatusId = initialStatus?.Id ?? 0,
-            UserCreatedId = (ViewData["Member"] as Member)?.Id ?? 0,
+            MemberCreatedId = (ViewData["Member"] as Member)?.Id ?? 0,
         };
 
         try {

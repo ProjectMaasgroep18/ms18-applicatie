@@ -1,8 +1,8 @@
 @{
     ViewData["Title"] = "Declaraties";
-    var Member = ViewData["Member"] as Member;
-    var Receipts = ViewData["Receipts"] as Receipt[];
-    var ReceiptStatuses = ViewData["ReceiptStatuses"] as Dictionary<long, ReceiptStatus>;
+    var Member = ViewData["Member"] as Maasgroep.Database.Members.Member;
+    var Receipts = ViewData["Receipts"] as Maasgroep.Database.Receipts.Receipt[];
+    var ReceiptStatuses = ViewData["ReceiptStatuses"] as Dictionary<long, Maasgroep.Database.Receipts.ReceiptStatus>;
 }
 <h1>@ViewData["Title"]</h1>
 

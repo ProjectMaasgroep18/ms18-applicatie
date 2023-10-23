@@ -3,7 +3,7 @@ using Maasgroep.Database.Receipts;
 
 namespace Maasgroep.Database.Photos
 {
-    internal record Photo
+    public record Photo
     {
         public long Id { get; set; }
         public long? Receipt { get; set; }

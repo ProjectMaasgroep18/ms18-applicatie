@@ -1,6 +1,6 @@
 namespace Maasgroep.Database.Members
 {
-    internal record MemberPermission
+    public record MemberPermission
     {
         public long MemberId { get; set; }
         public long PermissionId { get; set; }

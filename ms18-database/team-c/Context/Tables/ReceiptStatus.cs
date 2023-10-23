@@ -2,7 +2,7 @@
 
 namespace Maasgroep.Database.Receipts
 {
-    internal record ReceiptStatus
+    public record ReceiptStatus
 	{
 		public long Id { get; set; }
 		public string Name { get; set; }
