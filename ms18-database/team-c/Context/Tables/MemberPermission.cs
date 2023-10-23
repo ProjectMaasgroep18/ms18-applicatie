@@ -1,11 +1,4 @@
-<<<<<<<< HEAD:ms18-applicatie/team-c/Models/MemberPermission.cs
-﻿using ms18_applicatie.Models;
-
-namespace ms18_applicatie.Models
-========
-﻿
 namespace Maasgroep.Database.Members
->>>>>>>> feature/databaseOpzet:ms18-database/team-c/Context/Tables/MemberPermission.cs
 {
     internal record MemberPermission
     {

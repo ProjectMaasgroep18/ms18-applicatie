@@ -15,6 +15,10 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\ms18-database\ms18-database.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
       <PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.11" />
       <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="7.0.11">
         <PrivateAssets>all</PrivateAssets>
