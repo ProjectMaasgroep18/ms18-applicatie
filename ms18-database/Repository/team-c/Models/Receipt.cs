@@ -1,4 +1,5 @@
 ﻿using Maasgroep.Database.Interfaces;
+using Maasgroep.Database.team_c.Repository.ViewModel;
 
 namespace Maasgroep.Database.Models
 {
@@ -10,5 +11,6 @@ namespace Maasgroep.Database.Models
         public IReceiptStatus ReceiptStatus { get; set; }
         public string? Location { get; set; }
         public string? Note { get; set; }
+        
     }
 }
