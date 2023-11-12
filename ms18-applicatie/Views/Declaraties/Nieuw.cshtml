@@ -1,15 +1,9 @@
-@{
-    ViewData["Title"] = "Declaratie indienen";
-    var Member = ViewData["Member"] as Maasgroep.Database.Members.Member;
-}
-<h1>@ViewData["Title"]</h1>
+<h1>Declaratie indienen</h1>
 
+<div id="login-user" class="hidden">
+    <p>Hallo <span rel="name"></span>!</p>
 
-@if (@Member != null) {
-
-    <p>Hallo @(Member.Name)!</p>
-
-    <p>Vul hier de gegevens van je declaratie in:</p>
+    <p>Vul hier de gegevens van je declaratie in:</p>  
 
     <form method="post" enctype="multipart/form-data" asp-action="Nieuw">
         <table>
@@ -27,12 +21,15 @@
             </tr>
         </table>
     </form>
+</div>
 
-    @if (ViewData["Error"] != null) {
-        <p>@ViewData["Error"]</p>
-    }
 
-} else {
-
-    <p>Niet ingelogd</p>
+@section scripts {
+<script>
+    apiGet('Session').then(member => {
+        // User session loaded
+     
+        showOutput(member, document.querySelector('#login-user'));
+    });
+</script>
 }
