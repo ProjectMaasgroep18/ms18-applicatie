@@ -6,7 +6,7 @@ using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using Maasgroep.Database.Receipts;
 
-namespace Maasgroep.Database.team_c.Repository.ViewModel
+namespace Maasgroep.Database.Repository.ViewModel
 {
     
     /*

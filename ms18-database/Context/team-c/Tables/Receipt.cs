@@ -1,6 +1,6 @@
 ﻿using Maasgroep.Database.Members;
 using Maasgroep.Database.Photos;
-using Maasgroep.Database.team_c.Repository.ViewModel;
+using Maasgroep.Database.Repository.ViewModel;
 
 namespace Maasgroep.Database.Receipts
 {
@@ -27,7 +27,7 @@ namespace Maasgroep.Database.Receipts
         // EF receipt properties
         public CostCentre? CostCentre { get; set; }
 		public ReceiptStatus ReceiptStatus { get; set; }
-		public Photo? Photo { get; set; }
+		public Photo[]? Photos { get; set; }
 		public ReceiptApproval? ReceiptApproval { get; set; }
 
 
