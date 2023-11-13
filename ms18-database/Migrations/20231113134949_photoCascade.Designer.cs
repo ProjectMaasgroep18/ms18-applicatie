@@ -3,6 +3,7 @@ using System;
 using Maasgroep.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Maasgroep.Database.Migrations
 {
     [DbContext(typeof(MaasgroepContext))]
-    partial class MaasgroepContextModelSnapshot : ModelSnapshot
+    [Migration("20231113134949_photoCascade")]
+    partial class photoCascade
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -158,11 +161,8 @@ namespace Maasgroep.Database.Migrations
                         .HasColumnType("bigint")
                         .HasDefaultValueSql("nextval('photo.\"PhotoSeq\"')");
 
-                    b.Property<string>("Base64Image")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.Property<byte[]>("Bytes")
+                        .IsRequired()
                         .HasColumnType("bytea");
 
                     b.Property<DateTime>("DateTimeCreated")
@@ -207,7 +207,8 @@ namespace Maasgroep.Database.Migrations
 
                     b.HasIndex("MemberModifiedId");
 
-                    b.HasIndex("Receipt");
+                    b.HasIndex("Receipt")
+                        .IsUnique();
 
                     b.ToTable("photo", "photo");
                 });
@@ -689,8 +690,8 @@ namespace Maasgroep.Database.Migrations
                         .HasForeignKey("MemberModifiedId");
 
                     b.HasOne("Maasgroep.Database.Receipts.Receipt", "ReceiptInstance")
-                        .WithMany("Photos")
-                        .HasForeignKey("Receipt")
+                        .WithOne("Photo")
+                        .HasForeignKey("Maasgroep.Database.Photos.Photo", "Receipt")
                         .OnDelete(DeleteBehavior.Cascade)
                         .HasConstraintName("FK_Photo_Receipt");
 
@@ -878,7 +879,7 @@ namespace Maasgroep.Database.Migrations
 
             modelBuilder.Entity("Maasgroep.Database.Receipts.Receipt", b =>
                 {
-                    b.Navigation("Photos");
+                    b.Navigation("Photo");
 
                     b.Navigation("ReceiptApproval");
                 });

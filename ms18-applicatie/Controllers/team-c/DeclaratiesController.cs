@@ -1,9 +1,11 @@
 using System.Diagnostics;
 using Maasgroep.Database;
 using Maasgroep.Database.Members;
+using Maasgroep.Database.Photos;
 using Maasgroep.Database.Receipts;
 using Microsoft.AspNetCore.Mvc;
-
+using ms18_applicatie.Models;
+using ms18_applicatie.Utilities;
 
 namespace ms18_applicatie.Controllers;
 
@@ -18,29 +20,47 @@ public class DeclaratiesController : Controller
 
     public IActionResult Index()
     {
-        
-        ViewData["Member"] = _context.Member.FirstOrDefault();
-        ViewData["Receipts"] = _context.Receipt.Where(r => r.MemberCreatedId == (ViewData["Member"] as Member).Id).ToArray();
-        ViewData["ReceiptStatuses"] = _context.ReceiptStatus.ToDictionary(status => status.Id);
         return View();
     }
 
+    public IActionResult Edit(long id)
+    {
+        ViewData["id"] = id;
+        return View();
+    }
+
+    public IActionResult Single(long id)
+    {
+        var photo = _context.Photo.Where(x => x.Id == id).FirstOrDefault();
+
+        var output = new DeclaratieBestaand();
+        
+        output.FormFile64 = "data:image;base64,"+ Convert.ToBase64String(photo.Bytes);
+        output.AangemaaktDoor = photo.MemberCreated?.Name ?? "Kevin";
+
+        return View(output);
+    }
+    
+/*
+
     [HttpPost]
-	public IActionResult Nieuw(decimal Amount, string Note)
+	public IActionResult Nieuw(DeclaratieViewModel viewModel)
 	{
+        //// TODO: Omzetten naar API (dit dus niet meer gebruiken)
+        
 		ViewData["Member"] = _context.Member.FirstOrDefault();
 
         // Form data bewaren zodat we die weer kunnen tonen als er iets mis is
-        ViewData["Amount"] = Amount;
-        ViewData["Note"] = Note;
-        ViewData["Error"] = null;
+        //ViewData["Amount"] = Amount;
+        //ViewData["Note"] = Note;
+        //ViewData["Error"] = null;
 
         // Wat is de eerste status ("Ingediend")? (Als ReceiptStatus nou een Enum was zou je bijv. ReceiptStatus.Submitted kunnen gebruiken)
         var initialStatus = _context.ReceiptStatus.FirstOrDefault(); // Eerste de beste status dan maar
 
         var receipt = new Receipt() {
-            Amount = Amount,
-            Note = Note,
+            Amount = viewModel.Amount,
+            Note = viewModel.Note,
             ReceiptStatusId = initialStatus?.Id ?? 0,
             MemberCreatedId = (ViewData["Member"] as Member)?.Id ?? 0,
         };
@@ -60,6 +80,42 @@ public class DeclaratiesController : Controller
             ViewData["Error"] = errorMessage;
         }
 
+        var receiptEntered = _context.Receipt.OrderByDescending(x => x.DateTimeCreated).FirstOrDefault();
+
+        var toegestaand = new string[] { "image/png", "txt" };
+        var fileContent = FileHelpers.ProcessFormFile<BufferedSingleFileUploadDb>(
+                    viewModel.FormFile, ModelState, toegestaand,
+                    102400000).Result;
+
+        var photo = new Photo()
+        {
+            Bytes = fileContent,
+            DateTimeDeleted = DateTime.UtcNow,
+            fileName = viewModel.FormFile.FileName,
+            fileExtension = "blaat",
+            Receipt = receiptEntered.Id,
+            MemberCreatedId = (ViewData["Member"] as Member)?.Id ?? 0,
+        };
+
+
+        try
+        {
+            _context.Photo.Add(photo);
+            _context.SaveChanges();
+        }
+        catch (Exception e)
+        {
+            Exception? error = e;
+            string errorMessage = "";
+            while (error != null)
+            {
+                // Zoek de "binnenste" (nuttigste) exception
+                errorMessage = error.Message;
+                error = error.InnerException;
+            }
+            ViewData["Error"] = errorMessage;
+        }
+
         // Als het gelukt is
         if (ViewData["Error"] == null)
             return RedirectToAction(nameof(Index));
@@ -67,37 +123,10 @@ public class DeclaratiesController : Controller
         // Als er een validatie-error is
 		return View();
 	}
+*/
 
     public IActionResult Nieuw()
     {
-        ViewData["Member"] = _context.Member.FirstOrDefault();
         return View();
-    }
-
-    // public IActionResult Privacy()
-    // {
-    //     return View();
-    // }
-    
-    //get-routes below should provide JSON response from server, triggered by HTTP request:
-    
-    // One for the /Receipt route:
-    [HttpGet]
-    [Route("/Receipt")]
-    //(content root path = 
-    ///Users/tedruigrok/Documents/ms18_project_c_DEC/ms18-applicatie/ms18-applicatie/)
-    public IActionResult GetMemberById(int memberId)
-    {
-        //retrieve data for this member ID:
-        var receiptData = _context.Receipt.FirstOrDefault(_ => _.Id == memberId);
-
-        if (receiptData == null)
-        {
-            //404 not found exception:
-            return NotFound();
-        }
-        //return data as JSON:
-        return Json(receiptData);
-
     }
 }

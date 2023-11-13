@@ -1,5 +1,4 @@
-﻿
-using Maasgroep.Database.ViewModel;
+﻿using Maasgroep.Database.Interfaces;
 
 namespace Maasgroep.Database.Members
 {
@@ -9,20 +8,20 @@ namespace Maasgroep.Database.Members
         { 
         }
 
-        public MemberViewModel GetMember()
-        {
-            MemberViewModel result = null;
+        // public MemberViewModel GetMember()
+        // {
+        //     MemberViewModel result = null;
 
-            using (var db = new MaasgroepContext())
-            {
-                var q=  db.Member.FirstOrDefault()!;
+        //     using (var db = new MaasgroepContext())
+        //     {
+        //         var q=  db.Member.FirstOrDefault()!;
 
-                result.Name = q.Name;
+        //         result.Name = q.Name;
 
-            }
+        //     }
 
-            return result;
-        }
+        //     return result;
+        // }
 
         public void AddMember()
         {

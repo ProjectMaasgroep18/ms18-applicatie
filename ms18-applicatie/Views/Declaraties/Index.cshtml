@@ -1,15 +1,7 @@
-@{
-    ViewData["Title"] = "Declaraties";
-    var Member = ViewData["Member"] as Maasgroep.Database.Members.Member;
-    var Receipts = ViewData["Receipts"] as Maasgroep.Database.Receipts.Receipt[];
-    var ReceiptStatuses = ViewData["ReceiptStatuses"] as Dictionary<long, Maasgroep.Database.Receipts.ReceiptStatus>;
-}
 <h1>@ViewData["Title"]</h1>
 
-
-@if (@Member != null) {
-
-    <p>Hallo @(Member.Name)!</p>
+<div id="login-user" class="hidden">
+    <p>Hallo <span rel="name"></span>!</p>    
 
     <p>Hier kan je je bonnetjes inleveren:</p>
 
@@ -17,28 +9,78 @@
 
     <p>Dit zijn je bestaande declaraties in de database:</p>
 
-    <table>
+    <table id="user-receipts">
         <tr>
             <th>Bedrag</th>
             <th>Opmerking</th>
             <th>Status</th>
+            <th></th>
         </tr>
-        @if (Receipts == null || Receipts.Length == 0) {
-        <tr>
+        
+        <tr id="user-receipts-empty" class="hidden">
             <td colspan="999">Je hebt nog geen bonnetjes ingeleverd.</td>
         </tr>
-        } else {
-            @foreach (var Receipt in Receipts) {
-            <tr>
-                <td>@(Receipt.Amount)</td>
-                <td>@(Receipt.Note)</td>
-                <td>@(Receipt.ReceiptStatusId). @(ReceiptStatuses[Receipt.ReceiptStatusId]?.Name)</td>
-            </tr>
-            }
-        }
+        
+        <tr id="user-receipts-row" class="hidden">
+            <td rel="amount::euro"></td>
+            <td rel="note"></td>
+            <td rel="status"></td>
+            <td class="user-receipts-actions">
+                <a rel="id:href:editUrl">Aanpassen</a>
+                <a rel="id:data-id" href="#" class="delete-link">Verwijderen</a>
+            </td>
+        </tr>
     </table>
+</div>
 
-} else {
+@section scripts {
+<script>
+    apiGet('Session').then(member => {
+        // User session loaded
+     
+        showOutput(member, document.querySelector('#login-user'));
+        
+        apiGet('Receipt').then(receipts => {
+            // Receipts data loaded
 
-    <p>Niet ingelogd</p>
+            let noReceipts = (!receipts || !receipts.length);
+            let receiptsTable = document.querySelector('#user-receipts');
+            if (noReceipts) {
+                showElement(document.querySelector('#user-receipts-empty'));
+            } else {
+                hideElement(document.querySelector('#user-receipts-empty'));
+            }
+            for (id in receipts) {
+                let receipt = document.querySelector('#user-receipts-row').cloneNode(true);
+                receipt.id = 'user-receipts-' + receipts[id].id;
+                showElement(receipt);
+                showOutput(receipts[id], receipt);
+                receiptsTable.appendChild(receipt);
+            }
+            showElement(receiptsTable);
+            receiptsTable.querySelectorAll('.delete-link').forEach(deleteLink => deleteLink.addEventListener('click', event => {
+                // Click Delete link
+
+                event.preventDefault();
+
+                if (!window.confirm('Weet je zeker dat je deze declaratie wilt verwijderen?'))
+                    return;
+
+                const deleteId = deleteLink.dataset.id;
+                const receiptRow = receiptsTable.querySelector('#user-receipts-' + deleteId);
+                hideElement(receiptRow.querySelector('.user-receipts-actions'));
+
+                apiDelete('Receipt/' + deleteId).then(result => {
+                    if (!result)
+                        return;
+
+                    // Receipt deleted in database, clean it up here too
+                    receiptRow.remove();
+                    if (receiptsTable.querySelectorAll('tr:not(.hidden)').length <= 1)
+                        showElement(document.querySelector('#user-receipts-empty'));
+                });
+            }));
+        });
+    });
+</script>
 }
