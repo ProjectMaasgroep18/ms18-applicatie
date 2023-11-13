@@ -2,7 +2,7 @@
 
 namespace Maasgroep.Database.Members
 {
-    internal record Member
+    public record Member
     {
         public long Id { get; set; }
         public string Name { get; set; }

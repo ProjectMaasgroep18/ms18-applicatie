@@ -14,4 +14,8 @@
       </Content>
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\ms18-database\ms18-database.csproj" />
+    </ItemGroup>
+
 </Project>

@@ -2,7 +2,7 @@
 
 namespace Maasgroep.Database.Receipts
 {
-    internal record CostCentre
+    public record CostCentre
 	{
 		public long Id { get; set; }
 		public string Name { get; set; }

@@ -1,23 +1,28 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Maasgroep.Database.Members;
-using Maasgroep.Database.Photos;
+﻿using Maasgroep.Database.Members;
 using Maasgroep.Database.Receipts;
+using Maasgroep.Database.team_d.Models;
+using Microsoft.EntityFrameworkCore;
+
 
 namespace Maasgroep.Database
 {
-    internal class MaasgroepContext : DbContext
+    public class MaasgroepContext : DbContext
     {
         #region Members
+
         public DbSet<Member> Member { get; set; }
         public DbSet<Permission> Permission { get; set; }
         public DbSet<MemberPermission> MemberPermission { get; set; }
+
         #endregion
 
         #region Receipts
+
         public DbSet<Receipt> Receipt { get; set; }
         public DbSet<ReceiptApproval> ReceiptApproval { get; set; }
         public DbSet<ReceiptStatus> ReceiptStatus { get; set; }
         public DbSet<CostCentre> CostCentre { get; set; }
+
         #endregion
 
         #region ReceiptHistory
@@ -30,18 +35,30 @@ namespace Maasgroep.Database
         #endregion
 
         #region Photos
-        public DbSet<Photo> Photo { get; set; }
+
+        public DbSet<Photos.Photo> Photo { get; set; }
+
         #endregion
 
+        #region PhotoAlbum
+
+        public DbSet<Folder> Folders { get; set; } = null!;
+        public DbSet<team_d.Models.Photo> Photos { get; set; } = null!;
+        public DbSet<Like> Likes { get; set; } = null!;
+        public DbSet<Tag> Tags { get; set; } = null!;
+        public DbSet<PhotoTag> PhotoTags { get; set; } = null!;
+
+        #endregion
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseNpgsql("UserID=postgres;Password=postgres;Host=localhost;port=5432;Database=Maasgroep;Pooling=true");
+            optionsBuilder.UseNpgsql(
+                "UserID=postgres;Password=postgres;Host=localhost;port=5432;Database=Maasgroep;Pooling=true");
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            
+
             CreateMember(modelBuilder);
             CreatePermission(modelBuilder);
             CreateMemberPermission(modelBuilder);
@@ -57,9 +74,16 @@ namespace Maasgroep.Database
             CreateCostCentreHistory(modelBuilder);
 
             CreatePhoto(modelBuilder);
+
+            CreateFolder(modelBuilder);
+            CreatePhotoD(modelBuilder);
+            CreateTag(modelBuilder);
+            CreateLikes(modelBuilder);
+            CreatePhotoTag(modelBuilder);
         }
 
         #region Member
+
         private void CreateMember(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Member>().ToTable("member", "admin");
@@ -93,7 +117,8 @@ namespace Maasgroep.Database
             modelBuilder.Entity<Permission>().ToTable("permission", "admin");
             modelBuilder.Entity<Permission>().HasKey(p => p.Id);
             modelBuilder.HasSequence<long>("permissionSeq", schema: "admin").StartsAt(1).IncrementsBy(1);
-            modelBuilder.Entity<Permission>().Property(p => p.Id).HasDefaultValueSql("nextval('admin.\"permissionSeq\"')");
+            modelBuilder.Entity<Permission>().Property(p => p.Id)
+                .HasDefaultValueSql("nextval('admin.\"permissionSeq\"')");
             modelBuilder.Entity<Permission>().Property(p => p.DateTimeCreated).HasDefaultValueSql("now()");
             modelBuilder.Entity<Permission>().Property(p => p.Name).HasMaxLength(256);
             modelBuilder.Entity<Permission>().HasIndex(p => p.Name).IsUnique();
@@ -151,15 +176,18 @@ namespace Maasgroep.Database
                 .HasConstraintName("FK_memberPermission_memberModified")
                 .OnDelete(DeleteBehavior.NoAction);
         }
+
         #endregion
 
         #region Receipt
+
         private void CreateCostCentre(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<CostCentre>().ToTable("costCentre", "receipt");
             modelBuilder.Entity<CostCentre>().HasKey(cc => new { cc.Id });
             modelBuilder.HasSequence<long>("costCentreSeq", schema: "receipt").StartsAt(1).IncrementsBy(1);
-            modelBuilder.Entity<CostCentre>().Property(cc => cc.Id).HasDefaultValueSql("nextval('receipt.\"costCentreSeq\"')");
+            modelBuilder.Entity<CostCentre>().Property(cc => cc.Id)
+                .HasDefaultValueSql("nextval('receipt.\"costCentreSeq\"')");
             modelBuilder.Entity<CostCentre>().Property(cc => cc.DateTimeCreated).HasDefaultValueSql("now()");
             modelBuilder.Entity<CostCentre>().Property(cc => cc.Name).HasMaxLength(256);
             modelBuilder.Entity<CostCentre>().HasIndex(cc => cc.Name).IsUnique();
@@ -190,7 +218,7 @@ namespace Maasgroep.Database
             modelBuilder.Entity<Receipt>().Property(r => r.Id).HasDefaultValueSql("nextval('receipt.\"receiptSeq\"')");
             modelBuilder.Entity<Receipt>().Property(r => r.DateTimeCreated).HasDefaultValueSql("now()");
             modelBuilder.Entity<Receipt>().Property(r => r.Note).HasMaxLength(2048);
-            modelBuilder.Entity<Receipt>().Property(r => r.Amount).HasPrecision(18,2);
+            modelBuilder.Entity<Receipt>().Property(r => r.Amount).HasPrecision(18, 2);
 
             //Foreign keys
 
@@ -259,7 +287,8 @@ namespace Maasgroep.Database
             modelBuilder.Entity<ReceiptStatus>().ToTable("status", "receipt");
             modelBuilder.Entity<ReceiptStatus>().HasKey(rs => new { rs.Id });
             modelBuilder.HasSequence<long>("statusSeq", schema: "receipt").StartsAt(1).IncrementsBy(1);
-            modelBuilder.Entity<ReceiptStatus>().Property(rs => rs.Id).HasDefaultValueSql("nextval('receipt.\"statusSeq\"')");
+            modelBuilder.Entity<ReceiptStatus>().Property(rs => rs.Id)
+                .HasDefaultValueSql("nextval('receipt.\"statusSeq\"')");
             modelBuilder.Entity<ReceiptStatus>().Property(rs => rs.DateTimeCreated).HasDefaultValueSql("now()");
             modelBuilder.Entity<ReceiptStatus>().Property(rs => rs.Name).HasMaxLength(256);
             modelBuilder.Entity<ReceiptStatus>().HasIndex(rs => rs.Name).IsUnique();
@@ -279,6 +308,7 @@ namespace Maasgroep.Database
                 .OnDelete(DeleteBehavior.NoAction);
 
         }
+
         #endregion
 
         #region ReceiptHistory
@@ -287,7 +317,8 @@ namespace Maasgroep.Database
         {
             modelBuilder.Entity<ReceiptHistory>().ToTable("receipt", "receiptHistory");
             modelBuilder.HasSequence<long>("receiptSeq", schema: "receiptHistory").StartsAt(1).IncrementsBy(1);
-            modelBuilder.Entity<ReceiptHistory>().Property(r => r.Id).HasDefaultValueSql("nextval('\"receiptHistory\".\"receiptSeq\"')");
+            modelBuilder.Entity<ReceiptHistory>().Property(r => r.Id)
+                .HasDefaultValueSql("nextval('\"receiptHistory\".\"receiptSeq\"')");
             modelBuilder.Entity<ReceiptHistory>().Property(r => r.Note).HasMaxLength(2048);
             modelBuilder.Entity<ReceiptHistory>().Property(r => r.Amount).HasPrecision(18, 2);
             modelBuilder.Entity<ReceiptHistory>().Property(r => r.RecordCreated).HasDefaultValueSql("now()");
@@ -297,7 +328,8 @@ namespace Maasgroep.Database
         {
             modelBuilder.Entity<ReceiptStatusHistory>().ToTable("status", "receiptHistory");
             modelBuilder.HasSequence<long>("statusSeq", schema: "receiptHistory").StartsAt(1).IncrementsBy(1);
-            modelBuilder.Entity<ReceiptStatusHistory>().Property(rs => rs.Id).HasDefaultValueSql("nextval('\"receiptHistory\".\"statusSeq\"')");
+            modelBuilder.Entity<ReceiptStatusHistory>().Property(rs => rs.Id)
+                .HasDefaultValueSql("nextval('\"receiptHistory\".\"statusSeq\"')");
             modelBuilder.Entity<ReceiptStatusHistory>().Property(rs => rs.Name).HasMaxLength(256);
             modelBuilder.Entity<ReceiptStatusHistory>().Property(rs => rs.RecordCreated).HasDefaultValueSql("now()");
         }
@@ -306,17 +338,19 @@ namespace Maasgroep.Database
         {
             modelBuilder.Entity<ReceiptApprovalHistory>().ToTable("approval", "receiptHistory");
             modelBuilder.HasSequence<long>("approvalSeq", schema: "receiptHistory").StartsAt(1).IncrementsBy(1);
-            modelBuilder.Entity<ReceiptApprovalHistory>().Property(ra => ra.Id).HasDefaultValueSql("nextval('\"receiptHistory\".\"approvalSeq\"')");
+            modelBuilder.Entity<ReceiptApprovalHistory>().Property(ra => ra.Id)
+                .HasDefaultValueSql("nextval('\"receiptHistory\".\"approvalSeq\"')");
             modelBuilder.Entity<ReceiptApprovalHistory>().Property(ra => ra.Note).HasMaxLength(2048);
             modelBuilder.Entity<ReceiptApprovalHistory>().Property(ra => ra.RecordCreated).HasDefaultValueSql("now()");
-            
+
         }
 
         public void CreateCostCentreHistory(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<CostCentreHistory>().ToTable("costCentre", "receiptHistory");
             modelBuilder.HasSequence<long>("costCentreSeq", schema: "receiptHistory").StartsAt(1).IncrementsBy(1);
-            modelBuilder.Entity<CostCentreHistory>().Property(cc => cc.Id).HasDefaultValueSql("nextval('\"receiptHistory\".\"costCentreSeq\"')");
+            modelBuilder.Entity<CostCentreHistory>().Property(cc => cc.Id)
+                .HasDefaultValueSql("nextval('\"receiptHistory\".\"costCentreSeq\"')");
             modelBuilder.Entity<CostCentreHistory>().Property(cc => cc.Name).HasMaxLength(256);
             modelBuilder.Entity<CostCentreHistory>().Property(cc => cc.RecordCreated).HasDefaultValueSql("now()");
         }
@@ -324,22 +358,125 @@ namespace Maasgroep.Database
         #endregion
 
         #region Photo
+
         private void CreatePhoto(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<Photo>().ToTable("photo", "photo");
-            modelBuilder.Entity<Photo>().HasKey(p => new { p.Id });
+            modelBuilder.Entity<Photos.Photo>().ToTable("photo", "photo");
+            modelBuilder.Entity<Photos.Photo>().HasKey(p => new { p.Id });
             modelBuilder.HasSequence<long>("PhotoSeq", schema: "photo").StartsAt(1).IncrementsBy(1);
-            modelBuilder.Entity<Photo>().Property(p => p.DateTimeCreated).HasDefaultValueSql("now()");
-            modelBuilder.Entity<Photo>().Property(p => p.Id).HasDefaultValueSql("nextval('photo.\"PhotoSeq\"')");
+            modelBuilder.Entity<Photos.Photo>().Property(p => p.DateTimeCreated).HasDefaultValueSql("now()");
+            modelBuilder.Entity<Photos.Photo>().Property(p => p.Id).HasDefaultValueSql("nextval('photo.\"PhotoSeq\"')");
 
             //Foreign keys
 
-            modelBuilder.Entity<Photo>()
+            modelBuilder.Entity<Photos.Photo>()
                 .HasOne(p => p.ReceiptInstance)
                 .WithOne(r => r.Photo)
-                .HasForeignKey<Photo>(p => p.Receipt)
+                .HasForeignKey<Photos.Photo>(p => p.Receipt)
                 .HasConstraintName("FK_Photo_Receipt")
                 .OnDelete(DeleteBehavior.NoAction);
+        }
+
+        #endregion
+
+        #region PhotoAlbum
+
+        private void CreateFolder(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Folder>(entity =>
+            {
+                entity.ToTable("Folders", "PhotoAlbum");
+
+                entity.HasKey(f => f.Id);
+
+                entity.HasIndex(f => new { f.ParentFolderId, f.Name }).IsUnique();
+
+                entity.HasMany(f => f.ChildFolders)
+                    .WithOne(f => f.ParentFolder)
+                    .HasForeignKey(f => f.ParentFolderId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasMany(f => f.Photos)
+                    .WithOne(p => p.FolderLocation)
+                    .HasForeignKey(p => p.FolderLocationId);
+            });
+
+        }
+
+        private void CreateLikes(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Like>(entity =>
+            {
+                entity.ToTable("Likes", "PhotoAlbum");
+                entity.HasKey(l => l.Id);
+
+                entity.HasOne(l => l.Member)
+                    .WithMany() 
+                    .HasForeignKey(l => l.MemberId);
+
+                entity.HasOne(l => l.Photo)
+                    .WithMany(p => p.Likes)
+                    .HasForeignKey(l => l.PhotoId);
+            });
+        }
+
+        private void CreatePhotoD(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<team_d.Models.Photo>(entity =>
+            {
+                entity.ToTable("Photos", "PhotoAlbum");
+                entity.HasKey(p => p.Id);
+
+                entity.HasOne(p => p.Uploader)
+                    .WithMany()
+                    .HasForeignKey(p => p.UploaderId);
+
+                entity.HasOne(p => p.FolderLocation)
+                    .WithMany(f => f.Photos)
+                    .HasForeignKey(p => p.FolderLocationId);
+
+                entity.HasMany(p => p.PhotoTags)
+                    .WithOne(pt => pt.Photo)
+                    .HasForeignKey(pt => pt.PhotoId);
+
+                entity.HasMany(p => p.Likes)
+                    .WithOne(l => l.Photo)
+                    .HasForeignKey(l => l.PhotoId);
+            });
+        }
+
+        private void CreatePhotoTag(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<PhotoTag>(entity =>
+            {
+                entity.ToTable("PhotoTags", "PhotoAlbum");
+                entity.HasKey(pt => new { pt.PhotoId, pt.TagId });
+
+                entity.HasOne(pt => pt.Photo)
+                    .WithMany(p => p.PhotoTags)
+                    .HasForeignKey(pt => pt.PhotoId);
+
+                entity.HasOne(pt => pt.Tag)
+                    .WithMany(t => t.PhotoTags)
+                    .HasForeignKey(pt => pt.TagId);
+            });
+        }
+
+        private void CreateTag(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Tag>(entity =>
+            {
+                entity.ToTable("Tags", "photoAlbum");
+                entity.HasKey(t => t.Id);
+
+                entity.Property(t => t.Name).HasMaxLength(255).IsRequired();
+
+                entity.HasIndex(t => t.Name).IsUnique();
+
+                entity.HasMany(t => t.PhotoTags)
+                    .WithOne(pt => pt.Tag)
+                    .HasForeignKey(pt => pt.TagId);
+            });
         }
         #endregion
     }

@@ -1,7 +1,7 @@
 ﻿
 namespace Maasgroep.Database.Members
 {
-    internal record Permission
+    public record Permission
     {
         public long Id { get; set; }
         public string Name { get; set; }

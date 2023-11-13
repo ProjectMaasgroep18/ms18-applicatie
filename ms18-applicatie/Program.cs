@@ -1,7 +1,14 @@
+using Maasgroep.Database;
+using ms18_applicatie.Repository.PhotoAlbum;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+
+builder.Services.AddDbContext<MaasgroepContext>();
+
+builder.Services.AddScoped<PhotoAlbumRepository>();
 
 var app = builder.Build();
 
