@@ -5,6 +5,8 @@
 
     <p>Hier kan je je declaratie aanpassen:</p>
 
+    <p><img class="drop-image hidden" id="receipt-image"></p>
+
     <form method="post" id="receipt-form" class="hidden">
         <table>
             <tr>
@@ -38,6 +40,17 @@
         })
     });
 
+    try {
+        let receiptImage = localStorage.getItem('receipt-' + @ViewData["id"]);
+        if (receiptImage) {
+            const img = document.querySelector('#receipt-image');
+            img.src = receiptImage;
+            showElement(img);
+        }
+    } catch (e) {
+        console.warn('Local storage error', e);
+    }
+
     const receiptForm = document.querySelector('#receipt-form');
 
     receiptForm.addEventListener('submit', event => {
@@ -49,7 +62,7 @@
             id: @ViewData["id"],
         };
         receiptForm.querySelectorAll('input[name],textarea[name]').forEach(input => formData[input.name] = input.value);
-        receiptForm.className = 'hidden';
+        hideElement(receiptForm);
 
         apiPut('Receipt/' + @ViewData["id"], formData).then(result => {
             if (result) // PUT should not return a response body, just a success status

@@ -3,9 +3,19 @@
 <div id="login-user" class="hidden">
     <p>Hallo <span rel="name"></span>!</p>
 
-    <p>Vul hier de gegevens van je declaratie in:</p>
+    <p>Upload hier je bon:</p>
 
     <form method="post" id="receipt-form">
+
+        <label for="FormFile" class="drop-container">
+            <span class="drop-title">Sleep hier je bestand</span>
+            <img src="" class="drop-image hidden">
+            <span class="drop-hint">of klik om een bestand te selecteren</span>
+            <input type="file" id="images" accept="image/*" required name="FormFile" class="hidden">
+        </label>
+
+        <p>Vul hier de gegevens van je declaratie in:</p>
+
         <table>
             <tr>
                 <td>Bedrag: </td>
@@ -41,11 +51,23 @@
         
         let formData = {};
         receiptForm.querySelectorAll('input[name],textarea[name]').forEach(input => formData[input.name] = input.value);
-        receiptForm.className = 'hidden';
+        hideElement(receiptForm);
 
         apiPost('Receipt', formData).then(result => {
-            if (result.receipt)
-                window.location.href = '/Declaraties/Edit?id=' + result.receipt.id;
+            if (result.receipt) {
+                // Keep it in Local Storage for now
+                try {
+                    let receiptImage = localStorage.getItem('receipt-new');
+                    localStorage.removeItem('receipt-new');
+                    if (receiptImage)
+                        localStorage.setItem('receipt-' + result.receipt.id, receiptImage);
+                } catch (e) {
+                    console.warn('Local storage error', e);
+                    localStorage.removeItem('receipt-' + result.receipt.id);
+                }
+                // Redirect to main page
+                window.location.href = '/Declaraties/Edit/' + result.receipt.id;
+            }
         });
     });
 </script>

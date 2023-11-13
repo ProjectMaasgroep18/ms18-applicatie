@@ -45,15 +45,19 @@
 
             let noReceipts = (!receipts || !receipts.length);
             let receiptsTable = document.querySelector('#user-receipts');
-            document.querySelector('#user-receipts-empty').className = noReceipts ? '' : 'hidden';
+            if (noReceipts) {
+                showElement(document.querySelector('#user-receipts-empty'));
+            } else {
+                hideElement(document.querySelector('#user-receipts-empty'));
+            }
             for (id in receipts) {
                 let receipt = document.querySelector('#user-receipts-row').cloneNode(true);
                 receipt.id = 'user-receipts-' + receipts[id].id;
-                receipt.className = '';
+                showElement(receipt);
                 showOutput(receipts[id], receipt);
                 receiptsTable.appendChild(receipt);
             }
-            receiptsTable.className = '';
+            showElement(receiptsTable);
             receiptsTable.querySelectorAll('.delete-link').forEach(deleteLink => deleteLink.addEventListener('click', event => {
                 // Click Delete link
 
@@ -63,7 +67,7 @@
                     return;
 
                 const receiptRow = receiptsTable.querySelector('#user-receipts-' + deleteLink.dataset.id);
-                receiptRow.querySelector('.user-receipts-actions').className = 'hidden';
+                hideElement(receiptRow.querySelector('.user-receipts-actions'));
 
                 apiDelete('Receipt/' + deleteLink.dataset.id).then(result => {
                     if (!result)
