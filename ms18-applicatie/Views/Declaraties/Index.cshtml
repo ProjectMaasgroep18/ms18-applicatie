@@ -66,14 +66,24 @@
                 if (!window.confirm('Weet je zeker dat je deze declaratie wilt verwijderen?'))
                     return;
 
-                const receiptRow = receiptsTable.querySelector('#user-receipts-' + deleteLink.dataset.id);
+                const deleteId = deleteLink.dataset.id;
+                const receiptRow = receiptsTable.querySelector('#user-receipts-' + deleteId);
                 hideElement(receiptRow.querySelector('.user-receipts-actions'));
 
-                apiDelete('Receipt/' + deleteLink.dataset.id).then(result => {
+                apiDelete('Receipt/' + deleteId).then(result => {
                     if (!result)
                         return;
+
+                    // Receipt deleted in database, clean it up here too
                     receiptRow.remove();
-                })
+                    try {
+                        localStorage.removeItem('receipt-' + deleteId);
+                    } catch (e) {
+                        console.warn('Local storage error', e);
+                    }
+                    if (receiptsTable.querySelectorAll('tr:not(.hidden)').length <= 1)
+                        showElement(document.querySelector('#user-receipts-empty'));
+                });
             }));
         });
     });

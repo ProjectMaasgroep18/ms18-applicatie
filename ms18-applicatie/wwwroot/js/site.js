@@ -161,7 +161,8 @@ function dropContainer(container) {
     container.addEventListener("drop", (e) => {
         e.preventDefault()
         container.classList.remove("drag-active")
-        fileInput.files = e.dataTransfer.files
+        fileInput.files = e.dataTransfer.files;
+        fileInput.dispatchEvent(new Event('change'));
     });
 
     container.addEventListener("click", () => fileInput.click());
