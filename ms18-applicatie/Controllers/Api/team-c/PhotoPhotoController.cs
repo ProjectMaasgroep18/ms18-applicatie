@@ -5,7 +5,7 @@ using Maasgroep.Database.Receipts;
 using Maasgroep.Database.Repository.ViewModel;
 using Microsoft.AspNetCore.Mvc;
 
-namespace ms18_applicatie.Controllers.Api.team_c;
+namespace ms18_applicatie.Controllers.Api;
 
 [Route("api/v1/[controller]")]
 [ApiController]
@@ -16,6 +16,24 @@ public class ReceiptPhotoController : ControllerBase
     public ReceiptPhotoController(MaasgroepContext context)
     {
         _context = context;
+    }
+
+    [HttpGet("{id}")]
+    public IActionResult PhotoGet(long id)
+    {
+        
+        var photo = _context.Photo.Find(id);
+        
+        if (photo == null)
+        {
+            return NotFound(new
+            {
+                status = 404,
+                message = "Photo not found"
+            });
+        }
+        
+        return Ok(PhotoViewModel.FromDatabaseModel(photo));
     }
 
     [HttpPost]

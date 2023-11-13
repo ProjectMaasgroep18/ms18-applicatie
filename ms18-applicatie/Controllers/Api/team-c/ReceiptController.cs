@@ -5,7 +5,7 @@ using Maasgroep.Database.Receipts;
 using Maasgroep.Database.Repository.ViewModel;
 using Microsoft.AspNetCore.Mvc;
 
-namespace ms18_applicatie.Controllers.Api.team_c;
+namespace ms18_applicatie.Controllers.Api;
 
 [Route("api/v1/[controller]")]
 [ApiController]
@@ -257,6 +257,32 @@ public class ReceiptController : ControllerBase
             message = "Photo created",
             photo = PhotoViewModel.FromDatabaseModel(createdPhoto)
         });
+    }
+
+    [HttpGet("{id}/ReceiptPhoto")]
+    public IActionResult ReceiptGetPhotos(long id)
+    {
+        
+        // Get the receipt by the ID
+        Receipt? existingReceipt = _context.Receipt.Find(id);
+        
+        // Check if the receipt with the provided ID exists
+        if (existingReceipt == null)
+        {
+            return NotFound(new
+            {
+                status = 404,
+                message = "Receipt not found"
+            });
+        }
+        
+        // Get all photos for the receipt
+        var photos = _context.Photo
+            .Where(photo => photo.Receipt == existingReceipt.Id)
+            .Select(photo => PhotoViewModel.FromDatabaseModel(photo))
+            .ToList();
+        
+        return Ok(photos);
     }
     
     private bool ReceiptsAreEqual(Receipt existingReceipt, ReceiptViewModel updatedReceiptViewModel)

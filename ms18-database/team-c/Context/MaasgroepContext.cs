@@ -336,8 +336,8 @@ namespace Maasgroep.Database
 
             modelBuilder.Entity<Photo>()
                 .HasOne(p => p.ReceiptInstance)
-                .WithOne(r => r.Photo)
-                .HasForeignKey<Photo>(p => p.Receipt)
+                .WithMany(r => r.Photos)
+                .HasForeignKey(p => p.Receipt)
                 .HasConstraintName("FK_Photo_Receipt")
                 .OnDelete(DeleteBehavior.Cascade);
         }

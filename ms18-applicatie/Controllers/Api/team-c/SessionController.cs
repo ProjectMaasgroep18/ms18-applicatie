@@ -5,7 +5,7 @@ using Maasgroep.Database.Repository.ViewModel;
 using Maasgroep.Database.Repository.ViewModel;
 using Microsoft.AspNetCore.Mvc;
 
-namespace ms18_applicatie.Controllers.Api.team_c;
+namespace ms18_applicatie.Controllers.Api;
 
 [Route("api/v1/[controller]")]
 [ApiController]
