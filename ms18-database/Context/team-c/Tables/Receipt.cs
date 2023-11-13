@@ -1,5 +1,6 @@
 ﻿using Maasgroep.Database.Members;
 using Maasgroep.Database.Photos;
+using Maasgroep.Database.team_c.Repository.ViewModel;
 
 namespace Maasgroep.Database.Receipts
 {
@@ -34,5 +35,15 @@ namespace Maasgroep.Database.Receipts
         public Member MemberCreated { get; set; }
         public Member? MemberModified { get; set; }
         public Member? MemberDeleted { get; set; }
+        
+        public static Receipt FromViewModel(ReceiptViewModel viewModel)
+        {
+	        return new Receipt
+	        {
+		        Amount = viewModel.Amount,
+		        Note = viewModel.Note,
+	        };
+        }
+        
     }
 }
