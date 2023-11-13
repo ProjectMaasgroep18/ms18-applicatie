@@ -466,7 +466,7 @@ namespace Maasgroep.Database
         {
             modelBuilder.Entity<Tag>(entity =>
             {
-                entity.ToTable("Tags", "photoAlbum");
+                entity.ToTable("Tags", "PhotoAlbum");
                 entity.HasKey(t => t.Id);
 
                 entity.Property(t => t.Name).HasMaxLength(255).IsRequired();

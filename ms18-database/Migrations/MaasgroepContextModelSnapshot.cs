@@ -705,7 +705,7 @@ namespace Maasgroep.Database.Migrations
                     b.HasIndex("Name")
                         .IsUnique();
 
-                    b.ToTable("Tags", "photoAlbum");
+                    b.ToTable("Tags", "PhotoAlbum");
                 });
 
             modelBuilder.Entity("Maasgroep.Database.Members.Member", b =>
