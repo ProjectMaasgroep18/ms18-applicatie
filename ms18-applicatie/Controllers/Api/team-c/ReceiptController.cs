@@ -1,7 +1,8 @@
 ﻿using Maasgroep.Database;
 using Maasgroep.Database.Members;
+using Maasgroep.Database.Photos;
 using Maasgroep.Database.Receipts;
-using Maasgroep.Database.team_c.Repository.ViewModel;
+using Maasgroep.Database.Repository.ViewModel;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ms18_applicatie.Controllers.Api.team_c;
@@ -205,6 +206,57 @@ public class ReceiptController : ControllerBase
         }
         
         return NoContent();
+    }
+
+    [HttpPost("{id}/ReceiptPhoto")]
+    public IActionResult ReceiptAddPhoto(long id, [FromBody] PhotoViewModel photoViewModel)
+    {
+        
+        // Validate the request body
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(new
+            {
+                status = 400,
+                message = "Invalid request body"
+            });
+        }
+        
+        // Get the receipt by the ID
+        Receipt? existingReceipt = _context.Receipt.Find(id);
+        
+        // Check if the receipt with the provided ID exists
+        if (existingReceipt == null)
+        {
+            return NotFound(new
+            {
+                status = 404,
+                message = "Receipt not found"
+            });
+        }
+        
+        // Create a new photo from the view model
+        var createdPhoto = Photo.FromViewModel(photoViewModel);
+        
+        // Set the receipt ID of the photo to the ID of the receipt
+        createdPhoto.Receipt = existingReceipt.Id;
+        
+        // Set the member ID of the photo to the ID of the current member
+        var member = _context.Member.FirstOrDefault()!; // TODO Find current member
+        
+        createdPhoto.MemberCreatedId = member.Id;
+        
+        // Add the photo to the database
+        _context.Photo.Add(createdPhoto);
+        _context.SaveChanges();
+        
+        // Return the created photo
+        return Created($"/api/v1/receipt/{id}/ReceiptPhoto/{createdPhoto.Id}", new
+        {
+            status = 201,
+            message = "Photo created",
+            photo = PhotoViewModel.FromDatabaseModel(createdPhoto)
+        });
     }
     
     private bool ReceiptsAreEqual(Receipt existingReceipt, ReceiptViewModel updatedReceiptViewModel)

@@ -1,7 +1,8 @@
 using Maasgroep.Database;
 using Maasgroep.Database.Members;
 using Maasgroep.Database.Receipts;
-using Maasgroep.Database.team_c.Repository.ViewModel;
+using Maasgroep.Database.Repository.ViewModel;
+using Maasgroep.Database.Repository.ViewModel;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ms18_applicatie.Controllers.Api.team_c;

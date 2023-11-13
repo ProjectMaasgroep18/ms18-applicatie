@@ -3,6 +3,7 @@ using System;
 using Maasgroep.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Maasgroep.Database.Migrations
 {
     [DbContext(typeof(MaasgroepContext))]
-    partial class MaasgroepContextModelSnapshot : ModelSnapshot
+    [Migration("20231113144604_photoBase64")]
+    partial class photoBase64
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -163,6 +166,7 @@ namespace Maasgroep.Database.Migrations
                         .HasColumnType("text");
 
                     b.Property<byte[]>("Bytes")
+                        .IsRequired()
                         .HasColumnType("bytea");
 
                     b.Property<DateTime>("DateTimeCreated")

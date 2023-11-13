@@ -1,6 +1,6 @@
 ﻿using Maasgroep.Database.Members;
 using Maasgroep.Database.Photos;
-using Maasgroep.Database.team_c.Repository.ViewModel;
+using Maasgroep.Database.Repository.ViewModel;
 
 namespace Maasgroep.Database.Receipts
 {

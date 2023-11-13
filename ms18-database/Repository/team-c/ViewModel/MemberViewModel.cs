@@ -6,7 +6,7 @@ using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using Maasgroep.Database.Members;
 
-namespace Maasgroep.Database.team_c.Repository.ViewModel
+namespace Maasgroep.Database.Repository.ViewModel
 {
     public class MemberViewModel
     {

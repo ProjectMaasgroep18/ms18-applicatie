@@ -1,5 +1,5 @@
 ﻿using Maasgroep.Database.Interfaces;
-using Maasgroep.Database.team_c.Repository.ViewModel;
+using Maasgroep.Database.Repository.ViewModel;
 
 namespace Maasgroep.Database.Models
 {
