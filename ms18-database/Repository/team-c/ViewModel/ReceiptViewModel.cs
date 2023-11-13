@@ -27,6 +27,7 @@ namespace Maasgroep.Database.team_c.Repository.ViewModel
         public DateTime? DateTimeModified { get; set; }
         public decimal? Amount { get; set; }
         public string? Note { get; set; }
+        public ReceiptStatusViewModel? ReceiptStatus { get; set; } 
 
         public ReceiptViewModel(int id, DateTime dateTimeCreated, DateTime dateTimeModified, decimal amount, string note)
         {
@@ -44,6 +45,7 @@ namespace Maasgroep.Database.team_c.Repository.ViewModel
             DateTimeModified = dbRec.DateTimeModified;
             Amount = dbRec.Amount;
             Note = dbRec.Note;
+            ReceiptStatus = dbRec.ReceiptStatus == null ? null : new ReceiptStatusViewModel(dbRec.ReceiptStatus); // Deze geeft dus altijd null
         }
         
         [JsonConstructor]

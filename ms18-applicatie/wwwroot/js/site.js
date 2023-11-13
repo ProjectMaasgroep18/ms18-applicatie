@@ -19,8 +19,10 @@ function handleError(message) {
     return Promise.reject(message);
 }
 
-async function apiGet(action) {
-    // Send a Get request to the API
+async function apiGet(action, _fetchData) {
+    // Send a Get request to the API (do not use _fetchData directly)
+
+    _fetchData = (_fetchData && typeof _fetchData == 'object') ? _fetchData : {};
 
     LOAD_MSG.className = '';
     const json = await fetch(BASE_URL + action).catch(handleError).then(response => {
@@ -39,6 +41,11 @@ async function apiGet(action) {
     });
     LOAD_MSG.className = 'hidden';
     return json;
+}
+
+async function apiPost(action, data) {
+    // Send a Post request to the API
+    
 }
 
 function showOutput(data, container) {
