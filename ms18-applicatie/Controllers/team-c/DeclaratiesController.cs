@@ -26,17 +26,7 @@ public class DeclaratiesController : Controller
     public IActionResult Edit(long id)
     {
         ViewData["id"] = id;
-
-        var photo = _context.Receipt.Where(x => x.Id == id).FirstOrDefault();
-
-        var photo2 = _context.Photo.Where(x => x.Receipt == id).FirstOrDefault();
-
-        var output = new DeclaratieBestaand();
-
-        output.FormFile64 = photo2.Base64Image;
-        output.AangemaaktDoor = "Kevin";
-
-        return View(output);
+        return View();
     }
 
     public IActionResult Single(long id)

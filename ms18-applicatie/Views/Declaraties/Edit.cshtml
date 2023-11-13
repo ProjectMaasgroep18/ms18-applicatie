@@ -1,5 +1,3 @@
-@model DeclaratieBestaand
-
 <h1>Declaratie aanpassen</h1>
 
 <div id="login-user" class="hidden">
@@ -26,9 +24,6 @@
         </table>
     </form>
 
-
-    <img src=@Model.FormFile64 />
-
 </div>
 
 
@@ -43,19 +38,17 @@
             // Receipt loaded
 
             showOutput(receipt, document.querySelector('#receipt-form'));
+
+            apiGet('Receipt/' + @ViewData["id"] + '/ReceiptPhoto').then(result => {
+                if (typeof result[0] == 'undefined')
+                    return;
+
+                const img = document.querySelector('#receipt-photo');
+                img.src = result[0].base64Image;
+                showElement(img);
+            });
         })
     });
-
-    try {
-        let receiptImage = localStorage.getItem('receipt-' + @ViewData["id"]);
-        if (receiptImage) {
-            const img = document.querySelector('#receipt-photo');
-            img.src = receiptImage;
-            showElement(img);
-        }
-    } catch (e) {
-        console.warn('Local storage error', e);
-    }
 
     const receiptForm = document.querySelector('#receipt-form');
 
