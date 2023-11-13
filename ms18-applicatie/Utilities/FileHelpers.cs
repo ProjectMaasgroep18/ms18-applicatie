@@ -115,18 +115,18 @@ namespace ms18_applicatie.Utilities
                             $"{fieldDisplayName}({trustedFileNameForDisplay}) is empty.");
                     }
 
-                    if (!IsValidFileExtensionAndSignature(
-                        formFile.FileName, memoryStream, permittedExtensions))
-                    {
-                        modelState.AddModelError(formFile.Name,
-                            $"{fieldDisplayName}({trustedFileNameForDisplay}) file " +
-                            "type isn't permitted or the file's signature " +
-                            "doesn't match the file's extension.");
-                    }
-                    else
-                    {
+                    //if (!IsValidFileExtensionAndSignature(
+                    //    formFile.FileName, memoryStream, permittedExtensions))
+                    //{
+                    //    modelState.AddModelError(formFile.Name,
+                    //        $"{fieldDisplayName}({trustedFileNameForDisplay}) file " +
+                    //        "type isn't permitted or the file's signature " +
+                    //        "doesn't match the file's extension.");
+                    //}
+                    //else
+                    //{
                         return memoryStream.ToArray();
-                    }
+                    //}
                 }
             }
             catch (Exception ex)

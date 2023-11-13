@@ -29,7 +29,20 @@ public class DeclaratiesController : Controller
         return View();
     }
 
+    public IActionResult Single()
+    {
+        var photo = _context.Photo.Where(x => x.Id == 8).FirstOrDefault();
+
+        var output = new DeclaratieBestaand();
+
+        output.FormFile64 = "data:image;base64,"+ Convert.ToBase64String(photo.Bytes);
+        output.AangemaaktDoor = photo.MemberCreated?.Name ?? "Kevin";
+
+        return View(output);
+    }
+    
 /*
+
     [HttpPost]
 	public IActionResult Nieuw(DeclaratieViewModel viewModel)
 	{
@@ -69,8 +82,9 @@ public class DeclaratiesController : Controller
 
         var receiptEntered = _context.Receipt.OrderByDescending(x => x.DateTimeCreated).FirstOrDefault();
 
+        var toegestaand = new string[] { "image/png", "txt" };
         var fileContent = FileHelpers.ProcessFormFile<BufferedSingleFileUploadDb>(
-                    viewModel.FormFile, ModelState, new string[] { "png", "txt" },
+                    viewModel.FormFile, ModelState, toegestaand,
                     102400000).Result;
 
         var photo = new Photo()
