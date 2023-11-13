@@ -1,3 +1,5 @@
+@model DeclaratieViewModel
+
 <h1>Declaratie indienen</h1>
 
 <div id="login-user" class="hidden">
@@ -6,20 +8,30 @@
     <p>Vul hier de gegevens van je declaratie in:</p>  
 
     <form method="post" enctype="multipart/form-data" asp-action="Nieuw">
-        <table>
-            <tr>
-                <td>Bedrag: </td>
-                <td><input type="number" name="Amount" value="@ViewData["Amount"]"></td>
-            </tr>
-            <tr>
-                <td>Opmerkingen: </td>
-                <td><textarea name="Note">@ViewData["Note"]</textarea></td>
-            </tr>
-            <tr>
-                <td></td>
-                <td><input type="submit" value="Indienen" class="btn btn-primary"></td>
-            </tr>
-        </table>
+        <dl>
+            <dt>
+                <label asp-for="FormFile"></label>
+            </dt>
+            <dd>
+                <input asp-for="FormFile" type="file" />
+                <span asp-validation-for="FormFile"></span>
+            </dd>
+            <dt>
+                <label asp-for="Amount"></label>
+            </dt>
+            <dd>
+                <input asp-for="Amount" type="number" />
+                <span asp-validation-for="Amount"></span>
+            </dd>
+            <dt>
+                <label asp-for="Note"></label>
+            </dt>
+            <dd>
+                <input asp-for="Note" type="text" />
+                <span asp-validation-for="Note"></span>
+            </dd>
+        </dl>
+        <input class="btn btn-primary" type="submit" value="Indienen"  />
     </form>
 </div>
 

@@ -21,7 +21,14 @@ public class ReceiptController : ControllerBase
     [ActionName("receiptGet")]
     public IActionResult ReceiptGet()
     {
-        return Ok(_context.Receipt.Select(dbRec => new ReceiptViewModel(dbRec)).ToList());
+        var alles = _context.Receipt.Select(dbRec => new ReceiptViewModel(dbRec)).ToList();
+
+        foreach (var item in alles)
+        {
+            item.Status = GetReceiptStatus(item.StatusId);
+        }
+
+        return Ok(alles);
     }
 
     [HttpGet("{id}")]
@@ -216,5 +223,12 @@ public class ReceiptController : ControllerBase
         return amountEqual
                && noteEqual;
     }
-    
+
+    private string GetReceiptStatus(long id)
+    {
+        var nogTeChecken = _context.ReceiptStatus.FirstOrDefault(x => x.Id == id);
+
+        return nogTeChecken.Name;
+    }
+
 }

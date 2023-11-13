@@ -27,14 +27,17 @@ namespace Maasgroep.Database.team_c.Repository.ViewModel
         public DateTime? DateTimeModified { get; set; }
         public decimal? Amount { get; set; }
         public string? Note { get; set; }
+        public long StatusId { get; set; }
+        public string? Status { get; set; }
 
-        public ReceiptViewModel(int id, DateTime dateTimeCreated, DateTime dateTimeModified, decimal amount, string note)
+        public ReceiptViewModel(int id, DateTime dateTimeCreated, DateTime dateTimeModified, decimal amount, string note, long status)
         {
             ID = id;
             DateTimeCreated = dateTimeCreated;
             DateTimeModified = dateTimeModified;
             Amount = amount;
             Note = note;
+            StatusId = status;
         }
 
         public ReceiptViewModel(Receipt dbRec)
@@ -44,6 +47,7 @@ namespace Maasgroep.Database.team_c.Repository.ViewModel
             DateTimeModified = dbRec.DateTimeModified;
             Amount = dbRec.Amount;
             Note = dbRec.Note;
+            StatusId = dbRec.ReceiptStatusId;
         }
         
         [JsonConstructor]
