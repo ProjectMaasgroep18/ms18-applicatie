@@ -19,16 +19,24 @@ function handleError(message) {
     return Promise.reject(message);
 }
 
-async function apiGet(action) {
-    // Send a Get request to the API
+async function apiGet(action, _fetchData) {
+    // Send a Get request to the API (do not use _fetchData directly)
+
+    _fetchData = (_fetchData && typeof _fetchData == 'object') ? _fetchData : {
+        headers: {
+            "Accept": "application/json",
+            "Content-Type": "application/json",
+        },
+        redirect: "follow",
+    };
 
     LOAD_MSG.className = '';
-    const json = await fetch(BASE_URL + action).catch(handleError).then(response => {
+    const json = await fetch(BASE_URL + action, _fetchData).catch(handleError).then(response => {
         if (response.status >= 400 && response.status < 600) {
             // Server error
             return response.text().then(rawdata => {
                 try {
-                    return handleError(JSON.parse(rawdata).message)
+                    return handleError(JSON.parse(rawdata).message);
                 } catch {
                     console.warn('Failed to parse JSON data', rawdata);
                     return handleError('Er is een onverwachte fout opgetreden');
@@ -39,6 +47,21 @@ async function apiGet(action) {
     });
     LOAD_MSG.className = 'hidden';
     return json;
+}
+
+async function apiPost(action, data) {
+    // Send a Post request to the API
+
+    const fetchData = {
+        method: "POST",
+        headers: {
+            "Accept": "application/json",
+            "Content-Type": "application/json",
+        },
+        redirect: "follow",
+        body: JSON.stringify(data),
+    };
+    return await apiGet(action, fetchData);
 }
 
 function showOutput(data, container) {
