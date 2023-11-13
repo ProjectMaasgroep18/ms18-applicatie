@@ -1,4 +1,10 @@
+using Microsoft.Extensions.DependencyInjection;
+using Maasgroep.Database;
+
 var builder = WebApplication.CreateBuilder(args);
+
+// Add database context
+builder.Services.AddDbContext<MaasgroepContext>();
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
@@ -13,12 +19,14 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-app.UseHttpsRedirection();
+// app.UseHttpsRedirection(); // TODO Reenable for production, only disabled for testing
 app.UseStaticFiles();
 
 app.UseRouting();
 
 app.UseAuthorization();
+
+app.MapControllers();
 
 app.MapControllerRoute(
     name: "default",

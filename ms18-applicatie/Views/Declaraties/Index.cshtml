@@ -1,0 +1,86 @@
+<h1>@ViewData["Title"]</h1>
+
+<div id="login-user" class="hidden">
+    <p>Hallo <span rel="name"></span>!</p>    
+
+    <p>Hier kan je je bonnetjes inleveren:</p>
+
+    <p><a asp-action="Nieuw"><button class="btn btn-primary">Nieuwe declaratie</button></a></p>
+
+    <p>Dit zijn je bestaande declaraties in de database:</p>
+
+    <table id="user-receipts">
+        <tr>
+            <th>Bedrag</th>
+            <th>Opmerking</th>
+            <th>Status</th>
+            <th></th>
+        </tr>
+        
+        <tr id="user-receipts-empty" class="hidden">
+            <td colspan="999">Je hebt nog geen bonnetjes ingeleverd.</td>
+        </tr>
+        
+        <tr id="user-receipts-row" class="hidden">
+            <td rel="amount::euro"></td>
+            <td rel="note"></td>
+            <td rel="status"></td>
+            <td class="user-receipts-actions">
+                <a rel="id:href:editUrl">Aanpassen</a>
+                <a rel="id:data-id" href="#" class="delete-link">Verwijderen</a>
+            </td>
+        </tr>
+    </table>
+</div>
+
+@section scripts {
+<script>
+    apiGet('Session').then(member => {
+        // User session loaded
+     
+        showOutput(member, document.querySelector('#login-user'));
+        
+        apiGet('Receipt').then(receipts => {
+            // Receipts data loaded
+
+            let noReceipts = (!receipts || !receipts.length);
+            let receiptsTable = document.querySelector('#user-receipts');
+            if (noReceipts) {
+                showElement(document.querySelector('#user-receipts-empty'));
+            } else {
+                hideElement(document.querySelector('#user-receipts-empty'));
+            }
+            for (id in receipts) {
+                let receipt = document.querySelector('#user-receipts-row').cloneNode(true);
+                receipt.id = 'user-receipts-' + receipts[id].id;
+                showElement(receipt);
+                showOutput(receipts[id], receipt);
+                receiptsTable.appendChild(receipt);
+            }
+            showElement(receiptsTable);
+            receiptsTable.querySelectorAll('.delete-link').forEach(deleteLink => deleteLink.addEventListener('click', event => {
+                // Click Delete link
+
+                event.preventDefault();
+
+                if (!window.confirm('Weet je zeker dat je deze declaratie wilt verwijderen?'))
+                    return;
+
+                const deleteId = deleteLink.dataset.id;
+                const receiptRow = receiptsTable.querySelector('#user-receipts-' + deleteId);
+                hideElement(receiptRow.querySelector('.user-receipts-actions'));
+
+                apiDelete('Receipt/' + deleteId).then(result => {
+                    if (!result)
+                        return;
+
+                    // Receipt deleted in database, clean it up here too
+                    receiptRow.remove();
+                    if (receiptsTable.querySelectorAll('tr:not(.hidden)').length <= 1)
+                        showElement(document.querySelector('#user-receipts-empty'));
+                });
+            }));
+        });
+    });
+</script>
+}
