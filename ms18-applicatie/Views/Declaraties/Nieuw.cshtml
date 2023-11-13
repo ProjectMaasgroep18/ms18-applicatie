@@ -1,37 +1,25 @@
-@model DeclaratieViewModel
-
 <h1>Declaratie indienen</h1>
 
 <div id="login-user" class="hidden">
     <p>Hallo <span rel="name"></span>!</p>
 
-    <p>Vul hier de gegevens van je declaratie in:</p>  
+    <p>Vul hier de gegevens van je declaratie in:</p>
 
-    <form method="post" enctype="multipart/form-data" asp-action="Nieuw">
-        <dl>
-            <dt>
-                <label asp-for="FormFile"></label>
-            </dt>
-            <dd>
-                <input asp-for="FormFile" type="file" />
-                <span asp-validation-for="FormFile"></span>
-            </dd>
-            <dt>
-                <label asp-for="Amount"></label>
-            </dt>
-            <dd>
-                <input asp-for="Amount" type="number" />
-                <span asp-validation-for="Amount"></span>
-            </dd>
-            <dt>
-                <label asp-for="Note"></label>
-            </dt>
-            <dd>
-                <input asp-for="Note" type="text" />
-                <span asp-validation-for="Note"></span>
-            </dd>
-        </dl>
-        <input class="btn btn-primary" type="submit" value="Indienen"  />
+    <form method="post" id="receipt-form">
+        <table>
+            <tr>
+                <td>Bedrag: </td>
+                <td><input type="number" name="Amount" step="0.01"></td>
+            </tr>
+            <tr>
+                <td>Opmerkingen: </td>
+                <td><textarea name="Note"></textarea></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td><input type="submit" value="Indienen" class="btn btn-primary"></td>
+            </tr>
+        </table>
     </form>
 </div>
 
@@ -42,6 +30,23 @@
         // User session loaded
      
         showOutput(member, document.querySelector('#login-user'));
+    });
+
+    const receiptForm = document.querySelector('#receipt-form');
+
+    receiptForm.addEventListener('submit', event => {
+        // Submit form
+
+        event.preventDefault();
+        
+        let formData = {};
+        receiptForm.querySelectorAll('input[name],textarea[name]').forEach(input => formData[input.name] = input.value);
+        receiptForm.className = 'hidden';
+
+        apiPost('Receipt', formData).then(result => {
+            if (result.receipt)
+                window.location.href = '/Declaraties/Edit?id=' + result.receipt.id;
+        });
     });
 </script>
 }

@@ -14,6 +14,7 @@
             <th>Bedrag</th>
             <th>Opmerking</th>
             <th>Status</th>
+            <th></th>
         </tr>
         
         <tr id="user-receipts-empty" class="hidden">
@@ -21,9 +22,13 @@
         </tr>
         
         <tr id="user-receipts-row" class="hidden">
-            <td rel="amount"></td>
+            <td rel="amount::euro"></td>
             <td rel="note"></td>
             <td rel="status"></td>
+            <td class="user-receipts-actions">
+                <a rel="id:href:editUrl">Aanpassen</a>
+                <a rel="id:data-id" href="#" class="delete-link">Verwijderen</a>
+            </td>
         </tr>
     </table>
 </div>
@@ -43,12 +48,29 @@
             document.querySelector('#user-receipts-empty').className = noReceipts ? '' : 'hidden';
             for (id in receipts) {
                 let receipt = document.querySelector('#user-receipts-row').cloneNode(true);
-                receipt.id = 'user-receipts-' + id;
+                receipt.id = 'user-receipts-' + receipts[id].id;
                 receipt.className = '';
                 showOutput(receipts[id], receipt);
                 receiptsTable.appendChild(receipt);
             }
             receiptsTable.className = '';
+            receiptsTable.querySelectorAll('.delete-link').forEach(deleteLink => deleteLink.addEventListener('click', event => {
+                // Click Delete link
+
+                event.preventDefault();
+
+                if (!window.confirm('Weet je zeker dat je deze declaratie wilt verwijderen?'))
+                    return;
+
+                const receiptRow = receiptsTable.querySelector('#user-receipts-' + deleteLink.dataset.id);
+                receiptRow.querySelector('.user-receipts-actions').className = 'hidden';
+
+                apiDelete('Receipt/' + deleteLink.dataset.id).then(result => {
+                    if (!result)
+                        return;
+                    receiptRow.remove();
+                })
+            }));
         });
     });
 </script>

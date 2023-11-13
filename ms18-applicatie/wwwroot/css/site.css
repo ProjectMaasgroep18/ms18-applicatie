@@ -24,3 +24,12 @@ body {
 .hidden {
   display: none;
 }
+
+#user-receipts td,
+#user-receipts th {
+  padding-right: 1em;
+}
+
+.user-receipts-actions {
+  font-size: 0.8em;
+}

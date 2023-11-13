@@ -23,6 +23,13 @@ public class DeclaratiesController : Controller
         return View();
     }
 
+    public IActionResult Edit(long id)
+    {
+        ViewData["id"] = id;
+        return View();
+    }
+
+/*
     [HttpPost]
 	public IActionResult Nieuw(DeclaratieViewModel viewModel)
 	{
@@ -102,10 +109,10 @@ public class DeclaratiesController : Controller
         // Als er een validatie-error is
 		return View();
 	}
+*/
 
     public IActionResult Nieuw()
     {
-        // ViewData["Member"] = _context.Member.FirstOrDefault();
         return View();
     }
 }

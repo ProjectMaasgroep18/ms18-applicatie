@@ -1,0 +1,47 @@
+@model DeclaratieViewModel
+
+<h1>Declaratie indienen</h1>
+
+<div id="login-user" class="hidden">
+    <p>Hallo <span rel="name"></span>!</p>
+
+    <p>Vul hier de gegevens van je declaratie in:</p>  
+
+    <form method="post" enctype="multipart/form-data" asp-action="Nieuw">
+        <dl>
+            <dt>
+                <label asp-for="FormFile"></label>
+            </dt>
+            <dd>
+                <input asp-for="FormFile" type="file" />
+                <span asp-validation-for="FormFile"></span>
+            </dd>
+            <dt>
+                <label asp-for="Amount"></label>
+            </dt>
+            <dd>
+                <input asp-for="Amount" type="number" />
+                <span asp-validation-for="Amount"></span>
+            </dd>
+            <dt>
+                <label asp-for="Note"></label>
+            </dt>
+            <dd>
+                <input asp-for="Note" type="text" />
+                <span asp-validation-for="Note"></span>
+            </dd>
+        </dl>
+        <input class="btn btn-primary" type="submit" value="Indienen"  />
+    </form>
+</div>
+
+
+@section scripts {
+<script>
+    apiGet('Session').then(member => {
+        // User session loaded
+     
+        showOutput(member, document.querySelector('#login-user'));
+    });
+</script>
+}
