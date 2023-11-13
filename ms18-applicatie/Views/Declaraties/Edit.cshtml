@@ -5,7 +5,7 @@
 
     <p>Hier kan je je declaratie aanpassen:</p>
 
-    <p><img class="drop-image hidden" id="receipt-image"></p>
+    <p><img class="drop-image hidden" id="receipt-photo"></p>
 
     <form method="post" id="receipt-form" class="hidden">
         <table>
@@ -43,7 +43,7 @@
     try {
         let receiptImage = localStorage.getItem('receipt-' + @ViewData["id"]);
         if (receiptImage) {
-            const img = document.querySelector('#receipt-image');
+            const img = document.querySelector('#receipt-photo');
             img.src = receiptImage;
             showElement(img);
         }

@@ -209,14 +209,6 @@ function dropContainer(container) {
                     showElement(img);
                     title.innerText = file.name;
 
-                    // Keep it in Local Storage for now
-                    try {
-                        localStorage.setItem('receipt-new', resizedImage);
-                    } catch (e) {
-                        console.warn('Local storage error', e);
-                        localStorage.clear(); // Prevent localStorage from filling up completely (hope that fixes it)
-                        localStorage.setItem('receipt-new', resizedImage);
-                    }
                 };
                 image.src = readerEvent.target.result;
             };

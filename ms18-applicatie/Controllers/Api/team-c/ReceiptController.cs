@@ -27,6 +27,7 @@ public class ReceiptController : ControllerBase
         foreach (var item in alles)
         {
             item.Status = GetReceiptStatus(item.StatusId);
+            item.PhotoId = GetReceiptPhotoId(item.ID ?? 0);
         }
 
         return Ok(alles);
@@ -47,6 +48,9 @@ public class ReceiptController : ControllerBase
                 status = 404,
                 message = "Receipt not found"
             });
+
+        receiptViewModel.Status = GetReceiptStatus(receiptViewModel.StatusId);
+        receiptViewModel.PhotoId = GetReceiptPhotoId(receiptViewModel.ID ?? 0);
 
         return Ok(receiptViewModel);
     }
@@ -307,6 +311,12 @@ public class ReceiptController : ControllerBase
         var nogTeChecken = _context.ReceiptStatus.FirstOrDefault(x => x.Id == id);
 
         return nogTeChecken.Name;
+    }
+
+    private long? GetReceiptPhotoId(long id)
+    {
+        var firstPhoto = _context.Photo.FirstOrDefault(x => x.Receipt == id); //////////////////////////////
+        return firstPhoto?.Id;
     }
 
 }

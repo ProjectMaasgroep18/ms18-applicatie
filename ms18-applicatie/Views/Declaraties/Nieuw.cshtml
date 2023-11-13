@@ -9,11 +9,12 @@
 
         <label for="FormFile" class="drop-container">
             <span class="drop-title">Sleep hier je bestand</span>
-            <img src="" class="drop-image hidden">
+            <img src="" class="drop-image hidden" id="receipt-photo">
             <span class="drop-hint">of klik om een bestand te selecteren</span>
-            <input type="file" id="images" accept="image/*" required name="FormFile" class="hidden">
+            <input type="file" accept="image/*" required name="FormFile" class="hidden" id="receipt-input">
         </label>
 
+        <!--
         <p>Vul hier de gegevens van je declaratie in:</p>
 
         <table>
@@ -30,6 +31,9 @@
                 <td><input type="submit" value="Indienen" class="btn btn-primary"></td>
             </tr>
         </table>
+        -->
+
+        <p><input type="submit" value="Uploaden" class="btn btn-primary hidden" id="receipt-submit"></p>
     </form>
 </div>
 
@@ -43,31 +47,64 @@
     });
 
     const receiptForm = document.querySelector('#receipt-form');
+    const receiptInput = document.querySelector('#receipt-input');
+
+    receiptInput.addEventListener('change', () => {
+        // Show "upload" button
+
+        showElement(document.querySelector('#receipt-submit'));
+    });
 
     receiptForm.addEventListener('submit', event => {
         // Submit form
 
+        console.log('submit');
+
         event.preventDefault();
         
-        let formData = {};
-        receiptForm.querySelectorAll('input[name],textarea[name]').forEach(input => formData[input.name] = input.value);
+        const img = document.querySelector('#receipt-photo');
+
+        if (!img.src || !typeof receiptInput.files[0] == 'undefined')
+            return;
+
+        let fileName = receiptInput.files[0].name.split('.');
+        let fileExt = fileName.pop();
+        fileName = fileName.join('.');
+
+        // receiptForm.querySelectorAll('input[name],textarea[name]').forEach(input => formData[input.name] = input.value);
         hideElement(receiptForm);
 
-        apiPost('Receipt', formData).then(result => {
-            if (result.receipt) {
-                // Keep it in Local Storage for now
-                try {
-                    let receiptImage = localStorage.getItem('receipt-new');
-                    localStorage.removeItem('receipt-new');
-                    if (receiptImage)
-                        localStorage.setItem('receipt-' + result.receipt.id, receiptImage);
-                } catch (e) {
-                    console.warn('Local storage error', e);
-                    localStorage.removeItem('receipt-' + result.receipt.id);
-                }
-                // Redirect to main page
-                window.location.href = '/Declaraties/Edit/' + result.receipt.id;
+        const receiptData = {
+            Amount: 0,
+            Note: '',
+        };
+
+        apiPost('Receipt', receiptData).then(result => {
+            // Save (empty) receipt and then upload the photo
+
+            if (!result.receipt) {
+                handleError('Failed to save receipt');
+                return;
             }
+
+            const createdReceipt = result.receipt;
+
+            const formData = {
+                fileName: fileName,
+                fileExtension: fileExt,
+                base64Image: img.src,
+                Receipt: createdReceipt.id,
+            };
+
+            apiPost('ReceiptPhoto', formData).then(result => {
+                // Upload photo
+
+                if (result.photo) {
+                    window.location.href = '/Declaraties/Edit/' + createdReceipt.id;
+                } else {
+                    handleError('Failed to upload file');
+                }
+            });
         });
     });
 </script>

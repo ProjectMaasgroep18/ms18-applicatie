@@ -29,6 +29,7 @@ namespace Maasgroep.Database.Repository.ViewModel
         public string? Note { get; set; }
         public long StatusId { get; set; }
         public string? Status { get; set; }
+        public long? PhotoId { get; set; }
 
         public ReceiptViewModel(int id, DateTime dateTimeCreated, DateTime dateTimeModified, decimal amount, string note, long status)
         {

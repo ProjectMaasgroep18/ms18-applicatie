@@ -29,9 +29,9 @@ public class DeclaratiesController : Controller
         return View();
     }
 
-    public IActionResult Single()
+    public IActionResult Single(long id)
     {
-        var photo = _context.Photo.Where(x => x.Id == 8).FirstOrDefault();
+        var photo = _context.Photo.Where(x => x.Id == id).FirstOrDefault();
 
         var output = new DeclaratieBestaand();
 
