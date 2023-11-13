@@ -1,5 +1,40 @@
 @model DeclaratieViewModel
 
+
+<style>
+    .drop-container {
+        position: relative;
+        display: flex;
+        gap: 10px;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        height: 200px;
+        padding: 20px;
+        border-radius: 10px;
+        border: 2px dashed #555;
+        color: #444;
+        cursor: pointer;
+        transition: background .2s ease-in-out, border .2s ease-in-out;
+    }
+
+        .drop-container:hover {
+            background: #eee;
+            border-color: #111;
+        }
+
+            .drop-container:hover .drop-title {
+                color: #222;
+            }
+
+    .drop-title {
+        color: #444;
+        font-size: 20px;
+        font-weight: bold;
+        text-align: center;
+        transition: color .2s ease-in-out;
+    }
+</style>
 <h1>Declaratie indienen</h1>
 
 <div id="login-user" class="hidden">
@@ -9,13 +44,16 @@
 
     <form method="post" enctype="multipart/form-data" asp-action="Nieuw">
         <dl>
-            <dt>
-                <label asp-for="FormFile"></label>
-            </dt>
-            <dd>
-                <input asp-for="FormFile" type="file" />
-                <span asp-validation-for="FormFile"></span>
-            </dd>
+ 
+            <label for="FormFile" class="drop-container" id="dropcontainer">
+                <span class="drop-title">Sleep hier je bestand</span>
+                
+                of selecteer een bestand
+
+                <input type="file" id="images" accept="image/*" required name="FormFile">
+            </label>
+
+
             <dt>
                 <label asp-for="Amount"></label>
             </dt>
@@ -43,5 +81,30 @@
      
         showOutput(member, document.querySelector('#login-user'));
     });
+
+        const dropContainer = document.getElementById("dropcontainer")
+        const fileInput = document.getElementById("images")
+
+        dropContainer.addEventListener("dragover", (e) => {
+            // prevent default to allow drop
+            e.preventDefault()
+        }, false)
+
+        dropContainer.addEventListener("dragenter", () => {
+            dropContainer.classList.add("drag-active")
+        })
+
+        dropContainer.addEventListener("dragleave", () => {
+            dropContainer.classList.remove("drag-active")
+        })
+
+        dropContainer.addEventListener("drop", (e) => {
+            e.preventDefault()
+            dropContainer.classList.remove("drag-active")
+            fileInput.files = e.dataTransfer.files
+        })
 </script>
 }
+
+
+    
