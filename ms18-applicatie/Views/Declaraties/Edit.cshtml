@@ -53,7 +53,7 @@
 
         apiPut('Receipt/' + @ViewData["id"], formData).then(result => {
             if (result) // PUT should not return a response body, just a success status
-                window.location.href = '/Declaraties/Edit?id=' + result.receipt.id;
+                window.location.href = '/Declaraties'; // Of: /Declaraties/Edit?id=' + result.receipt.id;
         });
 
     });
