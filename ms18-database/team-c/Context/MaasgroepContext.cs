@@ -36,7 +36,7 @@ namespace Maasgroep.Database
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseNpgsql("UserID=postgres;Password=postgres;Host=localhost;port=5410;Database=Maasgroep;Pooling=true");
+            optionsBuilder.UseNpgsql("UserID=postgres;Password=postgres;Host=localhost;port=5454;Database=Maasgroep;Pooling=true");
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -339,7 +339,7 @@ namespace Maasgroep.Database
                 .WithOne(r => r.Photo)
                 .HasForeignKey<Photo>(p => p.Receipt)
                 .HasConstraintName("FK_Photo_Receipt")
-                .OnDelete(DeleteBehavior.NoAction);
+                .OnDelete(DeleteBehavior.Cascade);
         }
         #endregion
     }
