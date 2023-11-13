@@ -26,7 +26,17 @@ public class DeclaratiesController : Controller
     public IActionResult Edit(long id)
     {
         ViewData["id"] = id;
-        return View();
+
+        var photo = _context.Receipt.Where(x => x.Id == id).FirstOrDefault();
+
+        var photo2 = _context.Photo.Where(x => x.Receipt == id).FirstOrDefault();
+
+        var output = new DeclaratieBestaand();
+
+        output.FormFile64 = photo2.Base64Image;
+        output.AangemaaktDoor = "Kevin";
+
+        return View(output);
     }
 
     public IActionResult Single(long id)
@@ -34,7 +44,7 @@ public class DeclaratiesController : Controller
         var photo = _context.Photo.Where(x => x.Id == id).FirstOrDefault();
 
         var output = new DeclaratieBestaand();
-
+        
         output.FormFile64 = "data:image;base64,"+ Convert.ToBase64String(photo.Bytes);
         output.AangemaaktDoor = photo.MemberCreated?.Name ?? "Kevin";
 
