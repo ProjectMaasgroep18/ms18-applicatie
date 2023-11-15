@@ -315,7 +315,7 @@ public class ReceiptController : ControllerBase
 
     private long? GetReceiptPhotoId(long id)
     {
-        var firstPhoto = _context.Photo.FirstOrDefault(x => x.Receipt == id); //////////////////////////////
+        var firstPhoto = _context.Photo.FirstOrDefault(x => x.Receipt == id);
         return firstPhoto?.Id;
     }
 

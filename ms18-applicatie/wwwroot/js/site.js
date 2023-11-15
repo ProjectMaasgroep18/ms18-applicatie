@@ -23,6 +23,12 @@ function showElement(el) {
     el.className = el.className.replace(/(\s+|^)hidden(\s+|$)/, ' ').trim();
 }
 
+function setLoadMessage(msg) {
+    // Set new message to "loading" element
+
+    LOAD_MSG.innerText = msg || "Laden...";
+}
+
 function handleError(message) {
     // Show error message
 
@@ -50,10 +56,10 @@ async function apiGet(action, _fetchData, _skipJson) {
             // Server error
             return response.text().then(rawdata => {
                 try {
-                    return handleError(JSON.parse(rawdata).message);
+                    return handleError(JSON.parse(rawdata).message || 'Er is een onbekende fout opgetreden'); // Foutstatus, maar JSON zonder error message? 
                 } catch {
                     console.warn('Failed to parse JSON data', rawdata);
-                    return handleError('Er is een onverwachte fout opgetreden');
+                    return handleError('Er is een onverwachte fout opgetreden'); // Geen geldige JSON (error in plaintext? zie console)
                 }
             });
         }
@@ -171,15 +177,26 @@ function dropContainer(container) {
         // Handle file selection
         // based on: https://stackoverflow.com/questions/23945494/use-html5-to-resize-an-image-before-upload
 
-        const file = fileInput.files[0];
-        const img = container.querySelector('.drop-image');
+        const files = fileInput.files;
+        const imgDiv = container.querySelector('.drop-image-div');
         const title = container.querySelector('.drop-title');
-        const reader = new FileReader();
         const max_size = 800; // Maximum 800px (width or height)
 
-        if (file.type.match(/^image\//)) {
-            // Load the image
+        let filenames = [];
+        imgDiv.innerHTML = ''; // Clear imgDiv (in case new files were chosen)
+    
+        for (id in files) {
+            // Load the images
 
+            let file = files[id];
+
+            if (typeof file != 'object' || !file.type.match(/^image\//))
+                continue;
+
+            let filename = file.name;
+            filenames.push(filename);
+            
+            let reader = new FileReader();
             reader.onload = readerEvent => {
                 var image = new Image();
                 image.onload = () => {
@@ -204,20 +221,20 @@ function dropContainer(container) {
                     canvas.getContext('2d').drawImage(image, 0, 0, width, height);
                     resizedImage = canvas.toDataURL('image/jpeg');
 
-                    // Now let's something with the resized image
+                    // Put the resized image in an img tag
+                    let img = document.createElement('img');
+                    img.className = 'drop-image';
+                    img.dataset.id = id;
+                    img.dataset.filename = filename;
                     img.src = resizedImage;
-                    showElement(img);
-                    title.innerText = file.name;
-
+                    imgDiv.appendChild(img);
                 };
                 image.src = readerEvent.target.result;
             };
             reader.readAsDataURL(file);
-        } else {
-            // Not an image, discard it
-
-            fileInput.value = null;
         }
+
+        title.innerText = filenames.join(', ');
     });
 }
 

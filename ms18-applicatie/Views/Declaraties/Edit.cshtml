@@ -3,9 +3,7 @@
 <div id="login-user" class="hidden">
     <p>Hallo <span rel="name"></span>!</p>
 
-    <p>Hier kan je je declaratie aanpassen:</p>
-
-    <p><img class="drop-image hidden" id="receipt-photo"></p>
+    <p>Hier kan je je declaratie aanpassen of aanvullen:</p>
 
     <form method="post" id="receipt-form" class="hidden">
         <table>
@@ -24,6 +22,15 @@
         </table>
     </form>
 
+    <p><i>Foto's:</i></p>
+
+    <div id="receipt-photos">
+        <p id="receipt-photo" class="hidden"><img class="drop-image"></p>
+        <p id="receipt-photos-none" class="hidden">Er zijn geen foto's bij deze declaratie</p>
+    </div>
+
+    <p><button type="button" class="btn btn-secondary" id="receipt-new-photo">Extra foto toevoegen</button></p>
+    <input type="file" accept="image/*" class="hidden" id="receipt-input" multiple>
 </div>
 
 
@@ -40,12 +47,20 @@
             showOutput(receipt, document.querySelector('#receipt-form'));
 
             apiGet('Receipt/' + @ViewData["id"] + '/ReceiptPhoto').then(result => {
+                // Show all receipt photos
+
                 if (typeof result[0] == 'undefined')
                     return;
 
-                const img = document.querySelector('#receipt-photo');
-                img.src = result[0].base64Image;
-                showElement(img);
+                const photosDiv = document.querySelector('#receipt-photos');
+                for (id in result) {
+                    let photo = document.querySelector('#receipt-photo').cloneNode(true);
+                    let img = photo.querySelector('img');
+                    photo.id = 'receipt-photo-' + id;
+                    img.src = result[id].base64Image;
+                    showElement(photo);
+                    photosDiv.appendChild(photo);
+                }
             });
         })
     });

@@ -8,30 +8,11 @@
     <form method="post" id="receipt-form">
 
         <label for="FormFile" class="drop-container">
-            <span class="drop-title">Sleep hier je bestand</span>
-            <img src="" class="drop-image hidden" id="receipt-photo">
-            <span class="drop-hint">of klik om een bestand te selecteren</span>
-            <input type="file" accept="image/*" required name="FormFile" class="hidden" id="receipt-input">
+            <span class="drop-title">Upload je foto</span>
+            <div class="drop-image-div"></div>
+            <span class="drop-hint">sleep of klik om een bestand te selecteren</span>
+            <input type="file" accept="image/*" required name="FormFile" class="hidden" id="receipt-input" multiple>
         </label>
-
-        <!--
-        <p>Vul hier de gegevens van je declaratie in:</p>
-
-        <table>
-            <tr>
-                <td>Bedrag: </td>
-                <td><input type="number" name="Amount" value="0" step="0.01"></td>
-            </tr>
-            <tr>
-                <td>Opmerkingen: </td>
-                <td><textarea name="Note"></textarea></td>
-            </tr>
-            <tr>
-                <td></td>
-                <td><input type="submit" value="Indienen" class="btn btn-primary"></td>
-            </tr>
-        </table>
-        -->
 
         <p><input type="submit" value="Uploaden" class="btn btn-primary hidden" id="receipt-submit"></p>
     </form>
@@ -62,17 +43,15 @@
 
         event.preventDefault();
         
-        const img = document.querySelector('#receipt-photo');
+        const imgs = document.querySelectorAll('.drop-image-div img');
 
-        if (!img.src || !typeof receiptInput.files[0] == 'undefined')
+        if (!imgs || !imgs.length)
             return;
-
-        let fileName = receiptInput.files[0].name.split('.');
-        let fileExt = fileName.pop();
-        fileName = fileName.join('.');
 
         // receiptForm.querySelectorAll('input[name],textarea[name]').forEach(input => formData[input.name] = input.value);
         hideElement(receiptForm);
+
+        setLoadMessage('Declaratie aanmaken...')
 
         const receiptData = {
             Amount: 0,
@@ -89,22 +68,41 @@
 
             const createdReceipt = result.receipt;
 
-            const formData = {
-                fileName: fileName,
-                fileExtension: fileExt,
-                base64Image: img.src,
-                Receipt: createdReceipt.id,
-            };
+            let uploadsTotal = imgs.length;
+            let uploadsFinished = 0;
 
-            apiPost('ReceiptPhoto', formData).then(result => {
-                // Upload photo
+            for (id in imgs) {
+                // Loop through all selected receipt photos
 
-                if (result.photo) {
-                    window.location.href = '/Declaraties/Edit/' + createdReceipt.id;
-                } else {
-                    handleError('Failed to upload file');
-                }
-            });
+                setLoadMessage('Foto\'s uploaden (' + Math.round(uploadsFinished/uploadsTotal * 100) + '%)...')
+
+                let img = imgs[id];
+                let fileId = img.dataset.id;
+                let fileName = img.dataset.filename;
+                fileName = typeof fileName == 'string' ? fileName.split('.') : '';
+                let fileExt = fileName.pop();
+                fileName = fileName.join('.');
+
+                const formData = {
+                    fileName: fileName,
+                    fileExtension: fileExt,
+                    base64Image: img.src,
+                    Receipt: createdReceipt.id,
+                };
+
+                apiPost('ReceiptPhoto', formData).then(result => {
+                    // Upload photo
+
+                    if (result.photo) {
+                        uploadsFinished++;
+                        setLoadMessage('Foto\'s uploaden (' + Math.round(uploadsFinished/uploadsTotal * 100) + '%)...')
+                        if (uploadsFinished == uploadsTotal)
+                            window.location.href = '/Declaraties/Edit/' + createdReceipt.id;
+                    } else {
+                        handleError('Uploaden mislukt');
+                    }
+                });
+            }
         });
     });
 </script>
