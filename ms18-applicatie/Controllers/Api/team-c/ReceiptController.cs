@@ -1,5 +1,4 @@
 ﻿using Maasgroep.Database;
-using Maasgroep.Database.Members;
 using Maasgroep.Database.Photos;
 using Maasgroep.Database.Receipts;
 using Maasgroep.Database.Repository.ViewModel;
@@ -175,7 +174,7 @@ public class ReceiptController : ControllerBase
     
     [HttpDelete("{id}")]
     [ActionName("receiptDelete")]
-    public IActionResult ReceiptRemove(long id)
+    public IActionResult ReceiptDelete(long id)
     {
         
         // Retrieve the existing receipt from your data store (e.g., database)
@@ -256,7 +255,7 @@ public class ReceiptController : ControllerBase
         {
             status = 201,
             message = "Photo created",
-            photo = PhotoViewModel.FromDatabaseModel(createdPhoto)
+            photo = new PhotoViewModel(createdPhoto)
         });
     }
 
@@ -280,7 +279,7 @@ public class ReceiptController : ControllerBase
         // Get all photos for the receipt
         var photos = _context.Photo
             .Where(photo => photo.Receipt == existingReceipt.Id)
-            .Select(photo => PhotoViewModel.FromDatabaseModel(photo))
+            .Select(photo => new PhotoViewModel(photo))
             .ToList();
         
         return Ok(photos);
@@ -307,7 +306,7 @@ public class ReceiptController : ControllerBase
     {
         var nogTeChecken = _context.ReceiptStatus.FirstOrDefault(x => x.Id == id);
 
-        return nogTeChecken.Name;
+        return nogTeChecken?.Name ?? "";
     }
 
     private long? GetReceiptPhotoId(long id)

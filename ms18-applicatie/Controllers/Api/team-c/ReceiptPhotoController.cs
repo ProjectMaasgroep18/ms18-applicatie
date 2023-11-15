@@ -1,7 +1,5 @@
 ﻿using Maasgroep.Database;
-using Maasgroep.Database.Members;
 using Maasgroep.Database.Photos;
-using Maasgroep.Database.Receipts;
 using Maasgroep.Database.Repository.ViewModel;
 using Microsoft.AspNetCore.Mvc;
 
@@ -33,7 +31,7 @@ public class ReceiptPhotoController : ControllerBase
             });
         }
         
-        return Ok(PhotoViewModel.FromDatabaseModel(photo));
+        return Ok(new PhotoViewModel(photo));
     }
 
     [HttpPost]
@@ -67,7 +65,7 @@ public class ReceiptPhotoController : ControllerBase
         {
             status = 201,
             message = "Photo created",
-            photo = PhotoViewModel.FromDatabaseModel(createdPhoto)
+            photo = new PhotoViewModel(createdPhoto)
         });
     }
 
@@ -105,7 +103,7 @@ public class ReceiptPhotoController : ControllerBase
         // Retrieve the existing photo from your data store (e.g., database)
         Photo? existingPhoto = _context.Photo.Find(id);
 
-        // Check if the receipt with the provided ID exists
+        // Check if the photo with the provided ID exists
         if (existingPhoto == null)
         {
             return NotFound(new
@@ -156,7 +154,7 @@ public class ReceiptPhotoController : ControllerBase
     
     [HttpDelete("{id}")]
     [ActionName("photoDelete")]
-    public IActionResult photoRemove(long id)
+    public IActionResult PhotoDelete(long id)
     {
         
         // Retrieve the existing receipt from your data store (e.g., database)
@@ -172,7 +170,7 @@ public class ReceiptPhotoController : ControllerBase
             });
         }
         
-        // Try to remove the receipt from your data store and handle if it is not possible
+        // Try to remove the photo from your data store and handle if it is not possible
         try
         {
             _context.Remove(existingPhoto);
@@ -193,7 +191,7 @@ public class ReceiptPhotoController : ControllerBase
     
     private bool PhotosAreEqual(Photo existingPhoto, PhotoViewModel updatedPhotoViewModel)
     {
-        // Compare relevant properties to check if the receipt is unchanged
+        // Compare relevant properties to check if the photo is unchanged
 
         // Check if given value is null or if they are equal
         bool nameEqual = (updatedPhotoViewModel.fileName == null)
