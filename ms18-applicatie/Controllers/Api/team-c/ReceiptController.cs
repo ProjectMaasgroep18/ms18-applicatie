@@ -85,7 +85,7 @@ public class ReceiptController : ControllerBase
             _context.Receipt.Add(createdReceipt);
             _context.SaveChanges();
         }
-        catch (Exception e)
+        catch (Exception)
         {
             return UnprocessableEntity(new
             {
@@ -117,7 +117,7 @@ public class ReceiptController : ControllerBase
         }
         
         // Check if the ID in the request body matches the ID in the URL
-        if (updatedReceiptViewModel.ID != id)
+        if (updatedReceiptViewModel.ID != null && updatedReceiptViewModel.ID != id)
         {
             return BadRequest(new
             {
@@ -126,13 +126,10 @@ public class ReceiptController : ControllerBase
             });
         }
 
+        // Get the ID from URL (/Receipt/{id}/) if it was not in the body
         if (updatedReceiptViewModel.ID == null)
         {
-            return BadRequest(new
-            {
-                status = 400,
-                message = "Invalid request body, missing ID"
-            });
+            updatedReceiptViewModel.ID = id;
         }
 
         // Retrieve the existing receipt from your data store (e.g., database)
@@ -200,7 +197,7 @@ public class ReceiptController : ControllerBase
             _context.Remove(existingReceipt);
             _context.SaveChanges();
         }
-        catch (Exception e)
+        catch (Exception)
         {
             return Conflict(new
             {

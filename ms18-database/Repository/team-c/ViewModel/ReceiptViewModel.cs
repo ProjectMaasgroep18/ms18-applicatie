@@ -10,7 +10,7 @@ namespace Maasgroep.Database.Repository.ViewModel
 {
     
     /*
-    id”: Number,
+    “id”: Number,
     “dateTimeCreated”: DateTime,
     “dateTimeModified”: DateTime,
     “amount”: Number,

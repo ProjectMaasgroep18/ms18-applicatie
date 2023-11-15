@@ -27,7 +27,12 @@
         <p><i>Foto's:</i></p>
 
         <div id="receipt-photos">
-            <p id="receipt-photo" class="hidden"><img class="drop-image"></p>
+            <div id="receipt-photo" class="hidden">
+                <img class="drop-image">
+                <p class="user-actions">
+                    <a href="#" class="delete-photo">Verwijderen</a>
+                </p>
+            </div>
             <p id="receipt-photos-none" class="hidden">Er zijn geen foto's bij deze declaratie</p>
         </div>
 
@@ -48,6 +53,27 @@
     const receiptId = @ViewData["id"];
     const photosDiv = document.querySelector('#receipt-photos');
 
+    async function deletePhoto(deleteId) {
+        // Delete photo by ID
+
+        if (!window.confirm('Weet je zeker dat je deze foto wilt verwijderen?'))
+            return;
+
+        const photoContainer = document.querySelector('#receipt-photo-' + deleteId);
+        hideElement(photoContainer.querySelector('.user-actions'));
+
+        setLoadMessage('Foto verwijderen...');
+        let result = await apiDelete('ReceiptPhoto/' + deleteId);
+        
+        if (!result)
+            return;
+
+        // Photo deleted in database, clean it up here too
+        photoContainer.remove();
+        if (photosDiv.querySelectorAll(':not(.hidden) img').length <= 1)
+            showElement(document.querySelector('#receipt-photos-none'));
+    }
+
     apiGet('Session').then(member => {
         // User session loaded
      
@@ -66,11 +92,17 @@
                     return;
                 }
 
-                for (id in result) {
+                for (i in result) {
                     let photo = document.querySelector('#receipt-photo').cloneNode(true);
                     let img = photo.querySelector('img');
-                    photo.id = 'receipt-photo-' + result[id].id;
-                    img.src = result[id].base64Image;
+                    let deleteLink = photo.querySelector('.delete-photo');
+                    let id = result[i].id;
+                    deleteLink.addEventListener('click', event => {
+                        event.preventDefault();
+                        deletePhoto(id);
+                    });
+                    photo.id = 'receipt-photo-' + id;
+                    img.src = result[i].base64Image;
                     showElement(photo);
                     photosDiv.appendChild(photo);
                 }
@@ -89,9 +121,7 @@
 
         event.preventDefault();
         
-        let formData = {
-            id: receiptId,
-        };
+        let formData = {};
         receiptForm.querySelectorAll('input[name],textarea[name]').forEach(input => formData[input.name] = input.value);
         hideElement(receiptForm);
         hideElement(receiptPhotosForm);
@@ -146,8 +176,14 @@
                 // Show the photo here
                 let photo = document.querySelector('#receipt-photo').cloneNode(true);
                 let img = photo.querySelector('img');
-                photo.id = 'receipt-photo-' + result.photo.id;
+                let deleteLink = photo.querySelector('.delete-photo');
+                let id = result.photo.id;
+                photo.id = 'receipt-photo-' + id;
                 img.src = result.photo.base64Image;
+                deleteLink.addEventListener('click', event => {
+                    event.preventDefault();
+                    deletePhoto(id);
+                });
                 showElement(photo);
                 photosDiv.appendChild(photo);
             } else {

@@ -71,4 +71,41 @@ public class ReceiptPhotoController : ControllerBase
         });
     }
 
+    
+    [HttpDelete("{id}")]
+    [ActionName("photoDelete")]
+    public IActionResult photoRemove(long id)
+    {
+        
+        // Retrieve the existing receipt from your data store (e.g., database)
+        Photo? existingPhoto = _context.Photo.Find(id);
+        
+        // Check if the receipt with the provided ID exists
+        if (existingPhoto == null)
+        {
+            return NotFound(new
+            {
+                status = 404,
+                message = "Photo not found"
+            });
+        }
+        
+        // Try to remove the receipt from your data store and handle if it is not possible
+        try
+        {
+            _context.Remove(existingPhoto);
+            _context.SaveChanges();
+        }
+        catch (Exception)
+        {
+            return Conflict(new
+            {
+                status = 409,
+                message = "Could not delete photo" // TODO Check which dependency is causing the conflict
+            });
+        }
+        
+        return NoContent();
+    }
+
 }
