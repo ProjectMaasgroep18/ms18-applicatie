@@ -5,7 +5,7 @@ namespace Maasgroep.Database.Repository.ViewModel;
 public class PhotoViewModel
 {
     
-    public long Id { get; set; }
+    public long? Id { get; set; }
     public long? Receipt { get; set; }
     public string fileExtension { get; set; }
     public string fileName { get; set; }
