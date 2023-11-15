@@ -39,8 +39,6 @@
     receiptForm.addEventListener('submit', event => {
         // Submit form
 
-        console.log('submit');
-
         event.preventDefault();
         
         const imgs = document.querySelectorAll('.drop-image-div img');
@@ -58,7 +56,7 @@
             Note: '',
         };
 
-        apiPost('Receipt', receiptData).then(result => {
+        apiPost('Receipt', receiptData).then(async result => {
             // Save (empty) receipt and then upload the photo
 
             if (!result.receipt) {
@@ -71,13 +69,12 @@
             let uploadsTotal = imgs.length;
             let uploadsFinished = 0;
 
-            for (id in imgs) {
+            for (let i = 0; i < imgs.length; i++) {
                 // Loop through all selected receipt photos
 
                 setLoadMessage('Foto\'s uploaden (' + Math.round(uploadsFinished/uploadsTotal * 100) + '%)...')
 
-                let img = imgs[id];
-                let fileId = img.dataset.id;
+                let img = imgs[i];
                 let fileName = img.dataset.filename;
                 fileName = typeof fileName == 'string' ? fileName.split('.') : '';
                 let fileExt = fileName.pop();
@@ -90,19 +87,18 @@
                     Receipt: createdReceipt.id,
                 };
 
-                apiPost('ReceiptPhoto', formData).then(result => {
-                    // Upload photo
-
-                    if (result.photo) {
-                        uploadsFinished++;
-                        setLoadMessage('Foto\'s uploaden (' + Math.round(uploadsFinished/uploadsTotal * 100) + '%)...')
-                        if (uploadsFinished == uploadsTotal)
-                            window.location.href = '/Declaraties/Edit/' + createdReceipt.id;
-                    } else {
-                        handleError('Uploaden mislukt');
-                    }
-                });
+                // Upload photo
+                let result = await apiPost('ReceiptPhoto', formData).then();
+                
+                if (result.photo) {
+                    uploadsFinished++;
+                } else {
+                    handleError('Uploaden mislukt');
+                }
             }
+
+            // All uploads finished
+            window.location.href = '/Declaraties/Edit/' + createdReceipt.id;
         });
     });
 </script>

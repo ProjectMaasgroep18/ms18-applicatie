@@ -21,7 +21,7 @@ body {
   color: red;
 }
 
-.hidden {
+.hidden.hidden {
   display: none;
 }
 
@@ -30,7 +30,7 @@ body {
   padding-right: 1em;
 }
 
-.user-receipts-actions {
+.user-actions {
   font-size: 0.8em;
 }
 
@@ -75,6 +75,6 @@ body {
   margin: 0 5px;
 }
 
-.drop-active {
+.drag-active {
   background-color: #ddd;
 }

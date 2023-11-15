@@ -25,7 +25,7 @@
             <td rel="amount::euro"></td>
             <td rel="note"></td>
             <td rel="status"></td>
-            <td class="user-receipts-actions">
+            <td class="user-actions">
                 <a rel="id:href:editUrl">Aanpassen</a>
                 <a rel="id:data-id" href="#" class="delete-link">Verwijderen</a>
             </td>
@@ -68,7 +68,7 @@
 
                 const deleteId = deleteLink.dataset.id;
                 const receiptRow = receiptsTable.querySelector('#user-receipts-' + deleteId);
-                hideElement(receiptRow.querySelector('.user-receipts-actions'));
+                hideElement(receiptRow.querySelector('.user-actions'));
 
                 apiDelete('Receipt/' + deleteId).then(result => {
                     if (!result)

@@ -22,50 +22,67 @@
         </table>
     </form>
 
-    <p><i>Foto's:</i></p>
+    <form id="receipt-photos-form">
 
-    <div id="receipt-photos">
-        <p id="receipt-photo" class="hidden"><img class="drop-image"></p>
-        <p id="receipt-photos-none" class="hidden">Er zijn geen foto's bij deze declaratie</p>
-    </div>
+        <p><i>Foto's:</i></p>
 
-    <p><button type="button" class="btn btn-secondary" id="receipt-new-photo">Extra foto toevoegen</button></p>
-    <input type="file" accept="image/*" class="hidden" id="receipt-input" multiple>
+        <div id="receipt-photos">
+            <p id="receipt-photo" class="hidden"><img class="drop-image"></p>
+            <p id="receipt-photos-none" class="hidden">Er zijn geen foto's bij deze declaratie</p>
+        </div>
+
+        <p><button type="button" class="btn btn-secondary" id="receipt-extra-photo">Extra foto toevoegen</button></p>
+        
+        <label for="FormFile" class="drop-container hidden" id="receipt-new-photos">
+            <span class="drop-title">Upload je foto</span>
+            <div class="drop-image-div"></div>
+            <span class="drop-hint">sleep of klik om een bestand te selecteren</span>
+            <input type="file" accept="image/*" required class="hidden" id="receipt-input" multiple>
+        </label>
+    </form>
 </div>
 
 
 @section scripts {
 <script>
+    const receiptId = @ViewData["id"];
+    const photosDiv = document.querySelector('#receipt-photos');
+
     apiGet('Session').then(member => {
         // User session loaded
      
         showOutput(member, document.querySelector('#login-user'));
 
-        apiGet('Receipt/' + @ViewData["id"]).then(receipt => {
+        apiGet('Receipt/' + receiptId).then(receipt => {
             // Receipt loaded
 
             showOutput(receipt, document.querySelector('#receipt-form'));
 
-            apiGet('Receipt/' + @ViewData["id"] + '/ReceiptPhoto').then(result => {
+            apiGet('Receipt/' + receiptId + '/ReceiptPhoto').then(result => {
                 // Show all receipt photos
 
-                if (typeof result[0] == 'undefined')
+                if (typeof result[0] == 'undefined') {
+                    showElement(document.querySelector('#receipt-photos-none'));
                     return;
+                }
 
-                const photosDiv = document.querySelector('#receipt-photos');
                 for (id in result) {
                     let photo = document.querySelector('#receipt-photo').cloneNode(true);
                     let img = photo.querySelector('img');
-                    photo.id = 'receipt-photo-' + id;
+                    photo.id = 'receipt-photo-' + result[id].id;
                     img.src = result[id].base64Image;
                     showElement(photo);
                     photosDiv.appendChild(photo);
                 }
+
             });
         })
     });
 
     const receiptForm = document.querySelector('#receipt-form');
+    const receiptPhotosForm = document.querySelector('#receipt-photos-form');
+    const extraPhoto = document.querySelector('#receipt-extra-photo');
+    const dropInput = document.querySelector('#receipt-new-photos');
 
     receiptForm.addEventListener('submit', event => {
         // Submit form
@@ -73,16 +90,72 @@
         event.preventDefault();
         
         let formData = {
-            id: @ViewData["id"],
+            id: receiptId,
         };
         receiptForm.querySelectorAll('input[name],textarea[name]').forEach(input => formData[input.name] = input.value);
         hideElement(receiptForm);
+        hideElement(receiptPhotosForm);
 
-        apiPut('Receipt/' + @ViewData["id"], formData).then(result => {
+        setLoadMessage('Bezig met opslaan...');
+
+        apiPut('Receipt/' + receiptId, formData).then(result => {
             if (result) // PUT should not return a response body, just a success status
                 window.location.href = '/Declaraties'; // Of: /Declaraties/Edit?id=' + result.receipt.id;
         });
-
     });
+    
+    extraPhoto.addEventListener('click', event => {
+        // Select extra photos
+
+        document.querySelector('#receipt-input').click();
+    });
+
+    dropInput.addEventListener('photos-resized', async event => {
+        // Extra photos selected and resized (see site.js)
+
+        if (!event.detail || !event.detail.length)
+            return;
+        
+        let uploadsFinished = 0;
+        let uploadsTotal = event.detail.length;
+
+        for (id in event.detail) {
+            // Loop through all selected receipt photos
+
+            setLoadMessage('Foto\'s uploaden (' + Math.round(uploadsFinished/uploadsTotal * 100) + '%)...')
+
+            let fileData = event.detail[id];
+            let fileName = fileData.filename;
+            fileName = typeof fileName == 'string' ? fileName.split('.') : '';
+            let fileExt = fileName.pop();
+            fileName = fileName.join('.');
+
+            const formData = {
+                fileName: fileName,
+                fileExtension: fileExt,
+                base64Image: fileData.data,
+                Receipt: receiptId,
+            };
+
+            // Upload photo
+            let result = await apiPost('ReceiptPhoto', formData);
+        
+            if (result.photo) {
+                uploadsFinished++;
+
+                // Show the photo here
+                let photo = document.querySelector('#receipt-photo').cloneNode(true);
+                let img = photo.querySelector('img');
+                photo.id = 'receipt-photo-' + result.photo.id;
+                img.src = result.photo.base64Image;
+                showElement(photo);
+                photosDiv.appendChild(photo);
+            } else {
+                handleError('Uploaden mislukt');
+            }
+        }
+    });
+
+
 </script>
 }

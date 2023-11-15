@@ -13,14 +13,13 @@ const ERROR_MSG = document.querySelector('#error');
 function hideElement(el) {
     // Add "hidden" class to element
 
-    if (!el.className.match(/(\s|^)hidden(\s|$)/))
-        el.className = (el.className.trim() + ' hidden').trim();
+    el.classList.add('hidden');
 }
 
 function showElement(el) {
     // Remove "hidden" class from element
     
-    el.className = el.className.replace(/(\s+|^)hidden(\s+|$)/, ' ').trim();
+    el.classList.remove('hidden');
 }
 
 function setLoadMessage(msg) {
@@ -136,14 +135,58 @@ function showOutput(data, container) {
                 // No property provided
                 output.innerText = transformedData;
             } else if (prop.slice(0, 5) == 'data-') {
-                // Dataset property
-                output.dataset[prop.slice(5)] = transformedData;
+                // Dataset property ('data-test-test' => output.dataset.testTest)
+                output.dataset[prop.slice(5).replace(/-[a-z]/g, substr => substr[1].toUpperCase())] = transformedData;
             } else {
                 // Regular property
                 output[prop] = transformedData;
             } 
         });
     }
+}
+
+async function resizeImage(file, maxSize) {
+    // Resize an image and push an <img> to the imgContainer element
+    // based on: https://stackoverflow.com/questions/23945494/use-html5-to-resize-an-image-before-upload
+
+    return new Promise(resolve => {
+            
+        if (!file || typeof file != 'object' || !file.type.match(/^image\//))
+            return resolve(null);
+        
+        let reader = new FileReader();
+        let filename = file.name;
+
+        reader.onload = readerEvent => {
+            var image = new Image();
+            image.onload = () => {
+                // Resize the image
+
+                let canvas = document.createElement('canvas'),
+                    width = image.width,
+                    height = image.height;
+                if (width > height) {
+                    if (width > maxSize) {
+                        height *= maxSize / width;
+                        width = maxSize;
+                    }
+                } else {
+                    if (height > maxSize) {
+                        width *= maxSize / height;
+                        height = maxSize;
+                    }
+                }
+                canvas.width = width;
+                canvas.height = height;
+                canvas.getContext('2d').drawImage(image, 0, 0, width, height);
+
+                let resizedImage = canvas.toDataURL('image/jpeg');
+                return resolve({ filename, data: resizedImage });
+            };
+            image.src = readerEvent.target.result;
+        };
+        reader.readAsDataURL(file);
+    });
 }
 
 function dropContainer(container) {
@@ -173,68 +216,35 @@ function dropContainer(container) {
 
     container.addEventListener("click", () => fileInput.click());
 
-    fileInput.addEventListener("change", () => {
+    fileInput.addEventListener("change", async () => {
         // Handle file selection
-        // based on: https://stackoverflow.com/questions/23945494/use-html5-to-resize-an-image-before-upload
 
         const files = fileInput.files;
         const imgDiv = container.querySelector('.drop-image-div');
         const title = container.querySelector('.drop-title');
         const max_size = 800; // Maximum 800px (width or height)
 
-        let filenames = [];
+        let filesData = [];
         imgDiv.innerHTML = ''; // Clear imgDiv (in case new files were chosen)
     
-        for (id in files) {
-            // Load the images
+        for (let i = 0; i < files.length; i++) {
+            // Resize the selected images
 
-            let file = files[id];
-
-            if (typeof file != 'object' || !file.type.match(/^image\//))
-                continue;
-
-            let filename = file.name;
-            filenames.push(filename);
+            let fileData = await resizeImage(files[i], max_size);
+            filesData.push(fileData);
             
-            let reader = new FileReader();
-            reader.onload = readerEvent => {
-                var image = new Image();
-                image.onload = () => {
-                    // Resize the image
-
-                    let canvas = document.createElement('canvas'),
-                        width = image.width,
-                        height = image.height;
-                    if (width > height) {
-                        if (width > max_size) {
-                            height *= max_size / width;
-                            width = max_size;
-                        }
-                    } else {
-                        if (height > max_size) {
-                            width *= max_size / height;
-                            height = max_size;
-                        }
-                    }
-                    canvas.width = width;
-                    canvas.height = height;
-                    canvas.getContext('2d').drawImage(image, 0, 0, width, height);
-                    resizedImage = canvas.toDataURL('image/jpeg');
-
-                    // Put the resized image in an img tag
-                    let img = document.createElement('img');
-                    img.className = 'drop-image';
-                    img.dataset.id = id;
-                    img.dataset.filename = filename;
-                    img.src = resizedImage;
-                    imgDiv.appendChild(img);
-                };
-                image.src = readerEvent.target.result;
-            };
-            reader.readAsDataURL(file);
+            // Put the resized image in an img tag
+            let img = document.createElement('img');
+            img.className = 'drop-image';
+            img.dataset.filename = fileData.filename;
+            img.src = fileData.data;
+            imgDiv.appendChild(img);
         }
 
-        title.innerText = filenames.join(', ');
+        let event = new CustomEvent('photos-resized', { detail: filesData });
+        container.dispatchEvent(event);
+
+        title.innerText = filesData.map(data => data.filename).join(', ');
     });
 }
 
