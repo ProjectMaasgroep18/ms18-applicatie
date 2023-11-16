@@ -182,6 +182,32 @@ public class ReceiptStatusController : ControllerBase
         
         return NoContent();
     }
+
+    [HttpGet("{id}/Receipt")]
+    public IActionResult ReceiptStatusGetReceipts(long id)
+    {
+        
+        // Get receipt by ID
+        ReceiptStatus? status = _context.ReceiptStatus.Find(id);
+        
+        // Check if the receipt with the provided ID exists
+        if (status == null)
+        {
+            return NotFound(new
+            {
+                status = 404,
+                message = "Receipt status not found"
+            });
+        }
+        
+        // Get all receipts with this status
+        var receipts = _context.Receipt
+            .Where(receipt => receipt.ReceiptStatusId == status.Id)
+            .Select(receipt => new ReceiptViewModel(receipt))
+            .ToList();
+        
+        return Ok(receipts);
+    }
     
     
     private bool StatusesAreEqual(ReceiptStatus existingStatus, ReceiptStatusViewModel updatedReceiptStatusViewModel)

@@ -21,7 +21,7 @@
 
 @section scripts {
 <script>
-    apiGet('Session').then(member => {
+    getUserSession().then(member => {
         // User session loaded
      
         showOutput(member, document.querySelector('#login-user'));

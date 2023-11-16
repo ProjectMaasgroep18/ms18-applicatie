@@ -107,6 +107,12 @@ async function apiDelete(action) {
     return await apiGet(action, fetchData, true);
 }
 
+function getUserSession() {
+    // Get user session (todo: mogelijk uitbreiden met tokens etc. en zo nodig login popup tonen)
+
+    return apiGet('User/Current');
+}
+
 function showOutput(data, container) {
     // Show output data in a container element
 

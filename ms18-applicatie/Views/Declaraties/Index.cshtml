@@ -35,12 +35,13 @@
 
 @section scripts {
 <script>
-    apiGet('Session').then(member => {
+    getUserSession().then(member => {
         // User session loaded
      
+        const userId = member.id;
         showOutput(member, document.querySelector('#login-user'));
         
-        apiGet('Receipt').then(receipts => {
+        apiGet('User/' + userId + '/Receipt').then(receipts => {
             // Receipts data loaded
 
             let noReceipts = (!receipts || !receipts.length);
