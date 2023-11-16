@@ -24,9 +24,9 @@ namespace Maasgroep.Database.Repository.ViewModel
         public string? Note { get; set; }
         public long StatusId { get; set; }
         public string? Status { get; set; }
-        public List<string> ReceiptPhotoURI { get; set; }
+        public List<string>? ReceiptPhotoURI { get; set; }
         public long? CostCentreId;
-        public string CostCentreURI { get; set; }
+        public string? CostCentreURI { get; set; }
 
         public ReceiptViewModel(Receipt dbRec)
         {

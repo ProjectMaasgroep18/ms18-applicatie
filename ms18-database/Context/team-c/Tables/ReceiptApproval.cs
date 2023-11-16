@@ -1,4 +1,5 @@
 ﻿using Maasgroep.Database.Members;
+using Maasgroep.Database.Repository.ViewModel;
 
 namespace Maasgroep.Database.Receipts
 {
@@ -25,5 +26,14 @@ namespace Maasgroep.Database.Receipts
         public Member MemberCreated { get; set; }
         public Member? MemberModified { get; set; }
         public Member? MemberDeleted { get; set; }
+
+        public static ReceiptApproval FromViewModel(ReceiptApprovalViewModel viewModel)
+        {
+	        return new ReceiptApproval
+	        {
+		        ReceiptId = viewModel.ReceiptId ?? 0,
+		        Note = viewModel.Note,
+	        };
+        }
     }
 }

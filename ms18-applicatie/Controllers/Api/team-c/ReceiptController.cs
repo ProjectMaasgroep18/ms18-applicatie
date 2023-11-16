@@ -209,6 +209,7 @@ public class ReceiptController : BaseController
     }
 
     [HttpPost("{id}/ReceiptPhoto")]
+    [ActionName("receiptPhotosGet")]
     public IActionResult ReceiptAddPhoto(long id, [FromBody] PhotoViewModel photoViewModel)
     {
         if (_currentUser == null) // Toegangscontrole
@@ -243,10 +244,8 @@ public class ReceiptController : BaseController
         // Set the receipt ID of the photo to the ID of the receipt
         createdPhoto.Receipt = existingReceipt.Id;
         
-        // Set the member ID of the photo to the ID of the current member
-        var member = _currentUser;
-        
-        createdPhoto.MemberCreatedId = member.Id;
+        // Set the member created ID of the photo to the ID of the current user
+        createdPhoto.MemberCreatedId = _currentUser.Id;
         
         // Add the photo to the database
         _context.Photo.Add(createdPhoto);
@@ -262,6 +261,7 @@ public class ReceiptController : BaseController
     }
 
     [HttpGet("{id}/ReceiptPhoto")]
+    [ActionName("receiptPhotosAdd")]
     public IActionResult ReceiptGetPhotos(long id)
     {
         if (_currentUser == null) // Toegangscontrole
@@ -288,8 +288,60 @@ public class ReceiptController : BaseController
         
         return Ok(photos);
     }
+
+    [HttpPost("{id}/ReceiptApprovement")]
+    [ActionName("receiptApprovement")]
+    public IActionResult ApproveReceipt(long id, [FromBody] ReceiptApprovalViewModel approvalViewModel)
+    {
+        if (_currentUser == null) // Toegangscontrole
+            return Forbidden();
+        
+        // Validate the request body
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(new
+            {
+                status = 400,
+                message = "Invalid request body"
+            });
+        }
+        
+        // Get the receipt by the ID
+        Receipt? existingReceipt = _context.Receipt.Find(id);
+        
+        // Check if the receipt with the provided ID exists
+        if (existingReceipt == null)
+        {
+            return NotFound(new
+            {
+                status = 404,
+                message = "Receipt not found"
+            });
+        }
+
+        // Create a new approval record from the view model
+        var approval = ReceiptApproval.FromViewModel(approvalViewModel);
+        
+        // Set the receipt ID of the approval to the ID of the receipt
+        approval.ReceiptId = existingReceipt.Id;
+        
+        // Set the member created ID of the photo to the ID of the current user
+        approval.MemberCreatedId = _currentUser.Id;
+        
+        // Add the photo to the database
+        _context.ReceiptApproval.Add(approval);
+        _context.SaveChanges();
+        
+        // Return the created photo
+        return Created($"/api/v1/receipt/{id}", new
+        {
+            status = 201,
+            message = "Receipt approved",
+            approval = new ReceiptApprovalViewModel(approval),
+        });
+    }
     
-    private bool ReceiptsAreEqual(Receipt existingReceipt, ReceiptViewModel updatedReceiptViewModel)
+    private static bool ReceiptsAreEqual(Receipt existingReceipt, ReceiptViewModel updatedReceiptViewModel)
     {
         // Compare relevant properties to check if the receipt is unchanged
 

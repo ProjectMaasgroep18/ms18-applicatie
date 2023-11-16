@@ -11,7 +11,7 @@ public class UserController : BaseController
 {
     public UserController(MaasgroepContext context) : base(context) { }
 
-    [HttpGet("current")]
+    [HttpGet("Current")]
     [ActionName("userGetCurrent")]
     public IActionResult UserGetCurrent()
     {
