@@ -53,7 +53,7 @@ public class UserController : BaseController
         // Get user by ID
         Member? user = _context.Member.Find(id);
         
-        // Check if the receipt with the provided ID exists
+        // Check if the user with the provided ID exists
         if (user == null)
         {
             return NotFound(new

@@ -63,10 +63,7 @@ public class ReceiptStatusController : BaseController
         // Create a new receipt status from the view model
         var createdStatus = ReceiptStatus.FromViewModel(receiptStatusViewModel);
         
-        // Set the member ID of the receipt status to the ID of the current member
-        var member = _context.Member.FirstOrDefault()!; // TODO Find current member
-        
-        createdStatus.MemberCreatedId = member.Id;
+        createdStatus.MemberCreatedId = _currentUser.Id;
         
         // Add the receipt status to the database
         _context.ReceiptStatus.Add(createdStatus);
@@ -183,7 +180,7 @@ public class ReceiptStatusController : BaseController
             return Conflict(new
             {
                 status = 409,
-                message = "Could not delete receipt status" // TODO Check which dependency is causing the conflict
+                message = "Status kon niet worden verwijderd" // TODO Check which dependency is causing the conflict
             });
         }
         

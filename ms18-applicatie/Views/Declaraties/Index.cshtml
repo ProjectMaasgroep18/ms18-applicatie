@@ -1,36 +1,66 @@
 <h1>@ViewData["Title"]</h1>
 
 <div id="login-user" class="hidden">
-    <p>Hallo <span rel="name"></span>!</p>    
+    <p id="login-info">Hallo <span rel="name"></span>!</p>    
 
     <p>Hier kan je je bonnetjes inleveren:</p>
 
     <p><a asp-action="Nieuw"><button class="btn btn-primary">Nieuwe declaratie</button></a></p>
 
-    <p>Dit zijn je bestaande declaraties in de database:</p>
+    <div id="user-receipts" class="hidden">
+        <p><i>Dit zijn je bestaande declaraties in de database:</i></p>
 
-    <table id="user-receipts">
-        <tr>
-            <th>Bedrag</th>
-            <th>Opmerking</th>
-            <th>Status</th>
-            <th></th>
-        </tr>
+        <table class="data-table">
+            <tr>
+                <th>Bedrag</th>
+                <th>Opmerking</th>
+                <th>Status</th>
+                <th></th>
+            </tr>
+            
+            <tr id="user-receipts-empty" class="hidden">
+                <td colspan="999">Je hebt nog geen bonnetjes ingeleverd.</td>
+            </tr>
+            
+            <tr id="user-receipts-row" class="hidden">
+                <td rel="amount::euro"></td>
+                <td rel="note"></td>
+                <td rel="status,statusId:data-status"></td>
+                <td class="user-actions">
+                    <a rel="id:href:editUrl">Aanpassen</a>
+                    <a rel="id:data-id" href="#" class="delete-link">Verwijderen</a>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <div id="receipt-statuses" class="hidden">
+        <p><i>Dit zijn de statussen die een declaratie kan hebben:</i></p>
+
+        <table class="data-table">
+            <tr>
+                <th>Status</th>
+                <th></th>
+            </tr>
+            <tr id="receipt-statuses-empty">
+                <td colspan="999">Er zijn geen statussen</td>
+            </tr>    
+            <tr id="receipt-status-row" class="hidden">
+                <td>
+                    <span rel="name" class="status-name"></span>
+                    <input rel="name:value,id:data-id" class="status-input hidden">
+                </td>
+                <td class="user-actions">
+                    <a rel="id:data-id" href="#" class="edit-link">Aanpassen</a>
+                    <a rel="id:data-id" href="#" class="save-link hidden">Opslaan</a>
+                    <a rel="id:data-id" href="#" class="delete-link">Verwijderen</a>
+                </td>
+            </tr>
+        </table>
+
+        <p><a href="#" id="receipt-status-add">Status toevoegen</a></p>
         
-        <tr id="user-receipts-empty" class="hidden">
-            <td colspan="999">Je hebt nog geen bonnetjes ingeleverd.</td>
-        </tr>
-        
-        <tr id="user-receipts-row" class="hidden">
-            <td rel="amount::euro"></td>
-            <td rel="note"></td>
-            <td rel="status"></td>
-            <td class="user-actions">
-                <a rel="id:href:editUrl">Aanpassen</a>
-                <a rel="id:data-id" href="#" class="delete-link">Verwijderen</a>
-            </td>
-        </tr>
-    </table>
+    </div>
 </div>
 
 @section scripts {
@@ -39,26 +69,27 @@
         // User session loaded
      
         const userId = member.id;
-        showOutput(member, document.querySelector('#login-user'));
+        showElement(document.querySelector('#login-user'));
+        showOutput(member, document.querySelector('#login-info'));
         
         apiGet('User/' + userId + '/Receipt').then(receipts => {
             // Receipts data loaded
 
-            let noReceipts = (!receipts || !receipts.length);
-            let receiptsTable = document.querySelector('#user-receipts');
+            const noReceipts = (!receipts || !receipts.length);
+            const receiptsTable = document.querySelector('#user-receipts .data-table');
             if (noReceipts) {
                 showElement(document.querySelector('#user-receipts-empty'));
             } else {
                 hideElement(document.querySelector('#user-receipts-empty'));
             }
             for (id in receipts) {
-                let receipt = document.querySelector('#user-receipts-row').cloneNode(true);
-                receipt.id = 'user-receipts-' + receipts[id].id;
-                showElement(receipt);
-                showOutput(receipts[id], receipt);
-                receiptsTable.appendChild(receipt);
+                const receiptRow = document.querySelector('#user-receipts-row').cloneNode(true);
+                receiptRow.id = 'user-receipts-' + receipts[id].id;
+                showElement(receiptRow);
+                showOutput(receipts[id], receiptRow);
+                receiptsTable.appendChild(receiptRow);
             }
-            showElement(receiptsTable);
+            showElement(document.querySelector('#user-receipts'));
             receiptsTable.querySelectorAll('.delete-link').forEach(deleteLink => deleteLink.addEventListener('click', event => {
                 // Click Delete link
 
@@ -81,6 +112,242 @@
                         showElement(document.querySelector('#user-receipts-empty'));
                 });
             }));
+        });
+
+        apiGet('ReceiptStatus').then(statuses => {
+            // Status data loaded
+
+            const noStatuses = (!statuses || !statuses.length);
+            const statusTable = document.querySelector('#receipt-statuses .data-table');
+            if (noStatuses) {
+                showElement(document.querySelector('#receipt-statuses-empty'));
+            } else {
+                hideElement(document.querySelector('#receipt-statuses-empty'));
+            }
+            for (id in statuses) {
+                const statusRow = document.querySelector('#receipt-status-row').cloneNode(true);
+                statusRow.id = 'receipt-status-' + statuses[id].id;
+                showElement(statusRow);
+                showOutput(statuses[id], statusRow);
+                statusTable.appendChild(statusRow);
+            }
+            showElement(document.querySelector('#receipt-statuses'));
+
+            statusTable.querySelectorAll('.status-input').forEach(statusInput => statusInput.addEventListener('keyup', event => {
+                // Save on enter key
+
+                if (event.which != 13)
+                    return
+
+                statusTable.querySelector('.save-link[data-id="' + statusInput.dataset.id + '"]').dispatchEvent(new Event('click'));
+            }));
+            
+            statusTable.querySelectorAll('.edit-link').forEach(editLink => editLink.addEventListener('click', event => {
+                // Click Edit link
+                
+                event.preventDefault();
+
+                const editId = editLink.dataset.id;
+                const statusRow = statusTable.querySelector('#receipt-status-' + editId);
+                const statusInput = statusRow.querySelector('.status-input');
+
+                hideElement(statusRow.querySelector('.status-name'));
+                hideElement(statusRow.querySelector('.edit-link'));
+                
+                showElement(statusRow.querySelector('.save-link'));
+                showElement(statusInput);
+                statusInput.focus();
+            }));
+
+            statusTable.querySelectorAll('.save-link').forEach(saveLink => saveLink.addEventListener('click', event => {
+                // Click Save link
+                
+                event.preventDefault();
+
+                const editId = saveLink.dataset.id;
+                const statusRow = statusTable.querySelector('#receipt-status-' + editId);
+                const statusInput = statusRow.querySelector('.status-input');
+                const newStatus = statusInput.value;
+
+                statusInput.disabled = true;
+                hideElement(statusRow.querySelector('.user-actions'));
+
+                apiPut('ReceiptStatus/' + editId, { name: newStatus }).then(result => {
+                    // Saved the updated status: apply it here too
+
+                    if (!result)
+                        return;
+
+                    const statusName = statusRow.querySelector('.status-name');
+                    statusName.innerText = newStatus;
+                    statusInput.disabled = false;
+
+                    showElement(statusName);
+                    showElement(statusRow.querySelector('.edit-link'));
+                    showElement(statusRow.querySelector('.user-actions'));
+
+                    hideElement(statusRow.querySelector('.save-link'));
+                    hideElement(statusInput);
+
+                    document.querySelectorAll('#user-receipts [data-status="' + editId + '"]').forEach(label => label.innerText = newStatus);
+                });
+            }));
+            
+            statusTable.querySelectorAll('.delete-link').forEach(deleteLink => deleteLink.addEventListener('click', event => {
+                // Click Delete link
+
+                event.preventDefault();
+
+                if (!window.confirm('Weet je zeker dat je deze status wilt verwijderen?'))
+                    return;
+
+                const deleteId = deleteLink.dataset.id;
+                const statusRow = statusTable.querySelector('#receipt-status-' + deleteId);
+                hideElement(statusRow.querySelector('.user-actions'));
+
+                apiDelete('ReceiptStatus/' + deleteId).then(result => {
+                    if (!result)
+                        return;
+
+                    // Status deleted in database, clean it up here too
+                    statusRow.remove();
+                    if (statusTable.querySelectorAll('tr:not(.hidden)').length <= 0)
+                        showElement(document.querySelector('#receipt-statuses-empty'));
+                });
+            }));
+
+            document.querySelector('#receipt-status-add').addEventListener('click', event => {
+                // Add status link
+
+                event.preventDefault();
+
+                const statusRow = document.querySelector('#receipt-status-row').cloneNode(true);
+                showElement(statusRow);
+                statusTable.appendChild(statusRow);
+
+                const statusInput = statusRow.querySelector('.status-input');
+                const editLink = statusRow.querySelector('.edit-link');
+                const saveLink = statusRow.querySelector('.save-link');
+                const deleteLink = statusRow.querySelector('.delete-link');
+
+                hideElement(statusRow.querySelector('.status-name'));
+                hideElement(statusRow.querySelector('.edit-link'));
+                
+                showElement(saveLink);
+                showElement(statusInput);
+                statusInput.focus();
+
+                statusInput.addEventListener('keyup', event => {
+                    // Save on enter key
+
+                    if (event.which != 13)
+                        return
+
+                    saveLink.dispatchEvent(new Event('click'));
+                })
+
+                editLink.addEventListener('click', event => {
+                    // Click Edit link of newly added status
+                    
+                    event.preventDefault();
+
+                    hideElement(statusRow.querySelector('.status-name'));
+                    hideElement(statusRow.querySelector('.edit-link'));
+                    
+                    showElement(statusRow.querySelector('.save-link'));
+                    showElement(statusInput);
+                    statusInput.focus();
+                });
+
+                saveLink.addEventListener('click', event => {
+                    // Click Save link of newly added status
+                    
+                    event.preventDefault();
+
+                    const editId = saveLink.dataset.id;
+                    const newStatus = statusInput.value;
+
+                    statusInput.disabled = true;
+                    hideElement(statusRow.querySelector('.user-actions'));
+
+                    if (!editId) {
+                        // This newly added status was never saved before, so create it in the database
+
+                        apiPost('ReceiptStatus/', { name: newStatus }).then(result => {    
+                            // Saved new status
+
+                            if (!result || !result.receiptStatus)
+                                return;
+                            
+                            const statusName = statusRow.querySelector('.status-name');
+                            statusName.innerText = newStatus;
+                            statusInput.disabled = false;
+
+                            showElement(statusName);
+                            showElement(statusRow.querySelector('.edit-link'));
+                            showElement(statusRow.querySelector('.user-actions'));
+
+                            hideElement(statusRow.querySelector('.save-link'));
+                            hideElement(statusInput);
+
+                            showOutput(result.receiptStatus, statusRow);
+                        });
+                        return;
+                    }
+
+                    apiPut('ReceiptStatus/' + editId, { name: newStatus }).then(result => {
+                        // Saved the updated status: apply it here too
+
+                        if (!result)
+                            return;
+
+                        const statusName = statusRow.querySelector('.status-name');
+                        statusName.innerText = newStatus;
+                        statusInput.disabled = false;
+
+                        showElement(statusName);
+                        showElement(statusRow.querySelector('.edit-link'));
+                        showElement(statusRow.querySelector('.user-actions'));
+
+                        hideElement(statusRow.querySelector('.save-link'));
+                        hideElement(statusInput);
+
+                        document.querySelectorAll('#user-receipts [data-status="' + editId + '"]').forEach(label => label.innerText = newStatus);
+                    });
+                });
+
+                deleteLink.addEventListener('click', event => {
+                    // Click Delete link of newly added status
+                    
+                    event.preventDefault();
+
+                    if (!window.confirm('Weet je zeker dat je deze status wilt verwijderen?'))
+                        return;
+
+                    const deleteId = deleteLink.dataset.id;
+
+                    if (!deleteId) {
+                        // This newly added status was never saved, just remove it here
+                        statusRow.remove();
+                        if (statusTable.querySelectorAll('tr:not(.hidden)').length <= 0)
+                            showElement(document.querySelector('#receipt-statuses-empty'));
+                        return;
+                    }
+
+                    hideElement(statusRow.querySelector('.user-actions'));
+
+                    apiDelete('ReceiptStatus/' + deleteId).then(result => {
+                        if (!result)
+                            return;
+
+                        // Status deleted in database, clean it up here too
+                        statusRow.remove();
+                        if (statusTable.querySelectorAll('tr:not(.hidden)').length <= 0)
+                            showElement(document.querySelector('#receipt-statuses-empty'));
+                    });
+                });
+
+            });
         });
     });
 </script>

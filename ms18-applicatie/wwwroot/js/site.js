@@ -132,21 +132,27 @@ function showOutput(data, container) {
     };
 
     showElement(container);
+    const outputElements = container.querySelectorAll('[rel]');
     for (key in data) {
-        container.querySelectorAll('[rel="' + key + '"],[rel^="' + key + ':"]').forEach(output => {
-            const [key, prop, transform] = output.getAttribute('rel').split(':');
-            const value = typeof data[key] == 'object' ? JSON.stringify(data[key]) : data[key];
-            const transformedData = (transform && typeof transforms[transform] == 'function') ? transforms[transform](value) : value;
-            if (typeof prop == 'undefined' || prop == '') {
-                // No property provided
-                output.innerText = transformedData;
-            } else if (prop.slice(0, 5) == 'data-') {
-                // Dataset property ('data-test-test' => output.dataset.testTest)
-                output.dataset[prop.slice(5).replace(/-[a-z]/g, substr => substr[1].toUpperCase())] = transformedData;
-            } else {
-                // Regular property
-                output[prop] = transformedData;
-            } 
+        outputElements.forEach(output => {
+            const rels = output.getAttribute('rel') ? output.getAttribute('rel').split(',') : [];
+            rels.forEach(rel => {
+                const [relKey, prop, transform] = rel.split(':');
+                if (relKey != key)
+                    return;
+                const value = typeof data[key] == 'object' ? JSON.stringify(data[key]) : data[key];
+                const transformedData = (transform && typeof transforms[transform] == 'function') ? transforms[transform](value) : value;
+                if (typeof prop == 'undefined' || prop == '') {
+                    // No property provided
+                    output.innerText = transformedData;
+                } else if (prop.slice(0, 5) == 'data-') {
+                    // Dataset property ('data-test-test' => output.dataset.testTest)
+                    output.dataset[prop.slice(5).replace(/-[a-z]/g, substr => substr[1].toUpperCase())] = transformedData;
+                } else {
+                    // Regular property
+                    output[prop] = transformedData;
+                }
+            });
         });
     }
 }

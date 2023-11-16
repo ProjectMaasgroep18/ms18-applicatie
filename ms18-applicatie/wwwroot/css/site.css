@@ -25,8 +25,13 @@ body {
   display: none;
 }
 
-#user-receipts td,
-#user-receipts th {
+.data-table {
+  margin-bottom: 1em;
+}
+
+.data-table td,
+.data-table th {
+  text-align: left;
   padding-right: 1em;
 }
 

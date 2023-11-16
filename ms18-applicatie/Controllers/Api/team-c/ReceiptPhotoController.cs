@@ -50,10 +50,7 @@ public class ReceiptPhotoController : BaseController
         // Create a new photo from the view model
         var createdPhoto = Photo.FromViewModel(photoViewModel);
         
-        // Set the member ID of the photo to the ID of the current member
-        var member = _context.Member.FirstOrDefault()!; // TODO Find current member
-        
-        createdPhoto.MemberCreatedId = member.Id;
+        createdPhoto.MemberCreatedId = _currentUser.Id;
         
         // Add the photo to the database
         _context.Photo.Add(createdPhoto);
@@ -185,7 +182,7 @@ public class ReceiptPhotoController : BaseController
             return Conflict(new
             {
                 status = 409,
-                message = "Could not delete photo" // TODO Check which dependency is causing the conflict
+                message = "Foto kon niet worden verwijderd" // TODO Check which dependency is causing the conflict
             });
         }
         

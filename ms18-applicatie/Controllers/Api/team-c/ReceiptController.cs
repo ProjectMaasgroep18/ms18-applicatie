@@ -65,8 +65,7 @@ public class ReceiptController : BaseController
 
         var createdReceipt = Receipt.FromViewModel(receiptViewModel);
 
-        var member = _context.Member.FirstOrDefault()!; // TODO Find current member
-        createdReceipt.MemberCreatedId = member.Id;
+        createdReceipt.MemberCreatedId = _currentUser.Id;
 
         var status = _context.ReceiptStatus.FirstOrDefault()!; // TODO Find correct status
         createdReceipt.ReceiptStatusId = status.Id;
@@ -201,7 +200,7 @@ public class ReceiptController : BaseController
             return Conflict(new
             {
                 status = 409,
-                message = "Could not delete receipt" // TODO Check which dependency is causing the conflict
+                message = "Declaratie kon niet worden verwijderd" // TODO Check which dependency is causing the conflict
             });
         }
         

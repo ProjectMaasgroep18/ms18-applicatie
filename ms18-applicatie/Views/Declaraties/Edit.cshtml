@@ -1,7 +1,7 @@
 <h1>Declaratie aanpassen</h1>
 
 <div id="login-user" class="hidden">
-    <p>Hallo <span rel="name"></span>!</p>
+    <p id="login-info">Hallo <span rel="name"></span>!</p>
 
     <p>Hier kan je je declaratie aanpassen of aanvullen:</p>
 
@@ -77,7 +77,8 @@
     getUserSession().then(member => {
         // User session loaded
      
-        showOutput(member, document.querySelector('#login-user'));
+        showElement(document.querySelector('#login-user'));
+        showOutput(member, document.querySelector('#login-info'));
 
         apiGet('Receipt/' + receiptId).then(receipt => {
             // Receipt loaded

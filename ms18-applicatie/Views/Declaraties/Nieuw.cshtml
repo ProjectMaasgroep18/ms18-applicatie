@@ -1,7 +1,7 @@
 <h1>Declaratie indienen</h1>
 
 <div id="login-user" class="hidden">
-    <p>Hallo <span rel="name"></span>!</p>
+    <p id="login-info">Hallo <span rel="name"></span>!</p>
 
     <p>Upload hier je bon:</p>
 
@@ -24,7 +24,8 @@
     getUserSession().then(member => {
         // User session loaded
      
-        showOutput(member, document.querySelector('#login-user'));
+        showElement(document.querySelector('#login-user'));
+        showOutput(member, document.querySelector('#login-info'));
     });
 
     const receiptForm = document.querySelector('#receipt-form');
