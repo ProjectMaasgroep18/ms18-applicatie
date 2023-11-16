@@ -7,18 +7,15 @@ namespace ms18_applicatie.Controllers.Api;
 
 [Route("api/v1/[controller]")]
 [ApiController]
-public class ReceiptPhotoController : ControllerBase
+public class ReceiptPhotoController : BaseController
 {
-    private readonly MaasgroepContext _context;
-
-    public ReceiptPhotoController(MaasgroepContext context)
-    {
-        _context = context;
-    }
+    public ReceiptPhotoController(MaasgroepContext context) : base(context) { }
 
     [HttpGet("{id}")]
     public IActionResult PhotoGet(long id)
     {
+        if (_currentUser == null) // Toegangscontrole
+            return Forbidden();
         
         var photo = _context.Photo.Find(id);
         
@@ -37,6 +34,8 @@ public class ReceiptPhotoController : ControllerBase
     [HttpPost]
     public IActionResult PhotoCreate([FromBody] PhotoViewModel photoViewModel)
     {
+        if (_currentUser == null) // Toegangscontrole
+            return Forbidden();
         
         // Validate the request body
         if (!ModelState.IsValid)
@@ -74,6 +73,9 @@ public class ReceiptPhotoController : ControllerBase
     [ActionName("photoUpdate")]
     public IActionResult PhotoUpdate(long id, [FromBody] PhotoViewModel updatedPhotoViewModel)
     {
+        if (_currentUser == null) // Toegangscontrole
+            return Forbidden();
+
         // Validate the request body
         if (!ModelState.IsValid)
         {
@@ -156,6 +158,8 @@ public class ReceiptPhotoController : ControllerBase
     [ActionName("photoDelete")]
     public IActionResult PhotoDelete(long id)
     {
+        if (_currentUser == null) // Toegangscontrole
+            return Forbidden();
         
         // Retrieve the existing receipt from your data store (e.g., database)
         Photo? existingPhoto = _context.Photo.Find(id);

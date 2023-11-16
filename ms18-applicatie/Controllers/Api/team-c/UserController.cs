@@ -1,6 +1,5 @@
 using Maasgroep.Database;
 using Maasgroep.Database.Members;
-using Maasgroep.Database.Receipts;
 using Maasgroep.Database.Repository.ViewModel;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,35 +7,32 @@ namespace ms18_applicatie.Controllers.Api;
 
 [Route("api/v1/[controller]")]
 [ApiController]
-public class UserController : ControllerBase
+public class UserController : BaseController
 {
-    private readonly MaasgroepContext _context;
-
-    public UserController(MaasgroepContext context)
-    {
-        _context = context;
-    }
+    public UserController(MaasgroepContext context) : base(context) { }
 
     [HttpGet("current")]
     [ActionName("userGetCurrent")]
     public IActionResult UserGetCurrent()
     {
         // Get current user session (member that is currently logged in)
-        // For now, that is the first member in the database, or none if there are no members in the DB
-        MemberViewModel? currentUser = _context.Member.OrderBy(dbRec => dbRec.Id).Select(dbRec => new MemberViewModel(dbRec)).FirstOrDefault();
-        if (currentUser == null)
+        // For now, that is the first member in the database, or none if there are no members in the DB (see BaseController)
+        if (_currentUser == null)
             return NotFound(new
             {
                 status = 404,
                 message = "No member found. Please make sure there is at least one member in the database."
             });
-        return Ok(currentUser);
+        return Ok(new MemberViewModel(_currentUser));
     }
 
     [HttpGet("{id}")]
     [ActionName("userGetById")]
     public IActionResult UserGetById(long id)
     {
+        if (_currentUser == null) // Toegangscontrole
+            return Forbidden();
+
         // Get user by ID
         Member? user = _context.Member.Find(id);
         if (user == null)
@@ -51,6 +47,8 @@ public class UserController : ControllerBase
     [HttpGet("{id}/Receipt")]
     public IActionResult UserGetReceipts(long id)
     {
+        if (_currentUser == null) // Toegangscontrole
+            return Forbidden();
         
         // Get user by ID
         Member? user = _context.Member.Find(id);
@@ -70,6 +68,8 @@ public class UserController : ControllerBase
             .Where(receipt => receipt.MemberCreatedId == user.Id)
             .Select(receipt => new ReceiptViewModel(receipt))
             .ToList();
+        
+        receipts.ForEach(receipt => AddForeignData(receipt));
         
         return Ok(receipts);
     }

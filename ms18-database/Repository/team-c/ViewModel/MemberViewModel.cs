@@ -14,12 +14,6 @@ namespace Maasgroep.Database.Repository.ViewModel
         public long? ID { get; set; }
         public string Name { get; set; }
 
-        public MemberViewModel(int id, string name)
-        {
-            ID = id;
-            Name = name;
-        }
-
         public MemberViewModel(Member dbRec)
         {
             ID = dbRec.Id;

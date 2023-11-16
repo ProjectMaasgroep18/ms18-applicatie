@@ -7,19 +7,17 @@ namespace ms18_applicatie.Controllers.Api;
 
 [Route("api/v1/[controller]")]
 [ApiController]
-public class ReceiptStatusController : ControllerBase
+public class ReceiptStatusController : BaseController
 {
-    private readonly MaasgroepContext _context;
-
-    public ReceiptStatusController(MaasgroepContext context)
-    {
-        _context = context;
-    }
+    public ReceiptStatusController(MaasgroepContext context) : base(context) { }
 
     [HttpGet]
     [ActionName("receiptStatusGet")]
     public IActionResult ReceiptStatusGet()
     {
+        if (_currentUser == null) // Toegangscontrole
+            return Forbidden();
+
         var alles = _context.ReceiptStatus.Select(dbRec => new ReceiptStatusViewModel(dbRec)).ToList();
 
         return Ok(alles);
@@ -29,6 +27,8 @@ public class ReceiptStatusController : ControllerBase
     [ActionName("receiptStatusGetById")]
     public IActionResult ReceiptStatusGetById(int id)
     {
+        if (_currentUser == null) // Toegangscontrole
+            return Forbidden();
         
         var receiptStatus = _context.ReceiptStatus.Find(id);
         
@@ -47,6 +47,8 @@ public class ReceiptStatusController : ControllerBase
     [HttpPost]
     public IActionResult ReceiptStatusCreate([FromBody] ReceiptStatusViewModel receiptStatusViewModel)
     {
+        if (_currentUser == null) // Toegangscontrole
+            return Forbidden();
         
         // Validate the request body
         if (!ModelState.IsValid)
@@ -84,6 +86,9 @@ public class ReceiptStatusController : ControllerBase
     [ActionName("receiptStatusUpdate")]
     public IActionResult ReceiptStatusUpdate(long id, [FromBody] ReceiptStatusViewModel updatedReceiptStatusViewModel)
     {
+        if (_currentUser == null) // Toegangscontrole
+            return Forbidden();
+
         // Validate the request body
         if (!ModelState.IsValid)
         {
@@ -151,6 +156,8 @@ public class ReceiptStatusController : ControllerBase
     [ActionName("receiptStatusDelete")]
     public IActionResult ReceiptStatusDelete(long id)
     {
+        if (_currentUser == null) // Toegangscontrole
+            return Forbidden();
         
         // Retrieve the existing receipt status from your data store (e.g., database)
         ReceiptStatus? existingStatus = _context.ReceiptStatus.Find(id);
@@ -186,6 +193,8 @@ public class ReceiptStatusController : ControllerBase
     [HttpGet("{id}/Receipt")]
     public IActionResult ReceiptStatusGetReceipts(long id)
     {
+        if (_currentUser == null) // Toegangscontrole
+            return Forbidden();
         
         // Get receipt by ID
         ReceiptStatus? status = _context.ReceiptStatus.Find(id);
@@ -205,6 +214,8 @@ public class ReceiptStatusController : ControllerBase
             .Where(receipt => receipt.ReceiptStatusId == status.Id)
             .Select(receipt => new ReceiptViewModel(receipt))
             .ToList();
+
+        receipts.ForEach(receipt => AddForeignData(receipt));
         
         return Ok(receipts);
     }

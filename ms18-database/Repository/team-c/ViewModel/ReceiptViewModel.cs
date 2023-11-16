@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.Json.Serialization;
-using System.Threading.Tasks;
+﻿using System.Text.Json.Serialization;
 using Maasgroep.Database.Receipts;
 
 namespace Maasgroep.Database.Repository.ViewModel
@@ -29,26 +24,21 @@ namespace Maasgroep.Database.Repository.ViewModel
         public string? Note { get; set; }
         public long StatusId { get; set; }
         public string? Status { get; set; }
-        public long? PhotoId { get; set; }
-
-        public ReceiptViewModel(int id, DateTime dateTimeCreated, DateTime dateTimeModified, decimal amount, string note, long status)
-        {
-            ID = id;
-            DateTimeCreated = dateTimeCreated;
-            DateTimeModified = dateTimeModified;
-            Amount = amount;
-            Note = note;
-            StatusId = status;
-        }
+        public List<string> ReceiptPhotoURI { get; set; }
+        public long? CostCentreId;
+        public string CostCentreURI { get; set; }
 
         public ReceiptViewModel(Receipt dbRec)
         {
+            // Create ReceiptViewModel from Database Model
+
             ID = dbRec.Id;
             DateTimeCreated = dbRec.DateTimeCreated;
             DateTimeModified = dbRec.DateTimeModified;
             Amount = dbRec.Amount;
             Note = dbRec.Note;
             StatusId = dbRec.ReceiptStatusId;
+            CostCentreId = dbRec.CostCentreId;
         }
         
         [JsonConstructor]

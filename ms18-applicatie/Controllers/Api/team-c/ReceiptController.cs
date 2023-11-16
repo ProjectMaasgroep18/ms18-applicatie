@@ -8,34 +8,29 @@ namespace ms18_applicatie.Controllers.Api;
 
 [Route("api/v1/[controller]")]
 [ApiController]
-public class ReceiptController : ControllerBase
+public class ReceiptController : BaseController
 {
-    private readonly MaasgroepContext _context;
-
-    public ReceiptController(MaasgroepContext context)
-    {
-        _context = context;
-    }
+    public ReceiptController(MaasgroepContext context) : base(context) { }
 
     [HttpGet]
     [ActionName("receiptGet")]
     public IActionResult ReceiptGet()
     {
-        var alles = _context.Receipt.Select(dbRec => new ReceiptViewModel(dbRec)).ToList();
+        if (_currentUser == null) // Toegangscontrole
+            return Forbidden();
 
-        foreach (var item in alles)
-        {
-            item.Status = GetReceiptStatus(item.StatusId);
-            item.PhotoId = GetReceiptPhotoId(item.ID ?? 0);
-        }
-
-        return Ok(alles);
+        var receipts = _context.Receipt.Select(dbRec => new ReceiptViewModel(dbRec)).ToList();
+        receipts.ForEach(receipt => AddForeignData(receipt));
+        return Ok(receipts);
     }
 
     [HttpGet("{id}")]
     [ActionName("receiptGetById")]
     public IActionResult ReceiptGetById(int id)
     {
+        if (_currentUser == null) // Toegangscontrole
+            return Forbidden();
+
         ReceiptViewModel? receiptViewModel = _context.Receipt
             .Where(dbRec => dbRec.Id == id)
             .Select(dbRec => new ReceiptViewModel(dbRec))
@@ -48,16 +43,16 @@ public class ReceiptController : ControllerBase
                 message = "Receipt not found"
             });
 
-        receiptViewModel.Status = GetReceiptStatus(receiptViewModel.StatusId);
-        receiptViewModel.PhotoId = GetReceiptPhotoId(receiptViewModel.ID ?? 0);
-
-        return Ok(receiptViewModel);
+        return Ok(AddForeignData(receiptViewModel));
     }
 
     [HttpPost]
     [ActionName("receiptCreate")]
     public IActionResult ReceiptCreate([FromBody] ReceiptViewModel receiptViewModel)
     {
+        if (_currentUser == null) // Toegangscontrole
+            return Forbidden();
+
         // Validate the request body
         if (!ModelState.IsValid)
         {
@@ -97,7 +92,7 @@ public class ReceiptController : ControllerBase
         {
             status = 201,
             message = "Receipt created",
-            receipt = new ReceiptViewModel(createdReceipt)
+            receipt = AddForeignData(new ReceiptViewModel(createdReceipt))
         });
     }
 
@@ -105,6 +100,9 @@ public class ReceiptController : ControllerBase
     [ActionName("receiptUpdate")]
     public IActionResult ReceiptUpdate(long id, [FromBody] ReceiptViewModel updatedReceiptViewModel)
     {
+        if (_currentUser == null) // Toegangscontrole
+            return Forbidden();
+
         // Validate the request body
         if (!ModelState.IsValid)
         {
@@ -169,13 +167,15 @@ public class ReceiptController : ControllerBase
         _context.Update(existingReceipt);
         _context.SaveChanges();
 
-        return Ok(new ReceiptViewModel(existingReceipt));
+        return Ok(AddForeignData(new ReceiptViewModel(existingReceipt)));
     }
     
     [HttpDelete("{id}")]
     [ActionName("receiptDelete")]
     public IActionResult ReceiptDelete(long id)
     {
+        if (_currentUser == null) // Toegangscontrole
+            return Forbidden();
         
         // Retrieve the existing receipt from your data store (e.g., database)
         Receipt? existingReceipt = _context.Receipt.Find(id);
@@ -211,6 +211,8 @@ public class ReceiptController : ControllerBase
     [HttpPost("{id}/ReceiptPhoto")]
     public IActionResult ReceiptAddPhoto(long id, [FromBody] PhotoViewModel photoViewModel)
     {
+        if (_currentUser == null) // Toegangscontrole
+            return Forbidden();
         
         // Validate the request body
         if (!ModelState.IsValid)
@@ -242,7 +244,7 @@ public class ReceiptController : ControllerBase
         createdPhoto.Receipt = existingReceipt.Id;
         
         // Set the member ID of the photo to the ID of the current member
-        var member = _context.Member.FirstOrDefault()!; // TODO Find current member
+        var member = _currentUser;
         
         createdPhoto.MemberCreatedId = member.Id;
         
@@ -262,6 +264,8 @@ public class ReceiptController : ControllerBase
     [HttpGet("{id}/ReceiptPhoto")]
     public IActionResult ReceiptGetPhotos(long id)
     {
+        if (_currentUser == null) // Toegangscontrole
+            return Forbidden();
         
         // Get the receipt by the ID
         Receipt? existingReceipt = _context.Receipt.Find(id);
@@ -301,18 +305,4 @@ public class ReceiptController : ControllerBase
         return amountEqual
                && noteEqual;
     }
-
-    private string GetReceiptStatus(long id)
-    {
-        var nogTeChecken = _context.ReceiptStatus.FirstOrDefault(x => x.Id == id);
-
-        return nogTeChecken?.Name ?? "";
-    }
-
-    private long? GetReceiptPhotoId(long id)
-    {
-        var firstPhoto = _context.Photo.FirstOrDefault(x => x.Receipt == id);
-        return firstPhoto?.Id;
-    }
-
 }
