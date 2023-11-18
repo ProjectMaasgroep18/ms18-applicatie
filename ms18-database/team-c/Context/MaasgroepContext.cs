@@ -443,16 +443,16 @@ namespace Maasgroep.Database
                 .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<Stockpile>()
-                .HasOne(p => p.MemberModified)
+                .HasOne(s => s.MemberModified)
                 .WithMany(m => m.StocksModified)
-                .HasForeignKey(p => p.MemberModifiedId)
+                .HasForeignKey(s => s.MemberModifiedId)
                 .HasConstraintName("FK_stock_memberModified")
                 .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<Stockpile>()
-                .HasOne(p => p.MemberDeleted)
+                .HasOne(s => s.MemberDeleted)
                 .WithMany(m => m.StocksDeleted)
-                .HasForeignKey(p => p.MemberDeletedId)
+                .HasForeignKey(s => s.MemberDeletedId)
                 .HasConstraintName("FK_stock_memberDeleted")
                 .OnDelete(DeleteBehavior.NoAction);
         }
@@ -465,17 +465,17 @@ namespace Maasgroep.Database
         {
             modelBuilder.Entity<ProductHistory>().ToTable("product", "stockHistory");
             modelBuilder.HasSequence<long>("productSeq", schema: "stockHistory").StartsAt(1).IncrementsBy(1);
-            modelBuilder.Entity<ProductHistory>().Property(r => r.Id).HasDefaultValueSql("nextval('\"stockHistory\".\"productSeq\"')");
-            modelBuilder.Entity<ProductHistory>().Property(r => r.RecordCreated).HasDefaultValueSql("now()");
-            modelBuilder.Entity<ProductHistory>().Property(r => r.Name).HasMaxLength(2048);
+            modelBuilder.Entity<ProductHistory>().Property(p => p.Id).HasDefaultValueSql("nextval('\"stockHistory\".\"productSeq\"')");
+            modelBuilder.Entity<ProductHistory>().Property(p => p.RecordCreated).HasDefaultValueSql("now()");
+            modelBuilder.Entity<ProductHistory>().Property(p => p.Name).HasMaxLength(2048);
         }
 
         private void CreateStockpileHistory(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<StockpileHistory>().ToTable("stock", "stockHistory");
             modelBuilder.HasSequence<long>("stockSeq", schema: "stockHistory").StartsAt(1).IncrementsBy(1);
-            modelBuilder.Entity<StockpileHistory>().Property(r => r.Id).HasDefaultValueSql("nextval('\"stockHistory\".\"stockSeq\"')");
-            modelBuilder.Entity<StockpileHistory>().Property(r => r.RecordCreated).HasDefaultValueSql("now()");            
+            modelBuilder.Entity<StockpileHistory>().Property(s => s.Id).HasDefaultValueSql("nextval('\"stockHistory\".\"stockSeq\"')");
+            modelBuilder.Entity<StockpileHistory>().Property(s => s.RecordCreated).HasDefaultValueSql("now()");            
         }
 
         #endregion

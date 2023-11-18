@@ -41,6 +41,8 @@ namespace Maasgroep.Database.Members
 
         // EF admin properties
         public ICollection<MemberPermission> Permissions { get; set; }
+
+        // EF Generic properties
         public ICollection<Member>? MembersCreated { get; set; }
         public ICollection<Member>? MembersModified { get; set; }
         public ICollection<Member>? MembersDeleted { get; set; }

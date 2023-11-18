@@ -1,3 +1,4 @@
+
 namespace Maasgroep.Database.Members
 {
     public record Permission
