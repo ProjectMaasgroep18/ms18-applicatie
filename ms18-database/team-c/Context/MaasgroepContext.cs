@@ -3,7 +3,6 @@ using Maasgroep.Database.Members;
 using Maasgroep.Database.Photos;
 using Maasgroep.Database.Receipts;
 using Maasgroep.Database.Stock;
-using System.Reflection.Emit;
 
 namespace Maasgroep.Database
 {
@@ -41,6 +40,14 @@ namespace Maasgroep.Database
         public DbSet<Stockpile> Stock { get; set; }
 
         #endregion
+
+        #region StockHistory
+        
+        public DbSet<ProductHistory> ProductHistory { get; set; }
+        public DbSet<StockpileHistory> StockHistory { get; set; }
+
+        #endregion
+
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
