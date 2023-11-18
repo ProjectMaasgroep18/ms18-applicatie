@@ -107,6 +107,13 @@ namespace Maasgroep.Database
                 .HasConstraintName("FK_member_memberModified")
                 .OnDelete(DeleteBehavior.NoAction);
 
+            modelBuilder.Entity<Member>()
+                .HasOne(m => m.MemberDeleted)
+                .WithMany(m => m.MembersDeleted)
+                .HasForeignKey(m => m.MemberDeletedId)
+                .HasConstraintName("FK_member_memberDeleted")
+                .OnDelete(DeleteBehavior.NoAction);
+
         }
 
         private void CreatePermission(ModelBuilder modelBuilder)
@@ -134,6 +141,15 @@ namespace Maasgroep.Database
                 .HasForeignKey(p => p.MemberModifiedId)
                 .HasConstraintName("FK_permission_memberModified")
                 .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<Permission>()
+                .HasOne(p => p.MemberDeleted)
+                .WithMany(m => m.PermissionsDeleted)
+                .HasForeignKey(p => p.MemberDeletedId)
+                .HasConstraintName("FK_permission_memberDeleted")
+                .OnDelete(DeleteBehavior.NoAction);
+
+
         }
 
         private void CreateMemberPermission(ModelBuilder modelBuilder)
@@ -170,6 +186,13 @@ namespace Maasgroep.Database
                 .WithMany(m => m.MemberPermissionsModified)
                 .HasForeignKey(mp => mp.MemberModifiedId)
                 .HasConstraintName("FK_memberPermission_memberModified")
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<MemberPermission>()
+                .HasOne(mp => mp.MemberDeleted)
+                .WithMany(m => m.MemberPermissionsDeleted)
+                .HasForeignKey(mp => mp.MemberDeletedId)
+                .HasConstraintName("FK_memberPermission_memberDeleted")
                 .OnDelete(DeleteBehavior.NoAction);
         }
         #endregion
