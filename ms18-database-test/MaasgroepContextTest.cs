@@ -29,16 +29,25 @@ namespace Maasgroep.Database.Test
         }
 
         [Fact]
-        public void CreateProduct()
+        public void ModifyExistingStock()
         {
             using var context = Fixture.CreateContext();
+            context.Database.BeginTransaction();
+
             var controller = new StockController(context);
 
-            //var stockie = controller.StockGetById(1) as ObjectResult;
-            //var model = stockie.Value as StockViewModel;
+            var newStock = new StockViewModel("Duifis Scharrelnootjes", 1);
 
-            //Assert.Equal("Duifis Scharrelnootjes", model.Name);
-            //Assert.Equal(5, model.Quantity);
+            controller.ModifyStock(newStock);
+
+            context.ChangeTracker.Clear();
+
+            var stockAdded = context.Stock.Single(b => b.ProductId == 1);
+            var stockHistoryAdded = context.StockHistory.Where(b => b.ProductId == 1).OrderByDescending(x => x.Id).FirstOrDefault();
+            Assert.Equal(1, stockAdded.ProductId);
+            Assert.Equal(1, stockAdded.Quantity);
+            Assert.Equal(1, stockHistoryAdded.ProductId);
+            Assert.Equal(5, stockHistoryAdded.Quantity);
         }
     }
 }

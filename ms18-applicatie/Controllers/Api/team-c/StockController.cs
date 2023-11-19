@@ -46,25 +46,55 @@ namespace ms18_applicatie.Controllers.Api.team_c
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> AddStock(StockViewModel stock)
+        public IActionResult ModifyStock(StockViewModel stock)
         {
-            //if (product.Description.Contains("XYZ Widget"))
-            //{
-            //    return BadRequest();
-            //}
+            if (stock.Quantity < 0)
+            {
+                return BadRequest("Quantity must be equal or greater than 0.");
+            }
+
+            // TODO: Dit zit niet lekker in elkaar. Misschien controles anders, misschien model anders.
 
             var product = _context.Product.Where(p => p.Name == stock.Name).FirstOrDefault();
-            var currentStock = _context.Stock.Where(s => s.ProductId == product.Id).FirstOrDefault();
 
-            currentStock.Quantity = stock.Quantity;
-            //currentStock.MemberModifiedId = 2; // Todo
+            if (product == null)
+            {
+                return BadRequest("Dit moet nog gedaan worden, toevoegen");
+            }
+            else
+            {
+                var currentStock = _context.Stock.Where(s => s.ProductId == product.Id).FirstOrDefault();
 
-            _context.Update(currentStock);
-            await _context.SaveChangesAsync();
+                if (currentStock == null) 
+                {
+                    return BadRequest("Dit moet nog gedaan worden, toevoegen");
+                }
+                else
+                {
+                    var currentStockToHistory = new StockpileHistory(currentStock);
 
-            return Created("", product); // TODO: Aanpassen
+                    _context.StockHistory.Add(currentStockToHistory);
 
-            //return CreatedAtAction(nameof(GetById_IActionResult), new { id = product.Id }, product);
+                    currentStock.Quantity = stock.Quantity;
+                    currentStock.MemberModifiedId = _context.Member.Where(x => x.Id == 2).FirstOrDefault().Id;
+                    currentStock.DateTimeModified = DateTime.UtcNow;
+
+                    _context.Update(currentStock);
+                    _context.SaveChanges();
+
+                    return Created("", product); // TODO: Aanpassen
+                                                 //return CreatedAtAction(nameof(GetById_IActionResult), new { id = product.Id }, product);
+                }
+            }
+
+        }
+
+        [HttpPost]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public IActionResult DeleteStock(StockViewModel stock)
+        {
+            return Ok("hoi");
         }
     }
 }
