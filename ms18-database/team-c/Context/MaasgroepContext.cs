@@ -48,15 +48,27 @@ namespace Maasgroep.Database
 
         #endregion
 
+        private readonly Action<MaasgroepContext, ModelBuilder> _modelCustomizer;
 
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        public MaasgroepContext()
         {
+            DbContextOptionsBuilder optionsBuilder = new DbContextOptionsBuilder();
             optionsBuilder.UseNpgsql("UserID=postgres;Password=postgres;Host=localhost;port=5432;Database=Maasgroep;Pooling=true");
+            OnConfiguring(optionsBuilder);
+        }
+
+        public MaasgroepContext(DbContextOptions<MaasgroepContext> options, Action<MaasgroepContext, ModelBuilder> modelCustomizer = null) : base(options)
+        {
+            _modelCustomizer = modelCustomizer;
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            
+            if (_modelCustomizer is not null)
+            {
+                _modelCustomizer(this, modelBuilder);
+            }
+
             CreateMember(modelBuilder);
             CreatePermission(modelBuilder);
             CreateMemberPermission(modelBuilder);
@@ -78,6 +90,8 @@ namespace Maasgroep.Database
 
             CreateStockProductHistory(modelBuilder);
             CreateStockpileHistory(modelBuilder);
+
+
         }
 
         #region Member

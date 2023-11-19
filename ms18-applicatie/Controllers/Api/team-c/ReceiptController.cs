@@ -1,5 +1,4 @@
 ﻿using Maasgroep.Database;
-using Maasgroep.Database.Members;
 using Maasgroep.Database.Photos;
 using Maasgroep.Database.Receipts;
 using Maasgroep.Database.Repository.ViewModel;
