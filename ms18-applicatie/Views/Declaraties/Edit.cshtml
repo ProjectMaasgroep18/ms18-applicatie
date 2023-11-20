@@ -85,7 +85,7 @@
 
             showOutput(receipt, document.querySelector('#receipt-form'));
 
-            apiGet('Receipt/' + receiptId + '/ReceiptPhoto').then(result => {
+            apiGet('Receipt/' + receiptId + '/Photo').then(result => {
                 // Show all receipt photos
 
                 if (typeof result[0] == 'undefined') {

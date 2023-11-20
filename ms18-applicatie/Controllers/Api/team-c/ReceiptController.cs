@@ -207,8 +207,8 @@ public class ReceiptController : BaseController
         return NoContent();
     }
 
-    [HttpPost("{id}/ReceiptPhoto")]
-    [ActionName("receiptPhotosGet")]
+    [HttpPost("{id}/Photo")]
+    [ActionName("receiptPhotosAdd")]
     public IActionResult ReceiptAddPhoto(long id, [FromBody] PhotoViewModel photoViewModel)
     {
         if (_currentUser == null) // Toegangscontrole
@@ -251,7 +251,7 @@ public class ReceiptController : BaseController
         _context.SaveChanges();
         
         // Return the created photo
-        return Created($"/api/v1/receipt/{id}/ReceiptPhoto/{createdPhoto.Id}", new
+        return Created($"/api/v1/receipt/{id}/Photo/{createdPhoto.Id}", new
         {
             status = 201,
             message = "Photo created",
@@ -259,8 +259,8 @@ public class ReceiptController : BaseController
         });
     }
 
-    [HttpGet("{id}/ReceiptPhoto")]
-    [ActionName("receiptPhotosAdd")]
+    [HttpGet("{id}/Photo")]
+    [ActionName("receiptPhotosGet")]
     public IActionResult ReceiptGetPhotos(long id)
     {
         if (_currentUser == null) // Toegangscontrole
@@ -288,8 +288,8 @@ public class ReceiptController : BaseController
         return Ok(photos);
     }
 
-    [HttpPost("{id}/ReceiptApprovement")]
-    [ActionName("receiptApprovement")]
+    [HttpPost("{id}/Approve")]
+    [ActionName("approveReceipt")]
     public IActionResult ApproveReceipt(long id, [FromBody] ReceiptApprovalViewModel approvalViewModel)
     {
         if (_currentUser == null) // Toegangscontrole
