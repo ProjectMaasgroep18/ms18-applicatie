@@ -37,7 +37,6 @@ public abstract class BaseController : ControllerBase
             var costCentre = _context.CostCentre.FirstOrDefault(costCentre => costCentre.Id == receipt.CostCentreId);
             receipt.CostCentreURI = "/api/v1/CostCentre/" + costCentre?.Id;
             receipt.CostCentre = costCentre?.Name;
-            System.Console.WriteLine(receipt.CostCentreURI + " -> " + receipt.CostCentre);
         }
         
         return receipt;
