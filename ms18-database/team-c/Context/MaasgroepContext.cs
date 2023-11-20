@@ -2,6 +2,7 @@
 using Maasgroep.Database.Members;
 using Maasgroep.Database.Photos;
 using Maasgroep.Database.Receipts;
+using Maasgroep.Database.Stock;
 
 namespace Maasgroep.Database
 {
@@ -33,10 +34,24 @@ namespace Maasgroep.Database
         public DbSet<Photo> Photo { get; set; }
         #endregion
 
+        #region Stock
+
+        public DbSet<Product> Product { get; set; }
+        public DbSet<Stockpile> Stock { get; set; }
+
+        #endregion
+
+        #region StockHistory
+        
+        public DbSet<ProductHistory> ProductHistory { get; set; }
+        public DbSet<StockpileHistory> StockHistory { get; set; }
+
+        #endregion
+
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseNpgsql("UserID=postgres;Password=postgres;Host=localhost;port=5410;Database=Maasgroep;Pooling=true");
+            optionsBuilder.UseNpgsql("UserID=postgres;Password=postgres;Host=localhost;port=5432;Database=Maasgroep;Pooling=true");
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -57,6 +72,12 @@ namespace Maasgroep.Database
             CreateCostCentreHistory(modelBuilder);
 
             CreatePhoto(modelBuilder);
+
+            CreateStockProduct(modelBuilder);
+            CreateStockpile(modelBuilder);
+
+            CreateStockProductHistory(modelBuilder);
+            CreateStockpileHistory(modelBuilder);
         }
 
         #region Member
@@ -86,6 +107,13 @@ namespace Maasgroep.Database
                 .HasConstraintName("FK_member_memberModified")
                 .OnDelete(DeleteBehavior.NoAction);
 
+            modelBuilder.Entity<Member>()
+                .HasOne(m => m.MemberDeleted)
+                .WithMany(m => m.MembersDeleted)
+                .HasForeignKey(m => m.MemberDeletedId)
+                .HasConstraintName("FK_member_memberDeleted")
+                .OnDelete(DeleteBehavior.NoAction);
+
         }
 
         private void CreatePermission(ModelBuilder modelBuilder)
@@ -113,6 +141,15 @@ namespace Maasgroep.Database
                 .HasForeignKey(p => p.MemberModifiedId)
                 .HasConstraintName("FK_permission_memberModified")
                 .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<Permission>()
+                .HasOne(p => p.MemberDeleted)
+                .WithMany(m => m.PermissionsDeleted)
+                .HasForeignKey(p => p.MemberDeletedId)
+                .HasConstraintName("FK_permission_memberDeleted")
+                .OnDelete(DeleteBehavior.NoAction);
+
+
         }
 
         private void CreateMemberPermission(ModelBuilder modelBuilder)
@@ -150,6 +187,13 @@ namespace Maasgroep.Database
                 .HasForeignKey(mp => mp.MemberModifiedId)
                 .HasConstraintName("FK_memberPermission_memberModified")
                 .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<MemberPermission>()
+                .HasOne(mp => mp.MemberDeleted)
+                .WithMany(m => m.MemberPermissionsDeleted)
+                .HasForeignKey(mp => mp.MemberDeletedId)
+                .HasConstraintName("FK_memberPermission_memberDeleted")
+                .OnDelete(DeleteBehavior.NoAction);
         }
         #endregion
 
@@ -178,6 +222,13 @@ namespace Maasgroep.Database
                 .WithMany(m => m.CostCentresModified)
                 .HasForeignKey(cc => cc.MemberModifiedId)
                 .HasConstraintName("FK_costCentre_memberModified")
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<CostCentre>()
+                .HasOne(cc => cc.MemberDeleted)
+                .WithMany(m => m.CostCentresDeleted)
+                .HasForeignKey(cc => cc.MemberDeletedId)
+                .HasConstraintName("FK_costCentre_memberDeleted")
                 .OnDelete(DeleteBehavior.NoAction);
         }
 
@@ -221,6 +272,13 @@ namespace Maasgroep.Database
                 .HasForeignKey(ra => ra.MemberModifiedId)
                 .HasConstraintName("FK_receipt_memberModified")
                 .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<Receipt>()
+                .HasOne(ra => ra.MemberDeleted)
+                .WithMany(m => m.ReceiptsDeleted)
+                .HasForeignKey(ra => ra.MemberDeletedId)
+                .HasConstraintName("FK_receipt_memberDeleted")
+                .OnDelete(DeleteBehavior.NoAction);
         }
 
         private void CreateReceiptApproval(ModelBuilder modelBuilder)
@@ -252,6 +310,13 @@ namespace Maasgroep.Database
                 .HasForeignKey(ra => ra.MemberModifiedId)
                 .HasConstraintName("FK_receiptApproval_memberModified")
                 .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<ReceiptApproval>()
+                .HasOne(ra => ra.MemberDeleted)
+                .WithMany(m => m.ReceiptApprovalsDeleted)
+                .HasForeignKey(ra => ra.MemberDeletedId)
+                .HasConstraintName("FK_receiptApproval_memberDeleted")
+                .OnDelete(DeleteBehavior.NoAction);
         }
 
         private void CreateReceiptStatus(ModelBuilder modelBuilder)
@@ -276,6 +341,13 @@ namespace Maasgroep.Database
                 .WithMany(m => m.ReceiptStatusesModified)
                 .HasForeignKey(rs => rs.MemberModifiedId)
                 .HasConstraintName("FK_receiptStatus_memberModified")
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<ReceiptStatus>()
+                .HasOne(rs => rs.MemberDeleted)
+                .WithMany(m => m.ReceiptStatusesDeleted)
+                .HasForeignKey(rs => rs.MemberDeletedId)
+                .HasConstraintName("FK_receiptStatus_memberDeleted")
                 .OnDelete(DeleteBehavior.NoAction);
 
         }
@@ -341,6 +413,94 @@ namespace Maasgroep.Database
                 .HasConstraintName("FK_Photo_Receipt")
                 .OnDelete(DeleteBehavior.Cascade);
         }
+        #endregion
+
+        #region Stock
+        private void CreateStockProduct(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Product>().HasKey(p => p.Id);            
+            modelBuilder.Entity<Product>().ToTable("product", "stock");
+            modelBuilder.HasSequence<long>("productSeq", schema: "stock").StartsAt(1).IncrementsBy(1);
+            modelBuilder.Entity<Product>().Property(p => p.DateTimeCreated).HasDefaultValueSql("now()");
+            modelBuilder.Entity<Product>().Property(p => p.Id).HasDefaultValueSql("nextval('stock.\"productSeq\"')");
+
+            modelBuilder.Entity<Product>()
+                .HasOne(p => p.MemberCreated)
+                .WithMany(m => m.ProductsCreated)
+                .HasForeignKey(p => p.MemberCreatedId)
+                .HasConstraintName("FK_stockProduct_memberCreated")
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<Product>()
+                .HasOne(p => p.MemberModified)
+                .WithMany(m => m.ProductsModified)
+                .HasForeignKey(p => p.MemberModifiedId)
+                .HasConstraintName("FK_stockProduct_memberModified")
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<Product>()
+                .HasOne(p => p.MemberDeleted)
+                .WithMany(m => m.ProductsDeleted)
+                .HasForeignKey(p => p.MemberDeletedId)
+                .HasConstraintName("FK_stockProduct_memberDeleted")
+                .OnDelete(DeleteBehavior.NoAction);
+        }
+
+        private void CreateStockpile(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Stockpile>().HasKey(s => s.ProductId);
+            modelBuilder.Entity<Stockpile>().ToTable("stock", "stock");
+            modelBuilder.Entity<Stockpile>().Property(s => s.DateTimeCreated).HasDefaultValueSql("now()");
+            modelBuilder.Entity<Stockpile>().ToTable(s => s.HasCheckConstraint("CK_stock_quantity", "\"Quantity\" >= 0"));
+
+            modelBuilder.Entity<Stockpile>()
+                .HasOne(s => s.Product)
+                .WithOne(p => p.Stock)
+                .HasForeignKey<Stockpile>(s => s.ProductId);
+
+            modelBuilder.Entity<Stockpile>()
+                .HasOne(s => s.MemberCreated)
+                .WithMany(m => m.StocksCreated)
+                .HasForeignKey(s => s.MemberCreatedId)
+                .HasConstraintName("FK_stock_memberCreated")
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<Stockpile>()
+                .HasOne(s => s.MemberModified)
+                .WithMany(m => m.StocksModified)
+                .HasForeignKey(s => s.MemberModifiedId)
+                .HasConstraintName("FK_stock_memberModified")
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<Stockpile>()
+                .HasOne(s => s.MemberDeleted)
+                .WithMany(m => m.StocksDeleted)
+                .HasForeignKey(s => s.MemberDeletedId)
+                .HasConstraintName("FK_stock_memberDeleted")
+                .OnDelete(DeleteBehavior.NoAction);
+        }
+
+        #endregion
+
+        #region Stock History
+
+        private void CreateStockProductHistory(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<ProductHistory>().ToTable("product", "stockHistory");
+            modelBuilder.HasSequence<long>("productSeq", schema: "stockHistory").StartsAt(1).IncrementsBy(1);
+            modelBuilder.Entity<ProductHistory>().Property(p => p.Id).HasDefaultValueSql("nextval('\"stockHistory\".\"productSeq\"')");
+            modelBuilder.Entity<ProductHistory>().Property(p => p.RecordCreated).HasDefaultValueSql("now()");
+            modelBuilder.Entity<ProductHistory>().Property(p => p.Name).HasMaxLength(2048);
+        }
+
+        private void CreateStockpileHistory(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<StockpileHistory>().ToTable("stock", "stockHistory");
+            modelBuilder.HasSequence<long>("stockSeq", schema: "stockHistory").StartsAt(1).IncrementsBy(1);
+            modelBuilder.Entity<StockpileHistory>().Property(s => s.Id).HasDefaultValueSql("nextval('\"stockHistory\".\"stockSeq\"')");
+            modelBuilder.Entity<StockpileHistory>().Property(s => s.RecordCreated).HasDefaultValueSql("now()");            
+        }
+
         #endregion
     }
 }

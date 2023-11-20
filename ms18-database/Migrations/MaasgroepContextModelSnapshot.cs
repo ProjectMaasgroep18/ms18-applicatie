@@ -34,6 +34,10 @@ namespace Maasgroep.Database.Migrations
 
             modelBuilder.HasSequence("PhotoSeq", "photo");
 
+            modelBuilder.HasSequence("productSeq", "stock");
+
+            modelBuilder.HasSequence("productSeq", "stockHistory");
+
             modelBuilder.HasSequence("receiptSeq", "receipt");
 
             modelBuilder.HasSequence("receiptSeq", "receiptHistory");
@@ -41,6 +45,8 @@ namespace Maasgroep.Database.Migrations
             modelBuilder.HasSequence("statusSeq", "receipt");
 
             modelBuilder.HasSequence("statusSeq", "receiptHistory");
+
+            modelBuilder.HasSequence("stockSeq", "stockHistory");
 
             modelBuilder.Entity("Maasgroep.Database.Members.Member", b =>
                 {
@@ -54,10 +60,16 @@ namespace Maasgroep.Database.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasDefaultValueSql("now()");
 
+                    b.Property<DateTime?>("DateTimeDeleted")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<DateTime?>("DateTimeModified")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<long?>("MemberCreatedId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("MemberDeletedId")
                         .HasColumnType("bigint");
 
                     b.Property<long?>("MemberModifiedId")
@@ -71,6 +83,8 @@ namespace Maasgroep.Database.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("MemberCreatedId");
+
+                    b.HasIndex("MemberDeletedId");
 
                     b.HasIndex("MemberModifiedId");
 
@@ -93,10 +107,16 @@ namespace Maasgroep.Database.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasDefaultValueSql("now()");
 
+                    b.Property<DateTime?>("DateTimeDeleted")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<DateTime?>("DateTimeModified")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<long>("MemberCreatedId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("MemberDeletedId")
                         .HasColumnType("bigint");
 
                     b.Property<long?>("MemberModifiedId")
@@ -105,6 +125,8 @@ namespace Maasgroep.Database.Migrations
                     b.HasKey("MemberId", "PermissionId");
 
                     b.HasIndex("MemberCreatedId");
+
+                    b.HasIndex("MemberDeletedId");
 
                     b.HasIndex("MemberModifiedId");
 
@@ -125,10 +147,16 @@ namespace Maasgroep.Database.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasDefaultValueSql("now()");
 
+                    b.Property<DateTime?>("DateTimeDeleted")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<DateTime?>("DateTimeModified")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<long>("MemberCreatedId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("MemberDeletedId")
                         .HasColumnType("bigint");
 
                     b.Property<long?>("MemberModifiedId")
@@ -142,6 +170,8 @@ namespace Maasgroep.Database.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("MemberCreatedId");
+
+                    b.HasIndex("MemberDeletedId");
 
                     b.HasIndex("MemberModifiedId");
 
@@ -595,6 +625,174 @@ namespace Maasgroep.Database.Migrations
                     b.ToTable("status", "receiptHistory");
                 });
 
+            modelBuilder.Entity("Maasgroep.Database.Stock.Product", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasDefaultValueSql("nextval('stock.\"productSeq\"')");
+
+                    b.Property<DateTime>("DateTimeCreated")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValueSql("now()");
+
+                    b.Property<DateTime?>("DateTimeDeleted")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("DateTimeModified")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<long>("MemberCreatedId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("MemberDeletedId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("MemberModifiedId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MemberCreatedId");
+
+                    b.HasIndex("MemberDeletedId");
+
+                    b.HasIndex("MemberModifiedId");
+
+                    b.ToTable("product", "stock");
+                });
+
+            modelBuilder.Entity("Maasgroep.Database.Stock.ProductHistory", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasDefaultValueSql("nextval('\"stockHistory\".\"productSeq\"')");
+
+                    b.Property<DateTime>("DateTimeCreated")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("DateTimeDeleted")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("DateTimeModified")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<long>("MemberCreatedId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("MemberDeletedId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("MemberModifiedId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(2048)
+                        .HasColumnType("character varying(2048)");
+
+                    b.Property<long>("ProductId")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime>("RecordCreated")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValueSql("now()");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("product", "stockHistory");
+                });
+
+            modelBuilder.Entity("Maasgroep.Database.Stock.Stockpile", b =>
+                {
+                    b.Property<long>("ProductId")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime>("DateTimeCreated")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValueSql("now()");
+
+                    b.Property<DateTime?>("DateTimeDeleted")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("DateTimeModified")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<long>("MemberCreatedId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("MemberDeletedId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("MemberModifiedId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("Quantity")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("ProductId");
+
+                    b.HasIndex("MemberCreatedId");
+
+                    b.HasIndex("MemberDeletedId");
+
+                    b.HasIndex("MemberModifiedId");
+
+                    b.ToTable("stock", "stock", t =>
+                        {
+                            t.HasCheckConstraint("CK_stock_quantity", "\"Quantity\" >= 0");
+                        });
+                });
+
+            modelBuilder.Entity("Maasgroep.Database.Stock.StockpileHistory", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasDefaultValueSql("nextval('\"stockHistory\".\"stockSeq\"')");
+
+                    b.Property<DateTime>("DateTimeCreated")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("DateTimeDeleted")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("DateTimeModified")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<long>("MemberCreatedId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("MemberDeletedId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("MemberModifiedId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("ProductId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("Quantity")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime>("RecordCreated")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValueSql("now()");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("stock", "stockHistory");
+                });
+
             modelBuilder.Entity("Maasgroep.Database.Members.Member", b =>
                 {
                     b.HasOne("Maasgroep.Database.Members.Member", "MemberCreated")
@@ -603,6 +801,12 @@ namespace Maasgroep.Database.Migrations
                         .OnDelete(DeleteBehavior.NoAction)
                         .HasConstraintName("FK_member_memberCreated");
 
+                    b.HasOne("Maasgroep.Database.Members.Member", "MemberDeleted")
+                        .WithMany("MembersDeleted")
+                        .HasForeignKey("MemberDeletedId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .HasConstraintName("FK_member_memberDeleted");
+
                     b.HasOne("Maasgroep.Database.Members.Member", "MemberModified")
                         .WithMany("MembersModified")
                         .HasForeignKey("MemberModifiedId")
@@ -610,6 +814,8 @@ namespace Maasgroep.Database.Migrations
                         .HasConstraintName("FK_member_memberModified");
 
                     b.Navigation("MemberCreated");
+
+                    b.Navigation("MemberDeleted");
 
                     b.Navigation("MemberModified");
                 });
@@ -622,6 +828,12 @@ namespace Maasgroep.Database.Migrations
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired()
                         .HasConstraintName("FK_memberPermission_memberCreated");
+
+                    b.HasOne("Maasgroep.Database.Members.Member", "MemberDeleted")
+                        .WithMany("MemberPermissionsDeleted")
+                        .HasForeignKey("MemberDeletedId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .HasConstraintName("FK_memberPermission_memberDeleted");
 
                     b.HasOne("Maasgroep.Database.Members.Member", "Member")
                         .WithMany("Permissions")
@@ -647,6 +859,8 @@ namespace Maasgroep.Database.Migrations
 
                     b.Navigation("MemberCreated");
 
+                    b.Navigation("MemberDeleted");
+
                     b.Navigation("MemberModified");
 
                     b.Navigation("Permission");
@@ -661,6 +875,12 @@ namespace Maasgroep.Database.Migrations
                         .IsRequired()
                         .HasConstraintName("FK_permission_memberCreated");
 
+                    b.HasOne("Maasgroep.Database.Members.Member", "MemberDeleted")
+                        .WithMany("PermissionsDeleted")
+                        .HasForeignKey("MemberDeletedId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .HasConstraintName("FK_permission_memberDeleted");
+
                     b.HasOne("Maasgroep.Database.Members.Member", "MemberModified")
                         .WithMany("PermissionsModified")
                         .HasForeignKey("MemberModifiedId")
@@ -668,6 +888,8 @@ namespace Maasgroep.Database.Migrations
                         .HasConstraintName("FK_permission_memberModified");
 
                     b.Navigation("MemberCreated");
+
+                    b.Navigation("MemberDeleted");
 
                     b.Navigation("MemberModified");
                 });
@@ -713,8 +935,10 @@ namespace Maasgroep.Database.Migrations
                         .HasConstraintName("FK_costCentre_memberCreated");
 
                     b.HasOne("Maasgroep.Database.Members.Member", "MemberDeleted")
-                        .WithMany()
-                        .HasForeignKey("MemberDeletedId");
+                        .WithMany("CostCentresDeleted")
+                        .HasForeignKey("MemberDeletedId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .HasConstraintName("FK_costCentre_memberDeleted");
 
                     b.HasOne("Maasgroep.Database.Members.Member", "MemberModified")
                         .WithMany("CostCentresModified")
@@ -745,8 +969,10 @@ namespace Maasgroep.Database.Migrations
                         .HasConstraintName("FK_receipt_memberCreated");
 
                     b.HasOne("Maasgroep.Database.Members.Member", "MemberDeleted")
-                        .WithMany()
-                        .HasForeignKey("MemberDeletedId");
+                        .WithMany("ReceiptsDeleted")
+                        .HasForeignKey("MemberDeletedId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .HasConstraintName("FK_receipt_memberDeleted");
 
                     b.HasOne("Maasgroep.Database.Members.Member", "MemberModified")
                         .WithMany("ReceiptsModified")
@@ -782,8 +1008,10 @@ namespace Maasgroep.Database.Migrations
                         .HasConstraintName("FK_receiptApproval_memberCreated");
 
                     b.HasOne("Maasgroep.Database.Members.Member", "MemberDeleted")
-                        .WithMany()
-                        .HasForeignKey("MemberDeletedId");
+                        .WithMany("ReceiptApprovalsDeleted")
+                        .HasForeignKey("MemberDeletedId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .HasConstraintName("FK_receiptApproval_memberDeleted");
 
                     b.HasOne("Maasgroep.Database.Members.Member", "MemberModified")
                         .WithMany("ReceiptApprovalsModified")
@@ -817,8 +1045,10 @@ namespace Maasgroep.Database.Migrations
                         .HasConstraintName("FK_receiptStatus_memberCreated");
 
                     b.HasOne("Maasgroep.Database.Members.Member", "MemberDeleted")
-                        .WithMany()
-                        .HasForeignKey("MemberDeletedId");
+                        .WithMany("ReceiptStatusesDeleted")
+                        .HasForeignKey("MemberDeletedId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .HasConstraintName("FK_receiptStatus_memberDeleted");
 
                     b.HasOne("Maasgroep.Database.Members.Member", "MemberModified")
                         .WithMany("ReceiptStatusesModified")
@@ -833,17 +1063,87 @@ namespace Maasgroep.Database.Migrations
                     b.Navigation("MemberModified");
                 });
 
+            modelBuilder.Entity("Maasgroep.Database.Stock.Product", b =>
+                {
+                    b.HasOne("Maasgroep.Database.Members.Member", "MemberCreated")
+                        .WithMany("ProductsCreated")
+                        .HasForeignKey("MemberCreatedId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired()
+                        .HasConstraintName("FK_stockProduct_memberCreated");
+
+                    b.HasOne("Maasgroep.Database.Members.Member", "MemberDeleted")
+                        .WithMany("ProductsDeleted")
+                        .HasForeignKey("MemberDeletedId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .HasConstraintName("FK_stockProduct_memberDeleted");
+
+                    b.HasOne("Maasgroep.Database.Members.Member", "MemberModified")
+                        .WithMany("ProductsModified")
+                        .HasForeignKey("MemberModifiedId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .HasConstraintName("FK_stockProduct_memberModified");
+
+                    b.Navigation("MemberCreated");
+
+                    b.Navigation("MemberDeleted");
+
+                    b.Navigation("MemberModified");
+                });
+
+            modelBuilder.Entity("Maasgroep.Database.Stock.Stockpile", b =>
+                {
+                    b.HasOne("Maasgroep.Database.Members.Member", "MemberCreated")
+                        .WithMany("StocksCreated")
+                        .HasForeignKey("MemberCreatedId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired()
+                        .HasConstraintName("FK_stock_memberCreated");
+
+                    b.HasOne("Maasgroep.Database.Members.Member", "MemberDeleted")
+                        .WithMany("StocksDeleted")
+                        .HasForeignKey("MemberDeletedId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .HasConstraintName("FK_stock_memberDeleted");
+
+                    b.HasOne("Maasgroep.Database.Members.Member", "MemberModified")
+                        .WithMany("StocksModified")
+                        .HasForeignKey("MemberModifiedId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .HasConstraintName("FK_stock_memberModified");
+
+                    b.HasOne("Maasgroep.Database.Stock.Product", "Product")
+                        .WithOne("Stock")
+                        .HasForeignKey("Maasgroep.Database.Stock.Stockpile", "ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("MemberCreated");
+
+                    b.Navigation("MemberDeleted");
+
+                    b.Navigation("MemberModified");
+
+                    b.Navigation("Product");
+                });
+
             modelBuilder.Entity("Maasgroep.Database.Members.Member", b =>
                 {
                     b.Navigation("CostCentresCreated");
+
+                    b.Navigation("CostCentresDeleted");
 
                     b.Navigation("CostCentresModified");
 
                     b.Navigation("MemberPermissionsCreated");
 
+                    b.Navigation("MemberPermissionsDeleted");
+
                     b.Navigation("MemberPermissionsModified");
 
                     b.Navigation("MembersCreated");
+
+                    b.Navigation("MembersDeleted");
 
                     b.Navigation("MembersModified");
 
@@ -851,19 +1151,39 @@ namespace Maasgroep.Database.Migrations
 
                     b.Navigation("PermissionsCreated");
 
+                    b.Navigation("PermissionsDeleted");
+
                     b.Navigation("PermissionsModified");
 
+                    b.Navigation("ProductsCreated");
+
+                    b.Navigation("ProductsDeleted");
+
+                    b.Navigation("ProductsModified");
+
                     b.Navigation("ReceiptApprovalsCreated");
+
+                    b.Navigation("ReceiptApprovalsDeleted");
 
                     b.Navigation("ReceiptApprovalsModified");
 
                     b.Navigation("ReceiptStatusesCreated");
 
+                    b.Navigation("ReceiptStatusesDeleted");
+
                     b.Navigation("ReceiptStatusesModified");
 
                     b.Navigation("ReceiptsCreated");
 
+                    b.Navigation("ReceiptsDeleted");
+
                     b.Navigation("ReceiptsModified");
+
+                    b.Navigation("StocksCreated");
+
+                    b.Navigation("StocksDeleted");
+
+                    b.Navigation("StocksModified");
                 });
 
             modelBuilder.Entity("Maasgroep.Database.Members.Permission", b =>
@@ -886,6 +1206,12 @@ namespace Maasgroep.Database.Migrations
             modelBuilder.Entity("Maasgroep.Database.Receipts.ReceiptStatus", b =>
                 {
                     b.Navigation("Receipt");
+                });
+
+            modelBuilder.Entity("Maasgroep.Database.Stock.Product", b =>
+                {
+                    b.Navigation("Stock")
+                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }
