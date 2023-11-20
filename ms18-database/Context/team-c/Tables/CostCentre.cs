@@ -4,6 +4,7 @@ namespace Maasgroep.Database.Receipts
 {
     public record CostCentre
 	{
+
 		public long Id { get; set; }
 		public string Name { get; set; }
 
@@ -25,5 +26,12 @@ namespace Maasgroep.Database.Receipts
         public Member MemberCreated { get; set; }
         public Member? MemberModified { get; set; }
         public Member? MemberDeleted { get; set; }
+        
+        public CostCentre() {}
+        
+        public CostCentre(CostCentreViewModel costCentreViewModel)
+        {
+	        Name = costCentreViewModel.Name;
+        }
     }
 }
