@@ -41,12 +41,9 @@ namespace Maasgroep.Database.Photos
         {
             return new Photo
             {
-                Id = viewModel.Id,
                 Receipt = viewModel.Receipt,
                 fileExtension = viewModel.fileExtension,
                 fileName = viewModel.fileName,
-                DateTimeCreated = viewModel.DateTimeCreated,
-                DateTimeModified = viewModel.DateTimeModified,
                 Base64Image = viewModel.Base64Image,
             };
         }

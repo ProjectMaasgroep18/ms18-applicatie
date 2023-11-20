@@ -5,7 +5,7 @@ namespace Maasgroep.Database.Repository.ViewModel;
 public class PhotoViewModel
 {
     
-    public long Id { get; set; }
+    public long? Id { get; set; }
     public long? Receipt { get; set; }
     public string fileExtension { get; set; }
     public string fileName { get; set; }
@@ -18,19 +18,15 @@ public class PhotoViewModel
     [JsonConstructor]
     public PhotoViewModel() { }
     
-    public static PhotoViewModel FromDatabaseModel(Photo photo)
+    public PhotoViewModel(Photo photo)
     {
-        return new PhotoViewModel
-        {
-            Id = photo.Id,
-            Receipt = photo.Receipt,
-            fileExtension = photo.fileExtension,
-            fileName = photo.fileName,
-            DateTimeCreated = photo.DateTimeCreated,
-            DateTimeModified = photo.DateTimeModified,
-            Base64Image = photo.Base64Image,
-            // Map other properties as needed
-        };
+        Id = photo.Id;
+        Receipt = photo.Receipt;
+        fileExtension = photo.fileExtension;
+        fileName = photo.fileName;
+        DateTimeCreated = photo.DateTimeCreated;
+        DateTimeModified = photo.DateTimeModified;
+        Base64Image = photo.Base64Image;
     }
     
 }
