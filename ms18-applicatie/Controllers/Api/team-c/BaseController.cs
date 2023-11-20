@@ -31,9 +31,14 @@ public abstract class BaseController : ControllerBase
         // Photos, Status, CostCentre, etc.
 
         receipt.Status = _context.ReceiptStatus.FirstOrDefault(status => status.Id == receipt.StatusId)?.Name;
+        
         receipt.ReceiptPhotoURI = _context.Photo.Where(photo => photo.Receipt == receipt.ID).Select(receipt => $"/api/v1/ReceiptPhoto/{receipt.Id}").ToList();
-        if (receipt.CostCentreId != null)
-            receipt.CostCentreURI = "/api/v1/CostCentre/" + _context.CostCentre.FirstOrDefault(costCentre => costCentre.Id == receipt.CostCentreId)?.Id;
+        if (receipt.CostCentreId != null) {
+            var costCentre = _context.CostCentre.FirstOrDefault(costCentre => costCentre.Id == receipt.CostCentreId);
+            receipt.CostCentreURI = "/api/v1/CostCentre/" + costCentre?.Id;
+            receipt.CostCentre = costCentre?.Name;
+            System.Console.WriteLine(receipt.CostCentreURI + " -> " + receipt.CostCentre);
+        }
         
         return receipt;
     }
