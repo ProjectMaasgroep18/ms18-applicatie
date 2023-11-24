@@ -51,7 +51,7 @@ namespace Maasgroep.Database
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseNpgsql("UserID=postgres;Password=postgres;Host=localhost;port=5432;Database=Maasgroep;Pooling=true");
+            optionsBuilder.UseNpgsql("UserID=postgres;Password=postgres;Host=localhost;port=5454;Database=Maasgroep2;Pooling=true");
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -456,7 +456,9 @@ namespace Maasgroep.Database
             modelBuilder.Entity<Stockpile>()
                 .HasOne(s => s.Product)
                 .WithOne(p => p.Stock)
-                .HasForeignKey<Stockpile>(s => s.ProductId);
+                .HasForeignKey<Stockpile>(s => s.ProductId)
+                .OnDelete(DeleteBehavior.Cascade)
+                ;
 
             modelBuilder.Entity<Stockpile>()
                 .HasOne(s => s.MemberCreated)
