@@ -15,10 +15,11 @@ namespace Maasgroep.Database
         #endregion
 
         #region Receipts
-        public DbSet<Receipts.Receipt> Receipt { get; set; }
+        public DbSet<Receipt> Receipt { get; set; }
         public DbSet<ReceiptApproval> ReceiptApproval { get; set; }
         public DbSet<ReceiptStatus> ReceiptStatus { get; set; }
         public DbSet<CostCentre> CostCentre { get; set; }
+        public DbSet<Photo> Photo { get; set; }
         #endregion
 
         #region ReceiptHistory
@@ -27,11 +28,8 @@ namespace Maasgroep.Database
         public DbSet<ReceiptApprovalHistory> ReceiptApprovalHistory { get; set; }
         public DbSet<ReceiptHistory> ReceiptHistory { get; set; }
         public DbSet<ReceiptStatusHistory> ReceiptStatusHistory { get; set; }
+        public DbSet<PhotoHistory> PhotoHistory { get; set; }
 
-        #endregion
-
-        #region Photos
-        public DbSet<Photo> Photo { get; set; }
         #endregion
 
         #region Order
@@ -40,6 +38,7 @@ namespace Maasgroep.Database
         public DbSet<Stock> Stock { get; set; }
         public DbSet<ProductPrice> ProductPrice { get; set; }
         public DbSet<Line> OrderLines { get; set; }
+        public DbSet<Bill> Bills { get; set; }
 
         #endregion
 
@@ -47,7 +46,18 @@ namespace Maasgroep.Database
         
         public DbSet<ProductHistory> ProductHistory { get; set; }
         public DbSet<StockHistory> StockHistory { get; set; }
+        public DbSet<ProductPriceHistory> ProductPriceHistories { get; set; }
+        public DbSet<LineHistory> LineHistory { get; set; }
+        public DbSet<BillHistory> BillHistory { get; set; }
 
+        #endregion
+
+        #region ToDo
+        public DbSet<ToDo> ToDos { get; set; }
+        #endregion
+
+        #region ToDoHistory
+        public DbSet<ToDoHistory> ToDoHistory { get; set; }
         #endregion
 
         // TODO: Uitgecomment ivm fixture dat conflicteert met bouwen EF migration
