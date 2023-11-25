@@ -1,6 +1,6 @@
 ﻿using Maasgroep.Database.Members;
 using Maasgroep.Database.Receipts;
-using Maasgroep.Database.Stock;
+using Maasgroep.Database.Order;
 using Microsoft.EntityFrameworkCore;
 
 namespace Maasgroep.Database.Test
@@ -254,10 +254,10 @@ namespace Maasgroep.Database.Test
                 var product1 = db.Product.Where(p => p.Name == "Duifis Scharrelnootjes").FirstOrDefault();
                 var product2 = db.Product.Where(p => p.Name == "Vorta Cola").FirstOrDefault();
 
-                var stockToAdd = new List<Stockpile>()
+                var stockToAdd = new List<Stock>()
                 {
-                    new Stockpile() { MemberCreated = member, Product = product1, Quantity = 5 }
-                ,   new Stockpile() { MemberCreated = member, Product = product2, Quantity = 10 }
+                    new Stock() { MemberCreated = member, Product = product1, Quantity = 5 }
+                ,   new Stock() { MemberCreated = member, Product = product2, Quantity = 10 }
                 };
 
                 db.Stock.AddRange(stockToAdd);

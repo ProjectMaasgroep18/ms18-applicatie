@@ -1,17 +1,17 @@
 ﻿using Maasgroep.Database;
 using Maasgroep.Database.Repository.ViewModel;
-using Maasgroep.Database.Stock;
+using Maasgroep.Database.Order;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ms18_applicatie.Controllers.Api.team_c
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class StockController : ControllerBase
+    public class OrderController : ControllerBase
     {
         private readonly MaasgroepContext _context;
 
-        public StockController(MaasgroepContext context)
+        public OrderController(MaasgroepContext context)
         {
             _context = context;
         }

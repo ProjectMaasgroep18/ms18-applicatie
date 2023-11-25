@@ -35,7 +35,7 @@ public class DeclaratiesController : Controller
 
         var output = new DeclaratieBestaand();
         
-        output.FormFile64 = "data:image;base64,"+ Convert.ToBase64String(photo.Bytes);
+        output.FormFile64 = "data:image;base64,"+ photo.Base64Image;
         output.AangemaaktDoor = photo.MemberCreated?.Name ?? "Kevin";
 
         return View(output);

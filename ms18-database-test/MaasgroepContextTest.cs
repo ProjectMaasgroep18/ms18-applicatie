@@ -19,7 +19,7 @@ namespace Maasgroep.Database.Test
         public void GetProduct()
         {
             using var context = Fixture.CreateContext();
-            var controller = new StockController(context);
+            var controller = new OrderController(context);
 
             var stockie = controller.StockGetById(1) as ObjectResult;
             var model = stockie.Value as StockViewModel;
@@ -34,7 +34,7 @@ namespace Maasgroep.Database.Test
             using var context = Fixture.CreateContext();
             context.Database.BeginTransaction();
 
-            var controller = new StockController(context);
+            var controller = new OrderController(context);
 
             var newStock = new StockViewModel("Duifis Scharrelnootjes", 1);
 

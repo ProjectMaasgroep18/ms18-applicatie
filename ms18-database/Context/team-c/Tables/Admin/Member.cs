@@ -1,5 +1,6 @@
 using Maasgroep.Database.Receipts;
-using Maasgroep.Database.Stock;
+using Maasgroep.Database.Order;
+using Maasgroep.Database.Context.ToDoList;
 
 namespace Maasgroep.Database.Members
 {
@@ -32,18 +33,32 @@ namespace Maasgroep.Database.Members
         public ICollection<ReceiptApproval> ReceiptApprovalsModified { get; set; }
         public ICollection<ReceiptApproval> ReceiptApprovalsDeleted { get; set; }
 
-        // EF Stock properties
+        
+        // EF Order properties
         public ICollection<Product> ProductsCreated { get; set; }
         public ICollection<Product> ProductsModified { get; set; }
         public ICollection<Product> ProductsDeleted { get; set; }
-        public ICollection<Stockpile> StocksCreated { get; set; }
-        public ICollection<Stockpile> StocksModified { get; set; }
-        public ICollection<Stockpile> StocksDeleted { get; set; }
+        public ICollection<Stock> StocksCreated { get; set; }
+        public ICollection<Stock> StocksModified { get; set; }
+        public ICollection<Stock> StocksDeleted { get; set; }
+        public ICollection<Line> LinesCreated { get; set; }
+        public ICollection<Line> LinesModified { get; set; }
+        public ICollection<Line> LinesDeleted { get; set; }
+        public ICollection<ProductPrice> ProductPricesCreated { get; set; }
+        public ICollection<ProductPrice> ProductPricesModified { get; set; }
+        public ICollection<ProductPrice> ProductPricesDeleted { get; set; }
+
+
+        // ToDo
+        public ICollection<ToDo> ToDoCreated { get; set; }
+        public ICollection<ToDo> ToDoModified { get; set; }
+        public ICollection<ToDo> ToDoDeleted { get; set; }
 
 
         // EF admin properties
         public ICollection<MemberPermission> Permissions { get; set; }
 
+        
         // EF Generic properties
         public ICollection<Member>? MembersCreated { get; set; }
         public ICollection<Member>? MembersModified { get; set; }

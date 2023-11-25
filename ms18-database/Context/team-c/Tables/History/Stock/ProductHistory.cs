@@ -1,5 +1,5 @@
 ﻿
-namespace Maasgroep.Database.Stock
+namespace Maasgroep.Database.Order
 {
     public record ProductHistory
     {

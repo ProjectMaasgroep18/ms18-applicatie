@@ -1,11 +1,11 @@
 ﻿
-namespace Maasgroep.Database.Stock
+namespace Maasgroep.Database.Order
 {
     public record StockpileHistory
     {
         public StockpileHistory() { }
 
-        public StockpileHistory(Stockpile current)
+        public StockpileHistory(Stock current)
         {
             ProductId = current.ProductId;
             Quantity = current.Quantity;

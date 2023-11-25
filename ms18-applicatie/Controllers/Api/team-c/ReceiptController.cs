@@ -242,7 +242,7 @@ public class ReceiptController : ControllerBase
         var createdPhoto = Photo.FromViewModel(photoViewModel);
         
         // Set the receipt ID of the photo to the ID of the receipt
-        createdPhoto.Receipt = existingReceipt.Id;
+        createdPhoto.ReceiptId = existingReceipt.Id;
         
         // Set the member ID of the photo to the ID of the current member
         var member = _context.Member.FirstOrDefault()!; // TODO Find current member
@@ -281,7 +281,7 @@ public class ReceiptController : ControllerBase
         
         // Get all photos for the receipt
         var photos = _context.Photo
-            .Where(photo => photo.Receipt == existingReceipt.Id)
+            .Where(photo => photo.ReceiptId == existingReceipt.Id)
             .Select(photo => PhotoViewModel.FromDatabaseModel(photo))
             .ToList();
         
@@ -314,7 +314,7 @@ public class ReceiptController : ControllerBase
 
     private long? GetReceiptPhotoId(long id)
     {
-        var firstPhoto = _context.Photo.FirstOrDefault(x => x.Receipt == id); //////////////////////////////
+        var firstPhoto = _context.Photo.FirstOrDefault(x => x.ReceiptId == id); //////////////////////////////
         return firstPhoto?.Id;
     }
 

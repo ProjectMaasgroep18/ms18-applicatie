@@ -68,7 +68,6 @@ namespace ms18_applicatie.Models
 
             var photo = new Photo
             {
-                Bytes = formFileContent,
                 DateTimeDeleted = DateTime.UtcNow,
                 fileName = FileUpload.FormFile.FileName,
                 fileExtension = "png"

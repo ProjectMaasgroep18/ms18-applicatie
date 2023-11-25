@@ -6,7 +6,7 @@ public class PhotoViewModel
 {
     
     public long Id { get; set; }
-    public long? Receipt { get; set; }
+    public long ReceiptId { get; set; }
     public string fileExtension { get; set; }
     public string fileName { get; set; }
     public DateTime DateTimeCreated { get; set; } = DateTime.UtcNow;
@@ -23,7 +23,7 @@ public class PhotoViewModel
         return new PhotoViewModel
         {
             Id = photo.Id,
-            Receipt = photo.Receipt,
+            ReceiptId = photo.ReceiptId,
             fileExtension = photo.fileExtension,
             fileName = photo.fileName,
             DateTimeCreated = photo.DateTimeCreated,

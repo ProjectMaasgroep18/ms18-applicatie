@@ -1,7 +1,7 @@
 ﻿
 namespace Maasgroep.Database.Receipts
 {
-    public class ReceiptApprovalHistory
+    public record ReceiptApprovalHistory
     {
         public long Id { get; set; }
         public DateTime RecordCreated { get; set; }
