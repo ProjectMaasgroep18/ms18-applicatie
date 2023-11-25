@@ -1,8 +1,8 @@
 ﻿using Maasgroep.Database.Members;
 
-namespace Maasgroep.Database.Context.ToDoList
+namespace Maasgroep.Database.ToDoList
 {
-    public record ToDo : GenericRecord
+    public record ToDo : GenericRecordActive
     {
         public long Id { get; set; }
         public string Action { get; set; }

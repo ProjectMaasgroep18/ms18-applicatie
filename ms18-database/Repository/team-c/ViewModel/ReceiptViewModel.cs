@@ -41,7 +41,7 @@ namespace Maasgroep.Database.Repository.ViewModel
             StatusId = status;
         }
 
-        public ReceiptViewModel(Receipt dbRec)
+        public ReceiptViewModel(Receipts.Receipt dbRec)
         {
             ID = dbRec.Id;
             DateTimeCreated = dbRec.DateTimeCreated;

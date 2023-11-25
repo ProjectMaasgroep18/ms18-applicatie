@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using Maasgroep.Database;
 using Maasgroep.Database.Members;
-using Maasgroep.Database.Photos;
+using Maasgroep.Database.Receipts;
 using Maasgroep.Database.Receipts;
 using Microsoft.AspNetCore.Mvc;
 using ms18_applicatie.Models;

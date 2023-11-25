@@ -5,7 +5,7 @@ using ms18_applicatie.Utilities;
 using System.IO.Compression;
 using System;
 using Maasgroep.Database;
-using Maasgroep.Database.Photos;
+using Maasgroep.Database.Receipts;
 
 namespace ms18_applicatie.Models
 {

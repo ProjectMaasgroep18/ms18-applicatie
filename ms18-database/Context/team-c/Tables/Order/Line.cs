@@ -1,9 +1,8 @@
-﻿using Maasgroep.Database.Context;
-using Maasgroep.Database.Members;
+﻿using Maasgroep.Database.Members;
 
 namespace Maasgroep.Database.Order
 {
-    public record Line : GenericRecord
+    public record Line : GenericRecordActive
     {
         public long Id { get; set; }
         public long ProductId { get; set; }

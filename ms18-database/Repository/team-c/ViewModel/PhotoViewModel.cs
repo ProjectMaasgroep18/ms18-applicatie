@@ -1,5 +1,5 @@
 ﻿using System.Text.Json.Serialization;
-using Maasgroep.Database.Photos;
+using Maasgroep.Database.Receipts;
 
 namespace Maasgroep.Database.Repository.ViewModel;
 public class PhotoViewModel

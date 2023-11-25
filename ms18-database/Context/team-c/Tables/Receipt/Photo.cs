@@ -1,10 +1,8 @@
-﻿using Maasgroep.Database.Context;
-using Maasgroep.Database.Receipts;
-using Maasgroep.Database.Repository.ViewModel;
+﻿using Maasgroep.Database.Repository.ViewModel;
 
-namespace Maasgroep.Database.Photos
+namespace Maasgroep.Database.Receipts
 {
-    public record Photo : GenericRecord
+    public record Photo : GenericRecordActive
     {
         public long Id { get; set; }
         public long ReceiptId { get; set; }

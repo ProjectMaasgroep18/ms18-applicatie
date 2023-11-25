@@ -1,5 +1,5 @@
 ﻿
-namespace Maasgroep.Database.Photos
+namespace Maasgroep.Database.Receipts
 {
     public interface IPhotoRepository
     {

@@ -41,10 +41,10 @@ namespace Maasgroep.Database.Test
         }
 
         public MaasgroepContext CreateContext()
-            => new MaasgroepContext(
-                new DbContextOptionsBuilder<MaasgroepContext>()
-                    .UseNpgsql(ConnectionString)
-                    .Options);
+            => new MaasgroepContext();
+                //new DbContextOptionsBuilder<MaasgroepContext>()
+                //    .UseNpgsql(ConnectionString)
+                //    .Options);
 
         private void InitDatabase()
         {
@@ -181,15 +181,15 @@ namespace Maasgroep.Database.Test
                 var receiptStatusGoedgekeurd = db.ReceiptStatus.Where(rs => rs.Name == "Goedgekeurd").FirstOrDefault()!;
                 var receiptStatusAfgekeurd = db.ReceiptStatus.Where(rs => rs.Name == "Afgekeurd").FirstOrDefault()!;
 
-                var receipts = new List<Receipt>()
+                var receipts = new List<Receipts.Receipt>()
                 {
-                    new Receipt()   { MemberCreated = member, ReceiptStatus = receiptStatusIngediend
+                    new Receipts.Receipt()   { MemberCreated = member, ReceiptStatus = receiptStatusIngediend
                                     , CostCentre = costCentre
                                     }
-                ,   new Receipt()   { MemberCreated = member, ReceiptStatus = receiptStatusGoedgekeurd
+                ,   new Receipts.Receipt()   { MemberCreated = member, ReceiptStatus = receiptStatusGoedgekeurd
                                     , CostCentre = costCentre
                                     }
-                ,   new Receipt()   { MemberCreated = member, ReceiptStatus = receiptStatusAfgekeurd
+                ,   new Receipts.Receipt()   { MemberCreated = member, ReceiptStatus = receiptStatusAfgekeurd
                                     , CostCentre = costCentre
                                     }
                 };

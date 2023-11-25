@@ -1,8 +1,7 @@
-﻿using Maasgroep.Database.Members;
-
-namespace Maasgroep.Database.Context
+﻿
+namespace Maasgroep.Database
 {
-    public abstract record GenericRecord
+    public abstract record GenericRecordHistory
     {
         // Generic
         public virtual long MemberCreatedId { get; set; }
@@ -11,10 +10,5 @@ namespace Maasgroep.Database.Context
         public DateTime DateTimeCreated { get; set; }
         public DateTime? DateTimeModified { get; set; }
         public DateTime? DateTimeDeleted { get; set; }
-
-        // EF generic properties
-        public virtual Member MemberCreated { get; set; }
-        public Member? MemberModified { get; set; }
-        public Member? MemberDeleted { get; set; }
     }
 }

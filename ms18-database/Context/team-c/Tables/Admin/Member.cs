@@ -32,8 +32,12 @@ namespace Maasgroep.Database.Members
         public ICollection<ReceiptApproval> ReceiptApprovalsCreated { get; set; }
         public ICollection<ReceiptApproval> ReceiptApprovalsModified { get; set; }
         public ICollection<ReceiptApproval> ReceiptApprovalsDeleted { get; set; }
+        public ICollection<Photo> PhotosCreated { get; set; }
+        public ICollection<Photo> PhotosModified { get; set; }
+        public ICollection<Photo> PhotosDeleted { get; set; }
 
-        
+
+
         // EF Order properties
         public ICollection<Product> ProductsCreated { get; set; }
         public ICollection<Product> ProductsModified { get; set; }
@@ -49,7 +53,8 @@ namespace Maasgroep.Database.Members
         public ICollection<ProductPrice> ProductPricesDeleted { get; set; }
 
 
-        // ToDo
+        // EF ToDo properties
+        public ICollection<ToDo> ToDoOwned { get; set; }
         public ICollection<ToDo> ToDoCreated { get; set; }
         public ICollection<ToDo> ToDoModified { get; set; }
         public ICollection<ToDo> ToDoDeleted { get; set; }

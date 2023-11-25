@@ -71,7 +71,7 @@ namespace ms18_applicatie.Controllers.Api.team_c
                 }
                 else
                 {
-                    var currentStockToHistory = new StockpileHistory(currentStock);
+                    var currentStockToHistory = new StockHistory(currentStock);
 
                     _context.StockHistory.Add(currentStockToHistory);
 
