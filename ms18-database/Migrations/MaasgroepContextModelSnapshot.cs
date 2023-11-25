@@ -50,10 +50,6 @@ namespace Maasgroep.Database.Migrations
 
             modelBuilder.HasSequence("receiptSeq", "receiptHistory");
 
-            modelBuilder.HasSequence("statusSeq", "receipt");
-
-            modelBuilder.HasSequence("statusSeq", "receiptHistory");
-
             modelBuilder.HasSequence("stockSeq", "orderHistory");
 
             modelBuilder.HasSequence("todoSeq", "todo");
@@ -302,8 +298,11 @@ namespace Maasgroep.Database.Migrations
 
             modelBuilder.Entity("Maasgroep.Database.Order.Line", b =>
                 {
-                    b.Property<long>("ProductId")
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
                     b.Property<long>("BillId")
                         .HasColumnType("bigint");
@@ -319,9 +318,6 @@ namespace Maasgroep.Database.Migrations
                     b.Property<DateTime?>("DateTimeModified")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<long>("Id")
-                        .HasColumnType("bigint");
-
                     b.Property<long>("MemberCreatedId")
                         .HasColumnType("bigint");
 
@@ -331,10 +327,13 @@ namespace Maasgroep.Database.Migrations
                     b.Property<long?>("MemberModifiedId")
                         .HasColumnType("bigint");
 
+                    b.Property<long>("ProductId")
+                        .HasColumnType("bigint");
+
                     b.Property<long>("Quantity")
                         .HasColumnType("bigint");
 
-                    b.HasKey("ProductId");
+                    b.HasKey("Id");
 
                     b.HasIndex("BillId");
 
@@ -343,6 +342,8 @@ namespace Maasgroep.Database.Migrations
                     b.HasIndex("MemberDeletedId");
 
                     b.HasIndex("MemberModifiedId");
+
+                    b.HasIndex("ProductId");
 
                     b.ToTable("line", "order", t =>
                         {
@@ -905,8 +906,9 @@ namespace Maasgroep.Database.Migrations
                         .HasMaxLength(2048)
                         .HasColumnType("character varying(2048)");
 
-                    b.Property<long>("ReceiptStatusId")
-                        .HasColumnType("bigint");
+                    b.Property<string>("ReceiptStatus")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<long?>("StoreId")
                         .HasColumnType("bigint");
@@ -920,8 +922,6 @@ namespace Maasgroep.Database.Migrations
                     b.HasIndex("MemberDeletedId");
 
                     b.HasIndex("MemberModifiedId");
-
-                    b.HasIndex("ReceiptStatusId");
 
                     b.ToTable("receipt", "receipt", t =>
                         {
@@ -1053,8 +1053,9 @@ namespace Maasgroep.Database.Migrations
                     b.Property<long>("ReceiptId")
                         .HasColumnType("bigint");
 
-                    b.Property<long>("ReceiptStatusId")
-                        .HasColumnType("bigint");
+                    b.Property<string>("ReceiptStatus")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<DateTime>("RecordCreated")
                         .ValueGeneratedOnAdd()
@@ -1067,95 +1068,6 @@ namespace Maasgroep.Database.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("receipt", "receiptHistory");
-                });
-
-            modelBuilder.Entity("Maasgroep.Database.Receipts.ReceiptStatus", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasDefaultValueSql("nextval('receipt.\"statusSeq\"')");
-
-                    b.Property<DateTime>("DateTimeCreated")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasDefaultValueSql("now()");
-
-                    b.Property<DateTime?>("DateTimeDeleted")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime?>("DateTimeModified")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<long>("MemberCreatedId")
-                        .HasColumnType("bigint");
-
-                    b.Property<long?>("MemberDeletedId")
-                        .HasColumnType("bigint");
-
-                    b.Property<long?>("MemberModifiedId")
-                        .HasColumnType("bigint");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(256)
-                        .HasColumnType("character varying(256)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("MemberCreatedId");
-
-                    b.HasIndex("MemberDeletedId");
-
-                    b.HasIndex("MemberModifiedId");
-
-                    b.HasIndex("Name")
-                        .IsUnique();
-
-                    b.ToTable("status", "receipt");
-                });
-
-            modelBuilder.Entity("Maasgroep.Database.Receipts.ReceiptStatusHistory", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasDefaultValueSql("nextval('\"receiptHistory\".\"statusSeq\"')");
-
-                    b.Property<DateTime>("DateTimeCreated")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime?>("DateTimeDeleted")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime?>("DateTimeModified")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<long>("MemberCreatedId")
-                        .HasColumnType("bigint");
-
-                    b.Property<long?>("MemberDeletedId")
-                        .HasColumnType("bigint");
-
-                    b.Property<long?>("MemberModifiedId")
-                        .HasColumnType("bigint");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(256)
-                        .HasColumnType("character varying(256)");
-
-                    b.Property<long>("ReceiptStatusId")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime>("RecordCreated")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasDefaultValueSql("now()");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("status", "receiptHistory");
                 });
 
             modelBuilder.Entity("Maasgroep.Database.ToDoList.ToDo", b =>
@@ -1637,13 +1549,6 @@ namespace Maasgroep.Database.Migrations
                         .OnDelete(DeleteBehavior.NoAction)
                         .HasConstraintName("FK_receipt_memberModified");
 
-                    b.HasOne("Maasgroep.Database.Receipts.ReceiptStatus", "ReceiptStatus")
-                        .WithMany("Receipt")
-                        .HasForeignKey("ReceiptStatusId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired()
-                        .HasConstraintName("FK_receipt_receiptStatus");
-
                     b.Navigation("CostCentre");
 
                     b.Navigation("MemberCreated");
@@ -1651,8 +1556,6 @@ namespace Maasgroep.Database.Migrations
                     b.Navigation("MemberDeleted");
 
                     b.Navigation("MemberModified");
-
-                    b.Navigation("ReceiptStatus");
                 });
 
             modelBuilder.Entity("Maasgroep.Database.Receipts.ReceiptApproval", b =>
@@ -1690,34 +1593,6 @@ namespace Maasgroep.Database.Migrations
                     b.Navigation("MemberModified");
 
                     b.Navigation("Receipt");
-                });
-
-            modelBuilder.Entity("Maasgroep.Database.Receipts.ReceiptStatus", b =>
-                {
-                    b.HasOne("Maasgroep.Database.Members.Member", "MemberCreated")
-                        .WithMany("ReceiptStatusesCreated")
-                        .HasForeignKey("MemberCreatedId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired()
-                        .HasConstraintName("FK_receiptStatus_memberCreated");
-
-                    b.HasOne("Maasgroep.Database.Members.Member", "MemberDeleted")
-                        .WithMany("ReceiptStatusesDeleted")
-                        .HasForeignKey("MemberDeletedId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .HasConstraintName("FK_receiptStatus_memberDeleted");
-
-                    b.HasOne("Maasgroep.Database.Members.Member", "MemberModified")
-                        .WithMany("ReceiptStatusesModified")
-                        .HasForeignKey("MemberModifiedId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .HasConstraintName("FK_receiptStatus_memberModified");
-
-                    b.Navigation("MemberCreated");
-
-                    b.Navigation("MemberDeleted");
-
-                    b.Navigation("MemberModified");
                 });
 
             modelBuilder.Entity("Maasgroep.Database.ToDoList.ToDo", b =>
@@ -1823,12 +1698,6 @@ namespace Maasgroep.Database.Migrations
 
                     b.Navigation("ReceiptApprovalsModified");
 
-                    b.Navigation("ReceiptStatusesCreated");
-
-                    b.Navigation("ReceiptStatusesDeleted");
-
-                    b.Navigation("ReceiptStatusesModified");
-
                     b.Navigation("ReceiptsCreated");
 
                     b.Navigation("ReceiptsDeleted");
@@ -1881,11 +1750,6 @@ namespace Maasgroep.Database.Migrations
                     b.Navigation("Photos");
 
                     b.Navigation("ReceiptApproval");
-                });
-
-            modelBuilder.Entity("Maasgroep.Database.Receipts.ReceiptStatus", b =>
-                {
-                    b.Navigation("Receipt");
                 });
 #pragma warning restore 612, 618
         }

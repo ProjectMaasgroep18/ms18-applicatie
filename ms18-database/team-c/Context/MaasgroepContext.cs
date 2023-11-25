@@ -17,7 +17,6 @@ namespace Maasgroep.Database
         #region Receipts
         public DbSet<Receipt> Receipt { get; set; }
         public DbSet<ReceiptApproval> ReceiptApproval { get; set; }
-        public DbSet<ReceiptStatus> ReceiptStatus { get; set; }
         public DbSet<CostCentre> CostCentre { get; set; }
         public DbSet<Photo> Photo { get; set; }
         #endregion
@@ -27,7 +26,6 @@ namespace Maasgroep.Database
         public DbSet<CostCentreHistory> CostCentreHistory { get; set; }
         public DbSet<ReceiptApprovalHistory> ReceiptApprovalHistory { get; set; }
         public DbSet<ReceiptHistory> ReceiptHistory { get; set; }
-        public DbSet<ReceiptStatusHistory> ReceiptStatusHistory { get; set; }
         public DbSet<PhotoHistory> PhotoHistory { get; set; }
 
         #endregion
@@ -46,7 +44,7 @@ namespace Maasgroep.Database
         
         public DbSet<ProductHistory> ProductHistory { get; set; }
         public DbSet<StockHistory> StockHistory { get; set; }
-        public DbSet<ProductPriceHistory> ProductPriceHistories { get; set; }
+        public DbSet<ProductPriceHistory> ProductPriceHistory { get; set; }
         public DbSet<LineHistory> LineHistory { get; set; }
         public DbSet<BillHistory> BillHistory { get; set; }
 
@@ -100,12 +98,10 @@ namespace Maasgroep.Database
 
             CreateCostCentre(modelBuilder);
             CreateReceiptApproval(modelBuilder);
-            CreateReceiptStatus(modelBuilder);
             CreateReceipt(modelBuilder);
             CreatePhoto(modelBuilder);
 
             CreateReceiptHistory(modelBuilder);
-            CreateReceiptStatusHistory(modelBuilder);
             CreateReceiptApprovalHistory(modelBuilder);
             CreateCostCentreHistory(modelBuilder);
             CreatePhotoHistory(modelBuilder);
@@ -301,13 +297,6 @@ namespace Maasgroep.Database
                 .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<Receipt>()
-                .HasOne(r => r.ReceiptStatus)
-                .WithMany(rs => rs.Receipt)
-                .HasForeignKey(r => r.ReceiptStatusId)
-                .HasConstraintName("FK_receipt_receiptStatus")
-                .OnDelete(DeleteBehavior.NoAction);
-
-            modelBuilder.Entity<Receipt>()
                 .HasOne(ra => ra.MemberCreated)
                 .WithMany(m => m.ReceiptsCreated)
                 .HasForeignKey(ra => ra.MemberCreatedId)
@@ -367,39 +356,6 @@ namespace Maasgroep.Database
                 .OnDelete(DeleteBehavior.NoAction);
         }
 
-        private void CreateReceiptStatus(ModelBuilder modelBuilder)
-        {
-            modelBuilder.Entity<ReceiptStatus>().ToTable("status", "receipt");
-            modelBuilder.Entity<ReceiptStatus>().HasKey(rs => new { rs.Id });
-            modelBuilder.HasSequence<long>("statusSeq", schema: "receipt").StartsAt(1).IncrementsBy(1);
-            modelBuilder.Entity<ReceiptStatus>().Property(rs => rs.Id).HasDefaultValueSql("nextval('receipt.\"statusSeq\"')");
-            modelBuilder.Entity<ReceiptStatus>().Property(rs => rs.DateTimeCreated).HasDefaultValueSql("now()");
-            modelBuilder.Entity<ReceiptStatus>().Property(rs => rs.Name).HasMaxLength(256);
-            modelBuilder.Entity<ReceiptStatus>().HasIndex(rs => rs.Name).IsUnique();
-
-            modelBuilder.Entity<ReceiptStatus>()
-                .HasOne(rs => rs.MemberCreated)
-                .WithMany(m => m.ReceiptStatusesCreated)
-                .HasForeignKey(rs => rs.MemberCreatedId)
-                .HasConstraintName("FK_receiptStatus_memberCreated")
-                .OnDelete(DeleteBehavior.NoAction);
-
-            modelBuilder.Entity<ReceiptStatus>()
-                .HasOne(rs => rs.MemberModified)
-                .WithMany(m => m.ReceiptStatusesModified)
-                .HasForeignKey(rs => rs.MemberModifiedId)
-                .HasConstraintName("FK_receiptStatus_memberModified")
-                .OnDelete(DeleteBehavior.NoAction);
-
-            modelBuilder.Entity<ReceiptStatus>()
-                .HasOne(rs => rs.MemberDeleted)
-                .WithMany(m => m.ReceiptStatusesDeleted)
-                .HasForeignKey(rs => rs.MemberDeletedId)
-                .HasConstraintName("FK_receiptStatus_memberDeleted")
-                .OnDelete(DeleteBehavior.NoAction);
-
-        }
-
         private void CreatePhoto(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Photo>().ToTable("photo", "receipt");
@@ -452,15 +408,6 @@ namespace Maasgroep.Database
             modelBuilder.Entity<ReceiptHistory>().Property(r => r.Note).HasMaxLength(2048);
             modelBuilder.Entity<ReceiptHistory>().Property(r => r.Amount).HasPrecision(18, 2);
             modelBuilder.Entity<ReceiptHistory>().Property(r => r.RecordCreated).HasDefaultValueSql("now()");
-        }
-
-        public void CreateReceiptStatusHistory(ModelBuilder modelBuilder)
-        {
-            modelBuilder.Entity<ReceiptStatusHistory>().ToTable("status", "receiptHistory");
-            modelBuilder.HasSequence<long>("statusSeq", schema: "receiptHistory").StartsAt(1).IncrementsBy(1);
-            modelBuilder.Entity<ReceiptStatusHistory>().Property(rs => rs.Id).HasDefaultValueSql("nextval('\"receiptHistory\".\"statusSeq\"')");
-            modelBuilder.Entity<ReceiptStatusHistory>().Property(rs => rs.Name).HasMaxLength(256);
-            modelBuilder.Entity<ReceiptStatusHistory>().Property(rs => rs.RecordCreated).HasDefaultValueSql("now()");
         }
 
         public void CreateReceiptApprovalHistory(ModelBuilder modelBuilder)
@@ -564,7 +511,7 @@ namespace Maasgroep.Database
 
         private void CreateOrderLine(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<Line>().HasKey(pp => pp.ProductId);
+            modelBuilder.Entity<Line>().HasKey(pp => pp.Id);
             modelBuilder.Entity<Line>().ToTable("line", "order");
             modelBuilder.Entity<Line>().ToTable(pp => pp.HasCheckConstraint("CK_orderLine_quantity", "\"Quantity\" > 0"));
             modelBuilder.Entity<Line>().Property(pp => pp.DateTimeCreated).HasDefaultValueSql("now()");

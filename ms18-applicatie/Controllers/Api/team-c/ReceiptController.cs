@@ -1,6 +1,5 @@
 ﻿using Maasgroep.Database;
 using Maasgroep.Database.Receipts;
-using Maasgroep.Database.Receipts;
 using Maasgroep.Database.Repository.ViewModel;
 using Microsoft.AspNetCore.Mvc;
 
@@ -25,7 +24,6 @@ public class ReceiptController : ControllerBase
 
         foreach (var item in alles)
         {
-            item.Status = GetReceiptStatus(item.StatusId);
             item.PhotoId = GetReceiptPhotoId(item.ID ?? 0);
         }
 
@@ -48,7 +46,6 @@ public class ReceiptController : ControllerBase
                 message = "Receipt not found"
             });
 
-        receiptViewModel.Status = GetReceiptStatus(receiptViewModel.StatusId);
         receiptViewModel.PhotoId = GetReceiptPhotoId(receiptViewModel.ID ?? 0);
 
         return Ok(receiptViewModel);
@@ -72,9 +69,6 @@ public class ReceiptController : ControllerBase
 
         var member = _context.Member.FirstOrDefault()!; // TODO Find current member
         createdReceipt.MemberCreatedId = member.Id;
-
-        var status = _context.ReceiptStatus.FirstOrDefault()!; // TODO Find correct status
-        createdReceipt.ReceiptStatusId = status.Id;
 
         var costCentre = _context.CostCentre.FirstOrDefault()!; // TODO Let user select CostCentre
         createdReceipt.CostCentreId = costCentre.Id;
@@ -303,13 +297,6 @@ public class ReceiptController : ControllerBase
         // Compare other properties as needed
         return amountEqual
                && noteEqual;
-    }
-
-    private string GetReceiptStatus(long id)
-    {
-        var nogTeChecken = _context.ReceiptStatus.FirstOrDefault(x => x.Id == id);
-
-        return nogTeChecken.Name;
     }
 
     private long? GetReceiptPhotoId(long id)

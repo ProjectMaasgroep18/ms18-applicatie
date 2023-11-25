@@ -90,14 +90,6 @@ namespace Maasgroep.Database.Migrations
                 schema: "receiptHistory");
 
             migrationBuilder.CreateSequence(
-                name: "statusSeq",
-                schema: "receipt");
-
-            migrationBuilder.CreateSequence(
-                name: "statusSeq",
-                schema: "receiptHistory");
-
-            migrationBuilder.CreateSequence(
                 name: "stockSeq",
                 schema: "orderHistory");
 
@@ -314,7 +306,7 @@ namespace Maasgroep.Database.Migrations
                     Amount = table.Column<decimal>(type: "numeric(18,2)", precision: 18, scale: 2, nullable: true),
                     StoreId = table.Column<long>(type: "bigint", nullable: true),
                     CostCentreId = table.Column<long>(type: "bigint", nullable: true),
-                    ReceiptStatusId = table.Column<long>(type: "bigint", nullable: false),
+                    ReceiptStatus = table.Column<string>(type: "text", nullable: false),
                     Location = table.Column<string>(type: "text", nullable: true),
                     Note = table.Column<string>(type: "character varying(2048)", maxLength: 2048, nullable: true),
                     RecordCreated = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "now()"),
@@ -328,27 +320,6 @@ namespace Maasgroep.Database.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_receipt", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "status",
-                schema: "receiptHistory",
-                columns: table => new
-                {
-                    Id = table.Column<long>(type: "bigint", nullable: false, defaultValueSql: "nextval('\"receiptHistory\".\"statusSeq\"')"),
-                    ReceiptStatusId = table.Column<long>(type: "bigint", nullable: false),
-                    Name = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: false),
-                    RecordCreated = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "now()"),
-                    MemberCreatedId = table.Column<long>(type: "bigint", nullable: false),
-                    MemberModifiedId = table.Column<long>(type: "bigint", nullable: true),
-                    MemberDeletedId = table.Column<long>(type: "bigint", nullable: true),
-                    DateTimeCreated = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    DateTimeModified = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    DateTimeDeleted = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_status", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -555,43 +526,6 @@ namespace Maasgroep.Database.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "status",
-                schema: "receipt",
-                columns: table => new
-                {
-                    Id = table.Column<long>(type: "bigint", nullable: false, defaultValueSql: "nextval('receipt.\"statusSeq\"')"),
-                    Name = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: false),
-                    MemberCreatedId = table.Column<long>(type: "bigint", nullable: false),
-                    MemberModifiedId = table.Column<long>(type: "bigint", nullable: true),
-                    MemberDeletedId = table.Column<long>(type: "bigint", nullable: true),
-                    DateTimeCreated = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "now()"),
-                    DateTimeModified = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    DateTimeDeleted = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_status", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_receiptStatus_memberCreated",
-                        column: x => x.MemberCreatedId,
-                        principalSchema: "admin",
-                        principalTable: "member",
-                        principalColumn: "Id");
-                    table.ForeignKey(
-                        name: "FK_receiptStatus_memberDeleted",
-                        column: x => x.MemberDeletedId,
-                        principalSchema: "admin",
-                        principalTable: "member",
-                        principalColumn: "Id");
-                    table.ForeignKey(
-                        name: "FK_receiptStatus_memberModified",
-                        column: x => x.MemberModifiedId,
-                        principalSchema: "admin",
-                        principalTable: "member",
-                        principalColumn: "Id");
-                });
-
-            migrationBuilder.CreateTable(
                 name: "todo",
                 schema: "todo",
                 columns: table => new
@@ -632,6 +566,55 @@ namespace Maasgroep.Database.Migrations
                     table.ForeignKey(
                         name: "FK_todo_memberOwned",
                         column: x => x.MemberId,
+                        principalSchema: "admin",
+                        principalTable: "member",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "receipt",
+                schema: "receipt",
+                columns: table => new
+                {
+                    Id = table.Column<long>(type: "bigint", nullable: false, defaultValueSql: "nextval('receipt.\"receiptSeq\"')"),
+                    Amount = table.Column<decimal>(type: "numeric(18,2)", precision: 18, scale: 2, nullable: true),
+                    StoreId = table.Column<long>(type: "bigint", nullable: true),
+                    CostCentreId = table.Column<long>(type: "bigint", nullable: true),
+                    ReceiptStatus = table.Column<string>(type: "text", nullable: false),
+                    Location = table.Column<string>(type: "text", nullable: true),
+                    Note = table.Column<string>(type: "character varying(2048)", maxLength: 2048, nullable: true),
+                    MemberCreatedId = table.Column<long>(type: "bigint", nullable: false),
+                    MemberModifiedId = table.Column<long>(type: "bigint", nullable: true),
+                    MemberDeletedId = table.Column<long>(type: "bigint", nullable: true),
+                    DateTimeCreated = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "now()"),
+                    DateTimeModified = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    DateTimeDeleted = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_receipt", x => x.Id);
+                    table.CheckConstraint("CK_receipt_amount", "\"Amount\" >= 0");
+                    table.ForeignKey(
+                        name: "FK_receipt_costCentre",
+                        column: x => x.CostCentreId,
+                        principalSchema: "receipt",
+                        principalTable: "costCentre",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_receipt_memberCreated",
+                        column: x => x.MemberCreatedId,
+                        principalSchema: "admin",
+                        principalTable: "member",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_receipt_memberDeleted",
+                        column: x => x.MemberDeletedId,
+                        principalSchema: "admin",
+                        principalTable: "member",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_receipt_memberModified",
+                        column: x => x.MemberModifiedId,
                         principalSchema: "admin",
                         principalTable: "member",
                         principalColumn: "Id");
@@ -691,9 +674,10 @@ namespace Maasgroep.Database.Migrations
                 schema: "order",
                 columns: table => new
                 {
-                    ProductId = table.Column<long>(type: "bigint", nullable: false),
-                    Id = table.Column<long>(type: "bigint", nullable: false),
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     BillId = table.Column<long>(type: "bigint", nullable: false),
+                    ProductId = table.Column<long>(type: "bigint", nullable: false),
                     Quantity = table.Column<long>(type: "bigint", nullable: false),
                     MemberCreatedId = table.Column<long>(type: "bigint", nullable: false),
                     MemberModifiedId = table.Column<long>(type: "bigint", nullable: true),
@@ -704,7 +688,7 @@ namespace Maasgroep.Database.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_line", x => x.ProductId);
+                    table.PrimaryKey("PK_line", x => x.Id);
                     table.CheckConstraint("CK_orderLine_quantity", "\"Quantity\" > 0");
                     table.ForeignKey(
                         name: "FK_orderLine_bill",
@@ -823,61 +807,6 @@ namespace Maasgroep.Database.Migrations
                         column: x => x.ProductId,
                         principalSchema: "order",
                         principalTable: "product",
-                        principalColumn: "Id");
-                });
-
-            migrationBuilder.CreateTable(
-                name: "receipt",
-                schema: "receipt",
-                columns: table => new
-                {
-                    Id = table.Column<long>(type: "bigint", nullable: false, defaultValueSql: "nextval('receipt.\"receiptSeq\"')"),
-                    Amount = table.Column<decimal>(type: "numeric(18,2)", precision: 18, scale: 2, nullable: true),
-                    StoreId = table.Column<long>(type: "bigint", nullable: true),
-                    CostCentreId = table.Column<long>(type: "bigint", nullable: true),
-                    ReceiptStatusId = table.Column<long>(type: "bigint", nullable: false),
-                    Location = table.Column<string>(type: "text", nullable: true),
-                    Note = table.Column<string>(type: "character varying(2048)", maxLength: 2048, nullable: true),
-                    MemberCreatedId = table.Column<long>(type: "bigint", nullable: false),
-                    MemberModifiedId = table.Column<long>(type: "bigint", nullable: true),
-                    MemberDeletedId = table.Column<long>(type: "bigint", nullable: true),
-                    DateTimeCreated = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "now()"),
-                    DateTimeModified = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    DateTimeDeleted = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_receipt", x => x.Id);
-                    table.CheckConstraint("CK_receipt_amount", "\"Amount\" >= 0");
-                    table.ForeignKey(
-                        name: "FK_receipt_costCentre",
-                        column: x => x.CostCentreId,
-                        principalSchema: "receipt",
-                        principalTable: "costCentre",
-                        principalColumn: "Id");
-                    table.ForeignKey(
-                        name: "FK_receipt_memberCreated",
-                        column: x => x.MemberCreatedId,
-                        principalSchema: "admin",
-                        principalTable: "member",
-                        principalColumn: "Id");
-                    table.ForeignKey(
-                        name: "FK_receipt_memberDeleted",
-                        column: x => x.MemberDeletedId,
-                        principalSchema: "admin",
-                        principalTable: "member",
-                        principalColumn: "Id");
-                    table.ForeignKey(
-                        name: "FK_receipt_memberModified",
-                        column: x => x.MemberModifiedId,
-                        principalSchema: "admin",
-                        principalTable: "member",
-                        principalColumn: "Id");
-                    table.ForeignKey(
-                        name: "FK_receipt_receiptStatus",
-                        column: x => x.ReceiptStatusId,
-                        principalSchema: "receipt",
-                        principalTable: "status",
                         principalColumn: "Id");
                 });
 
@@ -1063,6 +992,12 @@ namespace Maasgroep.Database.Migrations
                 column: "MemberModifiedId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_line_ProductId",
+                schema: "order",
+                table: "line",
+                column: "ProductId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_member_MemberCreatedId",
                 schema: "admin",
                 table: "member",
@@ -1221,37 +1156,6 @@ namespace Maasgroep.Database.Migrations
                 column: "MemberModifiedId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_receipt_ReceiptStatusId",
-                schema: "receipt",
-                table: "receipt",
-                column: "ReceiptStatusId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_status_MemberCreatedId",
-                schema: "receipt",
-                table: "status",
-                column: "MemberCreatedId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_status_MemberDeletedId",
-                schema: "receipt",
-                table: "status",
-                column: "MemberDeletedId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_status_MemberModifiedId",
-                schema: "receipt",
-                table: "status",
-                column: "MemberModifiedId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_status_Name",
-                schema: "receipt",
-                table: "status",
-                column: "Name",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
                 name: "IX_stock_MemberCreatedId",
                 schema: "order",
                 table: "stock",
@@ -1350,10 +1254,6 @@ namespace Maasgroep.Database.Migrations
                 schema: "receiptHistory");
 
             migrationBuilder.DropTable(
-                name: "status",
-                schema: "receiptHistory");
-
-            migrationBuilder.DropTable(
                 name: "stock",
                 schema: "order");
 
@@ -1387,10 +1287,6 @@ namespace Maasgroep.Database.Migrations
 
             migrationBuilder.DropTable(
                 name: "costCentre",
-                schema: "receipt");
-
-            migrationBuilder.DropTable(
-                name: "status",
                 schema: "receipt");
 
             migrationBuilder.DropTable(
@@ -1451,14 +1347,6 @@ namespace Maasgroep.Database.Migrations
 
             migrationBuilder.DropSequence(
                 name: "receiptSeq",
-                schema: "receiptHistory");
-
-            migrationBuilder.DropSequence(
-                name: "statusSeq",
-                schema: "receipt");
-
-            migrationBuilder.DropSequence(
-                name: "statusSeq",
                 schema: "receiptHistory");
 
             migrationBuilder.DropSequence(

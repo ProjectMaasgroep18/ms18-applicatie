@@ -23,9 +23,6 @@ namespace Maasgroep.Database.Members
         public ICollection<CostCentre> CostCentresCreated { get; set; }
         public ICollection<CostCentre> CostCentresModified { get; set; }
         public ICollection<CostCentre> CostCentresDeleted { get; set; }
-        public ICollection<ReceiptStatus> ReceiptStatusesCreated { get; set; }
-        public ICollection<ReceiptStatus> ReceiptStatusesModified { get; set; }
-        public ICollection<ReceiptStatus> ReceiptStatusesDeleted { get; set; }
         public ICollection<Receipt> ReceiptsCreated { get; set; }
         public ICollection<Receipt> ReceiptsModified { get; set; }
         public ICollection<Receipt> ReceiptsDeleted { get; set; }
