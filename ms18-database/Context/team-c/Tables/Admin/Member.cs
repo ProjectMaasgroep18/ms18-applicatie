@@ -1,6 +1,6 @@
 using Maasgroep.Database.Receipts;
 using Maasgroep.Database.Order;
-using Maasgroep.Database.Context.ToDoList;
+using Maasgroep.Database.ToDoList;
 
 namespace Maasgroep.Database.Members
 {
@@ -51,6 +51,10 @@ namespace Maasgroep.Database.Members
         public ICollection<ProductPrice> ProductPricesCreated { get; set; }
         public ICollection<ProductPrice> ProductPricesModified { get; set; }
         public ICollection<ProductPrice> ProductPricesDeleted { get; set; }
+        public ICollection<Bill> BillsOwned { get; set; }
+        public ICollection<Bill> BillsCreated { get; set; }
+        public ICollection<Bill> BillsModified { get; set; }
+        public ICollection<Bill> BillsDeleted { get; set; }
 
 
         // EF ToDo properties

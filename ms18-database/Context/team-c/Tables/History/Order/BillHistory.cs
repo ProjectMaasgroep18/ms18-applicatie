@@ -1,13 +1,12 @@
 ﻿
 namespace Maasgroep.Database.Order
 {
-    public record LineHistory : GenericRecordHistory
+    public record BillHistory : GenericRecordHistory
     {
-        public long LineId { get; set; }
-        public long ProductId { get; set; }
-        public long Quantity { get; set; }
+        public long BillId { get; set; }
         public long? MemberId { get; set; }
         public bool IsGuest { get; set; }
         public string? Note { get; set; }
+        public string? Name { get; set; }
     }
 }

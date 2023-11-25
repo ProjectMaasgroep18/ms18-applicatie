@@ -19,8 +19,6 @@ namespace Maasgroep.Database.Order
             DateTimeDeleted = current.DateTimeDeleted;
         }
 
-        public long Id { get; set; }
-        public DateTime RecordCreated { get; set; }
         public long ProductId { get; set; }
         public long Quantity { get; set; }
     }

@@ -2,8 +2,6 @@
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
 using ms18_applicatie.Utilities;
-using System.IO.Compression;
-using System;
 using Maasgroep.Database;
 using Maasgroep.Database.Receipts;
 
