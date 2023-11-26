@@ -22,7 +22,10 @@ public class ProductController : BaseController
 
         var all = _context.Product
             .Select(dbRec => new ProductViewModel(dbRec))
-            .ToList();
+            .ToList()
+            .Select(AddForeignData)
+            .ToList()
+            ;
 
         return Ok(all);
     }
@@ -46,7 +49,7 @@ public class ProductController : BaseController
                 message = "Product niet gevonden"
             });
 
-        return Ok(dbRec);
+        return Ok(AddForeignData(dbRec));
     }
     
     [HttpPost]
@@ -91,7 +94,7 @@ public class ProductController : BaseController
         {
             status = 200,
             message = "Product aangemaakt",
-            product = new ProductViewModel(createdProduct)
+            product = AddForeignData(new ProductViewModel(createdProduct))
         });
     }
     
@@ -120,8 +123,7 @@ public class ProductController : BaseController
             });
 
         var existingProduct = _context.Product
-            .Where(dbRec => dbRec.Id == id)
-            .FirstOrDefault();
+            .FirstOrDefault(dbRec => dbRec.Id == id);
 
         if (existingProduct == null)
         {
