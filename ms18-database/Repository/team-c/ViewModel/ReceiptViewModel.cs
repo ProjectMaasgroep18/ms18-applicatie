@@ -11,7 +11,9 @@ namespace Maasgroep.Database.Repository.ViewModel
     “amount”: Number,
     “note”: String
     “ReceiptPhotoURI”: URI[],
-    “CostCentreURI”: URI
+    “CostCentre”: URI,
+    “CostCentreId”: URI,
+    “CostCentreURI”: URI,
     */
     
     public class ReceiptViewModel
@@ -25,7 +27,8 @@ namespace Maasgroep.Database.Repository.ViewModel
         public long StatusId { get; set; }
         public string? Status { get; set; }
         public List<string>? ReceiptPhotoURI { get; set; }
-        public long? CostCentreId;
+        public long? CostCentreId { get; set; }
+        public string? CostCentre { get; set; }
         public string? CostCentreURI { get; set; }
 
         public ReceiptViewModel(Receipt dbRec)
