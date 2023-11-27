@@ -2,4 +2,4 @@
 /.vs
 /ms18-applicatie/obj
 /ms18-applicatie/bin
-/ms18-applicatie/obj/*
+/ms18-applicatie/Controllers/team-a/service_accountInfo.json
