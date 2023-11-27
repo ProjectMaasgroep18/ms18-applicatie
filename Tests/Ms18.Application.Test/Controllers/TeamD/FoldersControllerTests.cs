@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Moq;
 using Ms18.Application.Controllers.TeamD;
 using Ms18.Application.Interface.TeamD;
-using Ms18.Application.Models.TeamD;
 using Ms18.Database.Models.TeamD.PhotoAlbum;
 using NUnit.Framework;
 
@@ -12,6 +12,8 @@ public class FoldersControllerTests
 {
     private Mock<IFolderRepository> _mockFolderRepository;
     private Mock<IPhotoRepository> _mockPhotoRepository;
+    private Mock<ILogger<FoldersController>> _mockLogger;
+
     private FoldersController _controller;
 
     [SetUp]
@@ -20,8 +22,9 @@ public class FoldersControllerTests
         // Arrange
         _mockFolderRepository = new Mock<IFolderRepository>();
         _mockPhotoRepository = new Mock<IPhotoRepository>();
+        _mockLogger = new Mock<ILogger<FoldersController>>();
 
-        _controller = new FoldersController(_mockPhotoRepository.Object, _mockFolderRepository.Object);
+        _controller = new FoldersController(_mockPhotoRepository.Object, _mockFolderRepository.Object, _mockLogger.Object);
     }
 
 
@@ -30,10 +33,10 @@ public class FoldersControllerTests
     {
         var folderName = "New Folder";
         var parentFolderId = new Guid();
-        var model = new CreateFolderModel { Name = folderName, ParentFolderId = parentFolderId};
-        var expectedFolder = new Folder() { Name = folderName, ParentFolderId = parentFolderId };
+        var model = new Folder { Name = folderName, ParentFolderId = parentFolderId};
+        var expectedFolder = new Folder { Name = folderName, ParentFolderId = parentFolderId };
 
-        _mockFolderRepository.Setup(repo => repo.CreateFolder(model.Name, model.ParentFolderId))
+        _mockFolderRepository.Setup(repo => repo.CreateFolder(model))
             .ReturnsAsync(expectedFolder);
 
         var result = await _controller.CreateFolder(model);
@@ -44,6 +47,6 @@ public class FoldersControllerTests
         Assert.AreEqual(201, createdResult.StatusCode);
         Assert.AreEqual(expectedFolder, createdResult.Value); 
 
-        _mockFolderRepository.Verify(repo => repo.CreateFolder(folderName, parentFolderId), Times.Once);
+        _mockFolderRepository.Verify(repo => repo.CreateFolder(model), Times.Once);
     }
 }
