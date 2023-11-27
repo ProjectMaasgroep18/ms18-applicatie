@@ -53,14 +53,10 @@ namespace ms18_applicatie.Controllers.team_a
 
             var request = _calendarService.Events.Get(GetCalenderId(calenderName), calendarEvent.Id);
             var googleCalendarEvent = await request.ExecuteAsync();
-            if(googleCalendarEvent == null)
+            if (googleCalendarEvent == null)
                 return new NotFoundResult();
 
-            googleCalendarEvent.Summary = calendarEvent.Title;
-            googleCalendarEvent.Description = calendarEvent.Description;
-            googleCalendarEvent.Start.DateTime = calendarEvent.StarDateTime;
-            googleCalendarEvent.End.DateTime = calendarEvent.EndDateTime;
-
+            googleCalendarEvent = calendarEvent.ToGoogleEvent(googleCalendarEvent);
 
             var requestUpdate = _calendarService.Events.Patch(googleCalendarEvent, GetCalenderId(calenderName), calendarEvent.Id);
             await requestUpdate.ExecuteAsync();
@@ -71,21 +67,9 @@ namespace ms18_applicatie.Controllers.team_a
         [Route("Event")]
         public async Task<IActionResult> AddEvent(Calenders calenderName, CalenderEvent calendarEvent)
         {
-            Event newEvent = new Event()
-            {
-                Summary = calendarEvent.Title,
-                Description = calendarEvent.Description,
-                Start = new EventDateTime()
-                {
-                    DateTime = calendarEvent.StarDateTime,
-                },
-                End = new EventDateTime()
-                {
-                    DateTime = calendarEvent.EndDateTime,
-                },
-            };
+            var googleEvent = calendarEvent.ToGoogleEvent();
 
-            EventsResource.InsertRequest request = _calendarService.Events.Insert(newEvent, GetCalenderId(calenderName));
+            EventsResource.InsertRequest request = _calendarService.Events.Insert(googleEvent, GetCalenderId(calenderName));
             Event createdEvent = await request.ExecuteAsync();
             return new OkResult();
         }
@@ -162,24 +146,9 @@ namespace ms18_applicatie.Controllers.team_a
             {
                 if (eventsItem == null)
                     continue;
-                var calenderEvent = new CalenderEvent();
-                calenderEvent.Id = eventsItem.Id;
-                calenderEvent.Description = eventsItem.Description;
-                if (eventsItem.Start.Date != null && eventsItem.End.Date != null)
-                {
-                    calenderEvent.StarDateTime = DateTime.Parse(eventsItem.Start.Date);
-                    calenderEvent.EndDateTime = DateTime.Parse(eventsItem.End.Date);
-                }
-                else if (eventsItem.Start.DateTimeRaw == null || eventsItem.End.DateTimeRaw == null)
-                    continue;
-                else
-                {
-                    if (DateTime.TryParse(eventsItem.Start.DateTimeRaw, out var startDate))
-                        calenderEvent.StarDateTime = startDate;
-                    if (DateTime.TryParse(eventsItem.End.DateTimeRaw, out var endDate))
-                        calenderEvent.EndDateTime = endDate;
-                }
-                calenderEvent.Title = eventsItem.Summary;
+
+
+                var calenderEvent = new CalenderEvent(eventsItem);
                 calenderEvents.Add(calenderEvent);
             }
             return calenderEvents;
