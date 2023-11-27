@@ -456,7 +456,9 @@ namespace Maasgroep.Database
             modelBuilder.Entity<Stockpile>()
                 .HasOne(s => s.Product)
                 .WithOne(p => p.Stock)
-                .HasForeignKey<Stockpile>(s => s.ProductId);
+                .HasForeignKey<Stockpile>(s => s.ProductId)
+                .OnDelete(DeleteBehavior.Cascade)
+                ;
 
             modelBuilder.Entity<Stockpile>()
                 .HasOne(s => s.MemberCreated)

@@ -42,4 +42,12 @@ public abstract class BaseController : ControllerBase
         
         return receipt;
     }
+
+    [NonAction]
+    public ProductViewModel AddForeignData(ProductViewModel product)
+    {
+        product.StockpileURI = "/api/v1/Stockpile/" + product.Id;
+        
+        return product;
+    }
 }
