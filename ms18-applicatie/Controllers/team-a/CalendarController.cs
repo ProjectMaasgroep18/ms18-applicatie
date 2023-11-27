@@ -23,7 +23,7 @@ namespace ms18_applicatie.Controllers.team_a
 
             string[] scopes = new string[] { CalendarService.Scope.Calendar, CalendarService.Scope.CalendarEvents };
             GoogleCredential credential;
-            using (var stream = new FileStream("C:\\Users\\timgr\\Downloads\\project-c-402518-9e1f526076e7.json", FileMode.Open, FileAccess.Read))
+            using (var stream = new FileStream("./Controllers/team-a/service_accountInfo.json", FileMode.Open, FileAccess.Read))
             {
                 credential = GoogleCredential.FromStream(stream)
                     .CreateScoped(scopes);
