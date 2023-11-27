@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Ms18.Database.Migrations
 {
     [DbContext(typeof(MaasgroepContext))]
-    [Migration("20231127155548_InitialCreateAndSeed")]
+    [Migration("20231127164556_InitialCreateAndSeed")]
     partial class InitialCreateAndSeed
     {
         /// <inheritdoc />
@@ -100,7 +100,7 @@ namespace Ms18.Database.Migrations
                         new
                         {
                             Id = 1L,
-                            DateTimeCreated = new DateTime(2023, 11, 27, 15, 55, 48, 676, DateTimeKind.Utc).AddTicks(6674),
+                            DateTimeCreated = new DateTime(2023, 11, 27, 16, 45, 56, 199, DateTimeKind.Utc).AddTicks(8540),
                             MemberCreatedId = 1L,
                             MemberModifiedId = 1L,
                             Name = "Borgia"
@@ -108,14 +108,14 @@ namespace Ms18.Database.Migrations
                         new
                         {
                             Id = 2L,
-                            DateTimeCreated = new DateTime(2023, 11, 27, 15, 55, 48, 676, DateTimeKind.Utc).AddTicks(6679),
+                            DateTimeCreated = new DateTime(2023, 11, 27, 16, 45, 56, 199, DateTimeKind.Utc).AddTicks(8546),
                             MemberCreatedId = 1L,
                             Name = "da Gama"
                         },
                         new
                         {
                             Id = 3L,
-                            DateTimeCreated = new DateTime(2023, 11, 27, 15, 55, 48, 676, DateTimeKind.Utc).AddTicks(6680),
+                            DateTimeCreated = new DateTime(2023, 11, 27, 16, 45, 56, 199, DateTimeKind.Utc).AddTicks(8547),
                             MemberCreatedId = 1L,
                             Name = "Albuquerque"
                         });
@@ -349,8 +349,9 @@ namespace Ms18.Database.Migrations
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasDefaultValueSql("nextval('receipt.\"costCentreSeq\"')");
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
                     b.Property<DateTime>("DateTimeCreated")
                         .ValueGeneratedOnAdd()
@@ -697,7 +698,7 @@ namespace Ms18.Database.Migrations
 
                     b.HasIndex("Receipt");
 
-                    b.ToTable("photo", "photo");
+                    b.ToTable("receiptPhotos", "receipt");
                 });
 
             modelBuilder.Entity("Ms18.Database.Models.TeamC.Receipt.ReceiptStatus", b =>
@@ -871,6 +872,121 @@ namespace Ms18.Database.Migrations
                         {
                             t.HasCheckConstraint("CK_stock_quantity", "\"Quantity\" >= 0");
                         });
+                });
+
+            modelBuilder.Entity("Ms18.Database.Models.TeamD.PhotoAlbum.Folder", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Guid?>("ParentFolderId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ParentFolderId", "Name")
+                        .IsUnique();
+
+                    b.ToTable("Folders", "photoAlbum");
+                });
+
+            modelBuilder.Entity("Ms18.Database.Models.TeamD.PhotoAlbum.Like", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("LikedOn")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<long>("MemberId")
+                        .HasColumnType("bigint");
+
+                    b.Property<Guid>("PhotoId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MemberId");
+
+                    b.HasIndex("PhotoId");
+
+                    b.ToTable("Likes", "photoAlbum");
+                });
+
+            modelBuilder.Entity("Ms18.Database.Models.TeamD.PhotoAlbum.Photo", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ContentType")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("FolderLocationId")
+                        .HasColumnType("uuid");
+
+                    b.Property<byte[]>("ImageData")
+                        .IsRequired()
+                        .HasColumnType("bytea");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("UploadDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<long>("UploaderId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FolderLocationId");
+
+                    b.HasIndex("UploaderId");
+
+                    b.ToTable("Photos", "photoAlbum");
+                });
+
+            modelBuilder.Entity("Ms18.Database.Models.TeamD.PhotoAlbum.PhotoTag", b =>
+                {
+                    b.Property<Guid>("PhotoId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("TagId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("PhotoId", "TagId");
+
+                    b.HasIndex("TagId");
+
+                    b.ToTable("PhotoTags", "photoAlbum");
+                });
+
+            modelBuilder.Entity("Ms18.Database.Models.TeamD.PhotoAlbum.Tag", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
+
+                    b.ToTable("Tags", "photoAlbum");
                 });
 
             modelBuilder.Entity("Ms18.Database.Models.TeamC.Admin.Member", b =>
@@ -1207,6 +1323,73 @@ namespace Ms18.Database.Migrations
                     b.Navigation("Product");
                 });
 
+            modelBuilder.Entity("Ms18.Database.Models.TeamD.PhotoAlbum.Folder", b =>
+                {
+                    b.HasOne("Ms18.Database.Models.TeamD.PhotoAlbum.Folder", "ParentFolder")
+                        .WithMany("ChildFolders")
+                        .HasForeignKey("ParentFolderId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("ParentFolder");
+                });
+
+            modelBuilder.Entity("Ms18.Database.Models.TeamD.PhotoAlbum.Like", b =>
+                {
+                    b.HasOne("Ms18.Database.Models.TeamC.Admin.Member", "Member")
+                        .WithMany()
+                        .HasForeignKey("MemberId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Ms18.Database.Models.TeamD.PhotoAlbum.Photo", "Photo")
+                        .WithMany("Likes")
+                        .HasForeignKey("PhotoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Member");
+
+                    b.Navigation("Photo");
+                });
+
+            modelBuilder.Entity("Ms18.Database.Models.TeamD.PhotoAlbum.Photo", b =>
+                {
+                    b.HasOne("Ms18.Database.Models.TeamD.PhotoAlbum.Folder", "FolderLocation")
+                        .WithMany("Photos")
+                        .HasForeignKey("FolderLocationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Ms18.Database.Models.TeamC.Admin.Member", "Uploader")
+                        .WithMany()
+                        .HasForeignKey("UploaderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("FolderLocation");
+
+                    b.Navigation("Uploader");
+                });
+
+            modelBuilder.Entity("Ms18.Database.Models.TeamD.PhotoAlbum.PhotoTag", b =>
+                {
+                    b.HasOne("Ms18.Database.Models.TeamD.PhotoAlbum.Photo", "Photo")
+                        .WithMany("PhotoTags")
+                        .HasForeignKey("PhotoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Ms18.Database.Models.TeamD.PhotoAlbum.Tag", "Tag")
+                        .WithMany("PhotoTags")
+                        .HasForeignKey("TagId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Photo");
+
+                    b.Navigation("Tag");
+                });
+
             modelBuilder.Entity("Ms18.Database.Models.TeamC.Admin.Member", b =>
                 {
                     b.Navigation("CostCentresCreated");
@@ -1292,6 +1475,25 @@ namespace Ms18.Database.Migrations
                 {
                     b.Navigation("Stock")
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Ms18.Database.Models.TeamD.PhotoAlbum.Folder", b =>
+                {
+                    b.Navigation("ChildFolders");
+
+                    b.Navigation("Photos");
+                });
+
+            modelBuilder.Entity("Ms18.Database.Models.TeamD.PhotoAlbum.Photo", b =>
+                {
+                    b.Navigation("Likes");
+
+                    b.Navigation("PhotoTags");
+                });
+
+            modelBuilder.Entity("Ms18.Database.Models.TeamD.PhotoAlbum.Tag", b =>
+                {
+                    b.Navigation("PhotoTags");
                 });
 #pragma warning restore 612, 618
         }

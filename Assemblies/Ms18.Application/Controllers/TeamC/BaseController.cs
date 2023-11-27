@@ -32,7 +32,7 @@ public abstract class BaseController : ControllerBase
 
         receipt.Status = _context.ReceiptStatus.FirstOrDefault(status => status.Id == receipt.StatusId)?.Name;
         
-        receipt.ReceiptPhotoURI = _context.Photo.Where(photo => photo.Receipt == receipt.ID).Select(receipt => $"/api/v1/ReceiptPhoto/{receipt.Id}").ToList();
+        receipt.ReceiptPhotoURI = _context.ReceiptPhotos.Where(photo => photo.Receipt == receipt.ID).Select(receipt => $"/api/v1/ReceiptPhoto/{receipt.Id}").ToList();
         if (receipt.CostCentreId != null) {
             var costCentre = _context.CostCentre.FirstOrDefault(costCentre => costCentre.Id == receipt.CostCentreId);
             receipt.CostCentreURI = "/api/v1/CostCentre/" + costCentre?.Id;

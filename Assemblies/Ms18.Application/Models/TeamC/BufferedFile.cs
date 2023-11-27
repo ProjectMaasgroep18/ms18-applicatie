@@ -75,7 +75,7 @@ public class BufferedSingleFileUploadDbModel : PageModel
             //UploadDT = DateTime.UtcNow
         };
 
-        _context.Photo.Add(photo);
+        _context.ReceiptPhotos.Add(photo);
         await _context.SaveChangesAsync();
 
         return RedirectToPage("./Index");

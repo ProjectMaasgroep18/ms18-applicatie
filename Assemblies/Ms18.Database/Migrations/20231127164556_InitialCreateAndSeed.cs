@@ -1,5 +1,6 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
@@ -20,16 +21,19 @@ namespace Ms18.Database.Migrations
                 name: "receiptHistory");
 
             migrationBuilder.EnsureSchema(
-                name: "admin");
+                name: "photoAlbum");
 
             migrationBuilder.EnsureSchema(
-                name: "photo");
+                name: "admin");
 
             migrationBuilder.EnsureSchema(
                 name: "stock");
 
             migrationBuilder.EnsureSchema(
                 name: "stockHistory");
+
+            migrationBuilder.EnsureSchema(
+                name: "photo");
 
             migrationBuilder.CreateSequence(
                 name: "approvalSeq",
@@ -123,6 +127,27 @@ namespace Ms18.Database.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_costCentre", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Folders",
+                schema: "photoAlbum",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Name = table.Column<string>(type: "text", nullable: false),
+                    ParentFolderId = table.Column<Guid>(type: "uuid", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Folders", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Folders_Folders_ParentFolderId",
+                        column: x => x.ParentFolderId,
+                        principalSchema: "photoAlbum",
+                        principalTable: "Folders",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -252,11 +277,25 @@ namespace Ms18.Database.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Tags",
+                schema: "photoAlbum",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Name = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Tags", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "costCentre",
                 schema: "receipt",
                 columns: table => new
                 {
-                    Id = table.Column<long>(type: "bigint", nullable: false, defaultValueSql: "nextval('receipt.\"costCentreSeq\"')"),
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Name = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: false),
                     MemberCreatedId = table.Column<long>(type: "bigint", nullable: false),
                     MemberModifiedId = table.Column<long>(type: "bigint", nullable: true),
@@ -323,6 +362,38 @@ namespace Ms18.Database.Migrations
                         principalSchema: "admin",
                         principalTable: "member",
                         principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Photos",
+                schema: "photoAlbum",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    UploaderId = table.Column<long>(type: "bigint", nullable: false),
+                    UploadDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    Title = table.Column<string>(type: "text", nullable: false),
+                    ImageData = table.Column<byte[]>(type: "bytea", nullable: false),
+                    ContentType = table.Column<string>(type: "text", nullable: false),
+                    FolderLocationId = table.Column<Guid>(type: "uuid", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Photos", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Photos_Folders_FolderLocationId",
+                        column: x => x.FolderLocationId,
+                        principalSchema: "photoAlbum",
+                        principalTable: "Folders",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Photos_member_UploaderId",
+                        column: x => x.UploaderId,
+                        principalSchema: "admin",
+                        principalTable: "member",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -446,6 +517,62 @@ namespace Ms18.Database.Migrations
                         principalSchema: "admin",
                         principalTable: "permission",
                         principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Likes",
+                schema: "photoAlbum",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    MemberId = table.Column<long>(type: "bigint", nullable: false),
+                    PhotoId = table.Column<Guid>(type: "uuid", nullable: false),
+                    LikedOn = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Likes", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Likes_Photos_PhotoId",
+                        column: x => x.PhotoId,
+                        principalSchema: "photoAlbum",
+                        principalTable: "Photos",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Likes_member_MemberId",
+                        column: x => x.MemberId,
+                        principalSchema: "admin",
+                        principalTable: "member",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "PhotoTags",
+                schema: "photoAlbum",
+                columns: table => new
+                {
+                    PhotoId = table.Column<Guid>(type: "uuid", nullable: false),
+                    TagId = table.Column<Guid>(type: "uuid", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PhotoTags", x => new { x.PhotoId, x.TagId });
+                    table.ForeignKey(
+                        name: "FK_PhotoTags_Photos_PhotoId",
+                        column: x => x.PhotoId,
+                        principalSchema: "photoAlbum",
+                        principalTable: "Photos",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_PhotoTags_Tags_TagId",
+                        column: x => x.TagId,
+                        principalSchema: "photoAlbum",
+                        principalTable: "Tags",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -592,8 +719,8 @@ namespace Ms18.Database.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "photo",
-                schema: "photo",
+                name: "receiptPhotos",
+                schema: "receipt",
                 columns: table => new
                 {
                     Id = table.Column<long>(type: "bigint", nullable: false, defaultValueSql: "nextval('photo.\"PhotoSeq\"')"),
@@ -612,7 +739,7 @@ namespace Ms18.Database.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_photo", x => x.Id);
+                    table.PrimaryKey("PK_receiptPhotos", x => x.Id);
                     table.ForeignKey(
                         name: "FK_Photo_Receipt",
                         column: x => x.Receipt,
@@ -621,20 +748,20 @@ namespace Ms18.Database.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_photo_member_MemberCreatedId",
+                        name: "FK_receiptPhotos_member_MemberCreatedId",
                         column: x => x.MemberCreatedId,
                         principalSchema: "admin",
                         principalTable: "member",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_photo_member_MemberDeletedId",
+                        name: "FK_receiptPhotos_member_MemberDeletedId",
                         column: x => x.MemberDeletedId,
                         principalSchema: "admin",
                         principalTable: "member",
                         principalColumn: "Id");
                     table.ForeignKey(
-                        name: "FK_photo_member_MemberModifiedId",
+                        name: "FK_receiptPhotos_member_MemberModifiedId",
                         column: x => x.MemberModifiedId,
                         principalSchema: "admin",
                         principalTable: "member",
@@ -647,9 +774,9 @@ namespace Ms18.Database.Migrations
                 columns: new[] { "Id", "DateTimeCreated", "DateTimeDeleted", "DateTimeModified", "MemberCreatedId", "MemberDeletedId", "MemberModifiedId", "Name" },
                 values: new object[,]
                 {
-                    { 1L, new DateTime(2023, 11, 27, 15, 55, 48, 676, DateTimeKind.Utc).AddTicks(6674), null, null, 1L, null, 1L, "Borgia" },
-                    { 2L, new DateTime(2023, 11, 27, 15, 55, 48, 676, DateTimeKind.Utc).AddTicks(6679), null, null, 1L, null, null, "da Gama" },
-                    { 3L, new DateTime(2023, 11, 27, 15, 55, 48, 676, DateTimeKind.Utc).AddTicks(6680), null, null, 1L, null, null, "Albuquerque" }
+                    { 1L, new DateTime(2023, 11, 27, 16, 45, 56, 199, DateTimeKind.Utc).AddTicks(8540), null, null, 1L, null, 1L, "Borgia" },
+                    { 2L, new DateTime(2023, 11, 27, 16, 45, 56, 199, DateTimeKind.Utc).AddTicks(8546), null, null, 1L, null, null, "da Gama" },
+                    { 3L, new DateTime(2023, 11, 27, 16, 45, 56, 199, DateTimeKind.Utc).AddTicks(8547), null, null, 1L, null, null, "Albuquerque" }
                 });
 
             migrationBuilder.InsertData(
@@ -717,6 +844,25 @@ namespace Ms18.Database.Migrations
                 table: "costCentre",
                 column: "Name",
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Folders_ParentFolderId_Name",
+                schema: "photoAlbum",
+                table: "Folders",
+                columns: new[] { "ParentFolderId", "Name" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Likes_MemberId",
+                schema: "photoAlbum",
+                table: "Likes",
+                column: "MemberId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Likes_PhotoId",
+                schema: "photoAlbum",
+                table: "Likes",
+                column: "PhotoId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_member_MemberCreatedId",
@@ -793,28 +939,22 @@ namespace Ms18.Database.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_photo_MemberCreatedId",
-                schema: "photo",
-                table: "photo",
-                column: "MemberCreatedId");
+                name: "IX_Photos_FolderLocationId",
+                schema: "photoAlbum",
+                table: "Photos",
+                column: "FolderLocationId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_photo_MemberDeletedId",
-                schema: "photo",
-                table: "photo",
-                column: "MemberDeletedId");
+                name: "IX_Photos_UploaderId",
+                schema: "photoAlbum",
+                table: "Photos",
+                column: "UploaderId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_photo_MemberModifiedId",
-                schema: "photo",
-                table: "photo",
-                column: "MemberModifiedId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_photo_Receipt",
-                schema: "photo",
-                table: "photo",
-                column: "Receipt");
+                name: "IX_PhotoTags_TagId",
+                schema: "photoAlbum",
+                table: "PhotoTags",
+                column: "TagId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_product_MemberCreatedId",
@@ -865,6 +1005,30 @@ namespace Ms18.Database.Migrations
                 column: "ReceiptStatusId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_receiptPhotos_MemberCreatedId",
+                schema: "receipt",
+                table: "receiptPhotos",
+                column: "MemberCreatedId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_receiptPhotos_MemberDeletedId",
+                schema: "receipt",
+                table: "receiptPhotos",
+                column: "MemberDeletedId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_receiptPhotos_MemberModifiedId",
+                schema: "receipt",
+                table: "receiptPhotos",
+                column: "MemberModifiedId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_receiptPhotos_Receipt",
+                schema: "receipt",
+                table: "receiptPhotos",
+                column: "Receipt");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_status_MemberCreatedId",
                 schema: "receipt",
                 table: "status",
@@ -906,6 +1070,13 @@ namespace Ms18.Database.Migrations
                 schema: "stock",
                 table: "stock",
                 column: "MemberModifiedId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Tags_Name",
+                schema: "photoAlbum",
+                table: "Tags",
+                column: "Name",
+                unique: true);
         }
 
         /// <inheritdoc />
@@ -924,12 +1095,16 @@ namespace Ms18.Database.Migrations
                 schema: "receiptHistory");
 
             migrationBuilder.DropTable(
+                name: "Likes",
+                schema: "photoAlbum");
+
+            migrationBuilder.DropTable(
                 name: "memberPermission",
                 schema: "admin");
 
             migrationBuilder.DropTable(
-                name: "photo",
-                schema: "photo");
+                name: "PhotoTags",
+                schema: "photoAlbum");
 
             migrationBuilder.DropTable(
                 name: "product",
@@ -938,6 +1113,10 @@ namespace Ms18.Database.Migrations
             migrationBuilder.DropTable(
                 name: "receipt",
                 schema: "receiptHistory");
+
+            migrationBuilder.DropTable(
+                name: "receiptPhotos",
+                schema: "receipt");
 
             migrationBuilder.DropTable(
                 name: "status",
@@ -956,12 +1135,24 @@ namespace Ms18.Database.Migrations
                 schema: "admin");
 
             migrationBuilder.DropTable(
+                name: "Photos",
+                schema: "photoAlbum");
+
+            migrationBuilder.DropTable(
+                name: "Tags",
+                schema: "photoAlbum");
+
+            migrationBuilder.DropTable(
                 name: "receipt",
                 schema: "receipt");
 
             migrationBuilder.DropTable(
                 name: "product",
                 schema: "stock");
+
+            migrationBuilder.DropTable(
+                name: "Folders",
+                schema: "photoAlbum");
 
             migrationBuilder.DropTable(
                 name: "costCentre",

@@ -4,6 +4,7 @@ using Ms18.Database.Models.TeamC.Admin;
 using Ms18.Database.Models.TeamC.History.Stock;
 using Ms18.Database.Models.TeamC.Receipt;
 using Ms18.Database.Models.TeamC.Stock;
+using Ms18.Database.Models.TeamD.PhotoAlbum;
 
 namespace Ms18.Database
 {
@@ -33,12 +34,17 @@ namespace Ms18.Database
         public DbSet<ReceiptApprovalHistory> ReceiptApprovalHistory { get; set; } = null!;
         public DbSet<ReceiptHistory> ReceiptHistory { get; set; } = null!;
         public DbSet<ReceiptStatusHistory> ReceiptStatusHistory { get; set; } = null!;
-
+        public DbSet<ReceiptPhoto> ReceiptPhotos { get; set; } = null!;
         #endregion
 
-        #region Photos
+        #region PhotoAlbum
 
-        public DbSet<ReceiptPhoto> Photo { get; set; } = null!;
+        public DbSet<Folder> Folders { get; set; } = null!;
+        public DbSet<Photo> Photos { get; set; } = null!;
+        public DbSet<Like> Likes { get; set; } = null!;
+        public DbSet<Tag> Tags { get; set; } = null!;
+        public DbSet<PhotoTag> PhotoTags { get; set; } = null!;
+
         #endregion
 
         #region Stock
@@ -72,8 +78,7 @@ namespace Ms18.Database
             CreateReceiptStatusHistory(modelBuilder);
             CreateReceiptApprovalHistory(modelBuilder);
             CreateCostCentreHistory(modelBuilder);
-
-            CreatePhoto(modelBuilder);
+            CreateReceiptPhoto(modelBuilder);
 
             CreateStockProduct(modelBuilder);
             CreateStockpile(modelBuilder);
@@ -81,7 +86,16 @@ namespace Ms18.Database
             CreateStockProductHistory(modelBuilder);
             CreateStockpileHistory(modelBuilder);
 
-            MemberSeeder.Seed(modelBuilder);
+            CreateFolder(modelBuilder);
+            CreatePhotoD(modelBuilder);
+            CreateTag(modelBuilder);
+            CreateLikes(modelBuilder);
+            CreatePhotoTag(modelBuilder);
+
+            if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development")
+            {
+                MemberSeeder.Seed(modelBuilder);
+            }
         }
 
         #region Member
@@ -207,7 +221,6 @@ namespace Ms18.Database
             modelBuilder.Entity<CostCentre>().ToTable("costCentre", "receipt");
             modelBuilder.Entity<CostCentre>().HasKey(cc => new { cc.Id });
             modelBuilder.HasSequence<long>("costCentreSeq", schema: "receipt").StartsAt(1).IncrementsBy(1);
-            modelBuilder.Entity<CostCentre>().Property(cc => cc.Id).HasDefaultValueSql("nextval('receipt.\"costCentreSeq\"')");
             modelBuilder.Entity<CostCentre>().Property(cc => cc.DateTimeCreated).HasDefaultValueSql("now()");
             modelBuilder.Entity<CostCentre>().Property(cc => cc.Name).HasMaxLength(256);
             modelBuilder.Entity<CostCentre>().HasIndex(cc => cc.Name).IsUnique();
@@ -355,6 +368,24 @@ namespace Ms18.Database
                 .OnDelete(DeleteBehavior.NoAction);
 
         }
+
+        private void CreateReceiptPhoto(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<ReceiptPhoto>().ToTable("receiptPhotos", "receipt");
+            modelBuilder.Entity<ReceiptPhoto>().HasKey(p => new { p.Id });
+            modelBuilder.HasSequence<long>("PhotoSeq", schema: "photo").StartsAt(1).IncrementsBy(1);
+            modelBuilder.Entity<ReceiptPhoto>().Property(p => p.DateTimeCreated).HasDefaultValueSql("now()");
+            modelBuilder.Entity<ReceiptPhoto>().Property(p => p.Id).HasDefaultValueSql("nextval('photo.\"PhotoSeq\"')");
+
+            //Foreign keys
+
+            modelBuilder.Entity<ReceiptPhoto>()
+                .HasOne(p => p.ReceiptInstance)
+                .WithMany(r => r.Photos)
+                .HasForeignKey(p => p.Receipt)
+                .HasConstraintName("FK_Photo_Receipt")
+                .OnDelete(DeleteBehavior.Cascade);
+        }
         #endregion
 
         #region ReceiptHistory
@@ -397,26 +428,6 @@ namespace Ms18.Database
             modelBuilder.Entity<CostCentreHistory>().Property(cc => cc.RecordCreated).HasDefaultValueSql("now()");
         }
 
-        #endregion
-
-        #region Photo
-        private void CreatePhoto(ModelBuilder modelBuilder)
-        {
-            modelBuilder.Entity<ReceiptPhoto>().ToTable("photo", "photo");
-            modelBuilder.Entity<ReceiptPhoto>().HasKey(p => new { p.Id });
-            modelBuilder.HasSequence<long>("PhotoSeq", schema: "photo").StartsAt(1).IncrementsBy(1);
-            modelBuilder.Entity<ReceiptPhoto>().Property(p => p.DateTimeCreated).HasDefaultValueSql("now()");
-            modelBuilder.Entity<ReceiptPhoto>().Property(p => p.Id).HasDefaultValueSql("nextval('photo.\"PhotoSeq\"')");
-
-            //Foreign keys
-
-            modelBuilder.Entity<ReceiptPhoto>()
-                .HasOne(p => p.ReceiptInstance)
-                .WithMany(r => r.Photos)
-                .HasForeignKey(p => p.Receipt)
-                .HasConstraintName("FK_Photo_Receipt")
-                .OnDelete(DeleteBehavior.Cascade);
-        }
         #endregion
 
         #region Stock
@@ -507,6 +518,107 @@ namespace Ms18.Database
             modelBuilder.Entity<StockpileHistory>().Property(s => s.RecordCreated).HasDefaultValueSql("now()");
         }
 
+        #endregion
+
+        #region PhotoAlbum
+
+        private void CreateFolder(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Folder>(entity =>
+            {
+                entity.ToTable("Folders", "photoAlbum");
+
+                entity.HasKey(f => f.Id);
+
+                entity.HasIndex(f => new { f.ParentFolderId, f.Name }).IsUnique();
+
+                entity.HasMany(f => f.ChildFolders)
+                    .WithOne(f => f.ParentFolder)
+                    .HasForeignKey(f => f.ParentFolderId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasMany(f => f.Photos)
+                    .WithOne(p => p.FolderLocation)
+                    .HasForeignKey(p => p.FolderLocationId);
+            });
+
+        }
+
+        private void CreateLikes(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Like>(entity =>
+            {
+                entity.ToTable("Likes", "photoAlbum");
+                entity.HasKey(l => l.Id);
+
+                entity.HasOne(l => l.Member)
+                    .WithMany()
+                    .HasForeignKey(l => l.MemberId);
+
+                entity.HasOne(l => l.Photo)
+                    .WithMany(p => p.Likes)
+                    .HasForeignKey(l => l.PhotoId);
+            });
+        }
+
+        private void CreatePhotoD(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Photo>(entity =>
+            {
+                entity.ToTable("Photos", "photoAlbum");
+                entity.HasKey(p => p.Id);
+
+                entity.HasOne(p => p.Uploader)
+                    .WithMany()
+                    .HasForeignKey(p => p.UploaderId);
+
+                entity.HasOne(p => p.FolderLocation)
+                    .WithMany(f => f.Photos)
+                    .HasForeignKey(p => p.FolderLocationId);
+
+                entity.HasMany(p => p.PhotoTags)
+                    .WithOne(pt => pt.Photo)
+                    .HasForeignKey(pt => pt.PhotoId);
+
+                entity.HasMany(p => p.Likes)
+                    .WithOne(l => l.Photo)
+                    .HasForeignKey(l => l.PhotoId);
+            });
+        }
+
+        private void CreatePhotoTag(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<PhotoTag>(entity =>
+            {
+                entity.ToTable("PhotoTags", "photoAlbum");
+                entity.HasKey(pt => new { pt.PhotoId, pt.TagId });
+
+                entity.HasOne(pt => pt.Photo)
+                    .WithMany(p => p.PhotoTags)
+                    .HasForeignKey(pt => pt.PhotoId);
+
+                entity.HasOne(pt => pt.Tag)
+                    .WithMany(t => t.PhotoTags)
+                    .HasForeignKey(pt => pt.TagId);
+            });
+        }
+
+        private void CreateTag(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Tag>(entity =>
+            {
+                entity.ToTable("Tags", "photoAlbum");
+                entity.HasKey(t => t.Id);
+
+                entity.Property(t => t.Name).HasMaxLength(255).IsRequired();
+
+                entity.HasIndex(t => t.Name).IsUnique();
+
+                entity.HasMany(t => t.PhotoTags)
+                    .WithOne(pt => pt.Tag)
+                    .HasForeignKey(pt => pt.TagId);
+            });
+        }
         #endregion
     }
 }

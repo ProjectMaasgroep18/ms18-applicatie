@@ -246,7 +246,7 @@ public class ReceiptController : BaseController
         createdPhoto.MemberCreatedId = _currentUser.Id;
         
         // Add the photo to the database
-        _context.Photo.Add(createdPhoto);
+        _context.ReceiptPhotos.Add(createdPhoto);
         _context.SaveChanges();
         
         // Return the created photo
@@ -279,7 +279,7 @@ public class ReceiptController : BaseController
         }
         
         // Get all photos for the receipt
-        var photos = _context.Photo
+        var photos = _context.ReceiptPhotos
             .Where(photo => photo.Receipt == existingReceipt.Id)
             .Select(photo => new PhotoViewModel(photo))
             .ToList();

@@ -17,7 +17,7 @@ public class ReceiptPhotoController : BaseController
         if (_currentUser == null) // Toegangscontrole
             return Forbidden();
         
-        var photo = _context.Photo.Find(id);
+        var photo = _context.ReceiptPhotos.Find(id);
         
         if (photo == null)
         {
@@ -53,7 +53,7 @@ public class ReceiptPhotoController : BaseController
         createdPhoto.MemberCreatedId = _currentUser.Id;
         
         // Add the photo to the database
-        _context.Photo.Add(createdPhoto);
+        _context.ReceiptPhotos.Add(createdPhoto);
         _context.SaveChanges();
         
         // Return the created photo
@@ -100,7 +100,7 @@ public class ReceiptPhotoController : BaseController
         }
 
         // Retrieve the existing photo from your data store (e.g., database)
-        ReceiptPhoto? existingPhoto = _context.Photo.Find(id);
+        ReceiptPhoto? existingPhoto = _context.ReceiptPhotos.Find(id);
 
         // Check if the photo with the provided ID exists
         if (existingPhoto == null)
@@ -159,7 +159,7 @@ public class ReceiptPhotoController : BaseController
             return Forbidden();
         
         // Retrieve the existing receipt from your data store (e.g., database)
-        ReceiptPhoto? existingPhoto = _context.Photo.Find(id);
+        ReceiptPhoto? existingPhoto = _context.ReceiptPhotos.Find(id);
         
         // Check if the receipt with the provided ID exists
         if (existingPhoto == null)
