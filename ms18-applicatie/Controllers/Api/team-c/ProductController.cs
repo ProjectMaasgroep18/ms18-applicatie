@@ -1,6 +1,6 @@
 ﻿using Maasgroep.Database;
 using Maasgroep.Database.Repository.ViewModel;
-using Maasgroep.Database.Stock;
+using Maasgroep.Database.Order;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ms18_applicatie.Controllers.Api;

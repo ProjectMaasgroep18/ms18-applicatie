@@ -1,4 +1,6 @@
 ﻿
+using Maasgroep.Database.Order;
+
 namespace Maasgroep.Database.Repository.ViewModel
 {
     public class StockViewModel
@@ -11,7 +13,13 @@ namespace Maasgroep.Database.Repository.ViewModel
             Quantity = quantity;
         }
 
-        public long Quantity { get; set; }
+		public StockViewModel(Stock stock)
+		{
+            Name = "TODO";
+			Quantity = stock.Quantity;
+		}
+
+		public long Quantity { get; set; }
         public string Name { get; set; }
     }
 }

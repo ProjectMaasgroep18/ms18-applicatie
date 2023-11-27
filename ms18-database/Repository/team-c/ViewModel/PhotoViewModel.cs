@@ -20,17 +20,16 @@ public class PhotoViewModel
     
     public PhotoViewModel(Photo photo)
     {
-        return new PhotoViewModel
-        {
-            Id = photo.Id,
-            ReceiptId = photo.ReceiptId,
-            fileExtension = photo.fileExtension,
-            fileName = photo.fileName,
-            DateTimeCreated = photo.DateTimeCreated,
-            DateTimeModified = photo.DateTimeModified,
-            Base64Image = photo.Base64Image,
-            // Map other properties as needed
-        };
+
+        Id = photo.Id;
+        ReceiptId = photo.ReceiptId;
+        fileExtension = photo.fileExtension;
+        fileName = photo.fileName;
+        DateTimeCreated = photo.DateTimeCreated;
+        DateTimeModified = photo.DateTimeModified;
+        Base64Image = photo.Base64Image;
+        // Map other properties as needed
+    
     }
     
 }

@@ -277,7 +277,7 @@ public class ReceiptController : BaseController
         
         // Get all photos for the receipt
         var photos = _context.Photo
-            .Where(photo => photo.Receipt == existingReceipt.Id)
+            .Where(photo => photo.ReceiptId == existingReceipt.Id)
             .Select(photo => new PhotoViewModel(photo))
             .ToList();
         
