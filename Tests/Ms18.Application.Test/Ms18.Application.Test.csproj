@@ -14,7 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Assemblies\Ms18.Application\Ms18.Application.csproj" />
+    <ProjectReference Include="..\..\Assemblies\Ms18.Application\Ms18.Application.csproj" />
   </ItemGroup>
 
 </Project>

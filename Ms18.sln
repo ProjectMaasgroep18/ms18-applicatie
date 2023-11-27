@@ -7,9 +7,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ms18.Application", "Assembl
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ms18.Database", "Assemblies\Ms18.Database\Ms18.Database.csproj", "{4C7B4B5F-651F-47DE-9EA3-E827F8965208}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ms18.Application.Test", "Ms18.Application.Test\Ms18.Application.Test.csproj", "{D5398C0E-2A50-4749-BE6E-3CA3CBC66084}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ms18.Application.Test", "Tests\Ms18.Application.Test\Ms18.Application.Test.csproj", "{D5398C0E-2A50-4749-BE6E-3CA3CBC66084}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ms18.Database.Test", "Ms18.Database.Test\Ms18.Database.Test.csproj", "{7686C5EE-630A-4F56-A4BC-AF0E2C6CBB1E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ms18.Database.Test", "Tests\Ms18.Database.Test\Ms18.Database.Test.csproj", "{7686C5EE-630A-4F56-A4BC-AF0E2C6CBB1E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
