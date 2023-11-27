@@ -11,7 +11,6 @@ builder.Services.AddSwaggerGen(s =>
   
     s.SwaggerDoc("v1", new OpenApiInfo { Title = "m18-applicatie", Version = "v1" });
     s.CustomOperationIds(e => e.ActionDescriptor.RouteValues["action"]);
-    //s.DocumentFilter<SwaggerFilters>();
 });
 
 builder.Services.AddCors(options =>
