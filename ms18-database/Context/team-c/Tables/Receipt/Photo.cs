@@ -23,8 +23,6 @@ namespace Maasgroep.Database.Receipts
                 ReceiptId = viewModel.ReceiptId,
                 fileExtension = viewModel.fileExtension,
                 fileName = viewModel.fileName,
-                DateTimeCreated = viewModel.DateTimeCreated,
-                DateTimeModified = viewModel.DateTimeModified,
                 Base64Image = viewModel.Base64Image,
             };
         }

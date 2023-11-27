@@ -21,16 +21,21 @@ body {
   color: red;
 }
 
-.hidden {
+.hidden.hidden {
   display: none;
 }
 
-#user-receipts td,
-#user-receipts th {
+.data-table {
+  margin-bottom: 1em;
+}
+
+.data-table td,
+.data-table th {
+  text-align: left;
   padding-right: 1em;
 }
 
-.user-receipts-actions {
+.user-actions {
   font-size: 0.8em;
 }
 
@@ -72,4 +77,9 @@ body {
   width: 400px;
   max-width: 100%;
   max-height: 100vh;
+  margin: 5px;
+}
+
+.drag-active {
+  background-color: #ddd;
 }

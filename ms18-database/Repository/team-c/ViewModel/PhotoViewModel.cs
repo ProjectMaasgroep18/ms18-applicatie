@@ -18,7 +18,7 @@ public class PhotoViewModel
     [JsonConstructor]
     public PhotoViewModel() { }
     
-    public static PhotoViewModel FromDatabaseModel(Photo photo)
+    public PhotoViewModel(Photo photo)
     {
         return new PhotoViewModel
         {

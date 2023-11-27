@@ -5,13 +5,15 @@ namespace Maasgroep.Database.Repository.ViewModel
 {
     
     /*
-    id”: Number,
+    “id”: Number,
     “dateTimeCreated”: DateTime,
     “dateTimeModified”: DateTime,
     “amount”: Number,
     “note”: String
     “ReceiptPhotoURI”: URI[],
-    “CostCentreURI”: URI
+    “CostCentre”: URI,
+    “CostCentreId”: URI,
+    “CostCentreURI”: URI,
     */
     
     public class ReceiptViewModel
@@ -23,6 +25,10 @@ namespace Maasgroep.Database.Repository.ViewModel
         public decimal? Amount { get; set; }
         public string? Note { get; set; }
         public string? Status { get; set; }
+        public List<string>? ReceiptPhotoURI { get; set; }
+        public long? CostCentreId { get; set; }
+        public string? CostCentre { get; set; }
+        public string? CostCentreURI { get; set; }
         public long? PhotoId { get; set; }
 
         public ReceiptViewModel(int id, DateTime dateTimeCreated, DateTime dateTimeModified, decimal amount, string note, string status)
@@ -37,6 +43,8 @@ namespace Maasgroep.Database.Repository.ViewModel
 
         public ReceiptViewModel(Receipt dbRec)
         {
+            // Create ReceiptViewModel from Database Model
+
             ID = dbRec.Id;
             DateTimeCreated = dbRec.DateTimeCreated;
             DateTimeModified = dbRec.DateTimeModified;
