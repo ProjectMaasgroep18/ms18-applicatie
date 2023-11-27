@@ -25,6 +25,9 @@
                     <li class="nav-item">
                         <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-dark" asp-area="" asp-controller="Declaraties" asp-action="Index">Declaraties</a>
+                    </li>
                 </ul>
             </div>
         </div>
@@ -33,6 +36,8 @@
 <div class="container">
     <main role="main" class="pb-3">
         @RenderBody()
+        <div id="loading" class="hidden">Laden...</div>
+        <div id="error" class="hidden"></div>
     </main>
 </div>
 
