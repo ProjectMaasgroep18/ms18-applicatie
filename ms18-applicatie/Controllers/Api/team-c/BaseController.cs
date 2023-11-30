@@ -2,6 +2,7 @@ using Maasgroep.Database;
 using Maasgroep.Database.Members;
 using Maasgroep.Database.Repository.ViewModel;
 using Microsoft.AspNetCore.Mvc;
+using ms18_applicatie.Models;
 
 namespace ms18_applicatie.Controllers.Api;
 public abstract class BaseController : ControllerBase
@@ -30,7 +31,7 @@ public abstract class BaseController : ControllerBase
         // Add data from foreign database tables to the ReceiptViewModel
         // Photos, Status, CostCentre, etc.
 
-        receipt.Status = "TODO ENUM";
+        // receipt.Status = "TODO ENUM";
         
         receipt.ReceiptPhotoURI = _context.Photo.Where(photo => photo.ReceiptId == receipt.ID).Select(receipt => $"/api/v1/ReceiptPhoto/{receipt.Id}").ToList();
         if (receipt.CostCentreId != null) {
