@@ -24,12 +24,22 @@ namespace Maasgroep.Database.Repository.ViewModel
         public DateTime? DateTimeModified { get; set; }
         public decimal? Amount { get; set; }
         public string? Note { get; set; }
-        public long StatusId { get; set; }
         public string? Status { get; set; }
         public List<string>? ReceiptPhotoURI { get; set; }
         public long? CostCentreId { get; set; }
         public string? CostCentre { get; set; }
         public string? CostCentreURI { get; set; }
+        public long? PhotoId { get; set; }
+
+        public ReceiptViewModel(int id, DateTime dateTimeCreated, DateTime dateTimeModified, decimal amount, string note, string status)
+        {
+            ID = id;
+            DateTimeCreated = dateTimeCreated;
+            DateTimeModified = dateTimeModified;
+            Amount = amount;
+            Note = note;
+            Status = status;
+        }
 
         public ReceiptViewModel(Receipt dbRec)
         {
@@ -40,8 +50,7 @@ namespace Maasgroep.Database.Repository.ViewModel
             DateTimeModified = dbRec.DateTimeModified;
             Amount = dbRec.Amount;
             Note = dbRec.Note;
-            StatusId = dbRec.ReceiptStatusId;
-            CostCentreId = dbRec.CostCentreId;
+            Status = dbRec.ReceiptStatus;
         }
         
         [JsonConstructor]

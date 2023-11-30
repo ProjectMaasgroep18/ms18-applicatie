@@ -1,5 +1,7 @@
 ﻿using Maasgroep.Database;
-using Maasgroep.Database.Photos;
+using Maasgroep.Database.Members;
+using Maasgroep.Database.Receipts;
+using Maasgroep.Database.Receipts;
 using Maasgroep.Database.Repository.ViewModel;
 using Microsoft.AspNetCore.Mvc;
 
@@ -136,9 +138,9 @@ public class ReceiptPhotoController : BaseController
             existingPhoto.fileExtension = updatedPhotoViewModel.fileExtension;
         }
 
-        if (updatedPhotoViewModel.Receipt != null)
+        if (updatedPhotoViewModel.ReceiptId != null)
         {
-            existingPhoto.Receipt = updatedPhotoViewModel.Receipt;
+            existingPhoto.ReceiptId = updatedPhotoViewModel.ReceiptId;
         }
         
         existingPhoto.DateTimeModified = DateTime.UtcNow;
@@ -207,8 +209,8 @@ public class ReceiptPhotoController : BaseController
                          || (existingPhoto.Base64Image == updatedPhotoViewModel.Base64Image);
 
         // Check if given value is null or if they are equal
-        bool receiptEqual = (updatedPhotoViewModel.Receipt == null)
-                         || (existingPhoto.Receipt == updatedPhotoViewModel.Receipt);
+        bool receiptEqual = (updatedPhotoViewModel.ReceiptId == null)
+                         || (existingPhoto.ReceiptId == updatedPhotoViewModel.ReceiptId);
 
         // Compare other properties as needed
         return nameEqual

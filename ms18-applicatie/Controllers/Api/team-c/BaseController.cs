@@ -30,9 +30,9 @@ public abstract class BaseController : ControllerBase
         // Add data from foreign database tables to the ReceiptViewModel
         // Photos, Status, CostCentre, etc.
 
-        receipt.Status = _context.ReceiptStatus.FirstOrDefault(status => status.Id == receipt.StatusId)?.Name;
+        receipt.Status = "TODO ENUM";
         
-        receipt.ReceiptPhotoURI = _context.Photo.Where(photo => photo.Receipt == receipt.ID).Select(receipt => $"/api/v1/ReceiptPhoto/{receipt.Id}").ToList();
+        receipt.ReceiptPhotoURI = _context.Photo.Where(photo => photo.ReceiptId == receipt.ID).Select(receipt => $"/api/v1/ReceiptPhoto/{receipt.Id}").ToList();
         if (receipt.CostCentreId != null) {
             var costCentre = _context.CostCentre.FirstOrDefault(costCentre => costCentre.Id == receipt.CostCentreId);
             receipt.CostCentreURI = "/api/v1/CostCentre/" + costCentre?.Id;
@@ -40,5 +40,13 @@ public abstract class BaseController : ControllerBase
         }
         
         return receipt;
+    }
+
+    [NonAction]
+    public ProductViewModel AddForeignData(ProductViewModel product)
+    {
+        product.StockpileURI = "/api/v1/Stockpile/" + product.Id;
+        
+        return product;
     }
 }

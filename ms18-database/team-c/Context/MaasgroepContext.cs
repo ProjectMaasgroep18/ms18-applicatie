@@ -1,8 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Maasgroep.Database.Members;
-using Maasgroep.Database.Photos;
 using Maasgroep.Database.Receipts;
-using Maasgroep.Database.Stock;
+using Maasgroep.Database.Order;
+using Maasgroep.Database.ToDoList;
 
 namespace Maasgroep.Database
 {
@@ -17,8 +17,8 @@ namespace Maasgroep.Database
         #region Receipts
         public DbSet<Receipt> Receipt { get; set; }
         public DbSet<ReceiptApproval> ReceiptApproval { get; set; }
-        public DbSet<ReceiptStatus> ReceiptStatus { get; set; }
         public DbSet<CostCentre> CostCentre { get; set; }
+        public DbSet<Photo> Photo { get; set; }
         #endregion
 
         #region ReceiptHistory
@@ -26,28 +26,59 @@ namespace Maasgroep.Database
         public DbSet<CostCentreHistory> CostCentreHistory { get; set; }
         public DbSet<ReceiptApprovalHistory> ReceiptApprovalHistory { get; set; }
         public DbSet<ReceiptHistory> ReceiptHistory { get; set; }
-        public DbSet<ReceiptStatusHistory> ReceiptStatusHistory { get; set; }
+        public DbSet<PhotoHistory> PhotoHistory { get; set; }
 
         #endregion
 
-        #region Photos
-        public DbSet<Photo> Photo { get; set; }
-        #endregion
-
-        #region Stock
+        #region Order
 
         public DbSet<Product> Product { get; set; }
-        public DbSet<Stockpile> Stock { get; set; }
+        public DbSet<Stock> Stock { get; set; }
+        public DbSet<ProductPrice> ProductPrice { get; set; }
+        public DbSet<Line> OrderLines { get; set; }
+        public DbSet<Bill> Bills { get; set; }
 
         #endregion
 
-        #region StockHistory
+        #region OrderHistory
         
         public DbSet<ProductHistory> ProductHistory { get; set; }
-        public DbSet<StockpileHistory> StockHistory { get; set; }
+        public DbSet<StockHistory> StockHistory { get; set; }
+        public DbSet<ProductPriceHistory> ProductPriceHistory { get; set; }
+        public DbSet<LineHistory> LineHistory { get; set; }
+        public DbSet<BillHistory> BillHistory { get; set; }
 
         #endregion
 
+        #region ToDo
+        public DbSet<ToDo> ToDos { get; set; }
+        #endregion
+
+        #region ToDoHistory
+        public DbSet<ToDoHistory> ToDoHistory { get; set; }
+        #endregion
+
+        // TODO: Uitgecomment ivm fixture dat conflicteert met bouwen EF migration
+        //private readonly Action<MaasgroepContext, ModelBuilder> _modelCustomizer;
+
+        //public MaasgroepContext(DbContextOptions options) : base(options)
+        //{
+        //    DbContextOptionsBuilder optionsBuilder = new DbContextOptionsBuilder();
+        //    optionsBuilder.UseNpgsql("UserID=postgres;Password=postgres;Host=localhost;port=5432;Database=Maasgroep;Pooling=true");
+        //    OnConfiguring(optionsBuilder);
+        //}
+
+        //public MaasgroepContext()
+        //{
+        //    DbContextOptionsBuilder optionsBuilder = new DbContextOptionsBuilder();
+        //    optionsBuilder.UseNpgsql("UserID=postgres;Password=postgres;Host=localhost;port=5432;Database=Maasgroep;Pooling=true");
+        //    OnConfiguring(optionsBuilder);
+        //}
+
+        //public MaasgroepContext(DbContextOptions<MaasgroepContext> options, Action<MaasgroepContext, ModelBuilder> modelCustomizer = null) : base(options)
+        //{
+        //    _modelCustomizer = modelCustomizer;
+        //}
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -56,29 +87,42 @@ namespace Maasgroep.Database
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            
+            //if (_modelCustomizer is not null)
+            //{
+            //    _modelCustomizer(this, modelBuilder);
+            //}
+
             CreateMember(modelBuilder);
             CreatePermission(modelBuilder);
             CreateMemberPermission(modelBuilder);
 
             CreateCostCentre(modelBuilder);
             CreateReceiptApproval(modelBuilder);
-            CreateReceiptStatus(modelBuilder);
             CreateReceipt(modelBuilder);
-
-            CreateReceiptHistory(modelBuilder);
-            CreateReceiptStatusHistory(modelBuilder);
-            CreateReceiptApprovalHistory(modelBuilder);
-            CreateCostCentreHistory(modelBuilder);
-
             CreatePhoto(modelBuilder);
 
-            CreateStockProduct(modelBuilder);
-            CreateStockpile(modelBuilder);
+            CreateReceiptHistory(modelBuilder);
+            CreateReceiptApprovalHistory(modelBuilder);
+            CreateCostCentreHistory(modelBuilder);
+            CreatePhotoHistory(modelBuilder);
 
-            CreateStockProductHistory(modelBuilder);
-            CreateStockpileHistory(modelBuilder);
+            CreateProduct(modelBuilder);
+            CreateStock(modelBuilder);
+            CreateProductPrice(modelBuilder);
+            CreateOrderLine(modelBuilder);
+            CreateBill(modelBuilder);
+
+            CreateProductHistory(modelBuilder);
+            CreateStockHistory(modelBuilder);
+            CreateProductPriceHistory(modelBuilder);
+            CreateOrderLineHistory(modelBuilder);
+            CreateBillHistory(modelBuilder);
+
+            CreateToDo(modelBuilder);
+
+            CreateToDoHistory(modelBuilder);
         }
+
 
         #region Member
         private void CreateMember(ModelBuilder modelBuilder)
@@ -240,7 +284,7 @@ namespace Maasgroep.Database
             modelBuilder.HasSequence<long>("receiptSeq", schema: "receipt").StartsAt(1).IncrementsBy(1);
             modelBuilder.Entity<Receipt>().Property(r => r.Id).HasDefaultValueSql("nextval('receipt.\"receiptSeq\"')");
             modelBuilder.Entity<Receipt>().Property(r => r.DateTimeCreated).HasDefaultValueSql("now()");
-            modelBuilder.Entity<Receipt>().Property(r => r.Note).HasMaxLength(2048);
+            modelBuilder.Entity<Receipt>().Property<string>(r => r.Note).HasMaxLength(2048);
             modelBuilder.Entity<Receipt>().Property(r => r.Amount).HasPrecision(18,2);
 
             //Foreign keys
@@ -250,13 +294,6 @@ namespace Maasgroep.Database
                 .WithMany(c => c.Receipt)
                 .HasForeignKey(r => r.CostCentreId)
                 .HasConstraintName("FK_receipt_costCentre")
-                .OnDelete(DeleteBehavior.NoAction);
-
-            modelBuilder.Entity<Receipt>()
-                .HasOne(r => r.ReceiptStatus)
-                .WithMany(rs => rs.Receipt)
-                .HasForeignKey(r => r.ReceiptStatusId)
-                .HasConstraintName("FK_receipt_receiptStatus")
                 .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<Receipt>()
@@ -319,37 +356,45 @@ namespace Maasgroep.Database
                 .OnDelete(DeleteBehavior.NoAction);
         }
 
-        private void CreateReceiptStatus(ModelBuilder modelBuilder)
+        private void CreatePhoto(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<ReceiptStatus>().ToTable("status", "receipt");
-            modelBuilder.Entity<ReceiptStatus>().HasKey(rs => new { rs.Id });
-            modelBuilder.HasSequence<long>("statusSeq", schema: "receipt").StartsAt(1).IncrementsBy(1);
-            modelBuilder.Entity<ReceiptStatus>().Property(rs => rs.Id).HasDefaultValueSql("nextval('receipt.\"statusSeq\"')");
-            modelBuilder.Entity<ReceiptStatus>().Property(rs => rs.DateTimeCreated).HasDefaultValueSql("now()");
-            modelBuilder.Entity<ReceiptStatus>().Property(rs => rs.Name).HasMaxLength(256);
-            modelBuilder.Entity<ReceiptStatus>().HasIndex(rs => rs.Name).IsUnique();
+            modelBuilder.Entity<Photo>().ToTable("photo", "receipt");
+            modelBuilder.Entity<Photo>().HasKey(p => new { p.Id });
+            modelBuilder.HasSequence<long>("photoSeq", schema: "receipt").StartsAt(1).IncrementsBy(1);
+            modelBuilder.Entity<Photo>().Property(p => p.DateTimeCreated).HasDefaultValueSql("now()");
+            modelBuilder.Entity<Photo>().Property(p => p.Id).HasDefaultValueSql("nextval('receipt.\"photoSeq\"')");
+            modelBuilder.Entity<Photo>().Property(p => p.fileExtension).HasMaxLength(256);
+            modelBuilder.Entity<Photo>().Property(p => p.fileName).HasMaxLength(2048);
 
-            modelBuilder.Entity<ReceiptStatus>()
-                .HasOne(rs => rs.MemberCreated)
-                .WithMany(m => m.ReceiptStatusesCreated)
-                .HasForeignKey(rs => rs.MemberCreatedId)
-                .HasConstraintName("FK_receiptStatus_memberCreated")
+            //Foreign keys
+
+            modelBuilder.Entity<Photo>()
+                .HasOne(p => p.Receipt)
+                .WithMany(r => r.Photos)
+                .HasForeignKey(p => p.ReceiptId)
+                .HasConstraintName("FK_photo_receipt")
                 .OnDelete(DeleteBehavior.NoAction);
 
-            modelBuilder.Entity<ReceiptStatus>()
-                .HasOne(rs => rs.MemberModified)
-                .WithMany(m => m.ReceiptStatusesModified)
-                .HasForeignKey(rs => rs.MemberModifiedId)
-                .HasConstraintName("FK_receiptStatus_memberModified")
+            modelBuilder.Entity<Photo>()
+                .HasOne(ra => ra.MemberCreated)
+                .WithMany(m => m.PhotosCreated)
+                .HasForeignKey(ra => ra.MemberCreatedId)
+                .HasConstraintName("FK_photo_memberCreated")
                 .OnDelete(DeleteBehavior.NoAction);
 
-            modelBuilder.Entity<ReceiptStatus>()
-                .HasOne(rs => rs.MemberDeleted)
-                .WithMany(m => m.ReceiptStatusesDeleted)
-                .HasForeignKey(rs => rs.MemberDeletedId)
-                .HasConstraintName("FK_receiptStatus_memberDeleted")
+            modelBuilder.Entity<Photo>()
+                .HasOne(ra => ra.MemberModified)
+                .WithMany(m => m.PhotosModified)
+                .HasForeignKey(ra => ra.MemberModifiedId)
+                .HasConstraintName("FK_photo_memberModified")
                 .OnDelete(DeleteBehavior.NoAction);
 
+            modelBuilder.Entity<Photo>()
+                .HasOne(ra => ra.MemberDeleted)
+                .WithMany(m => m.PhotosDeleted)
+                .HasForeignKey(ra => ra.MemberDeletedId)
+                .HasConstraintName("FK_photo_memberDeleted")
+                .OnDelete(DeleteBehavior.NoAction);
         }
         #endregion
 
@@ -363,15 +408,6 @@ namespace Maasgroep.Database
             modelBuilder.Entity<ReceiptHistory>().Property(r => r.Note).HasMaxLength(2048);
             modelBuilder.Entity<ReceiptHistory>().Property(r => r.Amount).HasPrecision(18, 2);
             modelBuilder.Entity<ReceiptHistory>().Property(r => r.RecordCreated).HasDefaultValueSql("now()");
-        }
-
-        public void CreateReceiptStatusHistory(ModelBuilder modelBuilder)
-        {
-            modelBuilder.Entity<ReceiptStatusHistory>().ToTable("status", "receiptHistory");
-            modelBuilder.HasSequence<long>("statusSeq", schema: "receiptHistory").StartsAt(1).IncrementsBy(1);
-            modelBuilder.Entity<ReceiptStatusHistory>().Property(rs => rs.Id).HasDefaultValueSql("nextval('\"receiptHistory\".\"statusSeq\"')");
-            modelBuilder.Entity<ReceiptStatusHistory>().Property(rs => rs.Name).HasMaxLength(256);
-            modelBuilder.Entity<ReceiptStatusHistory>().Property(rs => rs.RecordCreated).HasDefaultValueSql("now()");
         }
 
         public void CreateReceiptApprovalHistory(ModelBuilder modelBuilder)
@@ -393,112 +429,305 @@ namespace Maasgroep.Database
             modelBuilder.Entity<CostCentreHistory>().Property(cc => cc.RecordCreated).HasDefaultValueSql("now()");
         }
 
-        #endregion
-
-        #region Photo
-        private void CreatePhoto(ModelBuilder modelBuilder)
+        private void CreatePhotoHistory(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<Photo>().ToTable("photo", "photo");
-            modelBuilder.Entity<Photo>().HasKey(p => new { p.Id });
-            modelBuilder.HasSequence<long>("PhotoSeq", schema: "photo").StartsAt(1).IncrementsBy(1);
-            modelBuilder.Entity<Photo>().Property(p => p.DateTimeCreated).HasDefaultValueSql("now()");
-            modelBuilder.Entity<Photo>().Property(p => p.Id).HasDefaultValueSql("nextval('photo.\"PhotoSeq\"')");
-
-            //Foreign keys
-
-            modelBuilder.Entity<Photo>()
-                .HasOne(p => p.ReceiptInstance)
-                .WithMany(r => r.Photos)
-                .HasForeignKey(p => p.Receipt)
-                .HasConstraintName("FK_Photo_Receipt")
-                .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<PhotoHistory>().ToTable("photo", "receiptHistory");
+            modelBuilder.HasSequence<long>("photoSeq", schema: "receiptHistory").StartsAt(1).IncrementsBy(1);
+            modelBuilder.Entity<PhotoHistory>().Property(p => p.Id).HasDefaultValueSql("nextval('\"receiptHistory\".\"photoSeq\"')");
+            modelBuilder.Entity<PhotoHistory>().Property(p => p.RecordCreated).HasDefaultValueSql("now()");
+            modelBuilder.Entity<PhotoHistory>().Property(p => p.fileExtension).HasMaxLength(256);
+            modelBuilder.Entity<PhotoHistory>().Property(p => p.fileName).HasMaxLength(2048);
         }
+
         #endregion
 
-        #region Stock
-        private void CreateStockProduct(ModelBuilder modelBuilder)
+        #region Order
+        private void CreateProduct(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Product>().HasKey(p => p.Id);            
-            modelBuilder.Entity<Product>().ToTable("product", "stock");
-            modelBuilder.HasSequence<long>("productSeq", schema: "stock").StartsAt(1).IncrementsBy(1);
+            modelBuilder.Entity<Product>().ToTable("product", "order");
+            modelBuilder.HasSequence<long>("productSeq", schema: "order").StartsAt(1).IncrementsBy(1);
             modelBuilder.Entity<Product>().Property(p => p.DateTimeCreated).HasDefaultValueSql("now()");
-            modelBuilder.Entity<Product>().Property(p => p.Id).HasDefaultValueSql("nextval('stock.\"productSeq\"')");
+            modelBuilder.Entity<Product>().Property(p => p.Id).HasDefaultValueSql("nextval('order.\"productSeq\"')");
+            modelBuilder.Entity<Product>().Property(p => p.Name).HasMaxLength(2048);
 
             modelBuilder.Entity<Product>()
                 .HasOne(p => p.MemberCreated)
                 .WithMany(m => m.ProductsCreated)
                 .HasForeignKey(p => p.MemberCreatedId)
-                .HasConstraintName("FK_stockProduct_memberCreated")
+                .HasConstraintName("FK_orderProduct_memberCreated")
                 .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<Product>()
                 .HasOne(p => p.MemberModified)
                 .WithMany(m => m.ProductsModified)
                 .HasForeignKey(p => p.MemberModifiedId)
-                .HasConstraintName("FK_stockProduct_memberModified")
+                .HasConstraintName("FK_orderProduct_memberModified")
                 .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<Product>()
                 .HasOne(p => p.MemberDeleted)
                 .WithMany(m => m.ProductsDeleted)
                 .HasForeignKey(p => p.MemberDeletedId)
-                .HasConstraintName("FK_stockProduct_memberDeleted")
+                .HasConstraintName("FK_orderProduct_memberDeleted")
                 .OnDelete(DeleteBehavior.NoAction);
         }
 
-        private void CreateStockpile(ModelBuilder modelBuilder)
+        private void CreateStock(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<Stockpile>().HasKey(s => s.ProductId);
-            modelBuilder.Entity<Stockpile>().ToTable("stock", "stock");
-            modelBuilder.Entity<Stockpile>().Property(s => s.DateTimeCreated).HasDefaultValueSql("now()");
-            modelBuilder.Entity<Stockpile>().ToTable(s => s.HasCheckConstraint("CK_stock_quantity", "\"Quantity\" >= 0"));
+            modelBuilder.Entity<Stock>().HasKey(s => s.ProductId);
+            modelBuilder.Entity<Stock>().ToTable("stock", "order");
+            modelBuilder.Entity<Stock>().Property(s => s.DateTimeCreated).HasDefaultValueSql("now()");
+            modelBuilder.Entity<Stock>().ToTable(s => s.HasCheckConstraint("CK_order_quantity", "\"Quantity\" >= 0"));
 
-            modelBuilder.Entity<Stockpile>()
+            modelBuilder.Entity<Stock>()
                 .HasOne(s => s.Product)
                 .WithOne(p => p.Stock)
-                .HasForeignKey<Stockpile>(s => s.ProductId);
+                .HasForeignKey<Stock>(s => s.ProductId)
+                .HasConstraintName("FK_orderStock_product")
+                .OnDelete(DeleteBehavior.NoAction);
 
-            modelBuilder.Entity<Stockpile>()
+            modelBuilder.Entity<Stock>()
                 .HasOne(s => s.MemberCreated)
                 .WithMany(m => m.StocksCreated)
                 .HasForeignKey(s => s.MemberCreatedId)
-                .HasConstraintName("FK_stock_memberCreated")
+                .HasConstraintName("FK_orderStock_memberCreated")
                 .OnDelete(DeleteBehavior.NoAction);
 
-            modelBuilder.Entity<Stockpile>()
+            modelBuilder.Entity<Stock>()
                 .HasOne(s => s.MemberModified)
                 .WithMany(m => m.StocksModified)
                 .HasForeignKey(s => s.MemberModifiedId)
-                .HasConstraintName("FK_stock_memberModified")
+                .HasConstraintName("FK_orderStock_memberModified")
                 .OnDelete(DeleteBehavior.NoAction);
 
-            modelBuilder.Entity<Stockpile>()
+            modelBuilder.Entity<Stock>()
                 .HasOne(s => s.MemberDeleted)
                 .WithMany(m => m.StocksDeleted)
                 .HasForeignKey(s => s.MemberDeletedId)
-                .HasConstraintName("FK_stock_memberDeleted")
+                .HasConstraintName("FK_orderStock_memberDeleted")
+                .OnDelete(DeleteBehavior.NoAction);
+        }
+
+        private void CreateOrderLine(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Line>().HasKey(pp => pp.Id);
+            modelBuilder.Entity<Line>().ToTable("line", "order");
+            modelBuilder.Entity<Line>().ToTable(pp => pp.HasCheckConstraint("CK_orderLine_quantity", "\"Quantity\" > 0"));
+            modelBuilder.Entity<Line>().Property(pp => pp.DateTimeCreated).HasDefaultValueSql("now()");
+
+
+            modelBuilder.Entity<Line>()
+                .HasOne(ol => ol.Product)
+                .WithMany(p => p.OrderLines)
+                .HasForeignKey(ol => ol.ProductId)
+                .HasConstraintName("FK_orderLine_product")
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<Line>()
+                .HasOne(ol => ol.Bill)
+                .WithMany(b => b.Lines)
+                .HasForeignKey(ol => ol.BillId)
+                .HasConstraintName("FK_orderLine_bill")
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<Line>()
+                .HasOne(ol => ol.MemberCreated)
+                .WithMany(m => m.LinesCreated)
+                .HasForeignKey(ol => ol.MemberCreatedId)
+                .HasConstraintName("FK_orderLine_memberCreated")
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<Line>()
+                .HasOne(ol => ol.MemberModified)
+                .WithMany(m => m.LinesModified)
+                .HasForeignKey(ol => ol.MemberModifiedId)
+                .HasConstraintName("FK_orderLine_memberModified")
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<Line>()
+                .HasOne(ol => ol.MemberDeleted)
+                .WithMany(m => m.LinesDeleted)
+                .HasForeignKey(ol => ol.MemberDeletedId)
+                .HasConstraintName("FK_orderLine_memberDeleted")
+                .OnDelete(DeleteBehavior.NoAction);
+        }
+
+        private void CreateProductPrice(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<ProductPrice>().HasKey(pp => pp.ProductId);
+            modelBuilder.Entity<ProductPrice>().ToTable("productPrice", "order");
+            modelBuilder.Entity<ProductPrice>().ToTable(pp => pp.HasCheckConstraint("CK_orderProductPrice_price", "\"Price\" >= 0"));
+            modelBuilder.Entity<ProductPrice>().Property(pp => pp.DateTimeCreated).HasDefaultValueSql("now()");
+            modelBuilder.Entity<ProductPrice>().Property(pp => pp.Price).HasPrecision(18, 2);
+
+            modelBuilder.Entity<ProductPrice>()
+                .HasOne(pp => pp.Product)
+                .WithOne(p => p.ProductPrice)
+                .HasForeignKey<ProductPrice>(pp => pp.ProductId)
+                .HasConstraintName("FK_orderProductPrice_product")
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<ProductPrice>()
+                .HasOne(pp => pp.MemberCreated)
+                .WithMany(m => m.ProductPricesCreated)
+                .HasForeignKey(pp => pp.MemberCreatedId)
+                .HasConstraintName("FK_orderProductPrice_memberCreated")
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<ProductPrice>()
+                .HasOne(pp => pp.MemberModified)
+                .WithMany(m => m.ProductPricesModified)
+                .HasForeignKey(pp => pp.MemberModifiedId)
+                .HasConstraintName("FK_orderProductPrice_memberModified")
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<ProductPrice>()
+                .HasOne(pp => pp.MemberDeleted)
+                .WithMany(m => m.ProductPricesDeleted)
+                .HasForeignKey(pp => pp.MemberDeletedId)
+                .HasConstraintName("FK_orderProductPrice_memberDeleted")
+                .OnDelete(DeleteBehavior.NoAction);
+        }
+
+        private void CreateBill(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Bill>().HasKey(b => b.Id);
+            modelBuilder.Entity<Bill>().ToTable("bill", "order");
+            modelBuilder.Entity<Bill>().Property(b => b.Name).HasMaxLength(2048);
+            modelBuilder.Entity<Bill>().Property(b => b.Note).HasMaxLength(2048);
+            modelBuilder.Entity<Bill>().Property(b => b.DateTimeCreated).HasDefaultValueSql("now()");
+
+            modelBuilder.Entity<Bill>()
+                .HasOne(b => b.Member)
+                .WithMany(m => m.BillsOwned)
+                .HasForeignKey(b => b.MemberId)
+                .HasConstraintName("FK_orderBill_memberOwned")
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<Bill>()
+                .HasOne(b => b.MemberCreated)
+                .WithMany(m => m.BillsCreated)
+                .HasForeignKey(b => b.MemberCreatedId)
+                .HasConstraintName("FK_orderBill_memberCreated")
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<Bill>()
+                .HasOne(b => b.MemberModified)
+                .WithMany(m => m.BillsModified)
+                .HasForeignKey(b => b.MemberModifiedId)
+                .HasConstraintName("FK_orderBill_memberModified")
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<Bill>()
+                .HasOne(b => b.MemberDeleted)
+                .WithMany(m => m.BillsDeleted)
+                .HasForeignKey(b => b.MemberDeletedId)
+                .HasConstraintName("FK_orderBill_memberDeleted")
                 .OnDelete(DeleteBehavior.NoAction);
         }
 
         #endregion
 
-        #region Stock History
+        #region Order History
 
-        private void CreateStockProductHistory(ModelBuilder modelBuilder)
+        private void CreateProductHistory(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<ProductHistory>().ToTable("product", "stockHistory");
-            modelBuilder.HasSequence<long>("productSeq", schema: "stockHistory").StartsAt(1).IncrementsBy(1);
-            modelBuilder.Entity<ProductHistory>().Property(p => p.Id).HasDefaultValueSql("nextval('\"stockHistory\".\"productSeq\"')");
+            modelBuilder.Entity<ProductHistory>().ToTable("product", "orderHistory");
+            modelBuilder.HasSequence<long>("productSeq", schema: "orderHistory").StartsAt(1).IncrementsBy(1);
+            modelBuilder.Entity<ProductHistory>().Property(p => p.Id).HasDefaultValueSql("nextval('\"orderHistory\".\"productSeq\"')");
             modelBuilder.Entity<ProductHistory>().Property(p => p.RecordCreated).HasDefaultValueSql("now()");
             modelBuilder.Entity<ProductHistory>().Property(p => p.Name).HasMaxLength(2048);
         }
 
-        private void CreateStockpileHistory(ModelBuilder modelBuilder)
+        private void CreateStockHistory(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<StockpileHistory>().ToTable("stock", "stockHistory");
-            modelBuilder.HasSequence<long>("stockSeq", schema: "stockHistory").StartsAt(1).IncrementsBy(1);
-            modelBuilder.Entity<StockpileHistory>().Property(s => s.Id).HasDefaultValueSql("nextval('\"stockHistory\".\"stockSeq\"')");
-            modelBuilder.Entity<StockpileHistory>().Property(s => s.RecordCreated).HasDefaultValueSql("now()");            
+            modelBuilder.Entity<StockHistory>().ToTable("stock", "orderHistory");
+            modelBuilder.HasSequence<long>("stockSeq", schema: "orderHistory").StartsAt(1).IncrementsBy(1);
+            modelBuilder.Entity<StockHistory>().Property(s => s.Id).HasDefaultValueSql("nextval('\"orderHistory\".\"stockSeq\"')");
+            modelBuilder.Entity<StockHistory>().Property(s => s.RecordCreated).HasDefaultValueSql("now()");            
+        }
+
+        private void CreateOrderLineHistory(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<LineHistory>().ToTable("line", "orderHistory");
+            modelBuilder.HasSequence<long>("lineSeq", schema: "orderHistory").StartsAt(1).IncrementsBy(1);
+            modelBuilder.Entity<LineHistory>().Property(l => l.Id).HasDefaultValueSql("nextval('\"orderHistory\".\"lineSeq\"')");
+            modelBuilder.Entity<LineHistory>().Property(l => l.RecordCreated).HasDefaultValueSql("now()");
+        }
+
+        private void CreateProductPriceHistory(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<ProductPriceHistory>().ToTable("productPrice", "orderHistory");
+            modelBuilder.HasSequence<long>("productPriceSeq", schema: "orderHistory").StartsAt(1).IncrementsBy(1);
+            modelBuilder.Entity<ProductPriceHistory>().Property(pp => pp.Id).HasDefaultValueSql("nextval('\"orderHistory\".\"productPriceSeq\"')");
+            modelBuilder.Entity<ProductPriceHistory>().Property(pp => pp.RecordCreated).HasDefaultValueSql("now()");
+            modelBuilder.Entity<ProductPriceHistory>().Property(pp => pp.Price).HasPrecision(18, 2);
+        }
+
+        private void CreateBillHistory(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<BillHistory>().ToTable("bill", "orderHistory");
+            modelBuilder.HasSequence<long>("billSeq", schema: "orderHistory").StartsAt(1).IncrementsBy(1);
+            modelBuilder.Entity<BillHistory>().Property(b => b.Id).HasDefaultValueSql("nextval('\"orderHistory\".\"billSeq\"')");
+            modelBuilder.Entity<BillHistory>().Property(b => b.RecordCreated).HasDefaultValueSql("now()");
+            modelBuilder.Entity<BillHistory>().Property(p => p.Name).HasMaxLength(2048);
+            modelBuilder.Entity<BillHistory>().Property(b => b.Note).HasMaxLength(2048);
+        }
+
+
+        #endregion
+
+        #region Todo
+
+        private void CreateToDo(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<ToDo>().ToTable("todo", "todo");
+            modelBuilder.Entity<ToDo>().HasKey(t => t.Id);
+            modelBuilder.HasSequence<long>("todoSeq", "todo").StartsAt(1).IncrementsBy(1); ;
+            modelBuilder.Entity<ToDo>().Property(t => t.Id).HasDefaultValueSql("nextval('todo.\"todoSeq\"')");
+            modelBuilder.Entity<ToDo>().Property(t => t.Action).HasMaxLength(2048);
+
+            modelBuilder.Entity<ToDo>()
+                .HasOne(t => t.Member)
+                .WithMany(m => m.ToDoOwned)
+                .HasForeignKey(t => t.MemberId)
+                .HasConstraintName("FK_todo_memberOwned")
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<ToDo>()
+                .HasOne(ra => ra.MemberCreated)
+                .WithMany(m => m.ToDoCreated)
+                .HasForeignKey(ra => ra.MemberCreatedId)
+                .HasConstraintName("FK_todo_memberCreated")
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<ToDo>()
+                .HasOne(ra => ra.MemberModified)
+                .WithMany(m => m.ToDoModified)
+                .HasForeignKey(ra => ra.MemberModifiedId)
+                .HasConstraintName("FK_todo_memberModified")
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<ToDo>()
+                .HasOne(ra => ra.MemberDeleted)
+                .WithMany(m => m.ToDoDeleted)
+                .HasForeignKey(ra => ra.MemberDeletedId)
+                .HasConstraintName("FK_todo_memberDeleted")
+                .OnDelete(DeleteBehavior.NoAction);
+        }
+
+        #endregion
+
+        #region TodoHistory
+
+        private void CreateToDoHistory(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<ToDoHistory>().ToTable("todo", "todoHistory");
+            modelBuilder.Entity<ToDoHistory>().HasKey(t => t.Id);
+            modelBuilder.HasSequence<long>("todoSeq", "todoHistory").StartsAt(1).IncrementsBy(1); ;
+            modelBuilder.Entity<ToDoHistory>().Property(t => t.Id).HasDefaultValueSql("nextval('\"todoHistory\".\"todoSeq\"')");
+            modelBuilder.Entity<ToDoHistory>().Property(t => t.Action).HasMaxLength(2048);
         }
 
         #endregion
