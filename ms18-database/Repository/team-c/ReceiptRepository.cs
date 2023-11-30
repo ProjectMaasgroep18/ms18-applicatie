@@ -10,7 +10,6 @@ namespace Maasgroep.Database.Receipts
         public void AanmakenTestData()
         {
             CreateTestDataCostCentre();
-            CreateTestDataReceiptStatus();
             CreateTestDataReceipt();
             CreateTestDataReceiptApproval();
         }
@@ -35,7 +34,7 @@ namespace Maasgroep.Database.Receipts
 
         private void CreateTestDataCostCentre()
         {
-            using (var db = new MaasgroepContext())
+            using (var db = CreateContext())
             {
                 var member = db.Member.Where(m => m.Name == "Borgia").FirstOrDefault()!;
 
@@ -52,45 +51,23 @@ namespace Maasgroep.Database.Receipts
                 Console.WriteLine($"Number of rows: {rows}");
             }
         }
-        private void CreateTestDataReceiptStatus()
-        {
-            using (var db = new MaasgroepContext())
-            {
-                var member = db.Member.Where(m => m.Name == "Borgia").FirstOrDefault()!;
 
-                var receiptStati = new List<ReceiptStatus>()
-                {
-                    new ReceiptStatus() { Name = "Ingediend", MemberCreated = member }
-                ,   new ReceiptStatus() { Name = "Goedgekeurd", MemberCreated = member }
-                ,   new ReceiptStatus() { Name = "Afgekeurd", MemberCreated = member }
-                ,   new ReceiptStatus() { Name = "Uitbetaald", MemberCreated = member }
-                };
-
-                db.ReceiptStatus.AddRange(receiptStati);
-
-                var rows = db.SaveChanges();
-                Console.WriteLine($"Number of rows: {rows}");
-            }
-        }
         private void CreateTestDataReceipt()
         {
-            using (var db = new MaasgroepContext())
+            using (var db = CreateContext())
             {
                 var member = db.Member.Where(m => m.Name == "Borgia").FirstOrDefault()!;
                 var costCentre = db.CostCentre.Where(cc => cc.Name == "Moeder van Joopie").FirstOrDefault()!;
-                var receiptStatusIngediend = db.ReceiptStatus.Where(rs => rs.Name == "Ingediend").FirstOrDefault()!;
-                var receiptStatusGoedgekeurd = db.ReceiptStatus.Where(rs => rs.Name == "Goedgekeurd").FirstOrDefault()!;
-                var receiptStatusAfgekeurd = db.ReceiptStatus.Where(rs => rs.Name == "Afgekeurd").FirstOrDefault()!;
 
                 var receipts = new List<Receipt>()
                 {
-                    new Receipt()   { MemberCreated = member, ReceiptStatus = receiptStatusIngediend
+                    new Receipt()   { MemberCreated = member, ReceiptStatus = "Ingediend"
                                     , CostCentre = costCentre
                                     }
-                ,   new Receipt()   { MemberCreated = member, ReceiptStatus = receiptStatusGoedgekeurd
+                ,   new Receipt()   { MemberCreated = member, ReceiptStatus = "Goedgekeurd"
                                     , CostCentre = costCentre
                                     }
-                ,   new Receipt()   { MemberCreated = member, ReceiptStatus = receiptStatusAfgekeurd
+                ,   new Receipt()   { MemberCreated = member, ReceiptStatus = "Afgekeurd"
                                     , CostCentre = costCentre
                                     }
                 };
@@ -103,15 +80,12 @@ namespace Maasgroep.Database.Receipts
         }
         private void CreateTestDataReceiptApproval()
         {
-            using (var db = new MaasgroepContext())
+            using (var db = CreateContext())
             {
                 var member = db.Member.Where(m => m.Name == "Borgia").FirstOrDefault()!;
                 var costCentre = db.CostCentre.Where(cc => cc.Name == "Moeder van Joopie").FirstOrDefault()!;
-                var receiptStatusIngediend = db.ReceiptStatus.Where(rs => rs.Name == "Ingediend").FirstOrDefault()!;
-                var receiptStatusGoedgekeurd = db.ReceiptStatus.Where(rs => rs.Name == "Goedgekeurd").FirstOrDefault()!;
-                var receiptStatusAfgekeurd = db.ReceiptStatus.Where(rs => rs.Name == "Afgekeurd").FirstOrDefault()!;
-                var receiptGoedgekeurd = db.Receipt.Where(r => r.ReceiptStatus == receiptStatusGoedgekeurd).FirstOrDefault()!;
-                var receiptAfgekeurd = db.Receipt.Where(r => r.ReceiptStatus == receiptStatusAfgekeurd).FirstOrDefault()!;
+                var receiptGoedgekeurd = db.Receipt.Where(r => r.ReceiptStatus == "Goedgekeurd").FirstOrDefault()!;
+                var receiptAfgekeurd = db.Receipt.Where(r => r.ReceiptStatus == "Afgekeurd").FirstOrDefault()!;
 
                 var receiptApprovals = new List<ReceiptApproval>()
                 {
@@ -124,6 +98,11 @@ namespace Maasgroep.Database.Receipts
                 var rows = db.SaveChanges();
                 Console.WriteLine($"Number of rows: {rows}");
             }
+        }
+
+        private MaasgroepContext CreateContext()
+        {
+            return new MaasgroepContext();
         }
     }
 }

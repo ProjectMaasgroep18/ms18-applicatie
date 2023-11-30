@@ -1,5 +1,5 @@
 ﻿using System.Text.Json.Serialization;
-using Maasgroep.Database.Stock;
+using Maasgroep.Database.Order;
 
 namespace Maasgroep.Database.Repository.ViewModel;
 

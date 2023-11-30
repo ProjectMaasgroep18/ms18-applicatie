@@ -1,12 +1,9 @@
 ﻿using Maasgroep.Database.Members;
 
-namespace Maasgroep.Database.Stock
+namespace Maasgroep.Database
 {
-    public record Product
+    public abstract record GenericRecordActive
     {
-        public long Id { get; set; }
-        public string Name { get; set; }
-
         // Generic
         public long MemberCreatedId { get; set; }
         public long? MemberModifiedId { get; set; }
@@ -15,9 +12,6 @@ namespace Maasgroep.Database.Stock
         public DateTime? DateTimeModified { get; set; }
         public DateTime? DateTimeDeleted { get; set; }
 
-        // EF
-        public Stockpile Stock { get; set; }
-
         // EF generic properties
         public Member MemberCreated { get; set; }
         public Member? MemberModified { get; set; }
@@ -25,16 +19,3 @@ namespace Maasgroep.Database.Stock
 
     }
 }
-
-
-/*
-Voorbeeld Flutter
-  StockProduct(
-      product: Product(
-        priceQuantity: 1,
-        color: Colors.blueAccent,
-        name: 'Cola',
-        price: 3.13,
-      ),
-      quantity: 21,
-*/ 

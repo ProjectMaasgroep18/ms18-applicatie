@@ -1,6 +1,6 @@
 ﻿using Maasgroep.Database;
 using Maasgroep.Database.Repository.ViewModel;
-using Maasgroep.Database.Stock;
+using Maasgroep.Database.Order;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ms18_applicatie.Controllers.Api;
@@ -36,7 +36,7 @@ public class StockController : BaseController
         if (dbRec == null)
         {
             // If there is no stock for this product, create empty stock
-            dbRec = new Stockpile
+            dbRec = new Stock
             {
                 Product = dbRecProduct,
                 Quantity = 0,
@@ -60,7 +60,7 @@ public class StockController : BaseController
             }
         }
 
-        return Ok(new StockpileViewModel(dbRec));
+        return Ok(new StockViewModel(dbRec));
     }
 
     [HttpPut("{productId}/Increase")]
@@ -96,7 +96,7 @@ public class StockController : BaseController
         if (dbRec == null)
         {
             // If there is no stock for this product, create empty stock
-            dbRec = new Stockpile
+            dbRec = new Stock
             {
                 Product = dbRecProduct,
                 Quantity = quantityModel.Quantity,
@@ -175,7 +175,7 @@ public class StockController : BaseController
         if (dbRec == null)
         {
             // If there is no stock for this product, create empty stock
-            dbRec = new Stockpile
+            dbRec = new Stock
             {
                 Product = dbRecProduct,
                 Quantity = quantityModel.Quantity,

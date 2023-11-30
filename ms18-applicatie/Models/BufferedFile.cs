@@ -2,10 +2,8 @@
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
 using ms18_applicatie.Utilities;
-using System.IO.Compression;
-using System;
 using Maasgroep.Database;
-using Maasgroep.Database.Photos;
+using Maasgroep.Database.Receipts;
 
 namespace ms18_applicatie.Models
 {
@@ -68,7 +66,6 @@ namespace ms18_applicatie.Models
 
             var photo = new Photo
             {
-                Bytes = formFileContent,
                 DateTimeDeleted = DateTime.UtcNow,
                 fileName = FileUpload.FormFile.FileName,
                 fileExtension = "png"

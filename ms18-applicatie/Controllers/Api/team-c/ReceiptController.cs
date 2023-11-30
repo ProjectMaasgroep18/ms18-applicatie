@@ -1,5 +1,4 @@
 ﻿using Maasgroep.Database;
-using Maasgroep.Database.Photos;
 using Maasgroep.Database.Receipts;
 using Maasgroep.Database.Repository.ViewModel;
 using Microsoft.AspNetCore.Mvc;
@@ -66,9 +65,6 @@ public class ReceiptController : BaseController
         var createdReceipt = Receipt.FromViewModel(receiptViewModel);
 
         createdReceipt.MemberCreatedId = _currentUser.Id;
-
-        var status = _context.ReceiptStatus.FirstOrDefault()!; // TODO Find correct status
-        createdReceipt.ReceiptStatusId = status.Id;
 
         var costCentre = _context.CostCentre.FirstOrDefault()!; // TODO Let user select CostCentre
         createdReceipt.CostCentreId = costCentre.Id;
@@ -241,7 +237,7 @@ public class ReceiptController : BaseController
         var createdPhoto = Photo.FromViewModel(photoViewModel);
         
         // Set the receipt ID of the photo to the ID of the receipt
-        createdPhoto.Receipt = existingReceipt.Id;
+        createdPhoto.ReceiptId = existingReceipt.Id;
         
         // Set the member created ID of the photo to the ID of the current user
         createdPhoto.MemberCreatedId = _currentUser.Id;
@@ -281,7 +277,7 @@ public class ReceiptController : BaseController
         
         // Get all photos for the receipt
         var photos = _context.Photo
-            .Where(photo => photo.Receipt == existingReceipt.Id)
+            .Where(photo => photo.ReceiptId == existingReceipt.Id)
             .Select(photo => new PhotoViewModel(photo))
             .ToList();
         
