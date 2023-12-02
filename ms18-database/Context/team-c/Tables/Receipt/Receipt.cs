@@ -6,7 +6,6 @@ namespace Maasgroep.Database.Receipts
 	{
 		public long Id { get; set; }
 		public decimal? Amount { get; set; }
-		public long? StoreId { get; set; }
 		public long? CostCentreId { get; set; }
 		public string ReceiptStatus { get; set; }
 		public string? Location { get; set; }

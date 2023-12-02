@@ -19,7 +19,7 @@ namespace Maasgroep.Database.Repository.ViewModel
     public class ReceiptViewModel
     {
         
-        public long? ID { get; set; }
+        public long? Id { get; set; }
         public DateTime DateTimeCreated { get; set; }
         public DateTime? DateTimeModified { get; set; }
         public decimal? Amount { get; set; }
@@ -33,7 +33,7 @@ namespace Maasgroep.Database.Repository.ViewModel
 
         public ReceiptViewModel(int id, DateTime dateTimeCreated, DateTime dateTimeModified, decimal amount, string note, string status)
         {
-            ID = id;
+            Id = id;
             DateTimeCreated = dateTimeCreated;
             DateTimeModified = dateTimeModified;
             Amount = amount;
@@ -45,7 +45,7 @@ namespace Maasgroep.Database.Repository.ViewModel
         {
             // Create ReceiptViewModel from Database Model
 
-            ID = dbRec.Id;
+            Id = dbRec.Id;
             DateTimeCreated = dbRec.DateTimeCreated;
             DateTimeModified = dbRec.DateTimeModified;
             Amount = dbRec.Amount;

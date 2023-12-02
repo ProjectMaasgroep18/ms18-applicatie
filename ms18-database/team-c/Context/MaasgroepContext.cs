@@ -3,11 +3,13 @@ using Maasgroep.Database.Members;
 using Maasgroep.Database.Receipts;
 using Maasgroep.Database.Order;
 using Maasgroep.Database.ToDoList;
+using Maasgroep.Database.Repository.Interfaces;
 
 namespace Maasgroep.Database
 {
     public class MaasgroepContext : DbContext
     {
+        private string _connectionString;
         #region Members
         public DbSet<Member> Member { get; set; }
         public DbSet<Permission> Permission { get; set; }
@@ -58,40 +60,23 @@ namespace Maasgroep.Database
         public DbSet<ToDoHistory> ToDoHistory { get; set; }
         #endregion
 
-        // TODO: Uitgecomment ivm fixture dat conflicteert met bouwen EF migration
-        //private readonly Action<MaasgroepContext, ModelBuilder> _modelCustomizer;
+        public MaasgroepContext()
+        {
+            _connectionString = "UserID=postgres;Password=postgres;Host=localhost;port=5432;Database=Maasgroep;Pooling=true";
+        }
 
-        //public MaasgroepContext(DbContextOptions options) : base(options)
-        //{
-        //    DbContextOptionsBuilder optionsBuilder = new DbContextOptionsBuilder();
-        //    optionsBuilder.UseNpgsql("UserID=postgres;Password=postgres;Host=localhost;port=5432;Database=Maasgroep;Pooling=true");
-        //    OnConfiguring(optionsBuilder);
-        //}
-
-        //public MaasgroepContext()
-        //{
-        //    DbContextOptionsBuilder optionsBuilder = new DbContextOptionsBuilder();
-        //    optionsBuilder.UseNpgsql("UserID=postgres;Password=postgres;Host=localhost;port=5432;Database=Maasgroep;Pooling=true");
-        //    OnConfiguring(optionsBuilder);
-        //}
-
-        //public MaasgroepContext(DbContextOptions<MaasgroepContext> options, Action<MaasgroepContext, ModelBuilder> modelCustomizer = null) : base(options)
-        //{
-        //    _modelCustomizer = modelCustomizer;
-        //}
+        public MaasgroepContext(string connectionString)
+        {
+            _connectionString = connectionString;
+        }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseNpgsql("UserID=postgres;Password=postgres;Host=localhost;port=5410;Database=Maasgroep;Pooling=true");
+            optionsBuilder.UseNpgsql(_connectionString);
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            //if (_modelCustomizer is not null)
-            //{
-            //    _modelCustomizer(this, modelBuilder);
-            //}
-
             CreateMember(modelBuilder);
             CreatePermission(modelBuilder);
             CreateMemberPermission(modelBuilder);

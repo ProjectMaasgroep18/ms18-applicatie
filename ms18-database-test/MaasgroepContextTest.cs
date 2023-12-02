@@ -10,8 +10,7 @@ namespace Maasgroep.Database.Test
 
     public class MaasgroepContextTest : IClassFixture<MaasgroepTestFixture>
     {
-        public MaasgroepContextTest(MaasgroepTestFixture fixture)
-        => Fixture = fixture;
+        public MaasgroepContextTest(MaasgroepTestFixture fixture) => Fixture = fixture;
 
         public MaasgroepTestFixture Fixture { get; }
 

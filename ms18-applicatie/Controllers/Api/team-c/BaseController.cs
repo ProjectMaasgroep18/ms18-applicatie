@@ -32,7 +32,7 @@ public abstract class BaseController : ControllerBase
 
         receipt.Status = "TODO ENUM";
         
-        receipt.ReceiptPhotoURI = _context.Photo.Where(photo => photo.ReceiptId == receipt.ID).Select(receipt => $"/api/v1/ReceiptPhoto/{receipt.Id}").ToList();
+        receipt.ReceiptPhotoURI = _context.Photo.Where(photo => photo.ReceiptId == receipt.Id).Select(receipt => $"/api/v1/ReceiptPhoto/{receipt.Id}").ToList();
         if (receipt.CostCentreId != null) {
             var costCentre = _context.CostCentre.FirstOrDefault(costCentre => costCentre.Id == receipt.CostCentreId);
             receipt.CostCentreURI = "/api/v1/CostCentre/" + costCentre?.Id;

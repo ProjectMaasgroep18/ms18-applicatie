@@ -1,6 +1,8 @@
 ﻿using Maasgroep.Database;
 using Maasgroep.Database.Receipts;
 using Maasgroep.Database.Repository.ViewModel;
+using Maasgroep.SharedKernel.Interfaces.Receipts;
+using Maasgroep.SharedKernel.ViewModels.Receipts;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ms18_applicatie.Controllers.Api;
@@ -9,7 +11,12 @@ namespace ms18_applicatie.Controllers.Api;
 [ApiController]
 public class ReceiptController : BaseController
 {
-    public ReceiptController(MaasgroepContext context) : base(context) { }
+    private readonly IReceiptRepository _receiptRepository;
+
+    public ReceiptController(MaasgroepContext context, IReceiptRepository receiptRepository) : base(context) 
+    { 
+        _receiptRepository = receiptRepository; 
+    }
 
     [HttpGet]
     [ActionName("receiptGet")]
@@ -18,9 +25,16 @@ public class ReceiptController : BaseController
         if (_currentUser == null) // Toegangscontrole
             return Forbidden();
 
-        var receipts = _context.Receipt.Select(dbRec => new ReceiptViewModel(dbRec)).ToList();
-        receipts.ForEach(receipt => AddForeignData(receipt));
-        return Ok(receipts);
+        var result = _receiptRepository.GetReceipts(0, int.MaxValue);
+
+		if (result == null)
+			return NotFound(new
+			{
+				status = 404,
+				message = "Receipt not found"
+			});
+
+        return Ok(result);
     }
 
     [HttpGet("{id}")]
@@ -30,24 +44,21 @@ public class ReceiptController : BaseController
         if (_currentUser == null) // Toegangscontrole
             return Forbidden();
 
-        ReceiptViewModel? receiptViewModel = _context.Receipt
-            .Where(dbRec => dbRec.Id == id)
-            .Select(dbRec => new ReceiptViewModel(dbRec))
-            .FirstOrDefault();
+        var result = _receiptRepository.GetReceipt(id);
 
-        if (receiptViewModel == null)
-            return NotFound(new
-            {
-                status = 404,
-                message = "Receipt not found"
-            });
+		if (result == null)
+			return NotFound(new
+			{
+				status = 404,
+				message = "Receipt not found"
+			});
 
-        return Ok(AddForeignData(receiptViewModel));
+		return Ok(result);
     }
 
     [HttpPost]
     [ActionName("receiptCreate")]
-    public IActionResult ReceiptCreate([FromBody] ReceiptViewModel receiptViewModel)
+    public IActionResult ReceiptCreate([FromBody] ReceiptModelCreate receiptModelCreate)
     {
         if (_currentUser == null) // Toegangscontrole
             return Forbidden();
@@ -62,38 +73,20 @@ public class ReceiptController : BaseController
             });
         }
 
-        var createdReceipt = Receipt.FromViewModel(receiptViewModel);
-
-        createdReceipt.MemberCreatedId = _currentUser.Id;
-
-        var costCentre = _context.CostCentre.FirstOrDefault()!; // TODO Let user select CostCentre
-        createdReceipt.CostCentreId = costCentre.Id;
-
-        try
+        var receiptToAdd = new ReceiptModelCreateDb()
         {
-            _context.Receipt.Add(createdReceipt);
-            _context.SaveChanges();
-        }
-        catch (Exception)
-        {
-            return UnprocessableEntity(new
-            {
-                status = 422,
-                message = "Could not create receipt",
-            });
-        }
+            ReceiptModel = receiptModelCreate
+        ,   Member = new Maasgroep.SharedKernel.ViewModels.Admin.Member() { Id = _currentUser.Id }
+        };
 
-        return Created($"/api/v1/receipt/{createdReceipt.Id}", new
-        {
-            status = 201,
-            message = "Receipt created",
-            receipt = AddForeignData(new ReceiptViewModel(createdReceipt))
-        });
+		var result = _receiptRepository.AddReceipt(receiptToAdd);
+
+        return Ok(result);
     }
 
-    [HttpPut("{id}")]
+    [HttpPut]
     [ActionName("receiptUpdate")]
-    public IActionResult ReceiptUpdate(long id, [FromBody] ReceiptViewModel updatedReceiptViewModel)
+    public IActionResult ReceiptUpdate([FromBody] ReceiptModel receiptModel)
     {
         if (_currentUser == null) // Toegangscontrole
             return Forbidden();
@@ -107,62 +100,16 @@ public class ReceiptController : BaseController
                 message = "Invalid request body"
             });
         }
-        
-        // Check if the ID in the request body matches the ID in the URL
-        if (updatedReceiptViewModel.ID != null && updatedReceiptViewModel.ID != id)
+
+        var receiptToUpdate = new ReceiptModelUpdateDb()
         {
-            return BadRequest(new
-            {
-                status = 400,
-                message = "Invalid request body, ID in URL does not match ID in request body"
-            });
-        }
+            ReceiptModel = receiptModel,
+            Member = new Maasgroep.SharedKernel.ViewModels.Admin.Member() { Id = _currentUser.Id }
+        };
 
-        // Get the ID from URL (/Receipt/{id}/) if it was not in the body
-        if (updatedReceiptViewModel.ID == null)
-        {
-            updatedReceiptViewModel.ID = id;
-        }
+		var result = _receiptRepository.ModifyReceipt(receiptToUpdate);
 
-        // Retrieve the existing receipt from your data store (e.g., database)
-        Receipt? existingReceipt = _context.Receipt.Find(id);
-
-        // Check if the receipt with the provided ID exists
-        if (existingReceipt == null)
-        {
-            return NotFound(new
-            {
-                status = 404,
-                message = "Receipt not found"
-            });
-        }
-
-        if (ReceiptsAreEqual(existingReceipt, updatedReceiptViewModel))
-        {
-            // If the data is the same, return a response indicating no update was performed
-            return Ok(new {
-                status = 200,
-                message = "No changes were made to the receipt"
-            });
-        }
-
-        if (updatedReceiptViewModel.Amount != null)
-        {
-            existingReceipt.Amount = updatedReceiptViewModel.Amount;
-        }
-
-        if (updatedReceiptViewModel.Note != null)
-        {
-            existingReceipt.Note = updatedReceiptViewModel.Note;
-        }
-        
-        existingReceipt.DateTimeModified = DateTime.UtcNow;
-
-        // Save the changes to your data store (e.g., update the database record)
-        _context.Update(existingReceipt);
-        _context.SaveChanges();
-
-        return Ok(AddForeignData(new ReceiptViewModel(existingReceipt)));
+        return Ok(result);
     }
     
     [HttpDelete("{id}")]

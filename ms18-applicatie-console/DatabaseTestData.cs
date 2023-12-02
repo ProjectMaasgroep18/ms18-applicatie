@@ -12,21 +12,21 @@ namespace Maasgroep.Console
 
         internal DatabaseTestData() 
         {
-            _members = new MemberRepository();
-            _receipts = new ReceiptRepository();
-            _orders = new OrderRepository();
+            //_members = new MemberRepository();
+            //_receipts = new ReceiptRepository();
+            //_orders = new OrderRepository();
         }
 
         internal void CreateTestDataAll()
         {
-            // Members Repo
-            _members.AanmakenTestData();
+            //// Members Repo
+            //_members.AanmakenTestData();
 
-            // Receipts Repo
-            _receipts.AanmakenTestData();
+            //// Receipts Repo
+            //_receipts.AanmakenTestData();
 
-            // Orders Repo
-            _orders.AanmakenTestData();
+            //// Orders Repo
+            //_orders.AanmakenTestData();
         }
     }
 }

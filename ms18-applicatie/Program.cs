@@ -1,10 +1,12 @@
-using Microsoft.Extensions.DependencyInjection;
 using Maasgroep.Database;
+using Maasgroep.SharedKernel.Interfaces.Receipts;
+using Maasgroep.Database.Receipts;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add database context
 builder.Services.AddDbContext<MaasgroepContext>();
+builder.Services.AddTransient<IReceiptRepository, ReceiptRepository>();
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();

@@ -1,7 +1,6 @@
 ﻿using Maasgroep.Database.Members;
 using Maasgroep.Database.Receipts;
 using Maasgroep.Database.Order;
-using Microsoft.EntityFrameworkCore;
 
 namespace Maasgroep.Database.Test
 {
@@ -43,10 +42,7 @@ namespace Maasgroep.Database.Test
         }
 
         public MaasgroepContext CreateContext()
-            => new MaasgroepContext();
-                //new DbContextOptionsBuilder<MaasgroepContext>()
-                //    .UseNpgsql(ConnectionString)
-                //    .Options);
+            => new MaasgroepContext(ConnectionString);
 
         private void InitDatabase()
         {
@@ -159,18 +155,19 @@ namespace Maasgroep.Database.Test
             using (var db = CreateContext())
             {
                 var member = db.Member.Where(m => m.Name == "Borgia").FirstOrDefault()!;
-                var costCentre = db.CostCentre.Where(cc => cc.Name == "Moeder van Joopie").FirstOrDefault()!;
+                var costCentre1 = db.CostCentre.Where(cc => cc.Name == "Moeder van Joopie").FirstOrDefault()!;
+				var costCentre2 = db.CostCentre.Where(cc => cc.Name == "Penningmeester").FirstOrDefault()!;
 
-                var receipts = new List<Receipt>()
+				var receipts = new List<Receipt>()
                 {
                     new Receipt()   { MemberCreated = member, ReceiptStatus = "Ingediend"
-                                    , CostCentre = costCentre
+                                    , CostCentre = costCentre1
                                     }
                 ,   new Receipt()   { MemberCreated = member, ReceiptStatus = "Goedgekeurd"
-                                    , CostCentre = costCentre
+                                    , CostCentre = costCentre2
                                     }
                 ,   new Receipt()   { MemberCreated = member, ReceiptStatus = "Afgekeurd"
-                                    , CostCentre = costCentre
+                                    , CostCentre = costCentre1
                                     }
                 };
 

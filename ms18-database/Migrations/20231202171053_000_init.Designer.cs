@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Maasgroep.Database.Migrations
 {
     [DbContext(typeof(MaasgroepContext))]
-    [Migration("20231125145036_000_init")]
+    [Migration("20231202171053_000_init")]
     partial class _000_init
     {
         /// <inheritdoc />
