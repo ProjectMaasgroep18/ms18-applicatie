@@ -140,8 +140,8 @@ function showOutput(data, container) {
                 const [relKey, prop, transform] = rel.split(':');
                 if (relKey != key)
                     return;
-                const value = typeof data[key] == 'object' ? JSON.stringify(data[key]) : data[key];
-                const transformedData = (transform && typeof transforms[transform] == 'function') ? transforms[transform](value) : value;
+                const value = typeof data[key] == 'object' && data[key] !== null ? JSON.stringify(data[key]) : data[key];
+                const transformedData = ((transform && typeof transforms[transform] == 'function') ? transforms[transform](value) : value) ?? '\u2014';
                 if (typeof prop == 'undefined' || prop == '') {
                     // No property provided
                     output.innerText = transformedData;
