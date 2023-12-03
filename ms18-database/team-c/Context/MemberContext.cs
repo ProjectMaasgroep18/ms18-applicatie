@@ -1,4 +1,5 @@
 ﻿using Maasgroep.Database.Members;
+using Maasgroep.Database.Receipts;
 using Microsoft.EntityFrameworkCore;
 
 namespace Maasgroep.Database
@@ -32,6 +33,73 @@ namespace Maasgroep.Database
 			CreateMember(modelBuilder);
 			CreatePermission(modelBuilder);
 			CreateMemberPermission(modelBuilder);
+
+			CreateReceiptNavigations(modelBuilder);
+		}
+
+		private void CreateReceiptNavigations(ModelBuilder modelBuilder)
+		{
+			#region CostCentre
+			modelBuilder.Entity<Member>()
+				.HasMany(m => m.CostCentresCreated)
+				.WithOne(c => c.MemberCreated);
+
+			modelBuilder.Entity<Member>()
+				.HasMany(m => m.CostCentresModified)
+				.WithOne(c => c.MemberModified);
+
+			modelBuilder.Entity<Member>()
+				.HasMany(m => m.CostCentresDeleted)
+				.WithOne(c => c.MemberDeleted);
+
+			#endregion
+
+			#region Photo
+
+			modelBuilder.Entity<Member>()
+				.HasMany(m => m.PhotosCreated)
+				.WithOne(c => c.MemberCreated);
+
+			modelBuilder.Entity<Member>()
+				.HasMany(m => m.PhotosModified)
+				.WithOne(c => c.MemberModified);
+
+			modelBuilder.Entity<Member>()
+				.HasMany(m => m.PhotosDeleted)
+				.WithOne(c => c.MemberDeleted);
+
+			#endregion
+
+			#region ReceiptApproval
+			modelBuilder.Entity<Member>()
+				.HasMany(m => m.ReceiptApprovalsCreated)
+				.WithOne(c => c.MemberCreated);
+
+			modelBuilder.Entity<Member>()
+				.HasMany(m => m.ReceiptApprovalsModified)
+				.WithOne(c => c.MemberModified);
+
+			modelBuilder.Entity<Member>()
+				.HasMany(m => m.ReceiptApprovalsDeleted)
+				.WithOne(c => c.MemberDeleted);
+
+			#endregion
+
+			#region Receipt
+			modelBuilder.Entity<Member>()
+				.HasMany(m => m.ReceiptsCreated)
+				.WithOne(c => c.MemberCreated);
+
+			modelBuilder.Entity<Member>()
+				.HasMany(m => m.ReceiptsModified)
+				.WithOne(c => c.MemberModified);
+
+			modelBuilder.Entity<Member>()
+				.HasMany(m => m.ReceiptsDeleted)
+				.WithOne(c => c.MemberDeleted);
+			#endregion
+
+			modelBuilder.Entity<ReceiptApproval>().HasKey(ra => new { ra.ReceiptId });
 		}
 
 		private void CreateMember(ModelBuilder modelBuilder)

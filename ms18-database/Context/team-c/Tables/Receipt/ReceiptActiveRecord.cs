@@ -1,4 +1,5 @@
-﻿
+﻿using Maasgroep.Database.Members;
+
 namespace Maasgroep.Database.Receipts
 {
 	public record ReceiptActiveRecord

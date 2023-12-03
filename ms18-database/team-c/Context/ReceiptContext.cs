@@ -1,4 +1,5 @@
-﻿using Maasgroep.Database.Receipts;
+﻿using Maasgroep.Database.Members;
+using Maasgroep.Database.Receipts;
 using Maasgroep.Database.Services;
 using Microsoft.EntityFrameworkCore;
 
@@ -7,8 +8,6 @@ namespace Maasgroep.Database
 	public class ReceiptContext : DbContext
 	{
 		private string _connectionString;
-
-		public DbSet<Member> Member { get; set; }
 
 		#region Receipts
 		public DbSet<Receipt> Receipt { get; set; }
@@ -59,6 +58,95 @@ namespace Maasgroep.Database
 			CreateReceiptApprovalHistory(modelBuilder);
 			CreateCostCentreHistory(modelBuilder);
 			CreatePhotoHistory(modelBuilder);
+
+			CreateMemberNavigations(modelBuilder);
+		}
+
+		private void CreateMemberNavigations(ModelBuilder modelBuilder)
+		{
+			#region CostCentre
+			modelBuilder.Entity<CostCentre>()
+			.HasOne(c => c.MemberCreated)
+			.WithMany(m => m.CostCentresCreated);
+
+			modelBuilder.Entity<CostCentre>()
+			.HasOne(c => c.MemberModified)
+			.WithMany(m => m.CostCentresModified);
+
+			modelBuilder.Entity<CostCentre>()
+			.HasOne(c => c.MemberDeleted)
+			.WithMany(m => m.CostCentresDeleted);
+			#endregion
+
+			#region Photo
+			modelBuilder.Entity<Photo>()
+			.HasOne(c => c.MemberCreated)
+			.WithMany(m => m.PhotosCreated);
+
+			modelBuilder.Entity<Photo>()
+			.HasOne(c => c.MemberModified)
+			.WithMany(m => m.PhotosModified);
+
+			modelBuilder.Entity<Photo>()
+			.HasOne(c => c.MemberDeleted)
+			.WithMany(m => m.PhotosDeleted);
+			#endregion
+
+			#region ReceiptApproval
+			modelBuilder.Entity<ReceiptApproval>()
+			.HasOne(c => c.MemberCreated)
+			.WithMany(m => m.ReceiptApprovalsCreated);
+
+			modelBuilder.Entity<ReceiptApproval>()
+			.HasOne(c => c.MemberModified)
+			.WithMany(m => m.ReceiptApprovalsModified);
+
+			modelBuilder.Entity<ReceiptApproval>()
+			.HasOne(c => c.MemberDeleted)
+			.WithMany(m => m.ReceiptApprovalsDeleted);
+			#endregion
+
+			#region Receipt
+			modelBuilder.Entity<Receipt>()
+			.HasOne(c => c.MemberCreated)
+			.WithMany(m => m.ReceiptsCreated);
+
+			modelBuilder.Entity<Receipt>()
+			.HasOne(c => c.MemberModified)
+			.WithMany(m => m.ReceiptsModified);
+
+			modelBuilder.Entity<Receipt>()
+			.HasOne(c => c.MemberDeleted)
+			.WithMany(m => m.ReceiptsDeleted);
+			#endregion
+
+			#region Member
+			modelBuilder.Entity<Member>()
+				.HasOne(m => m.MemberCreated)
+				.WithMany(m => m.MembersCreated);
+
+			modelBuilder.Entity<Member>()
+				.HasOne(m => m.MemberModified)
+				.WithMany(m => m.MembersModified);
+
+			modelBuilder.Entity<Member>()
+				.HasOne(m => m.MemberDeleted)
+				.WithMany(m => m.MembersDeleted);
+
+			modelBuilder.Entity<Permission>()
+				.HasOne(p => p.MemberCreated)
+				.WithMany(m => m.PermissionsCreated);
+
+			modelBuilder.Entity<Permission>()
+				.HasOne(p => p.MemberModified)
+				.WithMany(m => m.PermissionsModified);
+
+			modelBuilder.Entity<Permission>()
+				.HasOne(p => p.MemberDeleted)
+				.WithMany(m => m.PermissionsDeleted);
+
+			#endregion
+
 		}
 
 		#region Receipt
