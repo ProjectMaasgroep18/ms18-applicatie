@@ -2,10 +2,11 @@
 
 namespace Maasgroep.SharedKernel.ViewModels.Receipts
 {
-	public class PhotoModelCreateDb
+	public class PhotoModelDeleteDb
 	{
-		public PhotoModelCreate PhotoModel { get; set; }
+		public PhotoModelDeleteDb() { }
+
+		public PhotoModel Photo { get;set; }
 		public MemberModel Member { get; set; }
-		public long ReceiptId { get; set; }
 	}
 }

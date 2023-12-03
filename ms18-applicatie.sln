@@ -11,7 +11,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ms18-applicatie-console", "
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ms18-sharedKernel", "ms18-sharedKernel\ms18-sharedKernel.csproj", "{D4834E1E-AFCC-445B-8D75-AEC14E10B40C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ms18-database-test", "ms18-database-test\ms18-database-test.csproj", "{C5D85C30-5A4D-4433-8D85-5F3C97811177}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ms18-database-test", "ms18-database-test\ms18-database-test.csproj", "{C5D85C30-5A4D-4433-8D85-5F3C97811177}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

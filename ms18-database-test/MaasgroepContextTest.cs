@@ -1,5 +1,4 @@
-﻿using Maasgroep.Database.Repository.ViewModel;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using ms18_applicatie.Controllers.Api;
 
 namespace Maasgroep.Database.Test
@@ -8,13 +7,13 @@ namespace Maasgroep.Database.Test
     // https://learn.microsoft.com/en-us/ef/core/testing/
     // https://learn.microsoft.com/en-us/aspnet/core/web-api/action-return-types?view=aspnetcore-7.0
 
-    public class StockContextTest : IClassFixture<StockTestFixture>
+    public class MaasgroepContextTest : IClassFixture<MaasgroepTestFixture>
     {
 
 
-        public StockContextTest(StockTestFixture fixture) => Fixture = fixture;
+        public MaasgroepContextTest(MaasgroepTestFixture fixture) => Fixture = fixture;
 
-        public StockTestFixture Fixture { get; }
+        public MaasgroepTestFixture Fixture { get; }
 
         //[Fact]
         //public void GetProduct()

@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Maasgroep.SharedKernel.Interfaces.Orders;
-using Maasgroep.SharedKernel.ViewModels.Order;
+using Maasgroep.SharedKernel.ViewModels.Orders;
 using ms18_applicatie.Services;
 
 namespace ms18_applicatie.Controllers.Api;

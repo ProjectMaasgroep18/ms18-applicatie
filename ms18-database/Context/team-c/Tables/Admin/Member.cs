@@ -1,4 +1,4 @@
-using Maasgroep.Database.Order;
+using Maasgroep.Database.Orders;
 using Maasgroep.Database.Receipts;
 using Maasgroep.Database.ToDoList;
 

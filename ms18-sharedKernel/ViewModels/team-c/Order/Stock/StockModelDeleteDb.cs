@@ -2,9 +2,9 @@
 
 namespace Maasgroep.SharedKernel.ViewModels.Orders
 {
-	public class StockModelCreateDb
+	public class StockModelDeleteDb
 	{
-		public StockModelCreate Stock { get; set; }
+		public StockModel Stock { get; set; }
 		public MemberModel Member { get; set; }
 	}
 }

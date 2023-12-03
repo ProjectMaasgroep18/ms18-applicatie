@@ -14,52 +14,8 @@ namespace Maasgroep.Database.Receipts
         {
 			_db = db;
         }
-		public long Add(ReceiptModelCreateDb receipt)
-		{
-			var costCentre = _db.CostCentre.Where(c => c.Name == receipt.ReceiptModel.CostCentre).FirstOrDefault();
-			if (costCentre == null) throw new Exception("kapot!");
 
-			var receiptToAdd = new Receipt()
-			{
-				Amount = receipt.ReceiptModel.Amount,
-				Note = receipt.ReceiptModel.Note,
-				CostCentreId = costCentre.Id,
-				ReceiptStatus = "Ingediend",
-				MemberCreatedId = receipt.Member.Id
-			};
-
-			_db.Database.BeginTransaction();
-			_db.Receipt.Add(receiptToAdd);
-			_db.SaveChanges();
-			
-			var idOfReceipt = _db.Database.SqlQuery<long>($"select currval('receipt.\"receiptSeq\"'::regclass)").ToList().FirstOrDefault();
-			
-			//TODO: Dit staat nu ook dubbel met photo toevoegen.
-			if (receipt.ReceiptModel.Photos != null && receipt.ReceiptModel.Photos.Count > 0) 
-			{
-				foreach (var photo in receipt.ReceiptModel.Photos)
-					_db.Photo.Add(new Photo()
-					{ 
-						Base64Image = photo.Base64Image,
-						fileExtension = photo.FileExtension,
-						fileName = photo.FileName,
-						ReceiptId = idOfReceipt,
-						MemberCreatedId = receipt.Member.Id
-					});
-			}
-
-			_db.SaveChanges();
-
-			_db.Database.CommitTransaction();
-
-			return idOfReceipt;
-
-		}
-
-		public bool DeleteReceipt(ReceiptModel receipt)
-		{
-			throw new NotImplementedException();
-		}
+		#region Receipt
 
 		public ReceiptModel GetReceipt(long id)
 		{
@@ -105,7 +61,6 @@ namespace Maasgroep.Database.Receipts
 
 			return result;
 		}
-
 		public IEnumerable<ReceiptModel> GetReceipts(int offset, int fetch)
 		{
 			var result = new List<ReceiptModel>();
@@ -121,7 +76,6 @@ namespace Maasgroep.Database.Receipts
 
 			return result;
 		}
-
 		public IEnumerable<ReceiptModel> GetReceiptsByMember(long memberId, int offset, int fetch)
 		{
 			var result = new List<ReceiptModel>();
@@ -137,28 +91,101 @@ namespace Maasgroep.Database.Receipts
 
 			return result;
 		}
+		public long Add(ReceiptModelCreateDb receipt)
+		{
+			var costCentre = _db.CostCentre.Where(c => c.Name == receipt.ReceiptModel.CostCentre).FirstOrDefault();
+			if (costCentre == null) throw new Exception("kapot!");
 
+			var receiptToAdd = new Receipt()
+			{
+				Amount = receipt.ReceiptModel.Amount,
+				Note = receipt.ReceiptModel.Note,
+				CostCentreId = costCentre.Id,
+				ReceiptStatus = "Ingediend",
+				MemberCreatedId = receipt.Member.Id
+			};
+
+			_db.Database.BeginTransaction();
+			_db.Receipt.Add(receiptToAdd);
+			_db.SaveChanges();
+
+			var idOfReceipt = _db.Database.SqlQuery<long>($"select currval('receipt.\"receiptSeq\"'::regclass)").ToList().FirstOrDefault();
+
+			//TODO: Dit staat nu ook dubbel met photo toevoegen.
+			if (receipt.ReceiptModel.Photos != null && receipt.ReceiptModel.Photos.Count > 0)
+			{
+				foreach (var photo in receipt.ReceiptModel.Photos)
+					_db.Photo.Add(new Photo()
+					{
+						Base64Image = photo.Base64Image,
+						fileExtension = photo.FileExtension,
+						fileName = photo.FileName,
+						ReceiptId = idOfReceipt,
+						MemberCreatedId = receipt.Member.Id
+					});
+			}
+
+			_db.SaveChanges();
+
+			_db.Database.CommitTransaction();
+
+			return idOfReceipt;
+
+		}
 		public bool Modify(ReceiptModelUpdateDb receiptUpdated)
 		{
 			var receipt = _db.Receipt.Where(r => r.Id == receiptUpdated.ReceiptModel.Id).FirstOrDefault();
 
 			if (receipt == null) throw new Exception("kapot!");
 
+			_db.Database.BeginTransaction();
 			_db.ReceiptHistory.Add(CreateReceiptHistory(receipt));
+			_db.SaveChanges();
 
 			receipt.Note = receiptUpdated.ReceiptModel.Note;
 			receipt.Amount = receiptUpdated.ReceiptModel.Amount;
-			receipt.CostCentreId = receiptUpdated.ReceiptModel.CostCentre.Id;
+			receipt.CostCentreId = receiptUpdated.ReceiptModel.CostCentre?.Id;
 			receipt.MemberModifiedId = receiptUpdated.Member.Id;
 			receipt.DateTimeModified = DateTime.UtcNow;
 			receipt.ReceiptStatus = receiptUpdated.ReceiptModel.StatusString!;
 
 			_db.Update(receipt);
 			_db.SaveChanges();
+			_db.Database.CommitTransaction();
+
+			return true;
+		}
+		public bool Delete(ReceiptModelDeleteDb receiptToDelete)
+		{
+			var receipt = _db.Receipt.Where(cc => cc.Id == receiptToDelete.Receipt.Id).FirstOrDefault();
+
+			if (receipt != null)
+			{
+				var history = CreateReceiptHistory(receipt);
+
+				_db.Database.BeginTransaction();
+				_db.ReceiptHistory.Add(history);
+				_db.SaveChanges();
+
+				receipt.MemberDeletedId = receiptToDelete.Member.Id;
+				receipt.DateTimeDeleted = DateTime.UtcNow;
+
+				_db.Receipt.Update(receipt);
+				_db.SaveChanges();
+				_db.Database.CommitTransaction(); //TODO: Misschien nog iets met finally en rollback enzo.
+			}
+			else
+			{
+				return false; //TODO: In de aanroep iets mee doen
+			}
 
 			return true;
 		}
 
+
+		#endregion
+
+		#region Photo
 		public long Add(PhotoModelCreateDb photo)
 		{
 			var photoToAdd = new Photo()
@@ -216,19 +243,24 @@ namespace Maasgroep.Database.Receipts
 			return result;
 		}
 
-		public bool DeletePhoto(long id)
+		public bool Delete(PhotoModelDeleteDb photoToDelete)
 		{
-			var photoToDelete = _db.Photo.Where(p => p.Id == id).FirstOrDefault();
+			var photo = _db.Photo.Where(p => p.Id == photoToDelete.Photo.Id).FirstOrDefault();
 
-			if (photoToDelete != null)
+			if (photo != null)
 			{
-				var history = CreatePhotoHistory(photoToDelete);
+				var history = CreatePhotoHistory(photo);
 
 				_db.Database.BeginTransaction();
 				_db.PhotoHistory.Add(history);
-				_db.Photo.Remove(photoToDelete);
 				_db.SaveChanges();
-				_db.Database.RollbackTransaction(); //TODO: Misschien nog iets met finally en rollback enzo.
+
+				photo.DateTimeDeleted = DateTime.UtcNow;
+				photo.MemberDeletedId = photoToDelete.Member.Id;
+
+				_db.Photo.Update(photo);
+				_db.SaveChanges();
+				_db.Database.CommitTransaction(); //TODO: Misschien nog iets met finally en rollback enzo.
 			}
 			else
 			{
@@ -238,6 +270,9 @@ namespace Maasgroep.Database.Receipts
 			return true;
 		}
 
+		#endregion
+
+		#region Approval
 		public bool AddApproval(ReceiptApprovalModelCreateDb approval)
 		{
 			var approvalToAdd = new ReceiptApproval()
@@ -253,10 +288,131 @@ namespace Maasgroep.Database.Receipts
 
 			return true;
 		}
+		#endregion
+
+		#region CostCentre
+		public IEnumerable<CostCentreModel> GetCostCentres(int offset, int fetch)
+		{
+			var result = new List<CostCentreModel>();
+
+			var allCostCentre = _db.CostCentre.ToList();
+			foreach (var costCentre in allCostCentre)
+				result.Add(GetCostCentre(costCentre.Id));
+
+			return result;
+		}
+
+		public CostCentreModel GetCostCentre(long id)
+		{
+			CostCentreModel result = new CostCentreModel();
+
+			var costCentre = _db.CostCentre.Where(c => c.Id == id).FirstOrDefault();
+
+			if (costCentre == null)
+			{
+				throw new InvalidOperationException();
+			}
+			else
+			{
+				result.Name = costCentre.Name;
+				result.Id = costCentre.Id;
+			}
+
+			return result;
+		}
+
+		public long Add(CostCentreModelCreateDb costCentre)
+		{
+			var costCentreToAdd = new CostCentre()
+			{
+				Name = costCentre.CostCentre.Name,
+				MemberCreatedId = costCentre.Member.Id,
+				DateTimeCreated = DateTime.UtcNow
+			};
+
+			_db.Database.BeginTransaction();
+
+			_db.CostCentre.Add(costCentreToAdd);
+			_db.SaveChanges();
+
+			var idOfCostCentre = _db.Database.SqlQuery<long>($"select currval('receipt.\"costCentreSeq\"'::regclass)").ToList().FirstOrDefault();
+
+			_db.Database.CommitTransaction();
+			
+			return idOfCostCentre;
+		}
+
+		public bool Modify(CostCentreModelUpdateDb costCentreUpdated)
+		{
+			var costCentre = _db.CostCentre.Where(c => c.Id == costCentreUpdated.CostCentre.Id).FirstOrDefault();
+
+			if (costCentre == null) throw new Exception("kapot!");
+
+			_db.Database.BeginTransaction();
+			_db.CostCentreHistory.Add(CreateCostCentreHistory(costCentre));
+			_db.SaveChanges();
+
+			costCentre.Name = costCentreUpdated.CostCentre.Name;
+			costCentre.MemberModifiedId = costCentreUpdated.Member.Id;
+			costCentre.DateTimeModified = DateTime.UtcNow;
+
+			_db.Update(costCentre);
+			_db.SaveChanges();
+
+			_db.Database.CommitTransaction();
+
+			return true;
+		}
+
+		public bool Delete(CostCentreModelDeleteDb costCentreDeleted)
+		{
+			var costCentre = _db.CostCentre.Where(cc => cc.Id == costCentreDeleted.CostCentre.Id).FirstOrDefault();
+
+			if (costCentre != null)
+			{
+				var history = CreateCostCentreHistory(costCentre);
+
+				_db.Database.BeginTransaction();
+				_db.CostCentreHistory.Add(history);
+				_db.SaveChanges();
+
+				costCentre.MemberDeletedId = costCentreDeleted.Member.Id;
+				costCentre.DateTimeDeleted = DateTime.UtcNow;
+
+				_db.CostCentre.Update(costCentre);
+				_db.SaveChanges();
+				_db.Database.CommitTransaction(); //TODO: Misschien nog iets met finally en rollback enzo.
+			}
+			else
+			{
+				return false; //TODO: In de aanroep iets mee doen
+			}
+
+			return true;
+		}
+
+		public IEnumerable<ReceiptModel> GetReceiptsByCostCentre(long costCentreId, int offset, int fetch)
+		{
+			var result = new List<ReceiptModel>();
+
+			var receiptsByCostCentre = from r in _db.Receipt
+									   join c in _db.CostCentre
+									   on r.CostCentreId equals c.Id
+									   where c.Id == costCentreId
+									   select new { ReceiptjeIdtje = r.Id };
+
+			foreach (var item in receiptsByCostCentre)
+				result.Add(GetReceipt(item.ReceiptjeIdtje));
+
+			return result;
+
+		}
+
+		#endregion
 
 		private ReceiptHistory CreateReceiptHistory(Receipt receipt)
 		{
-			ReceiptHistory history = new ReceiptHistory();
+			var history = new ReceiptHistory();
 
 			history.Id = receipt.Id;
 			history.Amount = receipt.Amount;
@@ -273,10 +429,9 @@ namespace Maasgroep.Database.Receipts
 
 			return history;
 		}
-
 		private PhotoHistory CreatePhotoHistory(Photo photo)
-		{ 
-			PhotoHistory history = new PhotoHistory();
+		{
+			var history = new PhotoHistory();
 
 			history.PhotoId = photo.Id;
 			history.ReceiptId = photo.ReceiptId;
@@ -293,35 +448,38 @@ namespace Maasgroep.Database.Receipts
 
 			return history;
 		}
-
-		public IEnumerable<CostCentreModel> GetCostCentres(int offset, int fetch)
+		private CostCentreHistory CreateCostCentreHistory(CostCentre costCentre)
 		{
-			throw new NotImplementedException();
+			var history = new CostCentreHistory();
+
+			history.CostCentreId = costCentre.Id;
+			history.Name = costCentre.Name;
+
+			history.MemberCreatedId = costCentre.MemberCreatedId;
+			history.MemberModifiedId = costCentre.MemberModifiedId;
+			history.MemberDeletedId = costCentre.MemberDeletedId;
+			history.DateTimeCreated = costCentre.DateTimeCreated;
+			history.DateTimeModified = costCentre.DateTimeModified;
+			history.DateTimeDeleted = costCentre.DateTimeDeleted;
+
+			return history;
 		}
-
-		public CostCentreModel GetCostCentre(long id)
+		private ReceiptApprovalHistory CreateReceiptApprovalHistory(ReceiptApproval approval)
 		{
-			throw new NotImplementedException();
-		}
+			var history = new ReceiptApprovalHistory();
 
-		public long Add(CostCentreModelCreateDb costCentre)
-		{
-			throw new NotImplementedException();
-		}
+			history.ReceiptId = approval.ReceiptId;
+			history.Approved = approval.Approved;
+			history.Note = approval.Note;
 
-		public bool Modify(CostCentreModelUpdateDb costCentre)
-		{
-			throw new NotImplementedException();
-		}
+			history.MemberCreatedId = approval.MemberCreatedId;
+			history.MemberModifiedId = approval.MemberModifiedId;
+			history.MemberDeletedId = approval.MemberDeletedId;
+			history.DateTimeCreated = approval.DateTimeCreated;
+			history.DateTimeModified = approval.DateTimeModified;
+			history.DateTimeDeleted = approval.DateTimeDeleted;
 
-		public bool DeleteCostCentre(long id)
-		{
-			throw new NotImplementedException();
-		}
-
-		public IEnumerable<CostCentreModel> GetReceiptsByCostCentre(long costCentreId, int offset, int fetch)
-		{
-			throw new NotImplementedException();
+			return history;
 		}
 	}
 }

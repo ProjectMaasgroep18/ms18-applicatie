@@ -1,4 +1,4 @@
-﻿using Maasgroep.SharedKernel.ViewModels.Order;
+﻿using Maasgroep.SharedKernel.ViewModels.Orders;
 
 namespace Maasgroep.SharedKernel.Interfaces.Orders
 {
@@ -9,7 +9,7 @@ namespace Maasgroep.SharedKernel.Interfaces.Orders
 		ProductModel GetProduct(long id);
 		long Add(ProductModelCreateDb product);
 		bool Modify(ProductModelUpdateDb product);
-		bool Delete(ProductModel product);
+		bool Delete(ProductModelDeleteDb product);
 		#endregion
 
 		#region Stock
@@ -17,7 +17,7 @@ namespace Maasgroep.SharedKernel.Interfaces.Orders
 		StockModel GetStock(long id);
 		long Add(StockModelCreateDb product);
 		bool Modify(StockModelUpdateDb product);
-		bool Delete(StockModel product);
+		bool Delete(StockModelDeleteDb product);
 		#endregion
 
 	}

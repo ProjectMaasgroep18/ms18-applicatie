@@ -1,4 +1,5 @@
 ﻿using Maasgroep.SharedKernel.Interfaces.Receipts;
+using Maasgroep.SharedKernel.ViewModels.Receipts;
 using Microsoft.AspNetCore.Mvc;
 using ms18_applicatie.Services;
 
@@ -56,11 +57,17 @@ public class ReceiptPhotoController : ControllerBase
                 message = "Photo not found"
             });
         }
+
+        var photoToDelete = new PhotoModelDeleteDb()
+        {
+            Photo = existingPhoto,
+            Member = _memberService.GetMember(1)
+        };
         
         // Try to remove the photo from your data store and handle if it is not possible
         try
         {
-            _receiptRepository.DeletePhoto(id);
+            _receiptRepository.Delete(photoToDelete);
         }
         catch (Exception)
         {

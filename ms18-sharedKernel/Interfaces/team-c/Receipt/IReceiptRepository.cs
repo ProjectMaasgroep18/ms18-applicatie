@@ -9,7 +9,7 @@ namespace Maasgroep.SharedKernel.Interfaces.Receipts
 		bool Modify(ReceiptModelUpdateDb receipt);
 		ReceiptModel GetReceipt(long id);
 		IEnumerable<ReceiptModel> GetReceipts(int offset, int fetch);
-		bool DeleteReceipt(ReceiptModel receipt);
+		bool Delete(ReceiptModelDeleteDb receipt);
 		IEnumerable<ReceiptModel> GetReceiptsByMember(long memberId, int offset, int fetch);
 		#endregion
 
@@ -17,7 +17,7 @@ namespace Maasgroep.SharedKernel.Interfaces.Receipts
 		long Add(PhotoModelCreateDb photo);
 		PhotoModel GetPhoto(long id);
 		IEnumerable<PhotoModel> GetPhotosByReceipt(long receiptId, int offset, int fetch);
-		bool DeletePhoto(long id);
+		bool Delete(PhotoModelDeleteDb id);
 		#endregion
 
 		#region Approval
@@ -29,8 +29,8 @@ namespace Maasgroep.SharedKernel.Interfaces.Receipts
 		CostCentreModel GetCostCentre(long id);
 		long Add(CostCentreModelCreateDb costCentre);
 		bool Modify(CostCentreModelUpdateDb costCentre);
-		bool DeleteCostCentre(long id);
-		IEnumerable<CostCentreModel> GetReceiptsByCostCentre(long costCentreId, int offset, int fetch);
+		bool Delete(CostCentreModelDeleteDb id);
+		IEnumerable<ReceiptModel> GetReceiptsByCostCentre(long costCentreId, int offset, int fetch);
 		#endregion
 	}
 }

@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Maasgroep.SharedKernel.Interfaces.Orders;
-using Maasgroep.SharedKernel.ViewModels.Order;
+using Maasgroep.SharedKernel.ViewModels.Orders;
 using ms18_applicatie.Services;
 
 namespace ms18_applicatie.Controllers.Api
@@ -91,7 +91,13 @@ namespace ms18_applicatie.Controllers.Api
 
             // if null
 
-            var result = _orderRepository.Delete(stock);
+            var stockToDelete = new StockModelDeleteDb()
+            {
+                Stock = stock,
+                Member = _memberService.GetMember(1)
+            };
+
+            var result = _orderRepository.Delete(stockToDelete);
 
 			return Ok(result);
         }

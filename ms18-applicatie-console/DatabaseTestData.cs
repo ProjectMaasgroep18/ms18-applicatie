@@ -1,6 +1,5 @@
 using Maasgroep.Database;
 using Maasgroep.Database.Members;
-using Maasgroep.Database.Order;
 using Maasgroep.Database.Orders;
 using Maasgroep.Database.Receipts;
 

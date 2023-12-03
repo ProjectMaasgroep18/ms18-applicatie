@@ -154,11 +154,17 @@ public class CostCentreController : ControllerBase
                 message = "Kostenpost niet gevonden"
             });
         }
+
+        var costCentreToDelete = new CostCentreModelDeleteDb()
+        {
+            CostCentre = existingCostCentre,
+            Member = _memberService.GetMember(1)
+        };
         
         // Try to remove the receipt from your data store and handle if it is not possible
         try
         {
-            _receiptRepository.DeleteCostCentre(id);
+            _receiptRepository.Delete(costCentreToDelete);
         }
         catch (Exception)
         {

@@ -1,5 +1,5 @@
 ﻿using Maasgroep.Database.Members;
-using Maasgroep.Database.Order;
+using Maasgroep.Database.Orders;
 using Maasgroep.Database.Receipts;
 using Maasgroep.Database.Services;
 using Maasgroep.Database.ToDoList;
@@ -32,7 +32,6 @@ namespace Maasgroep.Database
 		public DbSet<PhotoHistory> PhotoHistory { get; set; }
 
 		#endregion
-
 
 		#region Order
 

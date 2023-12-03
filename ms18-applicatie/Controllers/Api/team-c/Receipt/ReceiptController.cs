@@ -131,11 +131,13 @@ public class ReceiptController : ControllerBase
                 message = "Receipt not found"
             });
         }
+
+        var receiptToDelete = new ReceiptModelDeleteDb() { Member = _memberService.GetMember(1), Receipt = existingReceipt };
         
         // Try to remove the receipt from your data store and handle if it is not possible
         try
         {
-            _receiptRepository.DeleteReceipt(existingReceipt); //TODO: deze logica moet nog gebouwd
+            _receiptRepository.Delete(receiptToDelete); //TODO: deze logica moet nog gebouwd
         }
         catch (Exception)
         {

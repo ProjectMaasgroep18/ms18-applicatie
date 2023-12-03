@@ -1,5 +1,5 @@
 ﻿
-namespace Maasgroep.SharedKernel.ViewModels.Order
+namespace Maasgroep.SharedKernel.ViewModels.Orders
 {
 	public class StockModel
 	{

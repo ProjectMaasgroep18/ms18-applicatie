@@ -1,6 +1,6 @@
 ﻿using Maasgroep.SharedKernel.ViewModels.Admin;
 
-namespace Maasgroep.SharedKernel.ViewModels.Order
+namespace Maasgroep.SharedKernel.ViewModels.Orders
 {
 	public class StockModelUpdateDb
 	{

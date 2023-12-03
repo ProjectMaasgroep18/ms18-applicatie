@@ -1,6 +1,6 @@
 ﻿using Maasgroep.Database.Members;
 
-namespace Maasgroep.Database.Order
+namespace Maasgroep.Database.Orders
 {
     public record Bill : GenericRecordActive
 	{

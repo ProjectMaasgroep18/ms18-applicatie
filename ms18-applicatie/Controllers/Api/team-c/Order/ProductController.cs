@@ -1,7 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Maasgroep.SharedKernel.Interfaces.Orders;
-using Maasgroep.SharedKernel.ViewModels.Order;
+using Maasgroep.SharedKernel.ViewModels.Orders;
 using ms18_applicatie.Services;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace ms18_applicatie.Controllers.Api;
 
@@ -55,9 +56,12 @@ public class ProductController : ControllerBase
 		if (!MemberExists(1)) // Toegangscontrole
 			return Forbidden();
 
+        Console.WriteLine(product.Name);
+
 		// Validate the request body
 		if (!ModelState.IsValid)
         {
+            
             return BadRequest(new
             {
                 status = 400,
@@ -157,9 +161,15 @@ public class ProductController : ControllerBase
                 message = "Product niet gevonden"
             });
 
+        var productToDelete = new ProductModelDeleteDb()
+        {
+            Product = existingProduct,
+            Member = _memberService.GetMember(1)
+        };
+
         try
         {
-            _orderRepository.Delete(existingProduct);
+            _orderRepository.Delete(productToDelete);
         }
         catch (Exception e)
         {
