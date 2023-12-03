@@ -7,23 +7,25 @@ namespace ms18_applicatie.Controllers.Api;
 
 [Route("api/v1/[controller]")]
 [ApiController]
-public class ProductController : BaseController
+public class ProductController : ControllerBase
 {
-    public ProductController(MaasgroepContext context) : base(context)
+    private readonly StockContext _context;
+    public ProductController(StockContext context)
     {
+        _context = context;
     }
 
     [HttpGet]
     [ActionName("productGet")]
     public IActionResult ProductGet()
     {
-        if (_currentUser == null) // Toegangscontrole
-            return Forbidden();
+        //if (_currentUser == null) // Toegangscontrole
+        //    return Forbidden();
 
         var all = _context.Product
             .Select(dbRec => new ProductViewModel(dbRec))
             .ToList()
-            .Select(AddForeignData)
+            .Select(x => x)
             .ToList()
             ;
 
@@ -34,8 +36,8 @@ public class ProductController : BaseController
     [ActionName("productGetById")]
     public IActionResult ProductGetById(long id)
     {
-        if (_currentUser == null) // Toegangscontrole
-            return Forbidden();
+        //if (_currentUser == null) // Toegangscontrole
+        //    return Forbidden();
 
         var dbRec = _context.Product
             .Where(dbRec => dbRec.Id == id)
@@ -49,7 +51,8 @@ public class ProductController : BaseController
                 message = "Product niet gevonden"
             });
 
-        return Ok(AddForeignData(dbRec));
+        return Ok();
+        //return Ok(AddForeignData(dbRec));
     }
     
     [HttpPost]
@@ -57,8 +60,8 @@ public class ProductController : BaseController
     public IActionResult ProductCreate([FromBody] ProductViewModel vm)
     {
         
-        if (_currentUser == null) // Toegangscontrole
-            return Forbidden();
+        //if (_currentUser == null) // Toegangscontrole
+        //    return Forbidden();
 
         // Validate the request body
         if (!ModelState.IsValid)
@@ -73,7 +76,7 @@ public class ProductController : BaseController
         var createdProduct = new Product
         {
             Name = vm.Name,
-            MemberCreatedId = _currentUser.Id
+            MemberCreatedId = -1
         };
 
         try
@@ -94,7 +97,8 @@ public class ProductController : BaseController
         {
             status = 200,
             message = "Product aangemaakt",
-            product = AddForeignData(new ProductViewModel(createdProduct))
+            product = createdProduct
+            //product = AddForeignData(new ProductViewModel(createdProduct))
         });
     }
     
@@ -102,8 +106,8 @@ public class ProductController : BaseController
     [ActionName("productUpdate")]
     public IActionResult ProductUpdate(long id, [FromBody] ProductViewModel vm)
     {
-        if (_currentUser == null) // Toegangscontrole
-            return Forbidden();
+        //if (_currentUser == null) // Toegangscontrole
+        //    return Forbidden();
 
         // Validate the request body
         if (!ModelState.IsValid)
@@ -148,7 +152,7 @@ public class ProductController : BaseController
             existingProduct.Name = vm.Name;
         }
 
-        existingProduct.MemberModifiedId = _currentUser.Id;
+        existingProduct.MemberModifiedId = -1;
         existingProduct.DateTimeModified = DateTime.UtcNow;
         
         _context.Product.Update(existingProduct);
@@ -161,8 +165,8 @@ public class ProductController : BaseController
     [ActionName("productDelete")]
     public IActionResult ProductDelete(long id)
     {
-        if (_currentUser == null) // Toegangscontrole
-            return Forbidden();
+        //if (_currentUser == null) // Toegangscontrole
+        //    return Forbidden();
 
         var existingProduct = _context.Product
             .Where(dbRec => dbRec.Id == id)

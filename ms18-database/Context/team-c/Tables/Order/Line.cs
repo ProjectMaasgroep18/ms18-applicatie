@@ -1,8 +1,8 @@
 ﻿
 namespace Maasgroep.Database.Order
 {
-    public record Line : GenericRecordActive
-    {
+    public record Line : OrderRecordActive
+	{
         public long Id { get; set; }
         public long BillId { get; set; }
         public long ProductId { get; set; }

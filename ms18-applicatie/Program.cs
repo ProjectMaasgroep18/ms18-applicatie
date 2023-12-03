@@ -5,7 +5,8 @@ using Maasgroep.Database.Receipts;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add database context
-builder.Services.AddDbContext<MaasgroepContext>();
+builder.Services.AddDbContext<ReceiptContext>();
+builder.Services.AddDbContext<StockContext>();
 builder.Services.AddTransient<IReceiptRepository, ReceiptRepository>();
 
 // Add services to the container.

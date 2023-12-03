@@ -1,5 +1,4 @@
-﻿using Maasgroep.Database.Members;
-
+﻿
 namespace Maasgroep.Database
 {
     public abstract record GenericRecordActive
@@ -11,11 +10,5 @@ namespace Maasgroep.Database
         public DateTime DateTimeCreated { get; set; }
         public DateTime? DateTimeModified { get; set; }
         public DateTime? DateTimeDeleted { get; set; }
-
-        // EF generic properties
-        public Member MemberCreated { get; set; }
-        public Member? MemberModified { get; set; }
-        public Member? MemberDeleted { get; set; }
-
     }
 }

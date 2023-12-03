@@ -1,36 +1,41 @@
-using Maasgroep.Database;
-using Maasgroep.Database.Receipts;
-using Maasgroep.Database.Repository.ViewModel;
+using Maasgroep.SharedKernel.Interfaces.Receipts;
+using Maasgroep.SharedKernel.ViewModels.Receipts;
 using Microsoft.AspNetCore.Mvc;
+using ms18_applicatie.Services;
 
 namespace ms18_applicatie.Controllers.Api;
 
 [Route("api/v1/[controller]")]
 [ApiController]
-public class CostCentreController : BaseController
+public class CostCentreController : ControllerBase
 {
-    public CostCentreController(MaasgroepContext context) : base(context) { }
+	private readonly IReceiptRepository _receiptRepository;
+	private readonly IMemberService _memberService;
+
+	public CostCentreController(IReceiptRepository receiptRepository, IMemberService memberService) 
+    {
+		_receiptRepository = receiptRepository;
+		_memberService = memberService;
+	}
 
     [HttpGet]
     [ActionName("costCentreGet")]
     public IActionResult CostCentreGet()
     {
-        if (_currentUser == null) // Toegangscontrole
-            return Forbidden();
+		if (!MemberExists(1)) // Toegangscontrole
+			return Forbidden();
 
-        var alles = _context.CostCentre.Select(dbRec => new CostCentreViewModel(dbRec)).ToList();
-
-        return Ok(alles);
+        return Ok(_receiptRepository.GetCostCentres(0, int.MaxValue));
     }
 
     [HttpGet("{id}")]
     [ActionName("costCentreGetById")]
     public IActionResult CostCentreGetById(int id)
     {
-        if (_currentUser == null) // Toegangscontrole
-            return Forbidden();
-        
-        var costCentre = _context.CostCentre.Find(id);
+		if (!MemberExists(1)) // Toegangscontrole
+			return Forbidden();
+
+        var costCentre = _receiptRepository.GetCostCentre(id);
         
         if (costCentre == null)
         {
@@ -41,17 +46,17 @@ public class CostCentreController : BaseController
             });
         }
         
-        return Ok(new CostCentreViewModel(costCentre));
+        return Ok(costCentre);
     }
 
     [HttpPost]
-    public IActionResult CostCentreCreate([FromBody] CostCentreViewModel costCentreViewModel)
+    public IActionResult CostCentreCreate([FromBody] CostCentreModelCreate costCentreModel)
     {
-        if (_currentUser == null) // Toegangscontrole
-            return Forbidden();
-        
-        // Validate the request body
-        if (!ModelState.IsValid)
+		if (!MemberExists(1)) // Toegangscontrole
+			return Forbidden();
+
+		// Validate the request body
+		if (!ModelState.IsValid)
         {
             return BadRequest(new
             {
@@ -59,35 +64,35 @@ public class CostCentreController : BaseController
                 message = "Invalid request body"
             });
         }
-        
-        // Create a new cost centre from the view model
-        var createdStatus = CostCentre.FromViewModel(costCentreViewModel);
-        
-        createdStatus.MemberCreatedId = _currentUser.Id;
-        
+
+		// Create a new cost centre from the view model
+		var costCentreToAdd = new CostCentreModelCreateDb()
+		{
+			CostCentre = costCentreModel,
+			Member = _memberService.GetMember(1)
+		};
+
         // Add the cost centre to the database
-        _context.CostCentre.Add(createdStatus);
-        _context.SaveChanges();
+        var costCentreAdded = _receiptRepository.AddCostCentre(costCentreToAdd);
         
         // Return the created cost centre
-        return Created($"/api/v1/CostCentre/{createdStatus.Id}", new
+        return Created($"/api/v1/CostCentre/{costCentreAdded}", new
         {
             status = 201,
             message = "Kostenpost aangemaakt",
-            costCentre = new CostCentreViewModel(createdStatus),
+            costCentre = costCentreAdded,
         });
     }
 
-    
     [HttpPut("{id}")]
     [ActionName("costCentreUpdate")]
-    public IActionResult CostCentreUpdate(long id, [FromBody] CostCentreViewModel updatedCostCentreViewModel)
+    public IActionResult CostCentreUpdate(long id, [FromBody] CostCentreModel updatedCostCentreViewModel)
     {
-        if (_currentUser == null) // Toegangscontrole
-            return Forbidden();
+		if (!MemberExists(1)) // Toegangscontrole
+			return Forbidden();
 
-        // Validate the request body
-        if (!ModelState.IsValid)
+		// Validate the request body
+		if (!ModelState.IsValid)
         {
             return BadRequest(new
             {
@@ -95,37 +100,21 @@ public class CostCentreController : BaseController
                 message = "Invalid request body"
             });
         }
-        
-        // Check if the ID in the request body matches the ID in the URL
-        if (updatedCostCentreViewModel.ID != null && updatedCostCentreViewModel.ID != id)
-        {
-            return BadRequest(new
-            {
-                status = 400,
-                message = "Invalid request body, ID in URL does not match ID in request body"
-            });
-        }
-
-        // Get the ID from URL (/CostCentre/{id}/) if it was not in the body
-        if (updatedCostCentreViewModel.ID == null)
-        {
-            updatedCostCentreViewModel.ID = id;
-        }
 
         // Retrieve the existing cost centre from your data store (e.g., database)
-        CostCentre? existingStatus = _context.CostCentre.Find(id);
+        CostCentreModel? existingCostCentre = _receiptRepository.GetCostCentre(id);
 
         // Check if the receipt with the provided ID exists
-        if (existingStatus == null)
+        if (existingCostCentre == null)
         {
             return NotFound(new
             {
                 status = 404,
-                message = "Kostenpost nite gevonden"
+                message = "Kostenpost niet gevonden"
             });
         }
 
-        if (StatusesAreEqual(existingStatus, updatedCostCentreViewModel))
+        if (existingCostCentre.Equals(updatedCostCentreViewModel))
         {
             // If the data is the same, return a response indicating no update was performed
             return Ok(new {
@@ -134,33 +123,30 @@ public class CostCentreController : BaseController
             });
         }
 
-        if (updatedCostCentreViewModel.Name != null)
-        {
-            existingStatus.Name = updatedCostCentreViewModel.Name;
-        }
+        var costCentreToUpdate = new CostCentreModelUpdateDb()
+        { 
+            CostCentre = updatedCostCentreViewModel, 
+            Member = _memberService.GetMember(1)
+		};
         
-        existingStatus.DateTimeModified = DateTime.UtcNow;
-
         // Save the changes to your data store (e.g., update the database record)
-        _context.Update(existingStatus);
-        _context.SaveChanges();
+        var result = _receiptRepository.ModifyCostCentre(costCentreToUpdate);
 
-        return Ok(new CostCentreViewModel(existingStatus));
+        return Ok(result);
     }
-
-    
+   
     [HttpDelete("{id}")]
     [ActionName("costCentreDelete")]
     public IActionResult CostCentreDelete(long id)
     {
-        if (_currentUser == null) // Toegangscontrole
-            return Forbidden();
-        
+		if (!MemberExists(1)) // Toegangscontrole
+			return Forbidden();
+
         // Retrieve the existing cost centre from your data store (e.g., database)
-        CostCentre? existingStatus = _context.CostCentre.Find(id);
+        var existingCostCentre = _receiptRepository.GetCostCentre(id);
         
         // Check if the cost centre with the provided ID exists
-        if (existingStatus == null)
+        if (existingCostCentre == null)
         {
             return NotFound(new
             {
@@ -172,8 +158,7 @@ public class CostCentreController : BaseController
         // Try to remove the receipt from your data store and handle if it is not possible
         try
         {
-            _context.Remove(existingStatus);
-            _context.SaveChanges();
+            _receiptRepository.DeleteCostCentre(id);
         }
         catch (Exception)
         {
@@ -190,14 +175,14 @@ public class CostCentreController : BaseController
     [HttpGet("{id}/Receipt")]
     public IActionResult CostCentreGetReceipts(long id)
     {
-        if (_currentUser == null) // Toegangscontrole
-            return Forbidden();
-        
+		if (!MemberExists(1)) // Toegangscontrole
+			return Forbidden();
+
         // Get receipt by ID
-        CostCentre? status = _context.CostCentre.Find(id);
+        var costCentreExists = _receiptRepository.GetCostCentre(id);
         
         // Check if the receipt with the provided ID exists
-        if (status == null)
+        if (costCentreExists == null)
         {
             return NotFound(new
             {
@@ -205,28 +190,13 @@ public class CostCentreController : BaseController
                 message = "Kostenpost niet gevonden"
             });
         }
-        
+
         // Get all receipts with this status
-        var receipts = _context.Receipt
-            .Where(receipt => receipt.CostCentreId == status.Id)
-            .Select(receipt => new ReceiptViewModel(receipt))
-            .ToList();
-
-        receipts.ForEach(receipt => AddForeignData(receipt));
+        var costCentres = _receiptRepository.GetReceiptsByCostCentre(id, 0, int.MaxValue);
         
-        return Ok(receipts);
+        return Ok(costCentres);
     }
     
-    
-    private bool StatusesAreEqual(CostCentre existingStatus, CostCentreViewModel updatedCostCentreViewModel)
-    {
-        // Compare relevant properties to check if the receipt is unchanged
-
-        // Check if given value is null or if they are equal
-        bool nameEqual = (updatedCostCentreViewModel.Name == null)
-                         || (existingStatus.Name == updatedCostCentreViewModel.Name);
-
-        // Compare other properties as needed
-        return nameEqual;
-    }
+	private bool MemberExists(long id) => _memberService.MemberExists(id);
+	private IActionResult Forbidden() => Forbid("Je hebt geen toegang tot deze functie");
 }

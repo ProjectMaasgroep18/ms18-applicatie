@@ -5,10 +5,12 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Maasgroep.Database.Receipts
 {
+
+	//TODO: deze gaat ook teveel doen (receipt + photo + costcentre).
     public class ReceiptRepository : IReceiptRepository
     {
-        private readonly MaasgroepContext _db;
-        public ReceiptRepository(MaasgroepContext db) 
+        private readonly ReceiptContext _db;
+        public ReceiptRepository(ReceiptContext db) 
         {
 			_db = db;
         }
@@ -32,6 +34,7 @@ namespace Maasgroep.Database.Receipts
 			
 			var idOfReceipt = _db.Database.SqlQuery<long>($"select currval('receipt.\"receiptSeq\"'::regclass)").ToList().FirstOrDefault();
 			
+			//TODO: Dit staat nu ook dubbel met photo toevoegen.
 			if (receipt.ReceiptModel.Photos != null && receipt.ReceiptModel.Photos.Count > 0) 
 			{
 				foreach (var photo in receipt.ReceiptModel.Photos)
@@ -119,6 +122,22 @@ namespace Maasgroep.Database.Receipts
 			return result;
 		}
 
+		public IEnumerable<ReceiptModel> GetReceiptsByMember(long memberId, int offset, int fetch)
+		{
+			var result = new List<ReceiptModel>();
+
+			var indexStart = new Index(offset);
+			var indexEnd = new Index(fetch);
+			var range = new Range(indexStart, indexEnd);
+			//var dbResults = _db.Receipt.Take(range).ToList(); TODO: hiero offset fixen
+			var dbResults = _db.Receipt.Where(r => r.MemberCreatedId == memberId).ToList();
+
+			foreach (var dbResult in dbResults)
+				result.Add(GetReceipt(dbResult.Id));
+
+			return result;
+		}
+
 		public bool ModifyReceipt(ReceiptModelUpdateDb receiptUpdated)
 		{
 			var receipt = _db.Receipt.Where(r => r.Id == receiptUpdated.ReceiptModel.Id).FirstOrDefault();
@@ -135,6 +154,101 @@ namespace Maasgroep.Database.Receipts
 			receipt.ReceiptStatus = receiptUpdated.ReceiptModel.StatusString!;
 
 			_db.Update(receipt);
+			_db.SaveChanges();
+
+			return true;
+		}
+
+		public long AddPhoto(PhotoModelCreateDb photo)
+		{
+			var photoToAdd = new Photo()
+			{
+				Base64Image = photo.PhotoModel.Base64Image,
+				fileExtension = photo.PhotoModel.FileExtension,
+				fileName = photo.PhotoModel.FileName,
+				ReceiptId = photo.ReceiptId,
+				MemberCreatedId = photo.Member.Id
+			};
+
+			_db.Database.BeginTransaction();
+			_db.Photo.Add(photoToAdd);
+			_db.SaveChanges();
+
+			var idOfPhoto = _db.Database.SqlQuery<long>($"select currval('receipt.\"photoSeq\"'::regclass)").ToList().FirstOrDefault();
+			_db.Database.CommitTransaction();
+
+			return idOfPhoto;
+		}
+
+		public PhotoModel GetPhoto(long id) //TODO: Dit was PhotoViewModel; ik denk dat we funcitoneel niet 1 foto willen teruggeven?
+		{
+			var result = new PhotoModel();
+
+			var photo = _db.Photo.Where(p => p.Id == id).FirstOrDefault();
+
+			if (photo == null)
+			{
+				throw new Exception("kapot");
+			}
+			else
+			{
+				result.fileExtension = photo.fileExtension;
+				result.fileName = photo.fileName;
+				result.Base64Image = photo.Base64Image;
+			}
+
+			return result;
+		}
+
+		public IEnumerable<PhotoModel> GetPhotosByReceipt(long receiptId, int offset, int fetch)
+		{
+			var result = new List<PhotoModel>();
+
+			var indexStart = new Index(offset);
+			var indexEnd = new Index(fetch);
+			var range = new Range(indexStart, indexEnd);
+			//var dbResults = _db.Receipt.Take(range).ToList(); TODO: hiero offset fixen
+			var dbResults = _db.Photo.Where(p => p.ReceiptId == receiptId).ToList();
+
+			foreach (var dbResult in dbResults)
+				result.Add(GetPhoto(dbResult.Id));
+
+			return result;
+		}
+
+		public bool DeletePhoto(long id)
+		{
+			var photoToDelete = _db.Photo.Where(p => p.Id == id).FirstOrDefault();
+
+			if (photoToDelete != null)
+			{
+				var history = CreatePhotoHistory(photoToDelete);
+
+				_db.Database.BeginTransaction();
+				_db.PhotoHistory.Add(history);
+				_db.Photo.Remove(photoToDelete);
+				_db.SaveChanges();
+				_db.Database.RollbackTransaction(); //TODO: Misschien nog iets met finally en rollback enzo.
+			}
+			else
+			{
+				return false; //TODO: In de aanroep iets mee doen
+			}
+
+			return true;
+		}
+
+		public bool AddApproval(ReceiptApprovalModelCreateDb approval)
+		{
+			var approvalToAdd = new ReceiptApproval()
+			{ 
+				Approved = approval.Approval.Approved,
+				Note = approval.Approval.Note,
+				ReceiptId = approval.Approval.ReceiptId,
+				MemberCreatedId = approval.Member.Id
+			};
+
+			_db.ReceiptApproval.Add(approvalToAdd);
 			_db.SaveChanges();
 
 			return true;
@@ -158,6 +272,56 @@ namespace Maasgroep.Database.Receipts
 			history.DateTimeDeleted = receipt.DateTimeDeleted;
 
 			return history;
+		}
+
+		private PhotoHistory CreatePhotoHistory(Photo photo)
+		{ 
+			PhotoHistory history = new PhotoHistory();
+
+			history.PhotoId = photo.Id;
+			history.ReceiptId = photo.ReceiptId;
+			history.fileExtension = photo.fileExtension;
+			history.fileName = photo.fileName;
+			history.Location = photo.Location;
+			//Geen base64 history.
+			history.MemberCreatedId = photo.MemberCreatedId;
+			history.MemberModifiedId = photo.MemberModifiedId;
+			history.MemberDeletedId = photo.MemberDeletedId;
+			history.DateTimeCreated = photo.DateTimeCreated;
+			history.DateTimeModified = photo.DateTimeModified;
+			history.DateTimeDeleted = photo.DateTimeDeleted;
+
+			return history;
+		}
+
+		public IEnumerable<CostCentreModel> GetCostCentres(int offset, int fetch)
+		{
+			throw new NotImplementedException();
+		}
+
+		public CostCentreModel GetCostCentre(long id)
+		{
+			throw new NotImplementedException();
+		}
+
+		public long AddCostCentre(CostCentreModelCreateDb costCentre)
+		{
+			throw new NotImplementedException();
+		}
+
+		public bool ModifyCostCentre(CostCentreModelUpdateDb costCentre)
+		{
+			throw new NotImplementedException();
+		}
+
+		public bool DeleteCostCentre(long id)
+		{
+			throw new NotImplementedException();
+		}
+
+		public IEnumerable<CostCentreModel> GetReceiptsByCostCentre(long costCentreId, int offset, int fetch)
+		{
+			throw new NotImplementedException();
 		}
 	}
 }

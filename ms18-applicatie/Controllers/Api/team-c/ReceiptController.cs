@@ -1,28 +1,28 @@
-﻿using Maasgroep.Database;
-using Maasgroep.Database.Receipts;
-using Maasgroep.Database.Repository.ViewModel;
-using Maasgroep.SharedKernel.Interfaces.Receipts;
+﻿using Maasgroep.SharedKernel.Interfaces.Receipts;
 using Maasgroep.SharedKernel.ViewModels.Receipts;
 using Microsoft.AspNetCore.Mvc;
+using ms18_applicatie.Services;
 
 namespace ms18_applicatie.Controllers.Api;
 
 [Route("api/v1/[controller]")]
 [ApiController]
-public class ReceiptController : BaseController
+public class ReceiptController : ControllerBase
 {
     private readonly IReceiptRepository _receiptRepository;
+    private readonly IMemberService _memberService;
 
-    public ReceiptController(MaasgroepContext context, IReceiptRepository receiptRepository) : base(context) 
+    public ReceiptController(IReceiptRepository receiptRepository, IMemberService memberService) 
     { 
         _receiptRepository = receiptRepository; 
+        _memberService = memberService;
     }
 
     [HttpGet]
     [ActionName("receiptGet")]
     public IActionResult ReceiptGet()
     {
-        if (_currentUser == null) // Toegangscontrole
+        if (!MemberExists(1)) // Toegangscontrole
             return Forbidden();
 
         var result = _receiptRepository.GetReceipts(0, int.MaxValue);
@@ -41,10 +41,10 @@ public class ReceiptController : BaseController
     [ActionName("receiptGetById")]
     public IActionResult ReceiptGetById(int id)
     {
-        if (_currentUser == null) // Toegangscontrole
-            return Forbidden();
+		if (!MemberExists(1)) // Toegangscontrole
+			return Forbidden();
 
-        var result = _receiptRepository.GetReceipt(id);
+		var result = _receiptRepository.GetReceipt(id);
 
 		if (result == null)
 			return NotFound(new
@@ -60,11 +60,11 @@ public class ReceiptController : BaseController
     [ActionName("receiptCreate")]
     public IActionResult ReceiptCreate([FromBody] ReceiptModelCreate receiptModelCreate)
     {
-        if (_currentUser == null) // Toegangscontrole
-            return Forbidden();
+		if (!MemberExists(1)) // Toegangscontrole
+			return Forbidden();
 
-        // Validate the request body
-        if (!ModelState.IsValid)
+		// Validate the request body
+		if (!ModelState.IsValid)
         {
             return BadRequest(new
             {
@@ -76,7 +76,7 @@ public class ReceiptController : BaseController
         var receiptToAdd = new ReceiptModelCreateDb()
         {
             ReceiptModel = receiptModelCreate
-        ,   Member = new Maasgroep.SharedKernel.ViewModels.Admin.Member() { Id = _currentUser.Id }
+        ,   Member = _memberService.GetMember(1)
         };
 
 		var result = _receiptRepository.AddReceipt(receiptToAdd);
@@ -88,11 +88,11 @@ public class ReceiptController : BaseController
     [ActionName("receiptUpdate")]
     public IActionResult ReceiptUpdate([FromBody] ReceiptModel receiptModel)
     {
-        if (_currentUser == null) // Toegangscontrole
-            return Forbidden();
+		if (!MemberExists(1)) // Toegangscontrole
+			return Forbidden();
 
-        // Validate the request body
-        if (!ModelState.IsValid)
+		// Validate the request body
+		if (!ModelState.IsValid)
         {
             return BadRequest(new
             {
@@ -104,7 +104,7 @@ public class ReceiptController : BaseController
         var receiptToUpdate = new ReceiptModelUpdateDb()
         {
             ReceiptModel = receiptModel,
-            Member = new Maasgroep.SharedKernel.ViewModels.Admin.Member() { Id = _currentUser.Id }
+            Member = new Maasgroep.SharedKernel.ViewModels.Admin.MemberModel() { Id = _memberService.GetMember(1).Id }
         };
 
 		var result = _receiptRepository.ModifyReceipt(receiptToUpdate);
@@ -116,11 +116,11 @@ public class ReceiptController : BaseController
     [ActionName("receiptDelete")]
     public IActionResult ReceiptDelete(long id)
     {
-        if (_currentUser == null) // Toegangscontrole
-            return Forbidden();
-        
-        // Retrieve the existing receipt from your data store (e.g., database)
-        Receipt? existingReceipt = _context.Receipt.Find(id);
+		if (!MemberExists(1)) // Toegangscontrole
+			return Forbidden();
+
+		// Retrieve the existing receipt from your data store (e.g., database)
+		ReceiptModel? existingReceipt = _receiptRepository.GetReceipt(id);
         
         // Check if the receipt with the provided ID exists
         if (existingReceipt == null)
@@ -135,8 +135,7 @@ public class ReceiptController : BaseController
         // Try to remove the receipt from your data store and handle if it is not possible
         try
         {
-            _context.Remove(existingReceipt);
-            _context.SaveChanges();
+            _receiptRepository.DeleteReceipt(existingReceipt); //TODO: deze logica moet nog gebouwd
         }
         catch (Exception)
         {
@@ -152,13 +151,13 @@ public class ReceiptController : BaseController
 
     [HttpPost("{id}/Photo")]
     [ActionName("receiptPhotosAdd")]
-    public IActionResult ReceiptAddPhoto(long id, [FromBody] PhotoViewModel photoViewModel)
+    public IActionResult ReceiptAddPhoto(long id, [FromBody] PhotoModelCreate photo)
     {
-        if (_currentUser == null) // Toegangscontrole
-            return Forbidden();
-        
-        // Validate the request body
-        if (!ModelState.IsValid)
+		if (!MemberExists(1)) // Toegangscontrole
+			return Forbidden();
+
+		// Validate the request body
+		if (!ModelState.IsValid)
         {
             return BadRequest(new
             {
@@ -166,12 +165,12 @@ public class ReceiptController : BaseController
                 message = "Invalid request body"
             });
         }
-        
-        // Get the receipt by the ID
-        Receipt? existingReceipt = _context.Receipt.Find(id);
-        
-        // Check if the receipt with the provided ID exists
-        if (existingReceipt == null)
+
+		// Get the receipt by the ID
+		ReceiptModel? existingReceipt = _receiptRepository.GetReceipt(id);
+
+		// Check if the receipt with the provided ID exists
+		if (existingReceipt == null)
         {
             return NotFound(new
             {
@@ -179,41 +178,40 @@ public class ReceiptController : BaseController
                 message = "Receipt not found"
             });
         }
-        
+
         // Create a new photo from the view model
-        var createdPhoto = Photo.FromViewModel(photoViewModel);
-        
-        // Set the receipt ID of the photo to the ID of the receipt
-        createdPhoto.ReceiptId = existingReceipt.Id;
-        
-        // Set the member created ID of the photo to the ID of the current user
-        createdPhoto.MemberCreatedId = _currentUser.Id;
-        
+        var createdPhoto = new PhotoModelCreateDb()
+        { 
+            PhotoModel = photo,
+            ReceiptId = id,
+            Member = _memberService.GetMember(1)
+        };
+
         // Add the photo to the database
-        _context.Photo.Add(createdPhoto);
-        _context.SaveChanges();
+        var createPhotoId = _receiptRepository.AddPhoto(createdPhoto);
+        var photoToReturn = _receiptRepository.GetPhoto(createPhotoId);
         
         // Return the created photo
-        return Created($"/api/v1/receipt/{id}/Photo/{createdPhoto.Id}", new
+        return Created($"/api/v1/receipt/{id}/Photo/{createPhotoId}", new
         {
             status = 201,
             message = "Photo created",
-            photo = new PhotoViewModel(createdPhoto)
-        });
+            photo = photoToReturn
+		});
     }
 
     [HttpGet("{id}/Photo")]
     [ActionName("receiptPhotosGet")]
     public IActionResult ReceiptGetPhotos(long id)
     {
-        if (_currentUser == null) // Toegangscontrole
-            return Forbidden();
-        
-        // Get the receipt by the ID
-        Receipt? existingReceipt = _context.Receipt.Find(id);
-        
-        // Check if the receipt with the provided ID exists
-        if (existingReceipt == null)
+		if (!MemberExists(1)) // Toegangscontrole
+			return Forbidden();
+
+		// Get the receipt by the ID
+		ReceiptModel? existingReceipt = _receiptRepository.GetReceipt(id);
+
+		// Check if the receipt with the provided ID exists
+		if (existingReceipt == null)
         {
             return NotFound(new
             {
@@ -221,25 +219,22 @@ public class ReceiptController : BaseController
                 message = "Receipt not found"
             });
         }
-        
+
         // Get all photos for the receipt
-        var photos = _context.Photo
-            .Where(photo => photo.ReceiptId == existingReceipt.Id)
-            .Select(photo => new PhotoViewModel(photo))
-            .ToList();
-        
+        var photos = _receiptRepository.GetPhotosByReceipt(id, 0, int.MaxValue);
+
         return Ok(photos);
     }
 
     [HttpPost("{id}/Approve")]
     [ActionName("approveReceipt")]
-    public IActionResult ApproveReceipt(long id, [FromBody] ReceiptApprovalViewModel approvalViewModel)
+    public IActionResult ApproveReceipt(long id, [FromBody] ReceiptApprovalModelCreate approvalModel)
     {
-        if (_currentUser == null) // Toegangscontrole
-            return Forbidden();
-        
-        // Validate the request body
-        if (!ModelState.IsValid)
+		if (!MemberExists(1)) // Toegangscontrole
+			return Forbidden();
+
+		// Validate the request body
+		if (!ModelState.IsValid)
         {
             return BadRequest(new
             {
@@ -247,12 +242,12 @@ public class ReceiptController : BaseController
                 message = "Invalid request body"
             });
         }
-        
-        // Get the receipt by the ID
-        Receipt? existingReceipt = _context.Receipt.Find(id);
-        
-        // Check if the receipt with the provided ID exists
-        if (existingReceipt == null)
+
+		// Get the receipt by the ID
+		ReceiptModel? existingReceipt = _receiptRepository.GetReceipt(id);
+
+		// Check if the receipt with the provided ID exists
+		if (existingReceipt == null)
         {
             return NotFound(new
             {
@@ -262,41 +257,25 @@ public class ReceiptController : BaseController
         }
 
         // Create a new approval record from the view model
-        var approval = ReceiptApproval.FromViewModel(approvalViewModel);
-        
-        // Set the receipt ID of the approval to the ID of the receipt
-        approval.ReceiptId = existingReceipt.Id;
-        
-        // Set the member created ID of the photo to the ID of the current user
-        approval.MemberCreatedId = _currentUser.Id;
-        
+        var approval = new ReceiptApprovalModelCreateDb()
+        { 
+            Approval = approvalModel,
+            Member = _memberService.GetMember(1)
+		};
+
         // Add the photo to the database
-        _context.ReceiptApproval.Add(approval);
-        _context.SaveChanges();
+        _receiptRepository.AddApproval(approval);
         
         // Return the created photo
         return Created($"/api/v1/receipt/{id}", new
         {
             status = 201,
             message = "Receipt approved",
-            approval = new ReceiptApprovalViewModel(approval),
+            approval = approvalModel,
         });
     }
+
+    private bool MemberExists(long id) => _memberService.MemberExists(id);
+    private IActionResult Forbidden() => Forbid("Je hebt geen toegang tot deze functie");
     
-    private static bool ReceiptsAreEqual(Receipt existingReceipt, ReceiptViewModel updatedReceiptViewModel)
-    {
-        // Compare relevant properties to check if the receipt is unchanged
-
-        // Check if given value is null or if they are equal
-        bool amountEqual = (updatedReceiptViewModel.Amount == null)
-                           || (existingReceipt.Amount == updatedReceiptViewModel.Amount);
-
-        // Check if given value is null or if they are equal
-        bool noteEqual = (updatedReceiptViewModel.Note == null)
-                         || (existingReceipt.Note == updatedReceiptViewModel.Note);
-
-        // Compare other properties as needed
-        return amountEqual
-               && noteEqual;
-    }
 }

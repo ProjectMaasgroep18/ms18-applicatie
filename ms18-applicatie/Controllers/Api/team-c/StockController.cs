@@ -1,34 +1,37 @@
-﻿using Maasgroep.Database;
-using Maasgroep.Database.Repository.ViewModel;
+﻿using Maasgroep.Database.Repository.ViewModel;
 using Maasgroep.Database.Order;
 using Microsoft.AspNetCore.Mvc;
+using Maasgroep.Database;
 
 namespace ms18_applicatie.Controllers.Api;
 
 [Route("api/v1/[controller]")]
 [ApiController]
-public class StockController : BaseController
+public class StockController : ControllerBase
 {
-    public StockController(MaasgroepContext context) : base(context)
+	private readonly StockContext _context;
+
+	public StockController(StockContext context) 
     {
+        _context = context;
     }
 
     [HttpGet("{productId}")]
     [ActionName("stockGet")]
     public IActionResult StockGet(long productId)
     {
-        if (_currentUser == null) // Toegangscontrole
-            return Forbidden();
+        //if (_currentUser == null) // Toegangscontrole
+        //    return Forbidden();
 
         var dbRecProduct = _context.Product
             .FirstOrDefault(dbRec => dbRec.Id == productId);
 
-        if (dbRecProduct == null)
-            return NotFound(new
-            {
-                status = 404,
-                message = "Product niet gevonden"
-            });
+        //if (dbRecProduct == null)
+        //    return NotFound(new
+        //    {
+        //        status = 404,
+        //        message = "Product niet gevonden"
+        //    });
 
         var dbRec = _context.Stock
             .FirstOrDefault(dbRec => dbRec.ProductId == productId);
@@ -40,7 +43,7 @@ public class StockController : BaseController
             {
                 Product = dbRecProduct,
                 Quantity = 0,
-                MemberCreatedId = _currentUser.Id
+                MemberCreatedId = -1
             };
 
 
@@ -67,8 +70,8 @@ public class StockController : BaseController
     [ActionName("stockIncrease")]
     public IActionResult StockIncrease(long productId, [FromBody] StockQuantityViewModel quantityModel)
     {
-        if (_currentUser == null) // Toegangscontrole
-            return Forbidden();
+        //if (_currentUser == null) // Toegangscontrole
+        //    return Forbidden();
 
         // Validate the request body
         if (!ModelState.IsValid)
@@ -100,7 +103,7 @@ public class StockController : BaseController
             {
                 Product = dbRecProduct,
                 Quantity = quantityModel.Quantity,
-                MemberCreatedId = _currentUser.Id
+                MemberCreatedId = -1
             };
 
             // Try and add the stock to the database and return it
@@ -146,8 +149,8 @@ public class StockController : BaseController
     [ActionName("stockDecrease")]
     public IActionResult StockDecrease(long productId, [FromBody] StockQuantityViewModel quantityModel)
     {
-        if (_currentUser == null) // Toegangscontrole
-            return Forbidden();
+        //if (_currentUser == null) // Toegangscontrole
+        //    return Forbidden();
 
         // Validate the request body
         if (!ModelState.IsValid)
@@ -179,7 +182,7 @@ public class StockController : BaseController
             {
                 Product = dbRecProduct,
                 Quantity = quantityModel.Quantity,
-                MemberCreatedId = _currentUser.Id
+                MemberCreatedId = -1
             };
 
             // Try and add the stock to the database and return it

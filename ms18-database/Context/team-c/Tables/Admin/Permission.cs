@@ -1,8 +1,8 @@
 
 namespace Maasgroep.Database.Members
 {
-    public record Permission : GenericRecordActive
-    {
+    public record Permission : MemberRecordActive
+	{
         public long Id { get; set; }
         public string Name { get; set; }
 

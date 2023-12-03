@@ -1,17 +1,17 @@
-﻿using Maasgroep.Database;
-using Maasgroep.Database.Repository.ViewModel;
+﻿using Maasgroep.Database.Repository.ViewModel;
 using Maasgroep.Database.Order;
 using Microsoft.AspNetCore.Mvc;
+using Maasgroep.Database;
 
-namespace ms18_applicatie.Controllers.Api.team_c
+namespace ms18_applicatie.Controllers.Api
 {
     [Route("api/[controller]")]
     [ApiController]
     public class OrderController : ControllerBase
     {
-        private readonly MaasgroepContext _context;
+        private readonly StockContext _context;
 
-        public OrderController(MaasgroepContext context)
+        public OrderController(StockContext context)
         {
             _context = context;
         }
@@ -76,7 +76,7 @@ namespace ms18_applicatie.Controllers.Api.team_c
                     _context.StockHistory.Add(currentStockToHistory);
 
                     currentStock.Quantity = stock.Quantity;
-                    currentStock.MemberModifiedId = _context.Member.Where(x => x.Id == 2).FirstOrDefault().Id;
+                    currentStock.MemberModifiedId = -1;
                     currentStock.DateTimeModified = DateTime.UtcNow;
 
                     _context.Update(currentStock);
