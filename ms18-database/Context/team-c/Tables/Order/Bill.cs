@@ -1,7 +1,8 @@
-﻿
+﻿using Maasgroep.Database.Members;
+
 namespace Maasgroep.Database.Order
 {
-    public record Bill : OrderRecordActive
+    public record Bill : GenericRecordActive
 	{
         public long Id { get; set; }
         public long? MemberId { get; set; }

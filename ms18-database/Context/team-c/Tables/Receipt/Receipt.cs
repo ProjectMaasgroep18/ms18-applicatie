@@ -1,7 +1,7 @@
 ﻿
 namespace Maasgroep.Database.Receipts
 {
-    public record Receipt : ReceiptActiveRecord
+    public record Receipt : GenericRecordActive
 	{
 		public long Id { get; set; }
 		public decimal? Amount { get; set; }

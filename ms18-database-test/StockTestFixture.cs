@@ -29,11 +29,8 @@ namespace Maasgroep.Database.Test
 			}
 		}
 
-		public StockContext CreateContext()
-			=> new StockContext(ConnectionString);
-
-		public MemberContext CreateMemberContext() 
-			=> new MemberContext(ConnectionString);
+		public MaasgroepContext CreateContext()
+			=> new MaasgroepContext(ConnectionString);
 
 		private void InitDatabase()
 		{

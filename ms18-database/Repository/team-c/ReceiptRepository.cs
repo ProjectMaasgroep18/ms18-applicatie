@@ -9,12 +9,12 @@ namespace Maasgroep.Database.Receipts
 	//TODO: deze gaat ook teveel doen (receipt + photo + costcentre).
     public class ReceiptRepository : IReceiptRepository
     {
-        private readonly ReceiptContext _db;
-        public ReceiptRepository(ReceiptContext db) 
+        private readonly MaasgroepContext _db;
+        public ReceiptRepository(MaasgroepContext db) 
         {
 			_db = db;
         }
-		public long AddReceipt(ReceiptModelCreateDb receipt)
+		public long Add(ReceiptModelCreateDb receipt)
 		{
 			var costCentre = _db.CostCentre.Where(c => c.Name == receipt.ReceiptModel.CostCentre).FirstOrDefault();
 			if (costCentre == null) throw new Exception("kapot!");
@@ -138,7 +138,7 @@ namespace Maasgroep.Database.Receipts
 			return result;
 		}
 
-		public bool ModifyReceipt(ReceiptModelUpdateDb receiptUpdated)
+		public bool Modify(ReceiptModelUpdateDb receiptUpdated)
 		{
 			var receipt = _db.Receipt.Where(r => r.Id == receiptUpdated.ReceiptModel.Id).FirstOrDefault();
 
@@ -159,7 +159,7 @@ namespace Maasgroep.Database.Receipts
 			return true;
 		}
 
-		public long AddPhoto(PhotoModelCreateDb photo)
+		public long Add(PhotoModelCreateDb photo)
 		{
 			var photoToAdd = new Photo()
 			{
@@ -304,12 +304,12 @@ namespace Maasgroep.Database.Receipts
 			throw new NotImplementedException();
 		}
 
-		public long AddCostCentre(CostCentreModelCreateDb costCentre)
+		public long Add(CostCentreModelCreateDb costCentre)
 		{
 			throw new NotImplementedException();
 		}
 
-		public bool ModifyCostCentre(CostCentreModelUpdateDb costCentre)
+		public bool Modify(CostCentreModelUpdateDb costCentre)
 		{
 			throw new NotImplementedException();
 		}

@@ -1,7 +1,7 @@
 ﻿
 namespace Maasgroep.Database.Receipts
 {
-    public record ReceiptApproval : ReceiptActiveRecord
+    public record ReceiptApproval : GenericRecordActive
 	{
 		public long ReceiptId { get; set; }
 		public string? Note { get; set; }

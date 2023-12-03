@@ -1,13 +1,21 @@
 using Maasgroep.Database;
 using Maasgroep.SharedKernel.Interfaces.Receipts;
+using Maasgroep.SharedKernel.Interfaces.Members;
+using Maasgroep.SharedKernel.Interfaces.Orders;
 using Maasgroep.Database.Receipts;
+using Maasgroep.Database.Members;
+using Maasgroep.Database.Orders;
+using ms18_applicatie.Services;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add database context
-builder.Services.AddDbContext<ReceiptContext>();
-builder.Services.AddDbContext<StockContext>();
+builder.Services.AddDbContext<MaasgroepContext>();
 builder.Services.AddTransient<IReceiptRepository, ReceiptRepository>();
+builder.Services.AddTransient<IMemberRepository, MemberRepository>();
+builder.Services.AddTransient<IOrderRepository, OrderRepository>();
+builder.Services.AddTransient<IMemberService, MemberService>();
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();

@@ -5,11 +5,16 @@ namespace Maasgroep.Database.Members
 {
     public class MemberRepository : IMemberRepository
     {
-		private readonly MemberContext _memberContext;
+		private readonly MaasgroepContext _memberContext;
 
-		public MemberRepository(MemberContext memberContext)
+		public MemberRepository(MaasgroepContext memberContext)
         {
 			_memberContext = memberContext;
+		}
+
+		public long CreateMember(MemberModelCreateDb member)
+		{
+			return 1;
 		}
 
 		public MemberModel GetMember(long id)

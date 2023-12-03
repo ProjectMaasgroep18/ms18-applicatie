@@ -79,7 +79,7 @@ public class ReceiptController : ControllerBase
         ,   Member = _memberService.GetMember(1)
         };
 
-		var result = _receiptRepository.AddReceipt(receiptToAdd);
+		var result = _receiptRepository.Add(receiptToAdd);
 
         return Ok(result);
     }
@@ -107,7 +107,7 @@ public class ReceiptController : ControllerBase
             Member = new Maasgroep.SharedKernel.ViewModels.Admin.MemberModel() { Id = _memberService.GetMember(1).Id }
         };
 
-		var result = _receiptRepository.ModifyReceipt(receiptToUpdate);
+		var result = _receiptRepository.Modify(receiptToUpdate);
 
         return Ok(result);
     }
@@ -188,7 +188,7 @@ public class ReceiptController : ControllerBase
         };
 
         // Add the photo to the database
-        var createPhotoId = _receiptRepository.AddPhoto(createdPhoto);
+        var createPhotoId = _receiptRepository.Add(createdPhoto);
         var photoToReturn = _receiptRepository.GetPhoto(createPhotoId);
         
         // Return the created photo

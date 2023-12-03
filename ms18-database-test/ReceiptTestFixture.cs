@@ -33,8 +33,8 @@ namespace Maasgroep.Database.Test
             }
         }
 
-        public ReceiptContext CreateContext()
-            => new ReceiptContext(ConnectionString);
+        public MaasgroepContext CreateContext()
+            => new MaasgroepContext(ConnectionString);
 
         private void InitDatabase()
         {

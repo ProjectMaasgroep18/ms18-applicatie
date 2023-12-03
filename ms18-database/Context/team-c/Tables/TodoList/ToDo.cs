@@ -1,7 +1,8 @@
-﻿
+﻿using Maasgroep.Database.Members;
+
 namespace Maasgroep.Database.ToDoList
 {
-    public record ToDo : TodoRecordActive
+    public record ToDo : GenericRecordActive
 	{
         public long Id { get; set; }
         public string Action { get; set; }
