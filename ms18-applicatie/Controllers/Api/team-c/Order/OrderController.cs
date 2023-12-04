@@ -30,7 +30,7 @@ namespace ms18_applicatie.Controllers.Api
             return Ok(allStock);
         }
 
-        [HttpGet]
+        [HttpGet("{id}")]
         [ActionName("stockGetById")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(StockModel))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -44,7 +44,7 @@ namespace ms18_applicatie.Controllers.Api
             return Ok(stockCurrent);
         }
 
-        [HttpPost]
+        [HttpPut]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public IActionResult ModifyStock(StockModel stock)
@@ -79,7 +79,7 @@ namespace ms18_applicatie.Controllers.Api
             }
         }
 
-        [HttpPost]
+        [HttpDelete]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public IActionResult DeleteStock(long id)

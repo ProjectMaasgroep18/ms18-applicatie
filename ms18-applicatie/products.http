@@ -18,3 +18,7 @@ Content-Type: application/json
 ###
 DELETE https://localhost:7059/api/v1/Product/14
 
+###
+GET https://localhost:7059/api/v1/Stock/1
+
+###

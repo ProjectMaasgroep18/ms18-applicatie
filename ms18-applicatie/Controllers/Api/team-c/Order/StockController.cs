@@ -34,7 +34,11 @@ public class StockController : ControllerBase
         //    });
 
         var stockje = _orderRepository.GetStock(productId);
-		long result = 0;
+		var result = new StockModel()
+		{
+			Product = productje,
+			Quantity = stockje.Quantity
+		};
 
 		if (stockje == null)
         {
