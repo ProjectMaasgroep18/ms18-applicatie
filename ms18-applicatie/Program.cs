@@ -1,11 +1,14 @@
+using Google.Apis.Auth.OAuth2;
+using Google.Apis.Calendar.v3;
+using Google.Apis.Services;
+using Microsoft.Extensions.Configuration;
 using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
-builder.Services.AddSwaggerGen();
-
+    
 builder.Services.AddSwaggerGen(s =>
 {
   
@@ -22,6 +25,26 @@ builder.Services.AddCors(options =>
             builder.AllowAnyHeader();
             builder.AllowAnyMethod();
         });
+});
+
+builder.Services.Configure<CalendarService>(builder.Configuration.GetSection(nameof(CalendarService)));
+
+builder.Services.AddSingleton((x) =>
+{
+    string[] scopes = new string[] { CalendarService.Scope.Calendar, CalendarService.Scope.CalendarEvents };
+    GoogleCredential credential;
+    using (var stream = new FileStream("./Controllers/team-a/service_accountInfo.json", FileMode.Open, FileAccess.Read))
+    {
+        credential = GoogleCredential.FromStream(stream)
+            .CreateScoped(scopes);
+    }
+
+    //Create the Calendar service.
+    return new CalendarService(new BaseClientService.Initializer()
+    {
+        HttpClientInitializer = credential,
+        ApplicationName = "project c",
+    });
 });
 
 var app = builder.Build();

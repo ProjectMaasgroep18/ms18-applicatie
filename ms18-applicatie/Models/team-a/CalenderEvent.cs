@@ -37,15 +37,16 @@ namespace ms18_applicatie.Models.team_a
         public string? Location { get; set; } = string.Empty;
 
 
-        public Event ToGoogleEvent(Event googleEvent = null)
+        public Event ToGoogleEvent(Event? googleEvent = null)
         {
-            if (googleEvent == null)
-                googleEvent = new Event();
+            googleEvent ??= new Event();
 
             googleEvent.Summary = Title;
             googleEvent.Description = Description;
-            googleEvent.Start.DateTime = StarDateTime;
-            googleEvent.End.DateTime = EndDateTime;
+            googleEvent.Start = new();
+            googleEvent.End = new();
+            googleEvent.Start.DateTimeDateTimeOffset = StarDateTime;
+            googleEvent.End!.DateTimeDateTimeOffset = EndDateTime;
             googleEvent.Location = Location;
 
             return googleEvent;

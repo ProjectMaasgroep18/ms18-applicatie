@@ -1,130 +1,197 @@
 ﻿using Google.Apis.Calendar.v3;
 using Google.Apis.Calendar.v3.Data;
-using Google.Apis.Services;
 using Microsoft.AspNetCore.Mvc;
 using ms18_applicatie.Models.team_a;
-using Google.Apis.Auth.OAuth2;
+using Microsoft.Extensions.Options;
 
 namespace ms18_applicatie.Controllers.team_a
 {
     [Route("Calendar")]
     public class CalendarController : Controller
     {
-        private readonly ILogger<HomeController> _logger;
-
         private readonly CalendarSettings _calendarSettings;
         private readonly CalendarService _calendarService;
-        public CalendarController(ILogger<HomeController> logger, IConfiguration configuration)
+        private readonly ILogger<CalendarController> _logger;
+        public CalendarController(ILogger<CalendarController> logger, CalendarService calendarService, IOptions<CalendarSettings> calendarSettings)
         {
             _logger = logger;
-
-            _calendarSettings =
-                configuration.GetSection("Calendar").Get<CalendarSettings>();
-
-            string[] scopes = new string[] { CalendarService.Scope.Calendar, CalendarService.Scope.CalendarEvents };
-            GoogleCredential credential;
-            using (var stream = new FileStream("./Controllers/team-a/service_accountInfo.json", FileMode.Open, FileAccess.Read))
-            {
-                credential = GoogleCredential.FromStream(stream)
-                    .CreateScoped(scopes);
-            }
-
-            //Create the Calendar service.
-            _calendarService = new CalendarService(new BaseClientService.Initializer()
-            {
-                HttpClientInitializer = credential,
-                ApplicationName = "project c",
-            });
+            _calendarService = calendarService;
+            _calendarSettings = calendarSettings.Value;
         }
 
         [HttpDelete]
         [Route("Event")]
         public async Task<IActionResult> RemoveEvent(Calenders calenderName, string id)
         {
-            var request = _calendarService.Events.Delete(GetCalenderId(calenderName), id);
-            await request.ExecuteAsync();
-            return new OkResult();
+            try
+            {
+
+                var request = _calendarService.Events.Delete(GetCalenderId(calenderName), id);
+                await request.ExecuteAsync();
+                return new OkResult();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "delete Event call exception");
+                return new BadRequestResult();
+            }
         }
 
         [HttpPatch]
         [Route("Event")]
         public async Task<IActionResult> EditEvent(Calenders calenderName, CalenderEvent calendarEvent)
         {
+            try
+            {
 
-            var request = _calendarService.Events.Get(GetCalenderId(calenderName), calendarEvent.Id);
-            var googleCalendarEvent = await request.ExecuteAsync();
-            if (googleCalendarEvent == null)
-                return new NotFoundResult();
+                var request = _calendarService.Events.Get(GetCalenderId(calenderName), calendarEvent.Id);
+                var googleCalendarEvent = await request.ExecuteAsync();
+                if (googleCalendarEvent == null)
+                    return new NotFoundResult();
 
-            googleCalendarEvent = calendarEvent.ToGoogleEvent(googleCalendarEvent);
+                googleCalendarEvent = calendarEvent.ToGoogleEvent(googleCalendarEvent);
 
-            var requestUpdate = _calendarService.Events.Patch(googleCalendarEvent, GetCalenderId(calenderName), calendarEvent.Id);
-            await requestUpdate.ExecuteAsync();
-            return new OkResult();
+                var requestUpdate = _calendarService.Events.Patch(googleCalendarEvent, GetCalenderId(calenderName), calendarEvent.Id);
+                await requestUpdate.ExecuteAsync();
+                return new OkResult();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "patch Event call exception");
+                return new BadRequestResult();
+            }
         }
 
         [HttpPost]
         [Route("Event")]
         public async Task<IActionResult> AddEvent(Calenders calenderName, CalenderEvent calendarEvent)
         {
-            var googleEvent = calendarEvent.ToGoogleEvent();
+            try
+            {
 
-            EventsResource.InsertRequest request = _calendarService.Events.Insert(googleEvent, GetCalenderId(calenderName));
-            Event createdEvent = await request.ExecuteAsync();
-            return new OkResult();
+                var googleEvent = calendarEvent.ToGoogleEvent();
+
+                EventsResource.InsertRequest request = _calendarService.Events.Insert(googleEvent, GetCalenderId(calenderName));
+                Event createdEvent = await request.ExecuteAsync();
+                return new OkResult();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "post Event call exception");
+                return new BadRequestResult();
+            }
         }
 
         [HttpGet]
         [Route("welpen")]
         public async Task<IActionResult> Welpen()
         {
-            var events = await GetCalendar(GetCalenderId(Calenders.Welpen), false);
-            return new OkObjectResult(events);
+            try
+            {
+
+                var events = await GetCalendar(GetCalenderId(Calenders.Welpen), false);
+                return new OkObjectResult(events);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "welpen call exception");
+                return new BadRequestResult();
+            }
         }
 
         [HttpGet]
         [Route("matrozen")]
         public async Task<IActionResult> Matrozen()
         {
-            var events = await GetCalendar(GetCalenderId(Calenders.Matrozen), false);
-            return new OkObjectResult(events);
+            try
+            {
+                var events = await GetCalendar(GetCalenderId(Calenders.Matrozen), false);
+                return new OkObjectResult(events);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "matrozen call exception");
+                return new BadRequestResult();
+            }
         }
 
         [HttpGet]
         [Route("ZeeVerkenners")]
         public async Task<IActionResult> ZeeVerkenners()
         {
-            var events = await GetCalendar(GetCalenderId(Calenders.ZeeVerkenners), true);
-            return new OkObjectResult(events);
+            try
+            {
+                var events = await GetCalendar(GetCalenderId(Calenders.ZeeVerkenners), false);
+                return new OkObjectResult(events);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "zeeverkenners call exception");
+                return new BadRequestResult();
+            }
         }
 
         [HttpGet]
         [Route("stam")]
         public async Task<IActionResult> Stam()
         {
-            var events = await GetCalendar(GetCalenderId(Calenders.Stam), false);
-            return new OkObjectResult(events);
+            try
+            {
+
+                var events = await GetCalendar(GetCalenderId(Calenders.Stam), false);
+                return new OkObjectResult(events);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "stam call exception");
+                return new BadRequestResult();
+            }
         }
 
         [HttpGet]
         [Route("global")]
         public async Task<IActionResult> Global()
         {
-            var events = await GetCalendar(GetCalenderId(Calenders.Stam), false);
-            return new OkObjectResult(events);
+            try
+            {
+
+                var events = await GetCalendar(GetCalenderId(Calenders.Global), false);
+                return new OkObjectResult(events);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "global call exception");
+                return new BadRequestResult();
+            }
         }
 
         [HttpGet]
         [Route("all")]
         public async Task<IActionResult> All()
         {
-            var events = new List<CalenderEvent>();
-            events.AddRange(await GetCalendar(GetCalenderId(Calenders.Matrozen)));
-            events.AddRange(await GetCalendar(GetCalenderId(Calenders.Welpen)));
-            events.AddRange(await GetCalendar(GetCalenderId(Calenders.ZeeVerkenners)));
-            events.AddRange(await GetCalendar(GetCalenderId(Calenders.Stam)));
-            events.AddRange(await GetCalendar(GetCalenderId(Calenders.Global)));
-            return new OkObjectResult(events);
+            try
+            {
+
+                var tasks = new List<Task>();
+
+                var events = new List<CalenderEvent>();
+                tasks.Add(Task.Run(async () => events.AddRange(await GetCalendar(GetCalenderId(Calenders.Matrozen)))));
+                tasks.Add(Task.Run(async () => events.AddRange(await GetCalendar(GetCalenderId(Calenders.Welpen)))));
+                tasks.Add(Task.Run(async () =>
+                    events.AddRange(await GetCalendar(GetCalenderId(Calenders.ZeeVerkenners)))));
+                tasks.Add(Task.Run(async () => events.AddRange(await GetCalendar(GetCalenderId(Calenders.Stam)))));
+                tasks.Add(Task.Run(async () => events.AddRange(await GetCalendar(GetCalenderId(Calenders.Global)))));
+
+                Task t = Task.WhenAll(tasks);
+                await t.WaitAsync(CancellationToken.None);
+
+                return new OkObjectResult(events);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "all call exception");
+                return new BadRequestResult();
+            }
         }
 
         private async Task<List<CalenderEvent>> GetCalendar(string calenderId, bool filterGlobal = true)
