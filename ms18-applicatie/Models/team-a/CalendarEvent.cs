@@ -1,14 +1,16 @@
 ﻿using Google.Apis.Calendar.v3.Data;
+using ms18_applicatie.Controllers.team_a;
 
 namespace ms18_applicatie.Models.team_a
 {
     public class CalendarEvent
     {
-        public CalendarEvent(Event googleEvent)
+        public CalendarEvent(Event googleEvent, CalendarController.Calendars calendarId)
         {
             Id = googleEvent.Id;
             Description = googleEvent.Description;
             Location = googleEvent.Location;
+            CalendarId = calendarId;
             if (googleEvent.Start.Date != null && googleEvent.End.Date != null)
             {
                 StarDateTime = DateTime.Parse(googleEvent.Start.Date);
@@ -32,9 +34,10 @@ namespace ms18_applicatie.Models.team_a
         public DateTime StarDateTime { get; set; }
         public DateTime EndDateTime { get; set; }
         public string Title { get; set; } = string.Empty;
-        public string? Description { get; set; } = string.Empty;
+        public string? Description { get; set; } = null;
         public string Id { get; set; } = string.Empty;
-        public string? Location { get; set; } = string.Empty;
+        public string? Location { get; set; } = null;
+        public CalendarController.Calendars CalendarId { get; set; }
 
 
         public Event ToGoogleEvent(Event? googleEvent = null)
