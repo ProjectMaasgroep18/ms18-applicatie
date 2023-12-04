@@ -2,7 +2,6 @@
 using Maasgroep.SharedKernel.Interfaces.Orders;
 using Maasgroep.SharedKernel.ViewModels.Orders;
 using ms18_applicatie.Services;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace ms18_applicatie.Controllers.Api;
 
