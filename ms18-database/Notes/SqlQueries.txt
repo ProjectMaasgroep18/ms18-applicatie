@@ -9,16 +9,32 @@
 select * from "admin"."member";
 select * from "admin"."permission";
 select * from "admin"."memberPermission";
+
 select * from "receipt"."costCentre";
-select * from "receipt"."status";
 select * from "receipt"."receipt";
 select * from "receipt"."approval";
+select * from "receipt"."photo";
+
+select * from "order"."product";
+select * from "order"."stock";
+select * from "order"."productPrice";
+select * from "order"."line";
+select * from "order"."bill";
+
+
 
 /*
+delete from "order"."product";
+delete from "order"."stock";
+delete from "order"."productPrice";
+delete from "order"."line";
+delete from "order"."bill";
+
+delete from "receipt"."photo";
 delete from "receipt"."approval";
 delete from "receipt"."receipt";
 delete from "receipt"."costCentre";
-delete from "receipt"."status";
+
 delete from "admin"."memberPermission";
 delete from "admin"."permission";
 delete from "admin"."member";

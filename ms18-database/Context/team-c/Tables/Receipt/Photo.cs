@@ -1,9 +1,8 @@
-﻿using Maasgroep.Database.Repository.ViewModel;
-
+﻿
 namespace Maasgroep.Database.Receipts
 {
     public record Photo : GenericRecordActive
-    {
+	{
         public long Id { get; set; }
         public long ReceiptId { get; set; }
         public string Base64Image { get; set; }
@@ -14,18 +13,6 @@ namespace Maasgroep.Database.Receipts
         
         //Ef
         public Receipt Receipt { get; set; }  
-        
-        public static Photo FromViewModel(PhotoViewModel viewModel)
-        {
-            return new Photo
-            {
-                Id = viewModel.Id,
-                ReceiptId = viewModel.ReceiptId,
-                fileExtension = viewModel.fileExtension,
-                fileName = viewModel.fileName,
-                Base64Image = viewModel.Base64Image,
-            };
-        }
-        
+                
     }
 }

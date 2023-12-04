@@ -2,7 +2,7 @@
 namespace Maasgroep.Database.Members
 {
     public record Permission : GenericRecordActive
-    {
+	{
         public long Id { get; set; }
         public string Name { get; set; }
 

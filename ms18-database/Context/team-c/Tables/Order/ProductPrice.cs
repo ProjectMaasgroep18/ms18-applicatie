@@ -1,8 +1,8 @@
 ﻿
-namespace Maasgroep.Database.Order
+namespace Maasgroep.Database.Orders
 {
     public record ProductPrice : GenericRecordActive
-    {
+	{
         public long ProductId { get; set; }
         public decimal Price { get; set; }
 

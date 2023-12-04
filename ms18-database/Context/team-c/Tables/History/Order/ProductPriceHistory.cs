@@ -1,5 +1,5 @@
 ﻿
-namespace Maasgroep.Database.Order
+namespace Maasgroep.Database.Orders
 {
     public record ProductPriceHistory : GenericRecordHistory
     {

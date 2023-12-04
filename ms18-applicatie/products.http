@@ -1,0 +1,20 @@
+
+GET https://localhost:7059/api/v1/Product/1
+###
+
+GET https://localhost:7059/api/v1/Product
+
+
+###
+
+
+POST https://localhost:7059/api/v1/Product
+Content-Type: application/json
+
+{   
+    "Name": "TestProductToDelete"
+}
+
+###
+DELETE https://localhost:7059/api/v1/Product/14
+

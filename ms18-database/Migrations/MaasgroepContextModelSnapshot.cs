@@ -63,7 +63,7 @@ namespace Maasgroep.Database.Migrations
                         .HasColumnType("bigint")
                         .HasDefaultValueSql("nextval('admin.\"memberSeq\"')");
 
-                    b.Property<DateTime?>("DateTimeCreated")
+                    b.Property<DateTime>("DateTimeCreated")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
                         .HasDefaultValueSql("now()");
@@ -910,9 +910,6 @@ namespace Maasgroep.Database.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<long?>("StoreId")
-                        .HasColumnType("bigint");
-
                     b.HasKey("Id");
 
                     b.HasIndex("CostCentreId");
@@ -933,6 +930,9 @@ namespace Maasgroep.Database.Migrations
                 {
                     b.Property<long>("ReceiptId")
                         .HasColumnType("bigint");
+
+                    b.Property<bool>("Approved")
+                        .HasColumnType("boolean");
 
                     b.Property<DateTime>("DateTimeCreated")
                         .ValueGeneratedOnAdd()
@@ -975,6 +975,9 @@ namespace Maasgroep.Database.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bigint")
                         .HasDefaultValueSql("nextval('\"receiptHistory\".\"approvalSeq\"')");
+
+                    b.Property<bool>("Approved")
+                        .HasColumnType("boolean");
 
                     b.Property<DateTime>("DateTimeCreated")
                         .HasColumnType("timestamp with time zone");
@@ -1061,9 +1064,6 @@ namespace Maasgroep.Database.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
                         .HasDefaultValueSql("now()");
-
-                    b.Property<long?>("StoreId")
-                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 

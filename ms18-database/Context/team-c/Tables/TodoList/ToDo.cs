@@ -3,7 +3,7 @@
 namespace Maasgroep.Database.ToDoList
 {
     public record ToDo : GenericRecordActive
-    {
+	{
         public long Id { get; set; }
         public string Action { get; set; }
         public DateTime? Deadline { get; set; }

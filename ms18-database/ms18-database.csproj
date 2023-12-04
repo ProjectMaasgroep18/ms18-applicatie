@@ -21,4 +21,8 @@
     <Folder Include="Notes\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\ms18-sharedKernel\ms18-sharedKernel.csproj" />
+  </ItemGroup>
+
 </Project>

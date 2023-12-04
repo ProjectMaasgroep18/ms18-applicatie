@@ -1,137 +1,230 @@
-﻿using Maasgroep.Database.Order;
+﻿using Microsoft.EntityFrameworkCore;
+using Maasgroep.SharedKernel.Interfaces.Orders;
+using Maasgroep.SharedKernel.ViewModels.Orders;
 
 namespace Maasgroep.Database.Orders
 {
-    public class OrderRepository : IOrderRepository
-    {
-        public void AanmakenTestData()
-        {
-            CreateTestDataProduct();
-            CreateTestDataStock();
-            CreateTestDataProductPrice();
-            CreateTestDataBill();
-            CreateTestDataLine();
-        }
+	public class OrderRepository : IOrderRepository
+	{
+		private readonly MaasgroepContext _orderContext;
 
-        public MaasgroepContext CreateContext()
-        {
-            return new MaasgroepContext();
-        }
+		public OrderRepository(MaasgroepContext orderContext)
+		{
+			_orderContext = orderContext;
+		}
 
-        private void CreateTestDataProduct()
-        {
-            using (var db = CreateContext())
-            {
-                var member = db.Member.Where(m => m.Name == "Borgia").FirstOrDefault()!;
+		#region Product
 
-                var products = new List<Product>()
-                {
-                    new Product() { Name = "Duifis Scharrelnootjes", MemberCreated = member }
-                ,   new Product() { Name = "Vorta Cola", MemberCreated = member }
-                ,   new Product() { Name = "Jasmijn Thee", MemberCreated = member }
-                };
+		public ProductModel GetProduct(long id)
+		{
+			var product = _orderContext.Product.Where(p => p.Id == id).FirstOrDefault();
 
-                db.Product.AddRange(products);
+			var result = new ProductModel()
+			{
+				Id = product.Id,
+				Name = product.Name
+			};
 
-                var rows = db.SaveChanges();
-                Console.WriteLine($"Number of rows: {rows}");
-            }
-        }
+			return result;
+		}
 
-        private void CreateTestDataStock()
-        {
-            using (var db = CreateContext())
-            {
-                var member = db.Member.Where(m => m.Name == "Borgia").FirstOrDefault()!;
+		public IEnumerable<ProductModel> GetProducts(int offset, int fetch)
+		{
+			var result = new List<ProductModel>();
 
-                var product1 = db.Product.Where(p => p.Name == "Duifis Scharrelnootjes").FirstOrDefault();
-                var product2 = db.Product.Where(p => p.Name == "Vorta Cola").FirstOrDefault();
+			var products = _orderContext.Product.ToList();
 
-                var stockToAdd = new List<Stock>()
-                {
-                    new Stock() { MemberCreated = member, Product = product1, Quantity = 5 }
-                ,   new Stock() { MemberCreated = member, Product = product2, Quantity = 10 }
-                };
+			foreach (var product in products)
+				result.Add(GetProduct(product.Id));
 
-                db.Stock.AddRange(stockToAdd);
+			return result;
+		}
 
-                var rows = db.SaveChanges();
-                Console.WriteLine($"Number of rows: {rows}");
-            }
-        }
+		public long Add(ProductModelCreateDb productToCreate)
+		{
+			var productToAdd = new Product()
+			{
+				MemberCreatedId = productToCreate.Member.Id,
+				Name = productToCreate.Product.Name
+			};
 
-        private void CreateTestDataProductPrice()
-        {
-            using (var db = CreateContext())
-            {
-                var member = db.Member.Where(m => m.Name == "Borgia").FirstOrDefault()!;
+			_orderContext.Database.BeginTransaction();
 
-                var product1 = db.Product.Where(p => p.Name == "Duifis Scharrelnootjes").FirstOrDefault();
-                var product2 = db.Product.Where(p => p.Name == "Vorta Cola").FirstOrDefault();
+			_orderContext.Product.Add(productToAdd);
+			_orderContext.SaveChanges();
 
-                var priceToAdd = new List<ProductPrice>()
-                {
-                    new ProductPrice() { MemberCreated = member, Product = product1, Price = 5.5m }
-                ,   new ProductPrice() { MemberCreated = member, Product = product2, Price = 2.5m }
-                };
+			var idOfProduct = _orderContext.Database.SqlQuery<long>($"select currval('order.\"productSeq\"'::regclass)").ToList().FirstOrDefault();
 
-                db.ProductPrice.AddRange(priceToAdd);
+			_orderContext.Database.CommitTransaction();
 
-                var rows = db.SaveChanges();
-                Console.WriteLine($"Number of rows: {rows}");
-            }
-        }
+			return idOfProduct;
+		}
 
-        private void CreateTestDataBill()
-        {
-            using (var db = CreateContext())
-            {
-                var member = db.Member.Where(m => m.Name == "Borgia").FirstOrDefault()!;
-                var member1 = db.Member.Where(m => m.Name == "Borgia").FirstOrDefault()!;
-                var member2 = db.Member.Where(m => m.Name == "da Gama").FirstOrDefault()!;
+		public bool Modify(ProductModelUpdateDb productToUpdate)
+		{
+			var product = _orderContext.Product.Where(r => r.Id == productToUpdate.Product.Id).FirstOrDefault();
 
-                var billToAdd = new List<Bill>()
-                {
-                    new Bill() { MemberCreated = member, IsGuest = false, Member = member1 }
-                ,   new Bill() { MemberCreated = member, IsGuest = false, Member = member2 }
-                ,   new Bill() { MemberCreated = member, IsGuest = true, Name = "Neefje van Donald", Note = "Meteen betaald in Duckaten" }
-                };
+			if (product == null) throw new Exception("kapot!");
 
-                db.Bills.AddRange(billToAdd);
+			_orderContext.Database.BeginTransaction();
+			_orderContext.ProductHistory.Add(CreateProductHistory(product));
+			_orderContext.SaveChanges();
 
-                var rows = db.SaveChanges();
-                Console.WriteLine($"Number of rows: {rows}");
-            }
-        }
+			product.Name = productToUpdate.Product.Name;
+			product.MemberModifiedId = productToUpdate.Member.Id;
+			product.DateTimeModified = DateTime.UtcNow;
 
-        private void CreateTestDataLine()
-        {
-            using (var db = CreateContext())
-            {
-                var member = db.Member.Where(m => m.Name == "Borgia").FirstOrDefault()!;
-                var member1 = db.Member.Where(m => m.Name == "Borgia").FirstOrDefault()!;
-                var member2 = db.Member.Where(m => m.Name == "da Gama").FirstOrDefault()!;
+			_orderContext.Update(product);
+			_orderContext.SaveChanges();
+			_orderContext.Database.CommitTransaction();
 
-                var bill1 = db.Bills.Where(b => b.MemberId == member1.Id).FirstOrDefault()!;
-                var bill2 = db.Bills.Where(b => b.MemberId == member2.Id).FirstOrDefault()!;
-                var bill3 = db.Bills.Where(b => b.IsGuest).FirstOrDefault()!;
+			return true;
+		}
 
-                var product1 = db.Product.Where(p => p.Name == "Duifis Scharrelnootjes").FirstOrDefault();
-                var product2 = db.Product.Where(p => p.Name == "Vorta Cola").FirstOrDefault();
+		public bool Delete(ProductModelDeleteDb productToDelete)
+		{
+			var product = _orderContext.Product.Where(p => p.Id == productToDelete.Product.Id).FirstOrDefault();
 
-                var linesToAdd = new List<Line>()
-                {
-                    new Line() { Bill = bill1, Product = product1, Quantity = 1, MemberCreated = member }
-                ,   new Line() { Bill = bill2, Product = product2, Quantity = 2, MemberCreated = member }
-                ,   new Line() { Bill = bill3, Product = product1, Quantity = 3, MemberCreated = member }
-                ,   new Line() { Bill = bill3, Product = product2, Quantity = 4, MemberCreated = member }
-                };
+			_orderContext.Database.BeginTransaction();
 
-                db.OrderLines.AddRange(linesToAdd);
+			_orderContext.ProductHistory.Add(CreateProductHistory(product));
+			_orderContext.SaveChanges();
 
-                var rows = db.SaveChanges();
-                Console.WriteLine($"Number of rows: {rows}");
-            }
-        }
-    }
+			product.DateTimeDeleted = DateTime.UtcNow;
+			product.MemberDeletedId = productToDelete.Member.Id;
+			_orderContext.Product.Update(product);
+			_orderContext.SaveChanges();
+
+			_orderContext.Database.CommitTransaction();
+
+			return true;
+		}
+
+		#endregion
+
+		#region Stock
+
+		public IEnumerable<StockModel> GetStock(int offset, int fetch)
+		{
+			var stock = _orderContext.Stock.ToList();
+
+			var result = new List<StockModel>();
+
+			foreach (var item in stock)
+				result.Add(GetStock(item.ProductId));
+
+			return result;
+		}
+
+		public StockModel GetStock(long id)
+		{
+			var stock = _orderContext.Stock.Where(p => p.ProductId == id).FirstOrDefault();
+			var product = GetProduct(id);
+
+			var result = new StockModel()
+			{
+				Product = product,
+				Quantity = stock.Quantity
+			};
+
+			return result;
+		}
+
+		public long Add(StockModelCreateDb stockToCreate)
+		{
+			var stockToAdd = new Stock()
+			{
+				MemberCreatedId = stockToCreate.Member.Id,
+				Quantity = stockToCreate.Stock.Quantity,
+				ProductId = stockToCreate.Stock.ProductId
+			};
+
+			_orderContext.Database.BeginTransaction();
+
+			_orderContext.Stock.Add(stockToAdd);
+			_orderContext.SaveChanges();
+
+			var idOfProduct = _orderContext.Database.SqlQuery<long>($"select currval('order.\"stockSeq\"'::regclass)").ToList().FirstOrDefault();
+
+			_orderContext.Database.CommitTransaction();
+
+			return idOfProduct;
+		}
+
+		public bool Modify(StockModelUpdateDb stockToUpdate)
+		{
+			var stock = _orderContext.Stock.Where(s => s.ProductId == stockToUpdate.Stock.Product.Id).FirstOrDefault();
+
+			if (stock == null) throw new Exception("kapot!");
+
+			_orderContext.Database.BeginTransaction();
+			_orderContext.StockHistory.Add(CreateStockHistory(stock));
+			_orderContext.SaveChanges();
+
+			stock.Quantity = stockToUpdate.Stock.Quantity;
+			stock.MemberModifiedId = stockToUpdate.Member.Id;
+			stock.DateTimeModified = DateTime.UtcNow;
+
+			_orderContext.Update(stock);
+			_orderContext.SaveChanges();
+			_orderContext.Database.CommitTransaction();
+
+			return true;
+		}
+
+		public bool Delete(StockModelDeleteDb stockToDelete)
+		{
+			var stock = _orderContext.Stock.Where(s => s.ProductId == stockToDelete.Stock.Product.Id).FirstOrDefault();
+
+			_orderContext.Database.BeginTransaction();
+
+			_orderContext.StockHistory.Add(CreateStockHistory(stock));
+			_orderContext.SaveChanges();
+
+			stock.DateTimeDeleted = DateTime.UtcNow;
+			stock.MemberDeletedId = stockToDelete.Member.Id;
+			_orderContext.Stock.Update(stock);
+			_orderContext.SaveChanges();
+
+			_orderContext.Database.CommitTransaction();
+
+			return true;
+		}
+
+		#endregion
+
+		private ProductHistory CreateProductHistory(Product product)
+		{
+			var history = new ProductHistory();
+
+			history.ProductId = product.Id;
+			history.Name = product.Name;
+
+			history.MemberCreatedId = product.MemberCreatedId;
+			history.MemberModifiedId = product.MemberModifiedId;
+			history.MemberDeletedId = product.MemberDeletedId;
+			history.DateTimeCreated = product.DateTimeCreated;
+			history.DateTimeModified = product.DateTimeModified;
+			history.DateTimeDeleted = product.DateTimeDeleted;
+
+			return history;
+		}
+
+		private StockHistory CreateStockHistory(Stock stock)
+		{
+			var history = new StockHistory();
+
+			history.ProductId = stock.ProductId;
+			history.Quantity = stock.Quantity;
+
+			history.MemberCreatedId = stock.MemberCreatedId;
+			history.MemberModifiedId = stock.MemberModifiedId;
+			history.MemberDeletedId = stock.MemberDeletedId;
+			history.DateTimeCreated = stock.DateTimeCreated;
+			history.DateTimeModified = stock.DateTimeModified;
+			history.DateTimeDeleted = stock.DateTimeDeleted;
+
+			return history;
+		}
+	}
 }
