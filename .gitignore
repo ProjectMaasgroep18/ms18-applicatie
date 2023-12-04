@@ -3,3 +3,9 @@
 /ms18-applicatie/obj
 /ms18-applicatie/bin
 /ms18-applicatie/Controllers/team-a/service_accountInfo.json
+/ms18-applicatie-console/obj/
+/ms18-applicatie-console/bin/
+/ms18-database/obj
+/ms18-database/bin
+/ms18-sharedKernel/obj
+/ms18-sharedKernel/bin
