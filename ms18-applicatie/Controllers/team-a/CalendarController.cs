@@ -25,8 +25,7 @@ namespace ms18_applicatie.Controllers.team_a
         {
             try
             {
-
-                var request = _calendarService.Events.Delete(GetCalenderId(calenderName), id);
+                var request = _calendarService.Events.Delete(GetCalendarId(calenderName), id);
                 await request.ExecuteAsync();
                 return new OkResult();
             }
@@ -39,19 +38,18 @@ namespace ms18_applicatie.Controllers.team_a
 
         [HttpPatch]
         [Route("Event")]
-        public async Task<IActionResult> EditEvent(Calenders calenderName, CalenderEvent calendarEvent)
+        public async Task<IActionResult> EditEvent(Calenders calenderName, CalendarEvent calendarEvent)
         {
             try
             {
-
-                var request = _calendarService.Events.Get(GetCalenderId(calenderName), calendarEvent.Id);
+                var request = _calendarService.Events.Get(GetCalendarId(calenderName), calendarEvent.Id);
                 var googleCalendarEvent = await request.ExecuteAsync();
                 if (googleCalendarEvent == null)
                     return new NotFoundResult();
 
                 googleCalendarEvent = calendarEvent.ToGoogleEvent(googleCalendarEvent);
 
-                var requestUpdate = _calendarService.Events.Patch(googleCalendarEvent, GetCalenderId(calenderName), calendarEvent.Id);
+                var requestUpdate = _calendarService.Events.Patch(googleCalendarEvent, GetCalendarId(calenderName), calendarEvent.Id);
                 await requestUpdate.ExecuteAsync();
                 return new OkResult();
             }
@@ -64,14 +62,12 @@ namespace ms18_applicatie.Controllers.team_a
 
         [HttpPost]
         [Route("Event")]
-        public async Task<IActionResult> AddEvent(Calenders calenderName, CalenderEvent calendarEvent)
+        public async Task<IActionResult> AddEvent(Calenders calenderName, CalendarEvent calendarEvent)
         {
             try
             {
-
                 var googleEvent = calendarEvent.ToGoogleEvent();
-
-                EventsResource.InsertRequest request = _calendarService.Events.Insert(googleEvent, GetCalenderId(calenderName));
+                EventsResource.InsertRequest request = _calendarService.Events.Insert(googleEvent, GetCalendarId(calenderName));
                 Event createdEvent = await request.ExecuteAsync();
                 return new OkResult();
             }
@@ -88,8 +84,7 @@ namespace ms18_applicatie.Controllers.team_a
         {
             try
             {
-
-                var events = await GetCalendar(GetCalenderId(Calenders.Welpen), false);
+                var events = await GetCalendar(GetCalendarId(Calenders.Welpen), false);
                 return new OkObjectResult(events);
             }
             catch (Exception ex)
@@ -105,7 +100,7 @@ namespace ms18_applicatie.Controllers.team_a
         {
             try
             {
-                var events = await GetCalendar(GetCalenderId(Calenders.Matrozen), false);
+                var events = await GetCalendar(GetCalendarId(Calenders.Matrozen), false);
                 return new OkObjectResult(events);
             }
             catch (Exception ex)
@@ -121,7 +116,7 @@ namespace ms18_applicatie.Controllers.team_a
         {
             try
             {
-                var events = await GetCalendar(GetCalenderId(Calenders.ZeeVerkenners), false);
+                var events = await GetCalendar(GetCalendarId(Calenders.ZeeVerkenners), false);
                 return new OkObjectResult(events);
             }
             catch (Exception ex)
@@ -138,7 +133,7 @@ namespace ms18_applicatie.Controllers.team_a
             try
             {
 
-                var events = await GetCalendar(GetCalenderId(Calenders.Stam), false);
+                var events = await GetCalendar(GetCalendarId(Calenders.Stam), false);
                 return new OkObjectResult(events);
             }
             catch (Exception ex)
@@ -155,7 +150,7 @@ namespace ms18_applicatie.Controllers.team_a
             try
             {
 
-                var events = await GetCalendar(GetCalenderId(Calenders.Global), false);
+                var events = await GetCalendar(GetCalendarId(Calenders.Global), false);
                 return new OkObjectResult(events);
             }
             catch (Exception ex)
@@ -174,13 +169,13 @@ namespace ms18_applicatie.Controllers.team_a
 
                 var tasks = new List<Task>();
 
-                var events = new List<CalenderEvent>();
-                tasks.Add(Task.Run(async () => events.AddRange(await GetCalendar(GetCalenderId(Calenders.Matrozen)))));
-                tasks.Add(Task.Run(async () => events.AddRange(await GetCalendar(GetCalenderId(Calenders.Welpen)))));
+                var events = new List<CalendarEvent>();
+                tasks.Add(Task.Run(async () => events.AddRange(await GetCalendar(GetCalendarId(Calenders.Matrozen)))));
+                tasks.Add(Task.Run(async () => events.AddRange(await GetCalendar(GetCalendarId(Calenders.Welpen)))));
                 tasks.Add(Task.Run(async () =>
-                    events.AddRange(await GetCalendar(GetCalenderId(Calenders.ZeeVerkenners)))));
-                tasks.Add(Task.Run(async () => events.AddRange(await GetCalendar(GetCalenderId(Calenders.Stam)))));
-                tasks.Add(Task.Run(async () => events.AddRange(await GetCalendar(GetCalenderId(Calenders.Global)))));
+                    events.AddRange(await GetCalendar(GetCalendarId(Calenders.ZeeVerkenners)))));
+                tasks.Add(Task.Run(async () => events.AddRange(await GetCalendar(GetCalendarId(Calenders.Stam)))));
+                tasks.Add(Task.Run(async () => events.AddRange(await GetCalendar(GetCalendarId(Calenders.Global)))));
 
                 Task t = Task.WhenAll(tasks);
                 await t.WaitAsync(CancellationToken.None);
@@ -194,9 +189,9 @@ namespace ms18_applicatie.Controllers.team_a
             }
         }
 
-        private async Task<List<CalenderEvent>> GetCalendar(string calenderId, bool filterGlobal = true)
+        private async Task<List<CalendarEvent>> GetCalendar(string calenderId, bool filterGlobal = true)
         {
-            var calenderEvents = new List<CalenderEvent>();
+            var calenderEvents = new List<CalendarEvent>();
 
             var request = _calendarService.Events.List(calenderId);
             var response = await request.ExecuteAsync();
@@ -204,7 +199,7 @@ namespace ms18_applicatie.Controllers.team_a
 
             if (!filterGlobal)
             {
-                request = _calendarService.Events.List(GetCalenderId(Calenders.Global));
+                request = _calendarService.Events.List(GetCalendarId(Calenders.Global));
                 response = await request.ExecuteAsync();
                 listItems.AddRange(response.Items);
             }
@@ -215,13 +210,13 @@ namespace ms18_applicatie.Controllers.team_a
                     continue;
 
 
-                var calenderEvent = new CalenderEvent(eventsItem);
+                var calenderEvent = new CalendarEvent(eventsItem);
                 calenderEvents.Add(calenderEvent);
             }
             return calenderEvents;
         }
 
-        private string GetCalenderId(Calenders calenderName)
+        private string GetCalendarId(Calenders calenderName)
         {
             switch (calenderName)
             {

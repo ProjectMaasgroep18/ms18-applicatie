@@ -2,9 +2,9 @@
 
 namespace ms18_applicatie.Models.team_a
 {
-    public class CalenderEvent
+    public class CalendarEvent
     {
-        public CalenderEvent(Event googleEvent)
+        public CalendarEvent(Event googleEvent)
         {
             Id = googleEvent.Id;
             Description = googleEvent.Description;
@@ -25,7 +25,7 @@ namespace ms18_applicatie.Models.team_a
             }
             Title = googleEvent.Summary;
         }
-        public CalenderEvent()
+        public CalendarEvent()
         {
 
         }
