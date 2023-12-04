@@ -2,16 +2,19 @@ using Google.Apis.Auth.OAuth2;
 using Google.Apis.Calendar.v3;
 using Google.Apis.Services;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
+using ms18_applicatie.Models.team_a;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
-    
+
 builder.Services.AddSwaggerGen(s =>
 {
-  
+
     s.SwaggerDoc("v1", new OpenApiInfo { Title = "m18-applicatie", Version = "v1" });
     s.CustomOperationIds(e => e.ActionDescriptor.RouteValues["action"]);
 });
@@ -27,17 +30,19 @@ builder.Services.AddCors(options =>
         });
 });
 
-builder.Services.Configure<CalendarService>(builder.Configuration.GetSection(nameof(CalendarService)));
+builder.Services.Configure<CalendarSettings>(builder.Configuration.GetSection(nameof(CalendarSettings)));
 
 builder.Services.AddSingleton((x) =>
 {
-    string[] scopes = new string[] { CalendarService.Scope.Calendar, CalendarService.Scope.CalendarEvents };
-    GoogleCredential credential;
-    using (var stream = new FileStream("./Controllers/team-a/service_accountInfo.json", FileMode.Open, FileAccess.Read))
-    {
-        credential = GoogleCredential.FromStream(stream)
-            .CreateScoped(scopes);
-    }
+    var settings = builder.Configuration
+        .GetSection(nameof(CalendarSettings))
+        .Get<CalendarSettings>();
+
+    string[] scopes = { CalendarService.Scope.Calendar, CalendarService.Scope.CalendarEvents };
+    using var stream =
+           new FileStream(settings.FilePath, FileMode.Open, FileAccess.Read);
+    var credential = GoogleCredential.FromStream(stream).CreateScoped(scopes);
+    
 
     //Create the Calendar service.
     return new CalendarService(new BaseClientService.Initializer()
