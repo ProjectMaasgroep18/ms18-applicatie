@@ -207,9 +207,17 @@ namespace ms18_applicatie.Controllers.team_a
             {
                 request = _calendarService.Events.List(GetCalendarId(Calendars.Global));
                 response = await request.ExecuteAsync();
-                listItems.AddRange(response.Items);
-            }
+                listItems = response.Items.ToList();
 
+                foreach (var eventsItem in listItems)
+                {
+                    if (eventsItem == null)
+                        continue;
+
+                    var calenderEvent = new CalendarEvent(eventsItem, calenderId);
+                    calenderEvents.Add(calenderEvent);
+                }
+            }
             return calenderEvents;
         }
 
