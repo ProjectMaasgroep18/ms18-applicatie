@@ -22,7 +22,10 @@ namespace Maasgroep.Database.Orders
 			var result = new ProductModel()
 			{
 				Id = product.Id,
-				Name = product.Name
+				Name = product.Name,
+				Price = product.Price,
+				Color = product.Color,
+				Icon = product.Icon
 			};
 
 			return result;
@@ -36,8 +39,8 @@ namespace Maasgroep.Database.Orders
 
 			foreach (var product in products)
 				result.Add(GetProduct(product.Id));
-
-			return result;
+			
+			return result.OrderBy(p => p.Id).ToList();
 		}
 
 		public long Add(ProductModelCreateDb productToCreate)
@@ -45,7 +48,10 @@ namespace Maasgroep.Database.Orders
 			var productToAdd = new Product()
 			{
 				MemberCreatedId = productToCreate.Member.Id,
-				Name = productToCreate.Product.Name
+				Name = productToCreate.Product.Name,
+				Price = productToCreate.Product.Price ?? 0,
+				Color = productToCreate.Product.Color,
+				Icon = productToCreate.Product.Icon,
 			};
 
 			_orderContext.Database.BeginTransaction();
@@ -71,6 +77,11 @@ namespace Maasgroep.Database.Orders
 			_orderContext.SaveChanges();
 
 			product.Name = productToUpdate.Product.Name;
+			product.Color = productToUpdate.Product.Color;
+			product.Icon = productToUpdate.Product.Icon;
+			product.Price = productToUpdate.Product.Price;
+			
+			
 			product.MemberModifiedId = productToUpdate.Member.Id;
 			product.DateTimeModified = DateTime.UtcNow;
 

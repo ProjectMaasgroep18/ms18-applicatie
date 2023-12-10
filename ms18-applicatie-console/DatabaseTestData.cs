@@ -11,7 +11,7 @@ namespace Maasgroep.Console
         private readonly ReceiptRepository _receipts;
         private readonly OrderRepository _orders;
 
-        internal DatabaseTestData() 
+        internal DatabaseTestData()
         {
             _members = new MemberRepository(new MaasgroepContext());
             _receipts = new ReceiptRepository(new MaasgroepContext());
@@ -20,302 +20,334 @@ namespace Maasgroep.Console
 
         internal void CreateTestDataAll()
         {
-			AanmakenTestDataMembers();
-			AanmakenTestDataReceipts();
-			AanmakenTestDataOrders();
-		}
+            AanmakenTestDataMembers();
+            AanmakenTestDataReceipts();
+            AanmakenTestDataOrders();
+        }
 
 
-
-		private void AanmakenTestDataMembers()
+        private void AanmakenTestDataMembers()
         {
-			CreateTestDataMember();
-			CreateTestDataPermissions();
-			CreateTestDataMemberPermissions();
-		}
-		private void AanmakenTestDataReceipts()
-		{
-			CreateTestDataCostCentre();
-			CreateTestDataReceipt();
-			CreateTestDataReceiptApproval();
-		}
+            CreateTestDataMember();
+            CreateTestDataPermissions();
+            CreateTestDataMemberPermissions();
+        }
 
-		private void AanmakenTestDataOrders()
-		{
-			CreateTestDataProduct();
-			CreateTestDataStock();
-			CreateTestDataProductPrice();
-			CreateTestDataBill();
-			CreateTestDataLine();
-		}
+        private void AanmakenTestDataReceipts()
+        {
+            CreateTestDataCostCentre();
+            CreateTestDataReceipt();
+            CreateTestDataReceiptApproval();
+        }
 
-		private MaasgroepContext CreateContext()
-		{
-			return new MaasgroepContext();
-		}
+        private void AanmakenTestDataOrders()
+        {
+            CreateTestDataProduct();
+            CreateTestDataStock();
+            CreateTestDataProductPrice();
+            CreateTestDataBill();
+            CreateTestDataLine();
+        }
 
-		#region Member_Admin
-		private void CreateTestDataMember()
-		{
-			using (var db = CreateContext())
-			{
-				var members = new List<Member>()
-				{
-					new Member() { Name = "Borgia" }
-				};
+        private MaasgroepContext CreateContext()
+        {
+            return new MaasgroepContext();
+        }
 
-				db.Member.AddRange(members);
+        #region Member_Admin
 
-				db.SaveChanges();
+        private void CreateTestDataMember()
+        {
+            using (var db = CreateContext())
+            {
+                var members = new List<Member>()
+                {
+                    new Member() { Name = "Borgia" }
+                };
 
-				var borgia = db.Member.FirstOrDefault()!;
+                db.Member.AddRange(members);
 
-				members = new List<Member>()
-				{
-					new Member() { Name = "da Gama", MemberCreated = borgia }
-				,   new Member() { Name = "Albuquerque", MemberCreated = borgia }
-				};
+                db.SaveChanges();
 
-				borgia.MemberCreated = borgia;
-				borgia.MemberModified = borgia;
-				borgia.DateTimeModified = DateTime.UtcNow;
+                var borgia = db.Member.FirstOrDefault()!;
 
-				db.Member.AddRange(members);
+                members = new List<Member>()
+                {
+                    new Member() { Name = "da Gama", MemberCreated = borgia },
+                    new Member() { Name = "Albuquerque", MemberCreated = borgia }
+                };
 
-				var rows = db.SaveChanges();
-				System.Console.WriteLine($"Number of rows: {rows}");
-			}
-		}
-		private void CreateTestDataPermissions()
-		{
-			using (var db = CreateContext())
-			{
-				var borgia = db.Member.FirstOrDefault()!;
+                borgia.MemberCreated = borgia;
+                borgia.MemberModified = borgia;
+                borgia.DateTimeModified = DateTime.UtcNow;
 
-				var permissions = new List<Permission>()
-				{
-					new Permission() { Name = "receipt.approve", MemberCreated = borgia}
-				,   new Permission() { Name = "receipt.reject", MemberCreated = borgia}
-				,   new Permission() { Name = "receipt.handIn", MemberCreated = borgia}
-				,   new Permission() { Name = "receipt.payOut", MemberCreated = borgia}
-				};
+                db.Member.AddRange(members);
 
-				db.Permission.AddRange(permissions);
+                var rows = db.SaveChanges();
+                System.Console.WriteLine($"Number of rows: {rows}");
+            }
+        }
 
-				var rows = db.SaveChanges();
-				System.Console.WriteLine($"Number of rows: {rows}");
-			}
-		}
-		private void CreateTestDataMemberPermissions()
-		{
-			using (var db = CreateContext())
-			{
-				var borgia = db.Member.FirstOrDefault()!;
-				var daGama = db.Member.Where(m => m.Name == "da Gama").FirstOrDefault()!;
-				var alb = db.Member.Where(m => m.Name == "Albuquerque").FirstOrDefault()!;
+        private void CreateTestDataPermissions()
+        {
+            using (var db = CreateContext())
+            {
+                var borgia = db.Member.FirstOrDefault()!;
 
-				var approve = db.Permission.Where(p => p.Name == "receipt.approve").FirstOrDefault()!;
-				var reject = db.Permission.Where(p => p.Name == "receipt.reject").FirstOrDefault()!;
-				var handIn = db.Permission.Where(p => p.Name == "receipt.handIn").FirstOrDefault()!;
+                var permissions = new List<Permission>()
+                {
+                    new Permission() { Name = "receipt.approve", MemberCreated = borgia },
+                    new Permission() { Name = "receipt.reject", MemberCreated = borgia },
+                    new Permission() { Name = "receipt.handIn", MemberCreated = borgia },
+                    new Permission() { Name = "receipt.payOut", MemberCreated = borgia }
+                };
 
-				var memberPermissions = new List<MemberPermission>()
-				{
-					new MemberPermission() { Member = daGama, Permission = approve, MemberCreated = borgia }
-				,   new MemberPermission() { Member = daGama, Permission = reject, MemberCreated = borgia }
-				,   new MemberPermission() { Member = alb, Permission = handIn, MemberCreated = borgia }
-				};
+                db.Permission.AddRange(permissions);
 
-				db.MemberPermission.AddRange(memberPermissions);
+                var rows = db.SaveChanges();
+                System.Console.WriteLine($"Number of rows: {rows}");
+            }
+        }
 
-				var rows = db.SaveChanges();
-				System.Console.WriteLine($"Number of rows: {rows}");
-			}
-		}
-		#endregion
+        private void CreateTestDataMemberPermissions()
+        {
+            using (var db = CreateContext())
+            {
+                var borgia = db.Member.FirstOrDefault()!;
+                var daGama = db.Member.Where(m => m.Name == "da Gama").FirstOrDefault()!;
+                var alb = db.Member.Where(m => m.Name == "Albuquerque").FirstOrDefault()!;
 
-		#region Receipt
-		private void CreateTestDataCostCentre()
-		{
-			using (var db = CreateContext())
-			{
-				var member = db.Member.Where(m => m.Name == "Borgia").FirstOrDefault()!;
+                var approve = db.Permission.Where(p => p.Name == "receipt.approve").FirstOrDefault()!;
+                var reject = db.Permission.Where(p => p.Name == "receipt.reject").FirstOrDefault()!;
+                var handIn = db.Permission.Where(p => p.Name == "receipt.handIn").FirstOrDefault()!;
 
-				var costCentres = new List<CostCentre>()
-				{
-					new CostCentre() { Name = "Bestuur Maasgroep", MemberCreated = member }
-				,   new CostCentre() { Name = "Penningmeester", MemberCreated = member }
-				,   new CostCentre() { Name = "Moeder van Joopie", MemberCreated = member }
-				};
+                var memberPermissions = new List<MemberPermission>()
+                {
+                    new MemberPermission() { Member = daGama, Permission = approve, MemberCreated = borgia },
+                    new MemberPermission() { Member = daGama, Permission = reject, MemberCreated = borgia },
+                    new MemberPermission() { Member = alb, Permission = handIn, MemberCreated = borgia }
+                };
 
-				db.CostCentre.AddRange(costCentres);
+                db.MemberPermission.AddRange(memberPermissions);
 
-				var rows = db.SaveChanges();
-				System.Console.WriteLine($"Number of rows: {rows}");
-			}
-		}
-		private void CreateTestDataReceipt()
-		{
-			using (var db = CreateContext())
-			{
-				var member = db.Member.Where(m => m.Name == "Borgia").FirstOrDefault()!;
-				var costCentre1 = db.CostCentre.Where(cc => cc.Name == "Moeder van Joopie").FirstOrDefault()!;
-				var costCentre2 = db.CostCentre.Where(cc => cc.Name == "Penningmeester").FirstOrDefault()!;
+                var rows = db.SaveChanges();
+                System.Console.WriteLine($"Number of rows: {rows}");
+            }
+        }
 
-				var receipts = new List<Receipt>()
-						{
-							new Receipt()   { MemberCreated = member, ReceiptStatus = "Ingediend"
-											, CostCentre = costCentre1
-											}
-						,   new Receipt()   { MemberCreated = member, ReceiptStatus = "Goedgekeurd"
-											, CostCentre = costCentre2
-											}
-						,   new Receipt()   { MemberCreated = member, ReceiptStatus = "Afgekeurd"
-											, CostCentre = costCentre1
-											}
-						};
+        #endregion
 
-				db.Receipt.AddRange(receipts);
+        #region Receipt
 
-				var rows = db.SaveChanges();
-				System.Console.WriteLine($"Number of rows: {rows}");
-			}
-		}
-		private void CreateTestDataReceiptApproval()
-		{
-			using (var db = CreateContext())
-			{
-				var member = db.Member.Where(m => m.Name == "Borgia").FirstOrDefault()!;
-				var costCentre = db.CostCentre.Where(cc => cc.Name == "Moeder van Joopie").FirstOrDefault()!;
-				var receiptGoedgekeurd = db.Receipt.Where(r => r.ReceiptStatus == "Goedgekeurd").FirstOrDefault()!;
-				var receiptAfgekeurd = db.Receipt.Where(r => r.ReceiptStatus == "Afgekeurd").FirstOrDefault()!;
+        private void CreateTestDataCostCentre()
+        {
+            using (var db = CreateContext())
+            {
+                var member = db.Member.Where(m => m.Name == "Borgia").FirstOrDefault()!;
 
-				var receiptApprovals = new List<ReceiptApproval>()
-				{
-					new ReceiptApproval() { Receipt = receiptGoedgekeurd, Note = "Lekker duidelijk met zo'n foto!", MemberCreated = member }
-				,   new ReceiptApproval() { Receipt = receiptAfgekeurd, Note = "Dit is niet het soort plug dat we nodig hebben.", MemberCreated = member }
-				};
+                var costCentres = new List<CostCentre>()
+                {
+                    new CostCentre() { Name = "Bestuur Maasgroep", MemberCreated = member },
+                    new CostCentre() { Name = "Penningmeester", MemberCreated = member },
+                    new CostCentre() { Name = "Moeder van Joopie", MemberCreated = member }
+                };
 
-				db.ReceiptApproval.AddRange(receiptApprovals);
+                db.CostCentre.AddRange(costCentres);
 
-				var rows = db.SaveChanges();
-				System.Console.WriteLine($"Number of rows: {rows}");
-			}
-		}
-		#endregion
+                var rows = db.SaveChanges();
+                System.Console.WriteLine($"Number of rows: {rows}");
+            }
+        }
 
-		#region Order
-		private void CreateTestDataProduct()
-		{
-			using (var db = CreateContext())
-			{
-				var member = db.Member.Where(m => m.Name == "Borgia").FirstOrDefault()!;
+        private void CreateTestDataReceipt()
+        {
+            using (var db = CreateContext())
+            {
+                var member = db.Member.Where(m => m.Name == "Borgia").FirstOrDefault()!;
+                var costCentre1 = db.CostCentre.Where(cc => cc.Name == "Moeder van Joopie").FirstOrDefault()!;
+                var costCentre2 = db.CostCentre.Where(cc => cc.Name == "Penningmeester").FirstOrDefault()!;
 
-				var products = new List<Product>()
-				{
-					new Product() { Name = "Duifis Scharrelnootjes", MemberCreated = member }
-				,   new Product() { Name = "Vorta Cola", MemberCreated = member }
-				,   new Product() { Name = "Jasmijn Thee", MemberCreated = member }
-				};
+                var receipts = new List<Receipt>()
+                {
+                    new Receipt()
+                    {
+                        MemberCreated = member, ReceiptStatus = "Ingediend", CostCentre = costCentre1
+                    },
+                    new Receipt()
+                    {
+                        MemberCreated = member, ReceiptStatus = "Goedgekeurd", CostCentre = costCentre2
+                    },
+                    new Receipt()
+                    {
+                        MemberCreated = member, ReceiptStatus = "Afgekeurd", CostCentre = costCentre1
+                    }
+                };
 
-				db.Product.AddRange(products);
+                db.Receipt.AddRange(receipts);
 
-				var rows = db.SaveChanges();
-				System.Console.WriteLine($"Number of rows: {rows}");
-			}
-		}
-		private void CreateTestDataStock()
-		{
-			using (var db = CreateContext())
-			{
-				var member = db.Member.Where(m => m.Name == "Borgia").FirstOrDefault()!;
+                var rows = db.SaveChanges();
+                System.Console.WriteLine($"Number of rows: {rows}");
+            }
+        }
 
-				var product1 = db.Product.Where(p => p.Name == "Duifis Scharrelnootjes").FirstOrDefault();
-				var product2 = db.Product.Where(p => p.Name == "Vorta Cola").FirstOrDefault();
+        private void CreateTestDataReceiptApproval()
+        {
+            using (var db = CreateContext())
+            {
+                var member = db.Member.Where(m => m.Name == "Borgia").FirstOrDefault()!;
+                var costCentre = db.CostCentre.Where(cc => cc.Name == "Moeder van Joopie").FirstOrDefault()!;
+                var receiptGoedgekeurd = db.Receipt.Where(r => r.ReceiptStatus == "Goedgekeurd").FirstOrDefault()!;
+                var receiptAfgekeurd = db.Receipt.Where(r => r.ReceiptStatus == "Afgekeurd").FirstOrDefault()!;
 
-				var stockToAdd = new List<Stock>()
-				{
-					new Stock() { MemberCreated = member, Product = product1, Quantity = 5 }
-				,   new Stock() { MemberCreated = member, Product = product2, Quantity = 10 }
-				};
+                var receiptApprovals = new List<ReceiptApproval>()
+                {
+                    new ReceiptApproval()
+                    {
+                        Receipt = receiptGoedgekeurd, Note = "Lekker duidelijk met zo'n foto!", MemberCreated = member
+                    },
+                    new ReceiptApproval()
+                    {
+                        Receipt = receiptAfgekeurd, Note = "Dit is niet het soort plug dat we nodig hebben.",
+                        MemberCreated = member
+                    }
+                };
 
-				db.Stock.AddRange(stockToAdd);
+                db.ReceiptApproval.AddRange(receiptApprovals);
 
-				var rows = db.SaveChanges();
-				System.Console.WriteLine($"Number of rows: {rows}");
-			}
-		}
-		private void CreateTestDataProductPrice()
-		{
-			using (var db = CreateContext())
-			{
-				var member = db.Member.Where(m => m.Name == "Borgia").FirstOrDefault()!;
+                var rows = db.SaveChanges();
+                System.Console.WriteLine($"Number of rows: {rows}");
+            }
+        }
 
-				var product1 = db.Product.Where(p => p.Name == "Duifis Scharrelnootjes").FirstOrDefault();
-				var product2 = db.Product.Where(p => p.Name == "Vorta Cola").FirstOrDefault();
+        #endregion
 
-				var priceToAdd = new List<ProductPrice>()
-				{
-					new ProductPrice() { MemberCreated = member, Product = product1, Price = 5.5m }
-				,   new ProductPrice() { MemberCreated = member, Product = product2, Price = 2.5m }
-				};
+        #region Order
 
-				db.ProductPrice.AddRange(priceToAdd);
+        private void CreateTestDataProduct()
+        {
+            using (var db = CreateContext())
+            {
+                var member = db.Member.Where(m => m.Name == "Borgia").FirstOrDefault()!;
 
-				var rows = db.SaveChanges();
-				System.Console.WriteLine($"Number of rows: {rows}");
-			}
-		}
-		private void CreateTestDataBill()
-		{
-			using (var db = CreateContext())
-			{
-				var member = db.Member.Where(m => m.Name == "Borgia").FirstOrDefault()!;
-				var member1 = db.Member.Where(m => m.Name == "Borgia").FirstOrDefault()!;
-				var member2 = db.Member.Where(m => m.Name == "da Gama").FirstOrDefault()!;
+                var products = new List<Product>()
+                {
+                    new Product()
+                    {
+                        Name = "Duifis Scharrelnootjes", MemberCreated = member, Price = 3.45, Color = "#FF0000",
+                        Icon = "fas fa-bowl"
+                    },
+                    new Product() { Name = "Vorta Cola", MemberCreated = member, Price = 3.45, Color = "#FFF000",
+                        Icon = "fas fa-bottle" },
+                    new Product() { Name = "Jasmijn Thee", MemberCreated = member, Price = 3.45, Color = "#FF00F0",
+                        Icon = "fas fa-cup" }
+                };
+                db.Product.AddRange(products);
 
-				var billToAdd = new List<Bill>()
-				{
-					new Bill() { MemberCreated = member, IsGuest = false, Member = member1 }
-				,   new Bill() { MemberCreated = member, IsGuest = false, Member = member2 }
-				,   new Bill() { MemberCreated = member, IsGuest = true, Name = "Neefje van Donald", Note = "Meteen betaald in Duckaten" }
-				};
+                var rows = db.SaveChanges();
+                System.Console.WriteLine($"Number of rows: {rows}");
+            }
+        }
 
-				db.Bills.AddRange(billToAdd);
+        private void CreateTestDataStock()
+        {
+            using (var db = CreateContext())
+            {
+                var member = db.Member.Where(m => m.Name == "Borgia").FirstOrDefault()!;
 
-				var rows = db.SaveChanges();
-				System.Console.WriteLine($"Number of rows: {rows}");
-			}
-		}
-		private void CreateTestDataLine()
-		{
-			using (var db = CreateContext())
-			{
-				var member = db.Member.Where(m => m.Name == "Borgia").FirstOrDefault()!;
-				var member1 = db.Member.Where(m => m.Name == "Borgia").FirstOrDefault()!;
-				var member2 = db.Member.Where(m => m.Name == "da Gama").FirstOrDefault()!;
+                var product1 = db.Product.Where(p => p.Name == "Duifis Scharrelnootjes").FirstOrDefault();
+                var product2 = db.Product.Where(p => p.Name == "Vorta Cola").FirstOrDefault();
 
-				var bill1 = db.Bills.Where(b => b.MemberId == member1.Id).FirstOrDefault()!;
-				var bill2 = db.Bills.Where(b => b.MemberId == member2.Id).FirstOrDefault()!;
-				var bill3 = db.Bills.Where(b => b.IsGuest).FirstOrDefault()!;
+                var stockToAdd = new List<Stock>()
+                {
+                    new Stock() { MemberCreated = member, Product = product1, Quantity = 5 },
+                    new Stock() { MemberCreated = member, Product = product2, Quantity = 10 }
+                };
 
-				var product1 = db.Product.Where(p => p.Name == "Duifis Scharrelnootjes").FirstOrDefault();
-				var product2 = db.Product.Where(p => p.Name == "Vorta Cola").FirstOrDefault();
+                db.Stock.AddRange(stockToAdd);
 
-				var linesToAdd = new List<Line>()
-				{
-					new Line() { Bill = bill1, Product = product1, Quantity = 1, MemberCreated = member }
-				,   new Line() { Bill = bill2, Product = product2, Quantity = 2, MemberCreated = member }
-				,   new Line() { Bill = bill3, Product = product1, Quantity = 3, MemberCreated = member }
-				,   new Line() { Bill = bill3, Product = product2, Quantity = 4, MemberCreated = member }
-				};
+                var rows = db.SaveChanges();
+                System.Console.WriteLine($"Number of rows: {rows}");
+            }
+        }
 
-				db.OrderLines.AddRange(linesToAdd);
+        private void CreateTestDataProductPrice()
+        {
+            using (var db = CreateContext())
+            {
+                var member = db.Member.Where(m => m.Name == "Borgia").FirstOrDefault()!;
 
-				var rows = db.SaveChanges();
-				System.Console.WriteLine($"Number of rows: {rows}");
-			}
-		}
-		#endregion
+                var product1 = db.Product.Where(p => p.Name == "Duifis Scharrelnootjes").FirstOrDefault();
+                var product2 = db.Product.Where(p => p.Name == "Vorta Cola").FirstOrDefault();
 
-	}
+                var priceToAdd = new List<ProductPrice>()
+                {
+                    new ProductPrice() { MemberCreated = member, Product = product1, Price = 5.5m },
+                    new ProductPrice() { MemberCreated = member, Product = product2, Price = 2.5m }
+                };
+
+                db.ProductPrice.AddRange(priceToAdd);
+
+                var rows = db.SaveChanges();
+                System.Console.WriteLine($"Number of rows: {rows}");
+            }
+        }
+
+        private void CreateTestDataBill()
+        {
+            using (var db = CreateContext())
+            {
+                var member = db.Member.Where(m => m.Name == "Borgia").FirstOrDefault()!;
+                var member1 = db.Member.Where(m => m.Name == "Borgia").FirstOrDefault()!;
+                var member2 = db.Member.Where(m => m.Name == "da Gama").FirstOrDefault()!;
+
+                var billToAdd = new List<Bill>()
+                {
+                    new Bill() { MemberCreated = member, IsGuest = false, Member = member1 },
+                    new Bill() { MemberCreated = member, IsGuest = false, Member = member2 },
+                    new Bill()
+                    {
+                        MemberCreated = member, IsGuest = true, Name = "Neefje van Donald",
+                        Note = "Meteen betaald in Duckaten"
+                    }
+                };
+
+                db.Bills.AddRange(billToAdd);
+
+                var rows = db.SaveChanges();
+                System.Console.WriteLine($"Number of rows: {rows}");
+            }
+        }
+
+        private void CreateTestDataLine()
+        {
+            using (var db = CreateContext())
+            {
+                var member = db.Member.Where(m => m.Name == "Borgia").FirstOrDefault()!;
+                var member1 = db.Member.Where(m => m.Name == "Borgia").FirstOrDefault()!;
+                var member2 = db.Member.Where(m => m.Name == "da Gama").FirstOrDefault()!;
+
+                var bill1 = db.Bills.Where(b => b.MemberId == member1.Id).FirstOrDefault()!;
+                var bill2 = db.Bills.Where(b => b.MemberId == member2.Id).FirstOrDefault()!;
+                var bill3 = db.Bills.Where(b => b.IsGuest).FirstOrDefault()!;
+
+                var product1 = db.Product.Where(p => p.Name == "Duifis Scharrelnootjes").FirstOrDefault();
+                var product2 = db.Product.Where(p => p.Name == "Vorta Cola").FirstOrDefault();
+
+                var linesToAdd = new List<Line>()
+                {
+                    new Line() { Bill = bill1, Product = product1, Quantity = 1, MemberCreated = member },
+                    new Line() { Bill = bill2, Product = product2, Quantity = 2, MemberCreated = member },
+                    new Line() { Bill = bill3, Product = product1, Quantity = 3, MemberCreated = member },
+                    new Line() { Bill = bill3, Product = product2, Quantity = 4, MemberCreated = member }
+                };
+
+                db.OrderLines.AddRange(linesToAdd);
+
+                var rows = db.SaveChanges();
+                System.Console.WriteLine($"Number of rows: {rows}");
+            }
+        }
+
+        #endregion
+    }
 }
