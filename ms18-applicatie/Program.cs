@@ -3,8 +3,13 @@ using Google.Apis.Calendar.v3;
 using Google.Apis.Services;
 using Microsoft.OpenApi.Models;
 using ms18_applicatie.Models.team_a;
+using Microsoft.Extensions.DependencyInjection;
+using Maasgroep.Database;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Add database context
+builder.Services.AddDbContext<MaasgroepContext>();
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
@@ -76,6 +81,11 @@ app.UseRouting();
 app.UseCors("MyAllowSpecificOrigins");
 
 app.UseAuthorization();
+
 app.MapControllers();
+
+app.MapControllerRoute(
+    name: "default",
+    pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.Run();
