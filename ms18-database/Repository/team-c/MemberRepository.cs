@@ -1,124 +1,38 @@
-﻿using Maasgroep.Database.Interfaces;
+﻿using Maasgroep.SharedKernel.Interfaces.Members;
+using Maasgroep.SharedKernel.ViewModels.Admin;
 
 namespace Maasgroep.Database.Members
 {
     public class MemberRepository : IMemberRepository
     {
-        public MemberRepository()
-        { 
-        }
+		private readonly MaasgroepContext _memberContext;
 
-        // public MemberViewModel GetMember()
-        // {
-        //     MemberViewModel result = null;
-
-        //     using (var db = new MaasgroepContext())
-        //     {
-        //         var q=  db.Member.FirstOrDefault()!;
-
-        //         result.Name = q.Name;
-
-        //     }
-
-        //     return result;
-        // }
-
-        public void AddMember()
+		public MemberRepository(MaasgroepContext memberContext)
         {
-            throw new NotImplementedException();
-        }
+			_memberContext = memberContext;
+		}
 
-        public void RemoveMember()
-        {
-            throw new NotImplementedException();
-        }
+		public long CreateMember(MemberModelCreateDb member)
+		{
+			return 1;
+		}
 
-        public void AanmakenTestData()
-        {
-            CreateTestDataMember();
-            CreateTestDataPermissions();
-            CreateTestDataMemberPermissions();
-        }
+		public MemberModel GetMember(long id)
+		{
+			var result = new MemberModel();
+			var member = _memberContext.Member.Where(m => m.Id == id).FirstOrDefault();
 
-        private void CreateTestDataMember()
-        {
-            using (var db = new MaasgroepContext())
-            {
-                var members = new List<Member>()
-                {
-                    new Member() { Name = "Borgia"}
-                };
+			if (member != null) 
+			{
+				result.Name = member.Name;
+				result.Id = member.Id;
+			}
+			return result;
+		}
 
-                db.Member.AddRange(members);
-
-                var rows = db.SaveChanges();
-                Console.WriteLine($"Number of rows: {rows}");
-
-                var borgia = db.Member.FirstOrDefault()!;
-
-                members = new List<Member>()
-                {
-                    new Member() { Name = "da Gama", MemberCreated = borgia }
-                ,   new Member() { Name = "Albuquerque", MemberCreated = borgia }
-                };
-
-                borgia.MemberCreated = borgia;
-                borgia.MemberModified = borgia;
-                borgia.DateTimeModified = DateTime.UtcNow;
-
-                db.Member.AddRange(members);
-
-                rows = db.SaveChanges();
-                Console.WriteLine($"Number of rows: {rows}");
-            }
-        }
-
-        private void CreateTestDataPermissions()
-        {
-            using (var db = new MaasgroepContext())
-            {
-                var borgia = db.Member.FirstOrDefault()!;
-
-                var permissions = new List<Permission>()
-                {
-                    new Permission() { Name = "receipt.approve", MemberCreated = borgia}
-                ,   new Permission() { Name = "receipt.reject", MemberCreated = borgia}
-                ,   new Permission() { Name = "receipt.handIn", MemberCreated = borgia}
-                ,   new Permission() { Name = "receipt.payOut", MemberCreated = borgia}
-                };
-
-                db.Permission.AddRange(permissions);
-
-                var rows = db.SaveChanges();
-                Console.WriteLine($"Number of rows: {rows}");
-            }
-        }
-
-        private void CreateTestDataMemberPermissions()
-        {
-            using (var db = new MaasgroepContext())
-            {
-                var borgia = db.Member.FirstOrDefault()!;
-                var daGama = db.Member.Where(m => m.Name == "da Gama").FirstOrDefault()!;
-                var alb = db.Member.Where(m => m.Name == "Albuquerque").FirstOrDefault()!;
-
-                var approve = db.Permission.Where(p => p.Name == "receipt.approve").FirstOrDefault()!;
-                var reject = db.Permission.Where(p => p.Name == "receipt.reject").FirstOrDefault()!;
-                var handIn = db.Permission.Where(p => p.Name == "receipt.handIn").FirstOrDefault()!;
-
-                var memberPermissions = new List<MemberPermission>()
-                {
-                    new MemberPermission() { Member = daGama, Permission = approve, MemberCreated = borgia }
-                ,   new MemberPermission() { Member = daGama, Permission = reject, MemberCreated = borgia }
-                ,   new MemberPermission() { Member = alb, Permission = handIn, MemberCreated = borgia }
-                };
-
-                db.MemberPermission.AddRange(memberPermissions);
-
-                var rows = db.SaveChanges();
-                Console.WriteLine($"Number of rows: {rows}");
-            }
-        }
-
-    }
+		public bool MemberExists(long id)
+		{
+			return _memberContext.Member.Where(m => m.Id == id).FirstOrDefault() == null ? false : true;
+		}
+	}
 }
