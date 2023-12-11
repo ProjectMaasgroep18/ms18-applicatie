@@ -55,8 +55,6 @@ public class ProductController : ControllerBase
 		if (!MemberExists(1)) // Toegangscontrole
 			return Forbidden();
 
-        Console.WriteLine(product.Name);
-
 		// Validate the request body
 		if (!ModelState.IsValid)
         {

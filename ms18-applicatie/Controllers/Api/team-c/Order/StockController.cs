@@ -59,9 +59,9 @@ public class StockController : ControllerBase
         return Ok(result);
     }
 
-    [HttpPut("{productId}/Increase")]
-    [ActionName("stockIncrease")]
-    public IActionResult StockIncrease(long productId, [FromBody] StockModel quantityModel)
+    [HttpPut("{productId}")]
+    [ActionName("stockUpdate")]
+    public IActionResult StockUpdate(long productId, [FromBody] StockModel quantityModel)
     {
 		if (!MemberExists(1)) // Toegangscontrole
 			return Forbidden();
@@ -128,74 +128,74 @@ public class StockController : ControllerBase
         return NoContent();
     }
 
-    [HttpPut("{productId}/Decrease")]
-    [ActionName("stockDecrease")] // KH: Volgens mij is het niet nodig voor quantiy aanpassen 2 operites?
-    public IActionResult StockDecrease(long productId, [FromBody] StockModel quantityModel)
-    {
-		if (!MemberExists(1)) // Toegangscontrole
-			return Forbidden();
-
-		// Validate the request body
-		if (!ModelState.IsValid)
-		{
-			return BadRequest(new
-			{
-				status = 400,
-				message = "Invalid request body"
-			});
-		}
-
-		var dbRecProduct = _orderRepository.GetProduct(productId);
-
-		if (dbRecProduct == null)
-			return NotFound(new
-			{
-				status = 404,
-				message = "Product niet gevonden"
-			});
-
-		var dbRec = _orderRepository.GetStock(productId);
-
-		if (dbRec == null)
-		{
-			try
-			{
-				CreateStockIfNotExists(productId);
-			}
-			catch (Exception)
-			{
-				return BadRequest(new
-				{
-					status = 422,
-					message = "Kon voorraad niet aanmaken"
-				});
-			}
-		}
-		else
-		{
-			var nieuweStock = new StockModelUpdateDb()
-			{
-				Stock = quantityModel,
-				Member = _memberService.GetMember(1)
-			};
-
-			// Try and add the stock to the database and return it
-			try
-			{
-				_orderRepository.Modify(nieuweStock);
-			}
-			catch (Exception e)
-			{
-				return UnprocessableEntity(new
-				{
-					status = 422,
-					message = "Kon voorraad niet wijzigen"
-				});
-			}
-		}
-
-		return NoContent();
-	}
+ //    [HttpPut("{productId}/Decrease")]
+ //    [ActionName("stockDecrease")] // KH: Volgens mij is het niet nodig voor quantiy aanpassen 2 operites?
+ //    public IActionResult StockDecrease(long productId, [FromBody] StockModel quantityModel)
+ //    {
+	// 	if (!MemberExists(1)) // Toegangscontrole
+	// 		return Forbidden();
+ //
+	// 	// Validate the request body
+	// 	if (!ModelState.IsValid)
+	// 	{
+	// 		return BadRequest(new
+	// 		{
+	// 			status = 400,
+	// 			message = "Invalid request body"
+	// 		});
+	// 	}
+ //
+	// 	var dbRecProduct = _orderRepository.GetProduct(productId);
+ //
+	// 	if (dbRecProduct == null)
+	// 		return NotFound(new
+	// 		{
+	// 			status = 404,
+	// 			message = "Product niet gevonden"
+	// 		});
+ //
+	// 	var dbRec = _orderRepository.GetStock(productId);
+ //
+	// 	if (dbRec == null)
+	// 	{
+	// 		try
+	// 		{
+	// 			CreateStockIfNotExists(productId);
+	// 		}
+	// 		catch (Exception)
+	// 		{
+	// 			return BadRequest(new
+	// 			{
+	// 				status = 422,
+	// 				message = "Kon voorraad niet aanmaken"
+	// 			});
+	// 		}
+	// 	}
+	// 	else
+	// 	{
+	// 		var nieuweStock = new StockModelUpdateDb()
+	// 		{
+	// 			Stock = quantityModel,
+	// 			Member = _memberService.GetMember(1)
+	// 		};
+ //
+	// 		// Try and add the stock to the database and return it
+	// 		try
+	// 		{
+	// 			_orderRepository.Modify(nieuweStock);
+	// 		}
+	// 		catch (Exception e)
+	// 		{
+	// 			return UnprocessableEntity(new
+	// 			{
+	// 				status = 422,
+	// 				message = "Kon voorraad niet wijzigen"
+	// 			});
+	// 		}
+	// 	}
+ //
+	// 	return NoContent();
+	// }
 
 	private bool MemberExists(long id) => _memberService.MemberExists(id);
 	private IActionResult Forbidden() => Forbid("Je hebt geen toegang tot deze functie");
