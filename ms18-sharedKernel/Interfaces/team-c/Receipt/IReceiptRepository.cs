@@ -2,7 +2,7 @@
 
 namespace Maasgroep.SharedKernel.Interfaces.Receipts
 {
-	public interface IReceiptRepository<TReceiptRecord, TReceiptHistory> : IEditableRepository<TReceiptRecord, ReceiptModel, TReceiptHistory>
+	public interface IReceiptRepository<TRecord, THistory> : IEditableRepository<TRecord, ReceiptModel, THistory>
 	{
 		
 	}

@@ -9,9 +9,9 @@ namespace Maasgroep.Database.Receipts
 		public ReceiptPhotoRepository(MaasgroepContext db) : base(db) {}
 
         /** Create ReceiptPhotoModel from ReceiptPhoto record */
-        public override PhotoModel GetModel(ReceiptPhoto photo)
+        public override ReceiptPhotoModel GetModel(ReceiptPhoto photo)
         {
-            return new PhotoModel() {
+            return new ReceiptPhotoModel() {
 				FileExtension = photo.FileExtension,
 				FileName = photo.FileName,
                 ReceiptId = photo.ReceiptId,
@@ -20,7 +20,7 @@ namespace Maasgroep.Database.Receipts
         }
 
         /** Create or update ReceiptPhoto record from model */
-        public override ReceiptPhoto? GetRecord(PhotoModel model, ReceiptPhoto? existingPhoto = null)
+        public override ReceiptPhoto? GetRecord(ReceiptPhotoModel model, ReceiptPhoto? existingPhoto = null)
         {
             if (existingPhoto != null)
                 return null; // Photo records are not editable
