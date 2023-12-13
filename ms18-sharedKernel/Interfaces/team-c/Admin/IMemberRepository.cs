@@ -1,9 +1,10 @@
 ﻿using Maasgroep.SharedKernel.ViewModels.Admin;
 
-namespace Maasgroep.SharedKernel.Interfaces.Admin
+namespace Maasgroep.SharedKernel.Interfaces.Members
 {
-	public interface IMemberRepository<TRecord> : IDeletableRepository<TRecord, MemberModel>
+	public interface IMemberRepository
 	{
-		
+		MemberModel GetMember(long id);
+		bool MemberExists(long id);
 	}
 }

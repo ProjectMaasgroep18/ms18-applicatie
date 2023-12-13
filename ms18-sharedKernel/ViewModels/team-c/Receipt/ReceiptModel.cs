@@ -6,7 +6,7 @@ namespace Maasgroep.SharedKernel.ViewModels.Receipts
 		public ReceiptModel() 
 		{
 			CostCentre = new CostCentreModel();
-			Photos = new List<PhotoModel>();
+			Photos = new List<ReceiptPhotoModel>();
 			StatusString = ReceiptStatus.Onbekend.ToString();
 		}
 		public long Id { get; set; }
@@ -16,7 +16,7 @@ namespace Maasgroep.SharedKernel.ViewModels.Receipts
 		public ReceiptStatus Status { get; set; }
 		public string StatusString { get; set; }
 		public CostCentreModel? CostCentre { get; set; }
-		public List<PhotoModel>? Photos { get; set; }
+		public List<ReceiptPhotoModel>? Photos { get; set; }
 		public ReceiptApprovalModel Approval { get; set; }
 	}
 }

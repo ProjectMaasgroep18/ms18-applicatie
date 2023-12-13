@@ -2,7 +2,7 @@ using Maasgroep.SharedKernel.Interfaces;
 
 namespace Maasgroep.Database
 {
-    public abstract class DeletableRepository<TRecord, TModel> : GenericRepository<TRecord, TModel>, IDeletableRepository<TRecord, TModel>
+    public abstract class DeletableRepository<TRecord, TModel> : WritableRepository<TRecord, TModel>, IDeletableRepository<TRecord, TModel>
 	where TRecord : GenericRecordActive
     {
         public DeletableRepository(MaasgroepContext db) : base(db) {}

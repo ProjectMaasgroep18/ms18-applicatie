@@ -91,9 +91,7 @@ namespace Maasgroep.Database
 			CreatePhoto(modelBuilder);
 
 			CreateReceiptHistory(modelBuilder);
-			CreateReceiptApprovalHistory(modelBuilder);
 			CreateCostCentreHistory(modelBuilder);
-			CreatePhotoHistory(modelBuilder);
 			#endregion
 
 			#region Order
@@ -355,8 +353,8 @@ namespace Maasgroep.Database
 			modelBuilder.HasSequence<long>("photoSeq", schema: "receipt").StartsAt(1).IncrementsBy(1);
 			modelBuilder.Entity<ReceiptPhoto>().Property(p => p.DateTimeCreated).HasDefaultValueSql("now()");
 			modelBuilder.Entity<ReceiptPhoto>().Property(p => p.Id).HasDefaultValueSql("nextval('receipt.\"photoSeq\"')");
-			modelBuilder.Entity<ReceiptPhoto>().Property(p => p.fileExtension).HasMaxLength(256);
-			modelBuilder.Entity<ReceiptPhoto>().Property(p => p.fileName).HasMaxLength(2048);
+			modelBuilder.Entity<ReceiptPhoto>().Property(p => p.FileExtension).HasMaxLength(256);
+			modelBuilder.Entity<ReceiptPhoto>().Property(p => p.FileName).HasMaxLength(2048);
 
 			//Foreign keys
 
@@ -402,16 +400,6 @@ namespace Maasgroep.Database
 			modelBuilder.Entity<ReceiptHistory>().Property(r => r.RecordCreated).HasDefaultValueSql("now()");
 		}
 
-		public void CreateReceiptApprovalHistory(ModelBuilder modelBuilder)
-		{
-			modelBuilder.Entity<ReceiptApprovalHistory>().ToTable("approval", "receiptHistory");
-			modelBuilder.HasSequence<long>("approvalSeq", schema: "receiptHistory").StartsAt(1).IncrementsBy(1);
-			modelBuilder.Entity<ReceiptApprovalHistory>().Property(ra => ra.Id).HasDefaultValueSql("nextval('\"receiptHistory\".\"approvalSeq\"')");
-			modelBuilder.Entity<ReceiptApprovalHistory>().Property(ra => ra.Note).HasMaxLength(2048);
-			modelBuilder.Entity<ReceiptApprovalHistory>().Property(ra => ra.RecordCreated).HasDefaultValueSql("now()");
-
-		}
-
 		public void CreateCostCentreHistory(ModelBuilder modelBuilder)
 		{
 			modelBuilder.Entity<CostCentreHistory>().ToTable("costCentre", "receiptHistory");
@@ -419,16 +407,6 @@ namespace Maasgroep.Database
 			modelBuilder.Entity<CostCentreHistory>().Property(cc => cc.Id).HasDefaultValueSql("nextval('\"receiptHistory\".\"costCentreSeq\"')");
 			modelBuilder.Entity<CostCentreHistory>().Property(cc => cc.Name).HasMaxLength(256);
 			modelBuilder.Entity<CostCentreHistory>().Property(cc => cc.RecordCreated).HasDefaultValueSql("now()");
-		}
-
-		private void CreatePhotoHistory(ModelBuilder modelBuilder)
-		{
-			modelBuilder.Entity<PhotoHistory>().ToTable("photo", "receiptHistory");
-			modelBuilder.HasSequence<long>("photoSeq", schema: "receiptHistory").StartsAt(1).IncrementsBy(1);
-			modelBuilder.Entity<PhotoHistory>().Property(p => p.Id).HasDefaultValueSql("nextval('\"receiptHistory\".\"photoSeq\"')");
-			modelBuilder.Entity<PhotoHistory>().Property(p => p.RecordCreated).HasDefaultValueSql("now()");
-			modelBuilder.Entity<PhotoHistory>().Property(p => p.fileExtension).HasMaxLength(256);
-			modelBuilder.Entity<PhotoHistory>().Property(p => p.fileName).HasMaxLength(2048);
 		}
 
 		#endregion

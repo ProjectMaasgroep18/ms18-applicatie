@@ -36,7 +36,7 @@ namespace Maasgroep.Database.Receipts
 				|| receipt.ReceiptStatus == ReceiptStatus.Uitbetaald.ToString())
 				return null; // Al definitief, dus aanpassen niet meer toegestaan
 
-			var receiptHeeftFotos = _db.Photo.Where(p => p.ReceiptId == model.Id).Count() > 0;
+			var receiptHeeftFotos = _db.ReceiptPhoto.Where(p => p.ReceiptId == model.Id).Count() > 0;
 			
 			receipt.Note = model.Note;
 			receipt.Amount = model.Amount;
