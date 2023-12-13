@@ -1,21 +1,19 @@
 namespace Maasgroep.SharedKernel.Interfaces
 {
-	public interface IGenericRepository<TRecord, TModel, THistory>
+	/** A generic data repository that handles Records and View Models. Data can only be added to the repository, not Edited or Deleted */
+	public interface IGenericRepository<TRecord, TModel>
 	{
-		// Methods to convert between record/model/history
+		// Methods to convert between record/model
 		TModel? GetModel(long id);
 		TModel GetModel(TRecord record);
 		TRecord? GetRecord(TModel model, TRecord? existingRecord = default);
-		THistory GetHistory(TRecord record);
 
 		// Methods to query items
 		TRecord? GetById(long id);
-		IEnumerable<TModel> ListAll(int offset, int limit, bool includeDeleted = default);
-		IEnumerable<TModel> ListByMember(long memberId, int offset = default, int limit = default, bool includeDeleted = default);
+		IEnumerable<TModel> ListAll(int offset = default, int limit = default);
+		IEnumerable<TModel> ListByMember(long memberId, int offset = default, int limit = default);
 
 		// Methods to update the database from models 
 		long Create(TModel model, long memberId);
-		bool Update(long id, TModel model, long memberId);
-		bool Delete(long id, long memberId);
 	}
 }

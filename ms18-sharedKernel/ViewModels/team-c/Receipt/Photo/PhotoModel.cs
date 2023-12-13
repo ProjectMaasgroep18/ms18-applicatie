@@ -7,7 +7,8 @@ namespace Maasgroep.SharedKernel.ViewModels.Receipts
 
 		public long Id { get; set; }
 		public string Base64Image { get; set; }
-		public string fileExtension { get; set; }
-		public string fileName { get; set; }
+		public string FileExtension { get; set; }
+		public string FileName { get; set; }
+		public long ReceiptId { get; set; }
 	}
 }

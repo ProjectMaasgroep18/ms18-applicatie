@@ -2,7 +2,7 @@
 
 namespace Maasgroep.SharedKernel.Interfaces.Receipts
 {
-	public interface ICostCentreRepository<TCostCentreRecord, TCostCentreHistory> : IGenericRepository<TCostCentreRecord, CostCentreModel, TCostCentreHistory>
+	public interface ICostCentreRepository<TRecord, THistory> : IEditableRepository<TRecord, CostCentreModel, THistory>
 	{
 		
 	}

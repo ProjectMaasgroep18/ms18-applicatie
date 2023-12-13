@@ -2,15 +2,15 @@ using Maasgroep.SharedKernel.Interfaces;
 
 namespace Maasgroep.Database
 {
-
-    public abstract class GenericRepository<TRecord, TModel, THistory> : IGenericRepository<TRecord, TModel, THistory>
+    public abstract class GenericRepository<TRecord, TModel> : IGenericRepository<TRecord, TModel>
 	where TRecord : GenericRecordActive
-	where THistory : GenericRecordHistory
     {
         protected readonly MaasgroepContext _db;
 
         public GenericRepository(MaasgroepContext db) => _db = db;
 
+		// Default number of items per page
+		const int defaultLimit = 100;
 
 		// ABSTRACT METHODS:
 
@@ -23,18 +23,17 @@ namespace Maasgroep.Database
 		// This should create or update a record from a model
 		// Should return null if data is not valid or record is not editable
 
-		/** Get history record from record */
-		public abstract THistory GetHistory(TRecord record);
-		// This should create a history record from an existing record
-
 		// END ABSTRACT METHODS
 
 
 		/** Get list of records based on parameters */
-		protected virtual IEnumerable<TRecord> GetList(Func<TRecord, bool>? filter = null, Func<TRecord, int>? priority = null, int offset = 0, int limit = 100, bool includeDeleted = false)
+		protected virtual IEnumerable<TRecord> GetList(Func<TRecord, bool>? filter = default, Func<TRecord, int>? priority = default, int offset = default, int limit = default)
 		{
+			if (limit == default)
+				limit = defaultLimit;
+
 			return _db.Set<TRecord>()
-				.Where(item => (filter == null || filter(item)) && (item.DateTimeDeleted == null || includeDeleted))
+				.Where(item => filter == null || filter(item))
 				.OrderByDescending(item => priority == null ? 0 : priority(item))
 				.ThenByDescending(item => item.DateTimeCreated)
 				.Skip(offset)
@@ -46,14 +45,12 @@ namespace Maasgroep.Database
 		public virtual TRecord? GetById(long id) => _db.Set<TRecord>().FirstOrDefault(item => item.Id == id);
 
 		/** Save a record to the database */
-		protected bool SaveToDb(TRecord record, THistory? historyRecord = null)
+		protected bool SaveToDb(TRecord record)
 		{
 			_db.Database.BeginTransaction();
 			var success = false;
 			try {
 				_db.Set<TRecord>().Add(record);
-				if (historyRecord != null)
-					_db.Set<THistory>().Add(historyRecord);
 				_db.SaveChanges();
 				_db.Database.CommitTransaction();
 				success = true;
@@ -76,12 +73,12 @@ namespace Maasgroep.Database
 		}
 
 		/** Get a list of models for a range of records */
-		public virtual IEnumerable<TModel> ListAll(int offset = 0, int limit = 100, bool includeDeleted = false) =>
-			GetList(null, null, offset, limit, includeDeleted).Select(item => GetModel(item)!).ToList();
+		public virtual IEnumerable<TModel> ListAll(int offset = default, int limit = default) =>
+			GetList(null, null, offset, limit).Select(item => GetModel(item)!);
 
 		/** Get a list of models for a range of records created by a given member */
-		public virtual IEnumerable<TModel> ListByMember(long memberId, int offset = 0, int limit = 100, bool includeDeleted = false) =>
-			GetList(item => item.MemberCreatedId == memberId, null, offset, limit, includeDeleted).Select(item => GetModel(item)!).ToList();
+		public virtual IEnumerable<TModel> ListByMember(long memberId, int offset = default, int limit = default) =>
+			GetList(item => item.MemberCreatedId == memberId, null, offset, limit).Select(item => GetModel(item)!);
 
 		/** Create a new record and save it to the database */
 		public virtual long Create(TModel model, long memberId)
@@ -96,55 +93,5 @@ namespace Maasgroep.Database
 
 			return SaveToDb(record) ? record.Id : 0;
 		}
-
-		/** Update an existing record in the database */
-		public virtual bool Update(long id, TModel model, long memberId)
-		{
-			var record = GetById(id);
-			if (record == null)
-				return false; // Does not exist
-
-			var history = GetHistory(record);
-			record = GetRecord(model, record);
-
-			if (record == null)
-				return false; // Not editable or invalid data
-
-			history.MemberCreatedId = record.MemberCreatedId;
-			history.MemberModifiedId = record.MemberModifiedId;
-			history.MemberDeletedId = record.MemberDeletedId;
-			history.DateTimeCreated = record.DateTimeCreated;
-			history.DateTimeModified = record.DateTimeModified;
-			history.DateTimeDeleted = record.DateTimeDeleted;
-
-			record.MemberModifiedId = memberId;
-			record.DateTimeModified = DateTime.UtcNow;
-
-			return SaveToDb(record, history);
-		}
-
-		/** Delete an existing record from the database (set DateTimeDeleted and keep a history) */
-		public virtual bool Delete(long id, long memberId)
-		{
-			var record = GetById(id);
-
-			if (record == null)
-				return false; // Does not exist
-
-			var history = GetHistory(record);
-
-			history.MemberCreatedId = record.MemberCreatedId;
-			history.MemberModifiedId = record.MemberModifiedId;
-			history.MemberDeletedId = record.MemberDeletedId;
-			history.DateTimeCreated = record.DateTimeCreated;
-			history.DateTimeModified = record.DateTimeModified;
-			history.DateTimeDeleted = record.DateTimeDeleted;
-
-			record.MemberDeletedId = memberId;
-			record.DateTimeDeleted = DateTime.UtcNow;
-
-			return SaveToDb(record, history);
-		}
-
 	}
 }

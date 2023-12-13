@@ -5,7 +5,7 @@ using Maasgroep.SharedKernel.Services;
 namespace Maasgroep.Database.Receipts
 {
 
-    public class ReceiptRepository : GenericRepository<Receipt, ReceiptModel, ReceiptHistory>, IReceiptRepository<Receipt, ReceiptHistory>
+    public class ReceiptRepository : EditableRepository<Receipt, ReceiptModel, ReceiptHistory>, IReceiptRepository<Receipt, ReceiptHistory>
     {
 		public ReceiptRepository(MaasgroepContext db) : base(db) {}
 

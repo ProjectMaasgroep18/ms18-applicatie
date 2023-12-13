@@ -4,14 +4,13 @@ using Maasgroep.SharedKernel.ViewModels.Receipts;
 namespace Maasgroep.Database.Receipts
 {
 
-    public class CostCentreRepository : GenericRepository<CostCentre, CostCentreModel, CostCentreHistory>, ICostCentreRepository<CostCentre, CostCentreHistory>
+    public class CostCentreRepository : EditableRepository<CostCentre, CostCentreModel, CostCentreHistory>, ICostCentreRepository<CostCentre, CostCentreHistory>
     {
         public CostCentreRepository(MaasgroepContext db) : base(db) {}
 
         /** Create CostCentreModel from CostCentre record */
         public override CostCentreModel GetModel(CostCentre costCentre)
         {
-
             return new CostCentreModel() {
 				Id = costCentre.Id,
 				Name = costCentre.Name,
@@ -26,7 +25,7 @@ namespace Maasgroep.Database.Receipts
 			return costCentre;
         }
 
-		/** Create a CostCentreHistory record from a CostCentre record */ 
+		/** Create a CostCentreHistory record from a CostCentre record */
         public override CostCentreHistory GetHistory(CostCentre costCentre)
         {
             return new CostCentreHistory() {

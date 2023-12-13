@@ -1,9 +1,9 @@
-﻿using Maasgroep.SharedKernel.Interfaces.Members;
+﻿using Maasgroep.SharedKernel.Interfaces.Admin;
 using Maasgroep.SharedKernel.ViewModels.Admin;
 
 namespace Maasgroep.Database.Members
 {
-    public class MemberRepository : IMemberRepository
+    public class MemberRepository : IMemberRepository<Member>
     {
 		private readonly MaasgroepContext _memberContext;
 

@@ -27,9 +27,7 @@ namespace Maasgroep.Database
 		#region ReceiptHistory
 
 		public DbSet<CostCentreHistory> CostCentreHistory { get; set; }
-		public DbSet<ReceiptApprovalHistory> ReceiptApprovalHistory { get; set; }
 		public DbSet<ReceiptHistory> ReceiptHistory { get; set; }
-		public DbSet<PhotoHistory> PhotoHistory { get; set; }
 
 		#endregion
 
