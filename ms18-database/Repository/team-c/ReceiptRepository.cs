@@ -36,7 +36,7 @@ namespace Maasgroep.Database.Receipts
 								 where r.Id == id
 								 select new { r, rc };
 
-				var photos = from p in _db.Photo
+				var photos = from p in _db.ReceiptPhoto
 							 join c in costCentre
 							 on p.ReceiptId equals c.r.Id
 							 where c.r.Id == id
@@ -115,7 +115,7 @@ namespace Maasgroep.Database.Receipts
 			if (receipt.ReceiptModel.Photos != null && receipt.ReceiptModel.Photos.Count > 0)
 			{
 				foreach (var photo in receipt.ReceiptModel.Photos)
-					_db.Photo.Add(new Photo()
+					_db.ReceiptPhoto.Add(new ReceiptPhoto()
 					{
 						Base64Image = photo.Base64Image,
 						fileExtension = photo.FileExtension,
@@ -188,7 +188,7 @@ namespace Maasgroep.Database.Receipts
 		#region Photo
 		public long Add(PhotoModelCreateDb photo)
 		{
-			var photoToAdd = new Photo()
+			var photoToAdd = new ReceiptPhoto()
 			{
 				Base64Image = photo.PhotoModel.Base64Image,
 				fileExtension = photo.PhotoModel.FileExtension,
@@ -198,7 +198,7 @@ namespace Maasgroep.Database.Receipts
 			};
 
 			_db.Database.BeginTransaction();
-			_db.Photo.Add(photoToAdd);
+			_db.ReceiptPhoto.Add(photoToAdd);
 			_db.SaveChanges();
 
 			var idOfPhoto = _db.Database.SqlQuery<long>($"select currval('receipt.\"photoSeq\"'::regclass)").ToList().FirstOrDefault();
@@ -211,7 +211,7 @@ namespace Maasgroep.Database.Receipts
 		{
 			var result = new PhotoModel();
 
-			var photo = _db.Photo.Where(p => p.Id == id).FirstOrDefault();
+			var photo = _db.ReceiptPhoto.Where(p => p.Id == id).FirstOrDefault();
 
 			if (photo == null)
 			{
@@ -235,7 +235,7 @@ namespace Maasgroep.Database.Receipts
 			var indexEnd = new Index(fetch);
 			var range = new Range(indexStart, indexEnd);
 			//var dbResults = _db.Receipt.Take(range).ToList(); TODO: hiero offset fixen
-			var dbResults = _db.Photo.Where(p => p.ReceiptId == receiptId).ToList();
+			var dbResults = _db.ReceiptPhoto.Where(p => p.ReceiptId == receiptId).ToList();
 
 			foreach (var dbResult in dbResults)
 				result.Add(GetPhoto(dbResult.Id));
@@ -245,7 +245,7 @@ namespace Maasgroep.Database.Receipts
 
 		public bool Delete(PhotoModelDeleteDb photoToDelete)
 		{
-			var photo = _db.Photo.Where(p => p.Id == photoToDelete.Photo.Id).FirstOrDefault();
+			var photo = _db.ReceiptPhoto.Where(p => p.Id == photoToDelete.Photo.Id).FirstOrDefault();
 
 			if (photo != null)
 			{
@@ -258,7 +258,7 @@ namespace Maasgroep.Database.Receipts
 				photo.DateTimeDeleted = DateTime.UtcNow;
 				photo.MemberDeletedId = photoToDelete.Member.Id;
 
-				_db.Photo.Update(photo);
+				_db.ReceiptPhoto.Update(photo);
 				_db.SaveChanges();
 				_db.Database.CommitTransaction(); //TODO: Misschien nog iets met finally en rollback enzo.
 			}
@@ -429,7 +429,7 @@ namespace Maasgroep.Database.Receipts
 
 			return history;
 		}
-		private PhotoHistory CreatePhotoHistory(Photo photo)
+		private PhotoHistory CreatePhotoHistory(ReceiptPhoto photo)
 		{
 			var history = new PhotoHistory();
 

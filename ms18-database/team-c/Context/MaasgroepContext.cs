@@ -21,7 +21,7 @@ namespace Maasgroep.Database
 		public DbSet<Receipt> Receipt { get; set; }
 		public DbSet<ReceiptApproval> ReceiptApproval { get; set; }
 		public DbSet<CostCentre> CostCentre { get; set; }
-		public DbSet<Photo> Photo { get; set; }
+		public DbSet<ReceiptPhoto> ReceiptPhoto { get; set; }
 		#endregion
 
 		#region ReceiptHistory
@@ -352,38 +352,38 @@ namespace Maasgroep.Database
 
 		private void CreatePhoto(ModelBuilder modelBuilder)
 		{
-			modelBuilder.Entity<Photo>().ToTable("photo", "receipt");
-			modelBuilder.Entity<Photo>().HasKey(p => new { p.Id });
+			modelBuilder.Entity<ReceiptPhoto>().ToTable("photo", "receipt");
+			modelBuilder.Entity<ReceiptPhoto>().HasKey(p => new { p.Id });
 			modelBuilder.HasSequence<long>("photoSeq", schema: "receipt").StartsAt(1).IncrementsBy(1);
-			modelBuilder.Entity<Photo>().Property(p => p.DateTimeCreated).HasDefaultValueSql("now()");
-			modelBuilder.Entity<Photo>().Property(p => p.Id).HasDefaultValueSql("nextval('receipt.\"photoSeq\"')");
-			modelBuilder.Entity<Photo>().Property(p => p.fileExtension).HasMaxLength(256);
-			modelBuilder.Entity<Photo>().Property(p => p.fileName).HasMaxLength(2048);
+			modelBuilder.Entity<ReceiptPhoto>().Property(p => p.DateTimeCreated).HasDefaultValueSql("now()");
+			modelBuilder.Entity<ReceiptPhoto>().Property(p => p.Id).HasDefaultValueSql("nextval('receipt.\"photoSeq\"')");
+			modelBuilder.Entity<ReceiptPhoto>().Property(p => p.fileExtension).HasMaxLength(256);
+			modelBuilder.Entity<ReceiptPhoto>().Property(p => p.fileName).HasMaxLength(2048);
 
 			//Foreign keys
 
-			modelBuilder.Entity<Photo>()
+			modelBuilder.Entity<ReceiptPhoto>()
 				.HasOne(p => p.Receipt)
 				.WithMany(r => r.Photos)
 				.HasForeignKey(p => p.ReceiptId)
 				.HasConstraintName("FK_photo_receipt")
 				.OnDelete(DeleteBehavior.NoAction);
 
-			modelBuilder.Entity<Photo>()
+			modelBuilder.Entity<ReceiptPhoto>()
 				.HasOne(ra => ra.MemberCreated)
 				.WithMany(m => m.PhotosCreated)
 				.HasForeignKey(ra => ra.MemberCreatedId)
 				.HasConstraintName("FK_photo_memberCreated")
 				.OnDelete(DeleteBehavior.NoAction);
 
-			modelBuilder.Entity<Photo>()
+			modelBuilder.Entity<ReceiptPhoto>()
 				.HasOne(ra => ra.MemberModified)
 				.WithMany(m => m.PhotosModified)
 				.HasForeignKey(ra => ra.MemberModifiedId)
 				.HasConstraintName("FK_photo_memberModified")
 				.OnDelete(DeleteBehavior.NoAction);
 
-			modelBuilder.Entity<Photo>()
+			modelBuilder.Entity<ReceiptPhoto>()
 				.HasOne(ra => ra.MemberDeleted)
 				.WithMany(m => m.PhotosDeleted)
 				.HasForeignKey(ra => ra.MemberDeletedId)
