@@ -7,6 +7,6 @@ namespace Maasgroep.SharedKernel.Interfaces
 		THistory GetHistory(TRecord record);
 
 		// Methods to update the database from models 
-		bool Update(long id, TModel model, long memberId);
+		TRecord? Update(long id, TModel model, long memberId);
 	}
 }

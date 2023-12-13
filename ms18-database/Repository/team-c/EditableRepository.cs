@@ -19,7 +19,7 @@ namespace Maasgroep.Database
 
 
         /** Save a record to the database (with history) */
-		protected bool SaveToDb(TRecord record, THistory history)
+		protected TRecord? SaveToDb(TRecord record, THistory history)
 		{
 			_db.Database.BeginTransaction();
 			var success = false;
@@ -33,21 +33,21 @@ namespace Maasgroep.Database
 				_db.Database.RollbackTransaction();
 				_db.ChangeTracker.Clear();
 			}
-			return success;
+			return success ? record : null;
 		}
 
 		/** Update an existing record in the database */
-		public virtual bool Update(long id, TModel model, long memberId)
+		public virtual TRecord? Update(long id, TModel model, long memberId)
 		{
 			var record = GetById(id);
 			if (record == null)
-				return false; // Does not exist
+				return null; // Does not exist
 
 			var history = GetHistory(record);
 			record = GetRecord(model, record);
 
 			if (record == null)
-				return false; // Not editable or invalid data
+				return null; // Not editable or invalid data
 
 			history.MemberCreatedId = record.MemberCreatedId;
 			history.MemberModifiedId = record.MemberModifiedId;

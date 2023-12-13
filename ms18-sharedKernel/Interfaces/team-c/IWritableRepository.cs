@@ -4,7 +4,7 @@ namespace Maasgroep.SharedKernel.Interfaces
 	public interface IWritableRepository<TRecord, TModel> : IReadOnlyRepository<TRecord, TModel>
 	{
 		// Methods to update the database from models 
-		long Create(TModel model, long memberId);
+		TRecord? Create(TModel model, long memberId);
 
 		// Methods to query items
 		IEnumerable<TModel> ListByMember(long memberId, int offset = default, int limit = default);

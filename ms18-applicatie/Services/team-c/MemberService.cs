@@ -1,7 +1,7 @@
 ﻿using Maasgroep.SharedKernel.Interfaces.Members;
 using Maasgroep.SharedKernel.ViewModels.Admin;
 
-namespace ms18_applicatie.Services
+namespace Maasgroep.Services
 {
 	public class MemberService : IMemberService
 	{

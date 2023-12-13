@@ -68,5 +68,9 @@ namespace Maasgroep.Database.Receipts
 				CostCentreId = receipt.CostCentreId,
 			};
         }
+
+		/** List receipts by cost centre */
+		public IEnumerable<ReceiptModel> ListByCostCentre(long costCentreId, int offset = default, int limit = default, bool includeDeleted = default)
+			=> GetList(item => item.CostCentreId == costCentreId, null, offset, limit, includeDeleted).Select(item => GetModel(item)!);
     }
 }

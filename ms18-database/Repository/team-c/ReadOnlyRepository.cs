@@ -41,6 +41,9 @@ namespace Maasgroep.Database
 				.ToList();
 		}
 
+		/** See if record with ID exists */
+		public virtual bool Exists(long id) => _db.Set<TRecord>().Select(item => item.Id == id).Any();
+
 		/** Get record by ID */
 		public virtual TRecord? GetById(long id) => _db.Set<TRecord>().FirstOrDefault(item => item.Id == id);
 

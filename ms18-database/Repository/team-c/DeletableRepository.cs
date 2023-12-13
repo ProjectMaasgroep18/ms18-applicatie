@@ -18,7 +18,7 @@ namespace Maasgroep.Database
 			record.MemberDeletedId = memberId;
 			record.DateTimeDeleted = DateTime.UtcNow;
 
-			return SaveToDb(record);
+			return SaveToDb(record) != null;
 		}
 
         /** Get list of records based on parameters (hide deleted records by default) */

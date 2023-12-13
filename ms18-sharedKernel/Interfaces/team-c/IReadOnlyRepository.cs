@@ -9,6 +9,7 @@ namespace Maasgroep.SharedKernel.Interfaces
 		TRecord? GetRecord(TModel model, TRecord? existingRecord = default);
 
 		// Methods to query items
+		bool Exists(long id);
 		TRecord? GetById(long id);
 		IEnumerable<TModel> ListAll(int offset = default, int limit = default);
 	}

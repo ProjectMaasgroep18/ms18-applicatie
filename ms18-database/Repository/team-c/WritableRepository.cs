@@ -8,7 +8,7 @@ namespace Maasgroep.Database
         public WritableRepository(MaasgroepContext db) : base(db) {}
 
 		/** Save a record to the database */
-		protected bool SaveToDb(TRecord record)
+		protected TRecord SaveToDb(TRecord record)
 		{
 			_db.Database.BeginTransaction();
 			var success = false;
@@ -21,7 +21,7 @@ namespace Maasgroep.Database
 				_db.Database.RollbackTransaction();
 				_db.ChangeTracker.Clear();
 			}
-			return success;
+			return success ? record : null;
 		}
 
 		/** Get a list of models for a range of records created by a given member */
@@ -29,17 +29,17 @@ namespace Maasgroep.Database
 			GetList(item => item.MemberCreatedId == memberId, null, offset, limit).Select(item => GetModel(item)!);
 
 		/** Create a new record and save it to the database */
-		public virtual long Create(TModel model, long memberId)
+		public virtual TRecord? Create(TModel model, long memberId)
 		{
 			var record = GetRecord(model);
 			if (record == null) // Could not be created from model
-				return 0;
+				return null;
 			
 			record.Id = 0;
 			record.MemberCreatedId = memberId;
 			record.DateTimeCreated = DateTime.UtcNow;
 
-			return SaveToDb(record) ? record.Id : 0;
+			return SaveToDb(record);
 		}
 	}
 }
