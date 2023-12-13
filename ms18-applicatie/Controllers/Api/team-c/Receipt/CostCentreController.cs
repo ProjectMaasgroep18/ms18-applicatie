@@ -23,7 +23,7 @@ public class CostCentreController : ControllerBase
 
     [HttpGet]
     [ActionName("costCentreGet")]
-    public IActionResult CostCentreGet([FromQuery] int offset = default, [FromQuery] int limit = 100, [FromQuery] bool includeDeleted = false)
+    public IActionResult CostCentreGet([FromQuery] int offset = default, [FromQuery] int limit = default, [FromQuery] bool includeDeleted = default)
     {
 		if (!MemberExists(1)) // Toegangscontrole
 			return Forbidden();
@@ -147,7 +147,7 @@ public class CostCentreController : ControllerBase
     }
 
     [HttpGet("{id}/Receipt")]
-    public IActionResult CostCentreGetReceipts(long id, [FromQuery] int offset = 0, [FromQuery] int limit = 100, [FromQuery] bool includeDeleted = false)
+    public IActionResult CostCentreGetReceipts(long id, [FromQuery] int offset = default, [FromQuery] int limit = default, [FromQuery] bool includeDeleted = default)
     {
 		if (!MemberExists(1)) // Toegangscontrole
 			return Forbidden();

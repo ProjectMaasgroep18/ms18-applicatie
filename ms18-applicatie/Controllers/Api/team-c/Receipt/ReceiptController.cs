@@ -1,7 +1,8 @@
-﻿using Maasgroep.SharedKernel.Interfaces.Receipts;
+﻿using Maasgroep.Database.Receipts;
+using Maasgroep.SharedKernel.Interfaces.Receipts;
 using Maasgroep.SharedKernel.ViewModels.Receipts;
+using Maasgroep.Services;
 using Microsoft.AspNetCore.Mvc;
-using ms18_applicatie.Services;
 
 namespace ms18_applicatie.Controllers.Api;
 
@@ -9,23 +10,23 @@ namespace ms18_applicatie.Controllers.Api;
 [ApiController]
 public class ReceiptController : ControllerBase
 {
-    private readonly IReceiptRepository _receiptRepository;
+    private readonly IReceiptRepository<Receipt, ReceiptHistory> _receipt;
     private readonly IMemberService _memberService;
 
-    public ReceiptController(IReceiptRepository receiptRepository, IMemberService memberService) 
+    public ReceiptController(IReceiptRepository<Receipt, ReceiptHistory> receipt, IMemberService memberService) 
     { 
-        _receiptRepository = receiptRepository; 
+        _receipt = receipt; 
         _memberService = memberService;
     }
 
     [HttpGet]
     [ActionName("receiptGet")]
-    public IActionResult ReceiptGet([FromQuery] int offset = 0, [FromQuery] int limit = 100, [FromQuery] bool includeDeleted = false)
+    public IActionResult ReceiptGet([FromQuery] int offset = default, [FromQuery] int limit = default, [FromQuery] bool includeDeleted = default)
     {
         if (!MemberExists(1)) // Toegangscontrole
             return Forbidden();
 
-        var result = _receiptRepository.GetReceipts(offset, limit, includeDeleted);
+        var result = _receipt.ListAll(offset, limit, includeDeleted);
 
 		if (result == null)
 			return NotFound(new
@@ -44,7 +45,7 @@ public class ReceiptController : ControllerBase
 		if (!MemberExists(1)) // Toegangscontrole
 			return Forbidden();
 
-		var result = _receiptRepository.GetReceipt(id);
+		var result = _receipt.GetById(id);
 
 		if (result == null)
 			return NotFound(new
@@ -58,7 +59,7 @@ public class ReceiptController : ControllerBase
 
     [HttpPost]
     [ActionName("receiptCreate")]
-    public IActionResult ReceiptCreate([FromBody] ReceiptModelCreate receiptModelCreate)
+    public IActionResult ReceiptCreate([FromBody] ReceiptModel receiptModel)
     {
 		if (!MemberExists(1)) // Toegangscontrole
 			return Forbidden();
@@ -73,15 +74,9 @@ public class ReceiptController : ControllerBase
             });
         }
 
-        var receiptToAdd = new ReceiptModelCreateDb()
-        {
-            ReceiptModel = receiptModelCreate
-        ,   Member = _memberService.GetMember(1)
-        };
+		var receipt = _receipt.Create(receiptModel, 1);
 
-		var createReceiptId = _receiptRepository.Add(receiptToAdd);
-
-        if (createReceiptId == null) {
+        if (receipt == null) {
             return BadRequest(new
             {
                 status = 400,
@@ -89,7 +84,7 @@ public class ReceiptController : ControllerBase
             }); 
         }
 
-        return Ok(createReceiptId);
+        return Ok(receipt);
     }
 
     [HttpPut]
