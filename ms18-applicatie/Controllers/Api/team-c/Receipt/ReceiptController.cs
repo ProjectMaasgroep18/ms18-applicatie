@@ -31,7 +31,7 @@ public class ReceiptController : ControllerBase
 			return NotFound(new
 			{
 				status = 404,
-				message = "Receipt not found"
+				message = "Declaratie niet gevonden"
 			});
 
         return Ok(result);
@@ -50,7 +50,7 @@ public class ReceiptController : ControllerBase
 			return NotFound(new
 			{
 				status = 404,
-				message = "Receipt not found"
+				message = "Declaratie niet gevonden"
 			});
 
 		return Ok(result);
@@ -69,7 +69,7 @@ public class ReceiptController : ControllerBase
             return BadRequest(new
             {
                 status = 400,
-                message = "Invalid request body"
+                message = "Ongeldige data opgegeven"
             });
         }
 
@@ -79,9 +79,17 @@ public class ReceiptController : ControllerBase
         ,   Member = _memberService.GetMember(1)
         };
 
-		var result = _receiptRepository.Add(receiptToAdd);
+		var createReceiptId = _receiptRepository.Add(receiptToAdd);
 
-        return Ok(result);
+        if (createReceiptId == null) {
+            return BadRequest(new
+            {
+                status = 400,
+                message = "Ongeldige data opgegeven"
+            }); 
+        }
+
+        return Ok(createReceiptId);
     }
 
     [HttpPut]
@@ -97,7 +105,7 @@ public class ReceiptController : ControllerBase
             return BadRequest(new
             {
                 status = 400,
-                message = "Invalid request body"
+                message = "Ongeldige data opgegeven"
             });
         }
 
@@ -128,7 +136,7 @@ public class ReceiptController : ControllerBase
             return NotFound(new
             {
                 status = 404,
-                message = "Receipt not found"
+                message = "Declaratie niet gevonden"
             });
         }
 
@@ -164,7 +172,7 @@ public class ReceiptController : ControllerBase
             return BadRequest(new
             {
                 status = 400,
-                message = "Invalid request body"
+                message = "Ongeldige data opgegeven"
             });
         }
 
@@ -177,7 +185,7 @@ public class ReceiptController : ControllerBase
             return NotFound(new
             {
                 status = 404,
-                message = "Receipt not found"
+                message = "Declaratie niet gevonden"
             });
         }
 
@@ -191,13 +199,20 @@ public class ReceiptController : ControllerBase
 
         // Add the photo to the database
         var createPhotoId = _receiptRepository.Add(createdPhoto);
-        var photoToReturn = _receiptRepository.GetPhoto(createPhotoId);
+        if (createPhotoId == null) {
+            return BadRequest(new
+            {
+                status = 400,
+                message = "Foto kon niet worden aangemaakt"
+            }); 
+        }
+        var photoToReturn = _receiptRepository.GetPhoto(createPhotoId ?? 0);
         
         // Return the created photo
         return Created($"/api/v1/receipt/{id}/Photo/{createPhotoId}", new
         {
             status = 201,
-            message = "Photo created",
+            message = "Foto aangemaakt",
             photo = photoToReturn
 		});
     }
@@ -218,7 +233,7 @@ public class ReceiptController : ControllerBase
             return NotFound(new
             {
                 status = 404,
-                message = "Receipt not found"
+                message = "Declaratie niet gevonden"
             });
         }
 
@@ -241,7 +256,7 @@ public class ReceiptController : ControllerBase
             return BadRequest(new
             {
                 status = 400,
-                message = "Invalid request body"
+                message = "Ongeldige data opgegeven"
             });
         }
 
@@ -254,7 +269,7 @@ public class ReceiptController : ControllerBase
             return NotFound(new
             {
                 status = 404,
-                message = "Receipt not found"
+                message = "Declaratie niet gevonden"
             });
         }
 
@@ -272,7 +287,7 @@ public class ReceiptController : ControllerBase
         return Created($"/api/v1/receipt/{id}", new
         {
             status = 201,
-            message = "Receipt approved",
+            message = "Declaratie goedgekeurd",
             approval = approvalModel,
         });
     }

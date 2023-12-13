@@ -3,7 +3,7 @@
 
 
 
-// DEMO SCRIPT
+// Script for web front-end
 
 const BASE_URL = '/api/v1/';
 const LOAD_MSG = document.querySelector('#loading');
@@ -143,7 +143,9 @@ function showOutput(data, container) {
             while (splitKey.length > 0 && (keyData ?? null) !== null)
                 keyData = keyData[splitKey.shift()] ?? null;
             const value = typeof keyData == 'object' && keyData !== null ? JSON.stringify(keyData) : keyData;
-            const transformedData = ((transform && typeof transforms[transform] == 'function') ? transforms[transform](value) : value) ?? '\u2014';
+            let transformedData = ((transform && typeof transforms[transform] == 'function') ? transforms[transform](value) : value) ?? null;
+            if ((transformedData ?? '') === '' && (prop ?? '') === '' && output.tagName != 'TEXTAREA')
+                transformedData = '\u2014'; // — streepje
             if (typeof prop == 'undefined' || prop == '') {
                 // No property provided
                 output.innerText = transformedData;

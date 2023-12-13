@@ -4,7 +4,7 @@ namespace Maasgroep.Database.Test
 {
 	public class MaasgroepTestFixture
 	{
-		private const string ConnectionString = @"UserID=postgres;Password=postgres;Host=localhost;port=5432;Database=MaasgroepTest;Pooling=true";
+		private const string ConnectionString = @"UserID=postgres;Password=postgres;Host=localhost;port=5410;Database=MaasgroepTest;Pooling=true";
 
 		private static readonly object _lock = new();
 		private static bool _databaseInitialized;

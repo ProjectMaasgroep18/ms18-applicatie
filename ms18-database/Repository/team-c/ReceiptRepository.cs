@@ -17,46 +17,43 @@ namespace Maasgroep.Database.Receipts
 
 		#region Receipt
 
-		public ReceiptModel GetReceipt(long id)
+		public ReceiptModel? GetReceipt(long id)
 		{
 			ReceiptModel result = new ReceiptModel();
 
 			var receipt = _db.Receipt.FirstOrDefault(r => r.Id == id);
 			if (receipt == null) 
-			{
-				throw new InvalidOperationException();
-			}
-			else
-			{
-				var costCentre = from r in _db.Receipt
-								 join c in _db.CostCentre
-								 on r.CostCentreId equals c.Id
-								 into leftJoin
-								 from rc in leftJoin.DefaultIfEmpty()
-								 where r.Id == id
-								 select new { r, rc };
+				return null;
+		
+			var costCentre = from r in _db.Receipt
+								join c in _db.CostCentre
+								on r.CostCentreId equals c.Id
+								into leftJoin
+								from rc in leftJoin.DefaultIfEmpty()
+								where r.Id == id
+								select new { r, rc };
 
-				var photos = from p in _db.Photo
-							 join c in costCentre
-							 on p.ReceiptId equals c.r.Id
-							 where c.r.Id == id
-							 select new { p, c };
+			var photos = from p in _db.Photo
+							join c in costCentre
+							on p.ReceiptId equals c.r.Id
+							where c.r.Id == id
+							select new { p, c };
 
-				result.Id = costCentre.FirstOrDefault()!.r.Id;
-				result.Note = costCentre.FirstOrDefault()!.r.Note;
-				result.Status = EnumConverterService.ConvertStringToEnum(costCentre.FirstOrDefault()!.r.ReceiptStatus);
-				result.StatusString = costCentre.FirstOrDefault()!.r.ReceiptStatus;
-				result.Amount = costCentre.FirstOrDefault()!.r.Amount;
-				result.CostCentre.Id = costCentre.FirstOrDefault()!.rc.Id;
-				result.CostCentre.Name = costCentre.FirstOrDefault()!.rc.Name;
-				foreach (var photo in photos)
-					result.Photos.Add(new PhotoModel() 
-					{ 
-						Base64Image = photo.p.Base64Image
-					,	fileExtension = photo.p.fileExtension
-					,	fileName = photo.p.fileName
-					,	Id = photo.p.Id
-					});
+			result.Id = costCentre.FirstOrDefault()!.r.Id;
+			result.Note = costCentre.FirstOrDefault()!.r.Note;
+			result.Status = EnumConverterService.ConvertStringToEnum(costCentre.FirstOrDefault()!.r.ReceiptStatus);
+			result.StatusString = costCentre.FirstOrDefault()!.r.ReceiptStatus;
+			result.Amount = costCentre.FirstOrDefault()!.r.Amount;
+			result.CostCentre.Id = costCentre.FirstOrDefault()!.rc.Id;
+			result.CostCentre.Name = costCentre.FirstOrDefault()!.rc.Name;
+			foreach (var photo in photos) {
+				result.Photos.Add(new PhotoModel() 
+				{ 
+					Base64Image = photo.p.Base64Image
+				,	fileExtension = photo.p.fileExtension
+				,	fileName = photo.p.fileName
+				,	Id = photo.p.Id
+				});
 			}
 
 			return result;
@@ -69,10 +66,10 @@ namespace Maasgroep.Database.Receipts
 				.Where(r => r.DateTimeDeleted == null || includeDeleted)
 				.Skip(offset)
 				.Take(limit)
-				.ToList();
+				.Select(r => r.Id);
 
-			foreach (var dbResult in dbResults)
-				result.Add(GetReceipt(dbResult.Id));
+			foreach (var id in dbResults)
+				result.Add(GetReceipt(id));
 
 			return result;
 		}
@@ -87,17 +84,19 @@ namespace Maasgroep.Database.Receipts
 				.Where(r => r.MemberCreatedId == memberId && (r.DateTimeDeleted == null || includeDeleted))
 				.Skip(offset)
 				.Take(limit)
+				.Select(r => r.Id)
 				.ToList();
 
-			foreach (var dbResult in dbResults)
-				result.Add(GetReceipt(dbResult.Id));
+			foreach (var id in dbResults)
+				result.Add(GetReceipt(id));
 
 			return result;
 		}
-		public long Add(ReceiptModelCreateDb receipt)
+		public long? Add(ReceiptModelCreateDb receipt)
 		{
-			var costCentre = _db.CostCentre.Where(c => c.Name == receipt.ReceiptModel.CostCentre).FirstOrDefault();
-			if (costCentre == null) throw new Exception("kapot!");
+			var costCentre = _db.CostCentre.Where(c => c.Name == receipt.ReceiptModel.CostCentre || c.Id.ToString() == receipt.ReceiptModel.CostCentre).FirstOrDefault();
+			if (costCentre == null)
+				return null;
 
 			var receiptToAdd = new Receipt()
 			{
@@ -139,11 +138,10 @@ namespace Maasgroep.Database.Receipts
 		{
 			var receipt = _db.Receipt.Where(r => r.Id == receiptUpdated.ReceiptModel.Id).FirstOrDefault();
 
-			if (receipt == null) throw new Exception("Receipt niet gevonden!");
-
-			if (receipt.ReceiptStatus == ReceiptStatus.Goedgekeurd.ToString()
+			if (receipt == null
+				|| receipt.ReceiptStatus == ReceiptStatus.Goedgekeurd.ToString()
 				|| receipt.ReceiptStatus == ReceiptStatus.Uitbetaald.ToString()) {
-				throw new Exception("Deze receipt mag niet meer aangepast worden!");
+				return false;
 			}
 
 			var receiptHeeftFotos = _db.Photo.Where(p => p.ReceiptId == receiptUpdated.ReceiptModel.Id).Count() > 0;
@@ -207,7 +205,7 @@ namespace Maasgroep.Database.Receipts
 		#endregion
 
 		#region Photo
-		public long Add(PhotoModelCreateDb photo)
+		public long? Add(PhotoModelCreateDb photo)
 		{
 			var photoToAdd = new Photo()
 			{
@@ -228,7 +226,7 @@ namespace Maasgroep.Database.Receipts
 			return idOfPhoto;
 		}
 
-		public PhotoModel GetPhoto(long id) //TODO: Dit was PhotoViewModel; ik denk dat we funcitoneel niet 1 foto willen teruggeven?
+		public PhotoModel? GetPhoto(long id) //TODO: Dit was PhotoViewModel; ik denk dat we funcitoneel niet 1 foto willen teruggeven?
 		{
 			var result = new PhotoModel();
 
@@ -236,7 +234,7 @@ namespace Maasgroep.Database.Receipts
 
 			if (photo == null)
 			{
-				throw new Exception("kapot");
+				return null;
 			}
 			else
 			{
@@ -256,10 +254,11 @@ namespace Maasgroep.Database.Receipts
 				.Where(p => p.ReceiptId == receiptId && (p.DateTimeDeleted == null || includeDeleted))
 				.Skip(offset)
 				.Take(limit)
+				.Select(p => p.Id)
 				.ToList();
 
-			foreach (var dbResult in dbResults)
-				result.Add(GetPhoto(dbResult.Id));
+			foreach (var id in dbResults)
+				result.Add(GetPhoto(id));
 
 			return result;
 		}
@@ -316,33 +315,34 @@ namespace Maasgroep.Database.Receipts
 		{
 			var result = new List<CostCentreModel>();
 
-			var allCostCentre = _db.CostCentre.ToList();
-			foreach (var costCentre in allCostCentre)
-				result.Add(GetCostCentre(costCentre.Id));
+			var allCostCentre = _db.CostCentre
+				.Where(c => c.DateTimeDeleted == null || includeDeleted)
+				.Skip(offset)
+				.Take(limit)
+				.Select(c => c.Id)
+				.ToList();
+			foreach (var id in allCostCentre)
+				result.Add(GetCostCentre(id));
 
 			return result;
 		}
 
-		public CostCentreModel GetCostCentre(long id)
+		public CostCentreModel? GetCostCentre(long id)
 		{
 			CostCentreModel result = new CostCentreModel();
 
 			var costCentre = _db.CostCentre.Where(c => c.Id == id).FirstOrDefault();
 
 			if (costCentre == null)
-			{
-				throw new InvalidOperationException();
-			}
-			else
-			{
-				result.Name = costCentre.Name;
-				result.Id = costCentre.Id;
-			}
+				return null;
+
+			result.Name = costCentre.Name;
+			result.Id = costCentre.Id;
 
 			return result;
 		}
 
-		public long Add(CostCentreModelCreateDb costCentre)
+		public long? Add(CostCentreModelCreateDb costCentre)
 		{
 			var costCentreToAdd = new CostCentre()
 			{
@@ -367,7 +367,8 @@ namespace Maasgroep.Database.Receipts
 		{
 			var costCentre = _db.CostCentre.Where(c => c.Id == costCentreUpdated.CostCentre.Id).FirstOrDefault();
 
-			if (costCentre == null) throw new Exception("kapot!");
+			if (costCentre == null)
+				return false;
 
 			_db.Database.BeginTransaction();
 			_db.CostCentreHistory.Add(CreateCostCentreHistory(costCentre));
@@ -420,10 +421,11 @@ namespace Maasgroep.Database.Receipts
 									   join c in _db.CostCentre
 									   on r.CostCentreId equals c.Id
 									   where c.Id == costCentreId && (r.DateTimeDeleted == null || includeDeleted)
-									   select new { ReceiptjeIdtje = r.Id }).Skip(offset).Take(limit);
+									   select r.Id)
+									   .Skip(offset).Take(limit);
 
-			foreach (var item in receiptsByCostCentre)
-				result.Add(GetReceipt(item.ReceiptjeIdtje));
+			foreach (var id in receiptsByCostCentre)
+				result.Add(GetReceipt(id));
 
 			return result;
 

@@ -70,7 +70,7 @@ namespace Maasgroep.Database.Orders
 		{
 			var product = _orderContext.Product.Where(r => r.Id == productToUpdate.Product.Id).FirstOrDefault();
 
-			if (product == null) throw new Exception("kapot!");
+			if (product == null) throw new Exception("Product niet gevonden");
 
 			_orderContext.Database.BeginTransaction();
 			_orderContext.ProductHistory.Add(CreateProductHistory(product));
@@ -166,7 +166,7 @@ namespace Maasgroep.Database.Orders
 		{
 			var stock = _orderContext.Stock.Where(s => s.ProductId == stockToUpdate.Stock.Product.Id).FirstOrDefault();
 
-			if (stock == null) throw new Exception("kapot!");
+			if (stock == null) throw new Exception("Product niet gevonden");
 
 			_orderContext.Database.BeginTransaction();
 			_orderContext.StockHistory.Add(CreateStockHistory(stock));
