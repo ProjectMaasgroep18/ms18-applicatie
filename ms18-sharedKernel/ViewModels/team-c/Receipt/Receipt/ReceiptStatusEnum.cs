@@ -3,7 +3,7 @@ namespace Maasgroep.SharedKernel.ViewModels.Receipts
 {
 	public enum ReceiptStatus
 	{
-		Opgevoerd
+		Concept
 	,	Ingediend
 	,	Goedgekeurd
 	,	Afgekeurd
