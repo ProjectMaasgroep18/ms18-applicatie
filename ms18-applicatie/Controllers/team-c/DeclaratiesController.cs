@@ -13,13 +13,23 @@ public class DeclaratiesController : Controller
         return View();
     }
 
-    public IActionResult Edit(long id)
+    public IActionResult Lijst()
+    {
+        return View();
+    }
+
+    public IActionResult Aanpassen(long id)
     {
         ViewData["id"] = id;
         return View();
     }
 
     public IActionResult Nieuw()
+    {
+        return View();
+    }
+
+    public IActionResult Kostencentra()
     {
         return View();
     }

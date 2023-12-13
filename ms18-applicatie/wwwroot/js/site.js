@@ -121,40 +121,41 @@ function showOutput(data, container) {
 
         euro(amount) {
             // Format number to Euro value: 1.95 -> € 1,95
-            if (isNaN(+amount))
+            if (isNaN(+amount) || amount === null)
                 return amount;
             return (new Intl.NumberFormat('nl-NL', { style: 'currency', currency: 'EUR' })).format(amount);
         },
         editUrl(id) {
             // Return Edit url of Receipt id
-            return '/Declaraties/Edit/' + id;
+            return '/Declaraties/Aanpassen/' + id;
         },
     };
 
     showElement(container);
     const outputElements = container.querySelectorAll('[rel]');
-    for (key in data) {
-        outputElements.forEach(output => {
-            const rels = output.getAttribute('rel') ? output.getAttribute('rel').split(',') : [];
-            rels.forEach(rel => {
-                const [relKey, prop, transform] = rel.split(':');
-                if (relKey != key)
-                    return;
-                const value = typeof data[key] == 'object' && data[key] !== null ? JSON.stringify(data[key]) : data[key];
-                const transformedData = ((transform && typeof transforms[transform] == 'function') ? transforms[transform](value) : value) ?? '\u2014';
-                if (typeof prop == 'undefined' || prop == '') {
-                    // No property provided
-                    output.innerText = transformedData;
-                } else if (prop.slice(0, 5) == 'data-') {
-                    // Dataset property ('data-test-test' => output.dataset.testTest)
-                    output.dataset[prop.slice(5).replace(/-[a-z]/g, substr => substr[1].toUpperCase())] = transformedData;
-                } else {
-                    // Regular property
-                    output[prop] = transformedData;
-                }
-            });
+
+    outputElements.forEach(output => {
+        const rels = output.getAttribute('rel') ? output.getAttribute('rel').split(',') : [];
+        rels.forEach(rel => {
+            const [key, prop, transform] = rel.split(':');
+            let splitKey = key.split('.'); // Support data in structures (rel="key.subkey" with { "key": { "subkey": "value" }} will show "value")
+            let keyData = data[splitKey.shift()] ?? null;
+            while (splitKey.length > 0 && (keyData ?? null) !== null)
+                keyData = keyData[splitKey.shift()] ?? null;
+            const value = typeof keyData == 'object' && keyData !== null ? JSON.stringify(keyData) : keyData;
+            const transformedData = ((transform && typeof transforms[transform] == 'function') ? transforms[transform](value) : value) ?? '\u2014';
+            if (typeof prop == 'undefined' || prop == '') {
+                // No property provided
+                output.innerText = transformedData;
+            } else if (prop.slice(0, 5) == 'data-') {
+                // Dataset property ('data-test-test' => output.dataset.testTest)
+                output.dataset[prop.slice(5).replace(/-[a-z]/g, substr => substr[1].toUpperCase())] = transformedData;
+            } else {
+                // Regular property
+                output[prop] = transformedData;
+            }
         });
-    }
+    });
 }
 
 async function resizeImage(file, maxSize) {
