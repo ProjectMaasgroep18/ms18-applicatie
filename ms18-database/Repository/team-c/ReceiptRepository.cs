@@ -61,30 +61,33 @@ namespace Maasgroep.Database.Receipts
 
 			return result;
 		}
-		public IEnumerable<ReceiptModel> GetReceipts(int offset, int fetch)
+		public IEnumerable<ReceiptModel> GetReceipts(int offset = 0, int limit = 100, bool includeDeleted = false)
 		{
 			var result = new List<ReceiptModel>();
 
-			var indexStart = new Index(offset);
-			var indexEnd = new Index(fetch);
-			var range = new Range(indexStart, indexEnd);
-			//var dbResults = _db.Receipt.Take(range).ToList();
-			var dbResults = _db.Receipt.ToList();
+			var dbResults = _db.Receipt
+				.Where(r => r.DateTimeDeleted == null || includeDeleted)
+				.Skip(offset)
+				.Take(limit)
+				.ToList();
 
 			foreach (var dbResult in dbResults)
 				result.Add(GetReceipt(dbResult.Id));
 
 			return result;
 		}
-		public IEnumerable<ReceiptModel> GetReceiptsByMember(long memberId, int offset, int fetch)
+		public IEnumerable<ReceiptModel> GetReceiptsByMember(long memberId, int offset = 0, int limit = 100, bool includeDeleted = false)
 		{
 			var result = new List<ReceiptModel>();
 
 			var indexStart = new Index(offset);
-			var indexEnd = new Index(fetch);
+			var indexEnd = new Index(limit);
 			var range = new Range(indexStart, indexEnd);
-			//var dbResults = _db.Receipt.Take(range).ToList(); TODO: hiero offset fixen
-			var dbResults = _db.Receipt.Where(r => r.MemberCreatedId == memberId).ToList();
+			var dbResults = _db.Receipt
+				.Where(r => r.MemberCreatedId == memberId && (r.DateTimeDeleted == null || includeDeleted))
+				.Skip(offset)
+				.Take(limit)
+				.ToList();
 
 			foreach (var dbResult in dbResults)
 				result.Add(GetReceipt(dbResult.Id));
@@ -136,7 +139,14 @@ namespace Maasgroep.Database.Receipts
 		{
 			var receipt = _db.Receipt.Where(r => r.Id == receiptUpdated.ReceiptModel.Id).FirstOrDefault();
 
-			if (receipt == null) throw new Exception("kapot!");
+			if (receipt == null) throw new Exception("Receipt niet gevonden!");
+
+			if (receipt.ReceiptStatus == ReceiptStatus.Goedgekeurd.ToString()
+				|| receipt.ReceiptStatus == ReceiptStatus.Uitbetaald.ToString()) {
+				throw new Exception("Deze receipt mag niet meer aangepast worden!");
+			}
+
+			var receiptHeeftFotos = _db.Photo.Where(p => p.ReceiptId == receiptUpdated.ReceiptModel.Id).Count() > 0;
 
 			_db.Database.BeginTransaction();
 			_db.ReceiptHistory.Add(CreateReceiptHistory(receipt));
@@ -147,7 +157,18 @@ namespace Maasgroep.Database.Receipts
 			receipt.CostCentreId = receiptUpdated.ReceiptModel.CostCentre?.Id;
 			receipt.MemberModifiedId = receiptUpdated.Member.Id;
 			receipt.DateTimeModified = DateTime.UtcNow;
-			receipt.ReceiptStatus = receiptUpdated.ReceiptModel.StatusString!;
+			if (receiptHeeftFotos
+				&& receipt.Note != null
+				&& receipt.Note?.Trim() != ""
+				&& receipt.Amount != null
+				&& receipt.Amount != 0
+				&& receipt.CostCentreId != null) {
+				// We hebben alle benodigde gegevens
+				receipt.ReceiptStatus = ReceiptStatus.Ingediend.ToString();
+			} else {
+				// We hebben niet alle benodigde gegevens
+				receipt.ReceiptStatus = ReceiptStatus.Concept.ToString();
+			}
 
 			_db.Update(receipt);
 			_db.SaveChanges();
@@ -227,15 +248,15 @@ namespace Maasgroep.Database.Receipts
 			return result;
 		}
 
-		public IEnumerable<PhotoModel> GetPhotosByReceipt(long receiptId, int offset, int fetch)
+		public IEnumerable<PhotoModel> GetPhotosByReceipt(long receiptId, int offset = 0, int limit = 100, bool includeDeleted = false)
 		{
 			var result = new List<PhotoModel>();
 
-			var indexStart = new Index(offset);
-			var indexEnd = new Index(fetch);
-			var range = new Range(indexStart, indexEnd);
-			//var dbResults = _db.Receipt.Take(range).ToList(); TODO: hiero offset fixen
-			var dbResults = _db.Photo.Where(p => p.ReceiptId == receiptId).ToList();
+			var dbResults = _db.Photo
+				.Where(p => p.ReceiptId == receiptId && (p.DateTimeDeleted == null || includeDeleted))
+				.Skip(offset)
+				.Take(limit)
+				.ToList();
 
 			foreach (var dbResult in dbResults)
 				result.Add(GetPhoto(dbResult.Id));
@@ -291,7 +312,7 @@ namespace Maasgroep.Database.Receipts
 		#endregion
 
 		#region CostCentre
-		public IEnumerable<CostCentreModel> GetCostCentres(int offset, int fetch)
+		public IEnumerable<CostCentreModel> GetCostCentres(int offset = 0, int limit = 100, bool includeDeleted = false)
 		{
 			var result = new List<CostCentreModel>();
 
@@ -391,15 +412,15 @@ namespace Maasgroep.Database.Receipts
 			return true;
 		}
 
-		public IEnumerable<ReceiptModel> GetReceiptsByCostCentre(long costCentreId, int offset, int fetch)
+		public IEnumerable<ReceiptModel> GetReceiptsByCostCentre(long costCentreId, int offset = 0, int limit = 100, bool includeDeleted = false)
 		{
 			var result = new List<ReceiptModel>();
 
-			var receiptsByCostCentre = from r in _db.Receipt
+			var receiptsByCostCentre = (from r in _db.Receipt
 									   join c in _db.CostCentre
 									   on r.CostCentreId equals c.Id
-									   where c.Id == costCentreId
-									   select new { ReceiptjeIdtje = r.Id };
+									   where c.Id == costCentreId && (r.DateTimeDeleted == null || includeDeleted)
+									   select new { ReceiptjeIdtje = r.Id }).Skip(offset).Take(limit);
 
 			foreach (var item in receiptsByCostCentre)
 				result.Add(GetReceipt(item.ReceiptjeIdtje));

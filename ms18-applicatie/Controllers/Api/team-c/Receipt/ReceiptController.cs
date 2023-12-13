@@ -20,12 +20,12 @@ public class ReceiptController : ControllerBase
 
     [HttpGet]
     [ActionName("receiptGet")]
-    public IActionResult ReceiptGet()
+    public IActionResult ReceiptGet([FromQuery] int offset = 0, [FromQuery] int limit = 100, [FromQuery] bool includeDeleted = false)
     {
         if (!MemberExists(1)) // Toegangscontrole
             return Forbidden();
 
-        var result = _receiptRepository.GetReceipts(0, int.MaxValue);
+        var result = _receiptRepository.GetReceipts(offset, limit, includeDeleted);
 
 		if (result == null)
 			return NotFound(new
@@ -204,7 +204,7 @@ public class ReceiptController : ControllerBase
 
     [HttpGet("{id}/Photo")]
     [ActionName("receiptPhotosGet")]
-    public IActionResult ReceiptGetPhotos(long id)
+    public IActionResult ReceiptGetPhotos(long id, [FromQuery] int offset = 0, [FromQuery] int limit = 100, [FromQuery] bool includeDeleted = false)
     {
 		if (!MemberExists(1)) // Toegangscontrole
 			return Forbidden();
@@ -223,7 +223,7 @@ public class ReceiptController : ControllerBase
         }
 
         // Get all photos for the receipt
-        var photos = _receiptRepository.GetPhotosByReceipt(id, 0, int.MaxValue);
+        var photos = _receiptRepository.GetPhotosByReceipt(id, offset, limit, includeDeleted);
 
         return Ok(photos);
     }

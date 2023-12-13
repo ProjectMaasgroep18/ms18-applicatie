@@ -56,7 +56,7 @@ public class UserController : ControllerBase
 
     //TODO: KH, ik zou dit onder receipt plaatsen, niet member (we doen hier niks met memberrepositry)
     [HttpGet("{id}/Receipt")]
-    public IActionResult UserGetReceipts(long id)
+    public IActionResult UserGetReceipts(long id, [FromQuery] int offset = 0, [FromQuery] int limit = 100, [FromQuery] bool includeDeleted = false)
     {
 		if (!MemberExists(1)) // Toegangscontrole
 			return Forbidden();
@@ -72,7 +72,7 @@ public class UserController : ControllerBase
         }
 
         // Get all receipts for the user
-        var receipts = _receiptRepository.GetReceiptsByMember(id, 0, Int32.MaxValue);
+        var receipts = _receiptRepository.GetReceiptsByMember(id, offset, limit, includeDeleted);
         
         return Ok(receipts);
     }

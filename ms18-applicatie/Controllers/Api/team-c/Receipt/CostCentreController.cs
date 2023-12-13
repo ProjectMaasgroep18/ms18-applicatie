@@ -20,12 +20,12 @@ public class CostCentreController : ControllerBase
 
     [HttpGet]
     [ActionName("costCentreGet")]
-    public IActionResult CostCentreGet()
+    public IActionResult CostCentreGet([FromQuery] int offset = 0, [FromQuery] int limit = 100, [FromQuery] bool includeDeleted = false)
     {
 		if (!MemberExists(1)) // Toegangscontrole
 			return Forbidden();
 
-        return Ok(_receiptRepository.GetCostCentres(0, int.MaxValue));
+        return Ok(_receiptRepository.GetCostCentres(offset, limit, includeDeleted));
     }
 
     [HttpGet("{id}")]
@@ -179,7 +179,7 @@ public class CostCentreController : ControllerBase
     }
 
     [HttpGet("{id}/Receipt")]
-    public IActionResult CostCentreGetReceipts(long id)
+    public IActionResult CostCentreGetReceipts(long id, [FromQuery] int offset = 0, [FromQuery] int limit = 100, [FromQuery] bool includeDeleted = false)
     {
 		if (!MemberExists(1)) // Toegangscontrole
 			return Forbidden();
@@ -198,7 +198,7 @@ public class CostCentreController : ControllerBase
         }
 
         // Get all receipts with this status
-        var costCentres = _receiptRepository.GetReceiptsByCostCentre(id, 0, int.MaxValue);
+        var costCentres = _receiptRepository.GetReceiptsByCostCentre(id, offset, limit, includeDeleted);
         
         return Ok(costCentres);
     }
