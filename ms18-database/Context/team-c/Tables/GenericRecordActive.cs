@@ -5,6 +5,7 @@ namespace Maasgroep.Database
     public abstract record GenericRecordActive
     {
 		// Generic
+		public long Id { get; set; }
 		public long MemberCreatedId { get; set; }
 		public long? MemberModifiedId { get; set; }
 		public long? MemberDeletedId { get; set; }

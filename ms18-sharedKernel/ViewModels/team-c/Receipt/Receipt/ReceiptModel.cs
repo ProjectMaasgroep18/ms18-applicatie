@@ -1,8 +1,6 @@
 ﻿
 namespace Maasgroep.SharedKernel.ViewModels.Receipts
 {
-	//KH: Dit hernoemd van 'Receipt' naar 'ReceiptModel'
-	//    ivm gebruik van 'Receipt' in namespace '.Database'
 	public class ReceiptModel
 	{
 		public ReceiptModel() 
