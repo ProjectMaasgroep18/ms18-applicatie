@@ -1,8 +1,9 @@
-﻿using Maasgroep.Database.Orders;
+﻿using Maasgroep.Database.Context;
+using Maasgroep.Database.Orders;
 
 namespace Maasgroep.Database.Test
 {
-	public class MaasgroepTestFixture
+    public class MaasgroepTestFixture
 	{
 		private const string ConnectionString = @"UserID=postgres;Password=postgres;Host=localhost;port=5432;Database=MaasgroepTest;Pooling=true";
 

@@ -1,22 +1,14 @@
-using Maasgroep.Database;
+using Maasgroep.Database.Context;
 using Maasgroep.Database.Members;
 using Maasgroep.Database.Orders;
 using Maasgroep.Database.Receipts;
+using Microsoft.EntityFrameworkCore;
 
 namespace Maasgroep.Console
 {
     internal class DatabaseTestData
     {
-        private readonly MemberRepository _members;
-        private readonly ReceiptRepository _receipts;
-        private readonly OrderRepository _orders;
-
-        internal DatabaseTestData()
-        {
-            _members = new MemberRepository(new MaasgroepContext());
-            _receipts = new ReceiptRepository(new MaasgroepContext());
-            _orders = new OrderRepository(new MaasgroepContext());
-        }
+        private DbContext _context;
 
         internal void CreateTestDataAll()
         {
@@ -51,7 +43,7 @@ namespace Maasgroep.Console
 
         private MaasgroepContext CreateContext()
         {
-            return new MaasgroepContext();
+            return new MaasgroepContext("UserID=postgres;Password=postgres;Host=localhost;port=5432;Database=Maasgroep;Pooling=true");
         }
 
         #region Member_Admin

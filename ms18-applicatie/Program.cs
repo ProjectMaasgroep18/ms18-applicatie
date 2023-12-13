@@ -1,17 +1,31 @@
-using Maasgroep.Database;
-using Maasgroep.SharedKernel.Interfaces.Receipts;
-using Maasgroep.SharedKernel.Interfaces.Members;
-using Maasgroep.SharedKernel.Interfaces.Orders;
-using Maasgroep.Database.Receipts;
+using Google.Apis.Auth.OAuth2;
+using Google.Apis.Calendar.v3;
+using Google.Apis.Services;
+using Maasgroep.Database.Context;
 using Maasgroep.Database.Members;
 using Maasgroep.Database.Orders;
+using Maasgroep.Database.Receipts;
+using Maasgroep.SharedKernel.Interfaces.Members;
+using Maasgroep.SharedKernel.Interfaces.Orders;
+using Maasgroep.SharedKernel.Interfaces.Receipts;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
+using ms18_applicatie.Interfaces.team_d;
+using ms18_applicatie.Models.team_a;
+using ms18_applicatie.Repository.team_d;
 using ms18_applicatie.Services;
 
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add database context
-builder.Services.AddDbContext<MaasgroepContext>();
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+builder.Services.AddDbContext<MaasgroepContext>(options =>
+options.UseNpgsql(connectionString));
+
+builder.Services.AddScoped<IFolderRepository, FolderRepository>();
+builder.Services.AddScoped<IPhotoRepository, PhotoRepository>();
+
 builder.Services.AddTransient<IReceiptRepository, ReceiptRepository>();
 builder.Services.AddTransient<IMemberRepository, MemberRepository>();
 builder.Services.AddTransient<IOrderRepository, OrderRepository>();
@@ -50,7 +64,7 @@ builder.Services.AddSingleton((x) =>
     using var stream =
            new FileStream(settings.FilePath, FileMode.Open, FileAccess.Read);
     var credential = GoogleCredential.FromStream(stream).CreateScoped(scopes);
-    
+
 
     //Create the Calendar service.
     return new CalendarService(new BaseClientService.Initializer()

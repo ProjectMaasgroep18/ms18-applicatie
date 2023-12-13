@@ -1,12 +1,13 @@
-﻿using Maasgroep.SharedKernel.Interfaces.Receipts;
-using Maasgroep.SharedKernel.ViewModels.Receipts;
+﻿using Maasgroep.Database.Context;
+using Maasgroep.SharedKernel.Interfaces.Receipts;
 using Maasgroep.SharedKernel.Services;
+using Maasgroep.SharedKernel.ViewModels.Receipts;
 using Microsoft.EntityFrameworkCore;
 
 namespace Maasgroep.Database.Receipts
 {
 
-	//TODO: deze gaat ook teveel doen (receipt + photo + costcentre).
+    //TODO: deze gaat ook teveel doen (receipt + photo + costcentre).
     public class ReceiptRepository : IReceiptRepository
     {
         private readonly MaasgroepContext _db;

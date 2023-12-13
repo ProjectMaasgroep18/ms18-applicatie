@@ -1,10 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Maasgroep.SharedKernel.Interfaces.Orders;
 using Maasgroep.SharedKernel.ViewModels.Orders;
+using Maasgroep.Database.Context;
 
 namespace Maasgroep.Database.Orders
 {
-	public class OrderRepository : IOrderRepository
+    public class OrderRepository : IOrderRepository
 	{
 		private readonly MaasgroepContext _orderContext;
 
