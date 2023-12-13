@@ -1,9 +1,9 @@
 ﻿
 namespace Maasgroep.SharedKernel.ViewModels.Receipts
 {
-	public class PhotoModel
+	public class ReceiptPhotoModel
 	{
-		public PhotoModel() { }
+		public ReceiptPhotoModel() { }
 
 		public long Id { get; set; }
 		public string Base64Image { get; set; }

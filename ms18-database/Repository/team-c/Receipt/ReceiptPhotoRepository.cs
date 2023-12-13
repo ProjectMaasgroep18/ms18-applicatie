@@ -4,12 +4,12 @@ using Maasgroep.SharedKernel.ViewModels.Receipts;
 namespace Maasgroep.Database.Receipts
 {
 
-    public class ReceiptPhotoRepository : DeletableRepository<Photo, PhotoModel>, IReceiptPhotoRepository<Photo>
+    public class ReceiptPhotoRepository : DeletableRepository<ReceiptPhoto, ReceiptPhotoModel>, IReceiptPhotoRepository<ReceiptPhoto>
     {
 		public ReceiptPhotoRepository(MaasgroepContext db) : base(db) {}
 
         /** Create ReceiptPhotoModel from ReceiptPhoto record */
-        public override PhotoModel GetModel(Photo photo)
+        public override PhotoModel GetModel(ReceiptPhoto photo)
         {
             return new PhotoModel() {
 				FileExtension = photo.FileExtension,
@@ -20,12 +20,12 @@ namespace Maasgroep.Database.Receipts
         }
 
         /** Create or update ReceiptPhoto record from model */
-        public override Photo? GetRecord(PhotoModel model, Photo? existingPhoto = null)
+        public override ReceiptPhoto? GetRecord(PhotoModel model, ReceiptPhoto? existingPhoto = null)
         {
             if (existingPhoto != null)
                 return null; // Photo records are not editable
 
-            var photo = new Photo() {
+            var photo = new ReceiptPhoto() {
                 Base64Image = model.Base64Image,
 				FileExtension = model.FileExtension,
 				FileName = model.FileName,
