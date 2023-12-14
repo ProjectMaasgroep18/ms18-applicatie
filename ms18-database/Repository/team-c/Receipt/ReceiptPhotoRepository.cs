@@ -1,10 +1,11 @@
 using Maasgroep.Database.Interfaces;
 using Maasgroep.SharedKernel.ViewModels.Receipts;
+using Maasgroep.SharedKernel.DataModels.Receipts;
 
 namespace Maasgroep.Database.Receipts
 {
 
-    public class ReceiptPhotoRepository : DeletableRepository<ReceiptPhoto, ReceiptPhotoModel>, IReceiptPhotoRepository
+    public class ReceiptPhotoRepository : DeletableRepository<ReceiptPhoto, ReceiptPhotoModel, ReceiptPhotoData>, IReceiptPhotoRepository
     {
 		public ReceiptPhotoRepository(MaasgroepContext db) : base(db) {}
 
@@ -19,17 +20,17 @@ namespace Maasgroep.Database.Receipts
 			};
         }
 
-        /** Create or update ReceiptPhoto record from model */
-        public override ReceiptPhoto? GetRecord(ReceiptPhotoModel model, ReceiptPhoto? existingPhoto = null)
+        /** Create or update ReceiptPhoto record from data model */
+        public override ReceiptPhoto? GetRecord(ReceiptPhotoData data, ReceiptPhoto? existingPhoto = null)
         {
             if (existingPhoto != null)
                 return null; // Photo records are not editable
 
             var photo = new ReceiptPhoto() {
-                Base64Image = model.Base64Image,
-				FileExtension = model.FileExtension,
-				FileName = model.FileName,
-				ReceiptId = model.ReceiptId,
+                Base64Image = data.Base64Image,
+				FileExtension = data.FileExtension,
+				FileName = data.FileName,
+				ReceiptId = data.ReceiptId,
             };
 			return photo;
         }

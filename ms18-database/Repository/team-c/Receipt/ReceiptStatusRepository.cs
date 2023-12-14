@@ -6,6 +6,8 @@ namespace Maasgroep.Database.Receipts
 
     public class ReceiptStatusRepository : IReceiptStatusRepository
     {
+        const ReceiptStatus UnknownStatus = ReceiptStatus.Onbekend; 
+
         public bool Exists(long id)
             => Enum.IsDefined(typeof(ReceiptStatus), id);
 
@@ -13,21 +15,12 @@ namespace Maasgroep.Database.Receipts
             => GetModel(id).ToString();
 
         public ReceiptStatus GetModel(long id)
-            => Enum.IsDefined(typeof(ReceiptStatus), id) ? (ReceiptStatus)id : ReceiptStatus.Onbekend;
+            => Enum.IsDefined(typeof(ReceiptStatus), id) ? (ReceiptStatus)id : UnknownStatus;
 
         public ReceiptStatus GetModel(string value)
-        {
-            throw new NotImplementedException();
-        }
-
-        public string? GetRecord(ReceiptStatus model, string? existingRecord = null)
-        {
-            throw new NotImplementedException();
-        }
+            => Enum.TryParse(value, true, out ReceiptStatus result) ? result : UnknownStatus;
 
         public IEnumerable<ReceiptStatus> ListAll(int offset = 0, int limit = 0)
-        {
-            throw new NotImplementedException();
-        }
+            => Enum.GetValues(typeof(ReceiptStatus)).Cast<ReceiptStatus>().ToList();
     }
 }

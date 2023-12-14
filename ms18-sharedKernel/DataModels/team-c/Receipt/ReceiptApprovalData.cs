@@ -1,9 +1,8 @@
 ﻿
-namespace Maasgroep.SharedKernel.ViewModels.Receipts
+namespace Maasgroep.SharedKernel.DataModels.Receipts
 {
-	public class ReceiptApprovalModel
+	public class ReceiptApprovalData
 	{
-		public long Id { get; set; }
 		public long ReceiptId { get; set; }
 		public string? Note { get; set; }
 		public bool Approved { get; set; }

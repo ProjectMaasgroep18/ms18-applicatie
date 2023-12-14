@@ -6,8 +6,8 @@ namespace Maasgroep.Controllers.Api;
 
 [Route("api/v1/[controller]")]
 [ApiController]
-public abstract class ReadOnlyRepositoryController<TRepository, TRecord, TModel> : ControllerBase
-where TRepository : IReadOnlyRepository<TRecord, TModel>
+public abstract class ReadOnlyRepositoryController<TRepository, TRecord, TViewModel> : ControllerBase
+where TRepository : IReadOnlyRepository<TRecord, TViewModel>
 where TRecord: GenericRecordActive
 {
 	protected readonly TRepository Repository;

@@ -4,18 +4,18 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Maasgroep.Controllers.Api;
 
-public abstract class WritableRepositoryController<TRepository, TRecord, TModel> : ReadOnlyRepositoryController<TRepository, TRecord, TModel>
-where TRepository : IWritableRepository<TRecord, TModel>
+public abstract class WritableRepositoryController<TRepository, TRecord, TViewModel, TDataModel> : ReadOnlyRepositoryController<TRepository, TRecord, TViewModel>
+where TRepository : IWritableRepository<TRecord, TViewModel, TDataModel>
 where TRecord: GenericRecordActive
 {
 	public WritableRepositoryController(TRepository repository) : base(repository) {}
     
     [HttpPost]
-    public IActionResult RepositoryCreate([FromBody] TModel model)
+    public IActionResult RepositoryCreate([FromBody] TDataModel data)
     {
-        var repository = Repository.Create(model, 1);
+        var repository = Repository.Create(data, 1);
         if (repository == null)
-            return BadRequest(model);
+            return BadRequest(data);
         return Created($"/api/v1/{RouteData.Values["controller"]}/{repository.Id}", Repository.GetModel(repository));
     }
 }

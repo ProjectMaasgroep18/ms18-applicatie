@@ -60,18 +60,13 @@ namespace Maasgroep.Console
         {
             using (var db = CreateContext())
             {
-                var members = new List<Member>()
-                {
-                    new Member() { Name = "Borgia" }
-                };
-
-                db.Member.AddRange(members);
+                var borgia = new Member() { Name = "Borgia" };
+                
+                db.Member.Add(borgia);
 
                 db.SaveChanges();
 
-                var borgia = db.Member.FirstOrDefault()!;
-
-                members = new List<Member>()
+                var members = new List<Member>()
                 {
                     new Member() { Name = "da Gama", MemberCreated = borgia },
                     new Member() { Name = "Albuquerque", MemberCreated = borgia }

@@ -1,11 +1,12 @@
 ﻿using Maasgroep.Database.Receipts;
 using Maasgroep.Database.Interfaces;
 using Maasgroep.SharedKernel.ViewModels.Receipts;
+using Maasgroep.SharedKernel.DataModels.Receipts;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Maasgroep.Controllers.Api;
 
-public class ReceiptController : EditableRepositoryController<IReceiptRepository, Receipt, ReceiptModel, ReceiptHistory>
+public class ReceiptController : EditableRepositoryController<IReceiptRepository, Receipt, ReceiptModel, ReceiptData, ReceiptHistory>
 {
 	protected readonly IReceiptPhotoRepository Photos;
 	protected readonly IReceiptApprovalRepository Approvals;
@@ -17,10 +18,10 @@ public class ReceiptController : EditableRepositoryController<IReceiptRepository
     }
 
     [HttpPost("{id}/Photo")]
-    public IActionResult ReceiptAddPhoto(long id, [FromBody] ReceiptPhotoModel model)
+    public IActionResult ReceiptAddPhoto(long id, [FromBody] ReceiptPhotoData data)
     {
-        model.ReceiptId = id;
-        var photo = Photos.Create(model, 1);
+        data.ReceiptId = id;
+        var photo = Photos.Create(data, 1);
         if (photo == null)
             return BadRequest(photo);
         return Created($"/api/v1/ReceiptPhotos/{photo.Id}", photo);
@@ -31,10 +32,10 @@ public class ReceiptController : EditableRepositoryController<IReceiptRepository
         => Ok(Photos.ListByReceipt(id, offset, limit, includeDeleted));
 
     [HttpPost("{id}/Approve")]
-    public IActionResult ReceiptApprove(long id, [FromBody] ReceiptApprovalModel model)
+    public IActionResult ReceiptApprove(long id, [FromBody] ReceiptApprovalData data)
     {
-        model.ReceiptId = id;
-        var approval = Approvals.Create(model, 1);
+        data.ReceiptId = id;
+        var approval = Approvals.Create(data, 1);
         if (approval == null)
             return BadRequest(approval);
         return Ok(approval);

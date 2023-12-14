@@ -1,19 +1,22 @@
 ﻿using Maasgroep.Database.Interfaces;
 using Maasgroep.SharedKernel.ViewModels.Receipts;
-using Maasgroep.SharedKernel.Services;
+using Maasgroep.SharedKernel.DataModels.Receipts;
 
 namespace Maasgroep.Database.Receipts
 {
 
-    public class ReceiptRepository : EditableRepository<Receipt, ReceiptModel, ReceiptHistory>, IReceiptRepository
+    public class ReceiptRepository : EditableRepository<Receipt, ReceiptModel, ReceiptData, ReceiptHistory>, IReceiptRepository
     {
-		public ReceiptRepository(MaasgroepContext db) : base(db) {}
+
+		protected readonly ReceiptStatusRepository Statuses;
+		public ReceiptRepository(MaasgroepContext db) : base(db)
+			=> Statuses = new ReceiptStatusRepository();
 
 		/** Create ReceiptModel from Receipt record */
 		public override ReceiptModel GetModel(Receipt receipt)
         {
-			var status = EnumConverterService.ConvertStringToEnum(receipt.ReceiptStatus);
-			var costCentre = _db.CostCentre.FirstOrDefault(c => c.Id == receipt.CostCentreId);
+			var status = Statuses.GetModel(receipt.ReceiptStatus);
+			var costCentre = Db.CostCentre.FirstOrDefault(c => c.Id == receipt.CostCentreId);
 
             return new ReceiptModel() {
 				Id = receipt.Id,
@@ -28,19 +31,19 @@ namespace Maasgroep.Database.Receipts
 			};
         }
 
-		/** Create or update Receipt record from model */
-        public override Receipt? GetRecord(ReceiptModel model, Receipt? existingReceipt = null)
+		/** Create or update Receipt record from data model */
+        public override Receipt? GetRecord(ReceiptData data, Receipt? existingReceipt = null)
         {
             var receipt = existingReceipt ?? new();
 			if (receipt.ReceiptStatus == ReceiptStatus.Goedgekeurd.ToString()
 				|| receipt.ReceiptStatus == ReceiptStatus.Uitbetaald.ToString())
 				return null; // Al definitief, dus aanpassen niet meer toegestaan
 
-			var receiptHeeftFotos = _db.ReceiptPhoto.Where(p => p.ReceiptId == model.Id).Count() > 0;
+			var receiptHeeftFotos = existingReceipt == null ? false : Db.ReceiptPhoto.Where(p => p.ReceiptId == existingReceipt.Id).Any();
 			
-			receipt.Note = model.Note;
-			receipt.Amount = model.Amount;
-			receipt.CostCentreId = model.CostCentre?.Id;
+			receipt.Note = data.Note;
+			receipt.Amount = data.Amount;
+			receipt.CostCentreId = data.CostCentreId;
 			if (receiptHeeftFotos
 				&& receipt.Note != null
 				&& receipt.Note?.Trim() != ""

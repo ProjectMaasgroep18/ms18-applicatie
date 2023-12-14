@@ -6,7 +6,7 @@ namespace Maasgroep.Database
     {
 		// Generic
 		public long Id { get; set; }
-		public long MemberCreatedId { get; set; }
+		public long? MemberCreatedId { get; set; }
 		public long? MemberModifiedId { get; set; }
 		public long? MemberDeletedId { get; set; }
 		public DateTime DateTimeCreated { get; set; }
@@ -14,7 +14,7 @@ namespace Maasgroep.Database
 		public DateTime? DateTimeDeleted { get; set; }
 
 		// EF generic properties
-		public Member MemberCreated { get; set; }
+		public Member? MemberCreated { get; set; }
 		public Member? MemberModified { get; set; }
 		public Member? MemberDeleted { get; set; }
 	}

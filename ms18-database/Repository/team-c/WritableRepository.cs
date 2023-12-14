@@ -2,36 +2,46 @@ using Maasgroep.SharedKernel.Interfaces;
 
 namespace Maasgroep.Database
 {
-    public abstract class WritableRepository<TRecord, TModel> : ReadOnlyRepository<TRecord, TModel>, IWritableRepository<TRecord, TModel>
+    public abstract class WritableRepository<TRecord, TViewModel, TDataModel> : ReadOnlyRepository<TRecord, TViewModel>, IWritableRepository<TRecord, TViewModel, TDataModel>
 	where TRecord : GenericRecordActive
     {
         public WritableRepository(MaasgroepContext db) : base(db) {}
 
+		// ABSTRACT METHODS:
+
+		/** Get record from model */
+		public abstract TRecord? GetRecord(TDataModel model, TRecord? existingRecord = null);
+		// This should create or update a record from a model
+		// Should return null if data is not valid or record is not editable
+
+		// END ABSTRACT METHODS
+
+
 		/** Save a record to the database */
-		protected TRecord SaveToDb(TRecord record)
+		protected TRecord? SaveToDb(TRecord record)
 		{
-			_db.Database.BeginTransaction();
+			Db.Database.BeginTransaction();
 			var success = false;
 			try {
-				_db.Set<TRecord>().Add(record);
-				_db.SaveChanges();
-				_db.Database.CommitTransaction();
+				Db.Set<TRecord>().Add(record);
+				Db.SaveChanges();
+				Db.Database.CommitTransaction();
 				success = true;
 			} catch (Exception) {
-				_db.Database.RollbackTransaction();
-				_db.ChangeTracker.Clear();
+				Db.Database.RollbackTransaction();
+				Db.ChangeTracker.Clear();
 			}
 			return success ? record : null;
 		}
 
 		/** Get a list of models for a range of records created by a given member */
-		public virtual IEnumerable<TModel> ListByMember(long memberId, int offset = default, int limit = default) =>
+		public virtual IEnumerable<TViewModel> ListByMember(long memberId, int offset = default, int limit = default) =>
 			GetList(item => item.MemberCreatedId == memberId, null, offset, limit).Select(item => GetModel(item)!);
 
 		/** Create a new record and save it to the database */
-		public virtual TRecord? Create(TModel model, long memberId)
+		public virtual TRecord? Create(TDataModel data, long memberId)
 		{
-			var record = GetRecord(model);
+			var record = GetRecord(data);
 			if (record == null) // Could not be created from model
 				return null;
 			

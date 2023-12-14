@@ -2,12 +2,12 @@ using Maasgroep.SharedKernel.Interfaces;
 
 namespace Maasgroep.Database
 {
-    public abstract class ReadOnlyRepository<TRecord, TModel> : IReadOnlyRepository<TRecord, TModel>
+    public abstract class ReadOnlyRepository<TRecord, TViewModel> : IReadOnlyRepository<TRecord, TViewModel>
 	where TRecord : GenericRecordActive
     {
-        protected readonly MaasgroepContext _db;
+        protected readonly MaasgroepContext Db;
 
-        public ReadOnlyRepository(MaasgroepContext db) => _db = db;
+        public ReadOnlyRepository(MaasgroepContext db) => Db = db;
 
 		// Default number of items per page
 		const int defaultLimit = 100;
@@ -15,13 +15,8 @@ namespace Maasgroep.Database
 		// ABSTRACT METHODS:
 
 		/** Get model from record */
-		public abstract TModel GetModel(TRecord record);
+		public abstract TViewModel GetModel(TRecord record);
 		// This should create a model based on the given record
-
-		/** Get record from model */
-		public abstract TRecord? GetRecord(TModel model, TRecord? existingRecord = null);
-		// This should create or update a record from a model
-		// Should return null if data is not valid or record is not editable
 
 		// END ABSTRACT METHODS
 
@@ -32,9 +27,9 @@ namespace Maasgroep.Database
 			if (limit == default)
 				limit = defaultLimit;
 
-			return _db.Set<TRecord>()
-				.Where(item => filter == null || filter(item))
-				.OrderByDescending(item => priority == null ? 0 : priority(item))
+			return Db.Set<TRecord>()
+				.Where(filter ?? (item => true))
+				.OrderByDescending(priority ?? (item => 0))
 				.ThenByDescending(item => item.DateTimeCreated)
 				.Skip(offset)
 				.Take(limit)
@@ -42,13 +37,13 @@ namespace Maasgroep.Database
 		}
 
 		/** See if record with ID exists */
-		public virtual bool Exists(long id) => _db.Set<TRecord>().Select(item => item.Id == id).Any();
+		public virtual bool Exists(long id) => Db.Set<TRecord>().Select(item => item.Id == id).Any();
 
 		/** Get record by ID */
-		public virtual TRecord? GetById(long id) => _db.Set<TRecord>().FirstOrDefault(item => item.Id == id);
+		public virtual TRecord? GetById(long id) => Db.Set<TRecord>().FirstOrDefault(item => item.Id == id);
 
 		/** Get model by ID */
-		public TModel? GetModel(long id)
+		public TViewModel? GetModel(long id)
 		{
 			var record = GetById(id);
 
@@ -59,7 +54,7 @@ namespace Maasgroep.Database
 		}
 
 		/** Get a list of models for a range of records */
-		public virtual IEnumerable<TModel> ListAll(int offset = default, int limit = default) =>
+		public virtual IEnumerable<TViewModel> ListAll(int offset = default, int limit = default) =>
 			GetList(null, null, offset, limit).Select(item => GetModel(item)!);
 	}
 }

@@ -8,7 +8,7 @@ namespace Maasgroep.Database
         public DateTime RecordCreated { get; set; }
 
         // Generic
-        public virtual long MemberCreatedId { get; set; }
+        public virtual long? MemberCreatedId { get; set; }
         public long? MemberModifiedId { get; set; }
         public long? MemberDeletedId { get; set; }
         public DateTime DateTimeCreated { get; set; }

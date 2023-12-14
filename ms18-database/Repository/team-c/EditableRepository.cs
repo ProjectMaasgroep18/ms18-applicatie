@@ -2,7 +2,7 @@ using Maasgroep.SharedKernel.Interfaces;
 
 namespace Maasgroep.Database
 {
-    public abstract class EditableRepository<TRecord, TModel, THistory> : DeletableRepository<TRecord, TModel>, IEditableRepository<TRecord, TModel, THistory>
+    public abstract class EditableRepository<TRecord, TViewModel, TDataModel, THistory> : DeletableRepository<TRecord, TViewModel, TDataModel>, IEditableRepository<TRecord, TViewModel, TDataModel, THistory>
 	where TRecord : GenericRecordActive
 	where THistory : GenericRecordHistory
     {
@@ -21,23 +21,23 @@ namespace Maasgroep.Database
         /** Save a record to the database (with history) */
 		protected TRecord? SaveToDb(TRecord record, THistory history)
 		{
-			_db.Database.BeginTransaction();
+			Db.Database.BeginTransaction();
 			var success = false;
 			try {
-				_db.Set<TRecord>().Add(record);
-				_db.Set<THistory>().Add(history);
-				_db.SaveChanges();
-				_db.Database.CommitTransaction();
+				Db.Set<TRecord>().Add(record);
+				Db.Set<THistory>().Add(history);
+				Db.SaveChanges();
+				Db.Database.CommitTransaction();
 				success = true;
 			} catch (Exception) {
-				_db.Database.RollbackTransaction();
-				_db.ChangeTracker.Clear();
+				Db.Database.RollbackTransaction();
+				Db.ChangeTracker.Clear();
 			}
 			return success ? record : null;
 		}
 
 		/** Update an existing record in the database */
-		public virtual TRecord? Update(long id, TModel model, long memberId)
+		public virtual TRecord? Update(long id, TDataModel model, long memberId)
 		{
 			var record = GetById(id);
 			if (record == null)

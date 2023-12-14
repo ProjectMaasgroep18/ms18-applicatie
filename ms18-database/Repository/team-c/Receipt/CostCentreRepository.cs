@@ -1,10 +1,11 @@
 using Maasgroep.Database.Interfaces;
 using Maasgroep.SharedKernel.ViewModels.Receipts;
+using Maasgroep.SharedKernel.DataModels.Receipts;
 
 namespace Maasgroep.Database.Receipts
 {
 
-    public class CostCentreRepository : EditableRepository<CostCentre, CostCentreModel, CostCentreHistory>, ICostCentreRepository
+    public class CostCentreRepository : EditableRepository<CostCentre, CostCentreModel, CostCentreData, CostCentreHistory>, ICostCentreRepository
     {
         public CostCentreRepository(MaasgroepContext db) : base(db) {}
 
@@ -17,11 +18,11 @@ namespace Maasgroep.Database.Receipts
 			};
         }
 
-		/** Create or update CostCentre record from model */
-        public override CostCentre? GetRecord(CostCentreModel model, CostCentre? existingCostCentre = null)
+		/** Create or update CostCentre record from data model */
+        public override CostCentre? GetRecord(CostCentreData data, CostCentre? existingCostCentre = null)
         {
             var costCentre = existingCostCentre ?? new();
-			costCentre.Name = model.Name;
+			costCentre.Name = data.Name;
 			return costCentre;
         }
 
