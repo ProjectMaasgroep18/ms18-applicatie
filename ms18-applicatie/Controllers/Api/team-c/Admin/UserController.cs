@@ -15,7 +15,7 @@ public class UserController : WritableRepositoryController<IMemberRepository, Me
 
     [HttpGet("{id}/Receipt")]
     public IActionResult UserGetReceipts(long id, [FromQuery] int offset = default, [FromQuery] int limit = default, [FromQuery] bool includeDeleted = default)
-        => Ok(Receipts.ListByCostCentre(id, offset, limit, includeDeleted));
+        => Ok(Receipts.ListByMember(id, offset, limit, includeDeleted));
 
     [HttpGet("Current")]
     public IActionResult CurrentUser()

@@ -30,11 +30,11 @@ namespace Maasgroep.Database
             => base.GetList(item => (includeDeleted || item.DateTimeDeleted == null) && (filter == null || filter(item)), priority, offset, limit);
 
 		/** Get a list of models for a range of records (set includeDeleted to true to include records that were marked as deleted) */
-        public IEnumerable<TViewModel> ListAll(int offset = default, int limit = default, bool includeDeleted = default)
+        public virtual IEnumerable<TViewModel> ListAll(int offset = default, int limit = default, bool includeDeleted = default)
             => GetList(null, null, offset, limit, includeDeleted).Select(item => GetModel(item)!);
         
         /** Get a list of models for a range of records created by a given member (set includeDeleted to true to include records that were marked as deleted) */
-        public IEnumerable<TViewModel> ListByMember(long memberId, int offset = default, int limit = default, bool includeDeleted = default)
+        public virtual IEnumerable<TViewModel> ListByMember(long memberId, int offset = default, int limit = default, bool includeDeleted = default)
             => GetList(item => item.MemberCreatedId == memberId, null, offset, limit, includeDeleted).Select(item => GetModel(item)!);
     }
 }
