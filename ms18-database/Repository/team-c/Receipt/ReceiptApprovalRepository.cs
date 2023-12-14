@@ -17,6 +17,7 @@ namespace Maasgroep.Database.Receipts
 				Approved = approval.Approved,
 				Note = approval.Note,
 				ReceiptId = approval.ReceiptId,
+                MemberCreatedId = approval.MemberCreatedId,
 			};
         }
 

@@ -4,7 +4,7 @@ using Maasgroep.SharedKernel.ViewModels.Orders;
 
 namespace Maasgroep.Database.Orders
 {
-	public class OrderRepository : IOrderRepository
+	public class OrderRepository
 	{
 		private readonly MaasgroepContext _orderContext;
 

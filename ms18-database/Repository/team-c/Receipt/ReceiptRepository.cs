@@ -28,6 +28,7 @@ namespace Maasgroep.Database.Receipts
 					Id = costCentre.Id,
 					Name = costCentre.Name,
 				},
+				MemberCreatedId = receipt.MemberCreatedId,
 			};
         }
 
@@ -39,7 +40,7 @@ namespace Maasgroep.Database.Receipts
 				|| receipt.ReceiptStatus == ReceiptStatus.Uitbetaald.ToString())
 				return null; // Al definitief, dus aanpassen niet meer toegestaan
 
-			var receiptHeeftFotos = existingReceipt == null ? false : Db.ReceiptPhoto.Where(p => p.ReceiptId == existingReceipt.Id).Any();
+			var receiptHeeftFotos = existingReceipt != null && Db.ReceiptPhoto.Where(p => p.ReceiptId == existingReceipt.Id).Any();
 			
 			receipt.Note = data.Note;
 			receipt.Amount = data.Amount;

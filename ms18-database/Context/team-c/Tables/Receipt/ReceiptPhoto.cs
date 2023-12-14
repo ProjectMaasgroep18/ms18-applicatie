@@ -8,7 +8,6 @@ namespace Maasgroep.Database.Receipts
         public string Base64Image { get; set; }
         public string FileExtension { get; set; }
         public string FileName { get; set; }
-        public string? Location { get; set; }//TODO: Kevin; GPS zie ik nog even niet vliegen?
 
         
         //Ef
