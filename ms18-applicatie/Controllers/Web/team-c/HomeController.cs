@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
-using Maasgronp.Models;
+using Maasgroep.Models;
 
 namespace Maasgroep.Controllers.Web;
 

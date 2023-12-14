@@ -1,4 +1,4 @@
-﻿using Maasgroep.SharedKernel.Interfaces.Members;
+﻿using Maasgroep.Database.Interfaces;
 using Maasgroep.SharedKernel.ViewModels.Admin;
 
 namespace Maasgroep.Services
@@ -13,12 +13,12 @@ namespace Maasgroep.Services
 
 		public bool MemberExists(long id)
 		{
-			return _memberRepository.MemberExists(id);
+			return _memberRepository.Exists(id);
 		}
 
 		public MemberModel GetMember(long id)
 		{
-			return _memberRepository.GetMember(id);
+			return _memberRepository.GetModel(_memberRepository.GetById(id));
 		}
 	}
 }

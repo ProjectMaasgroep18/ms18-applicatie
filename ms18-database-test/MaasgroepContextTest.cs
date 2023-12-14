@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using ms18_applicatie.Controllers.Api;
+using Maasgroep.Controllers.Api;
 
 namespace Maasgroep.Database.Test
 {

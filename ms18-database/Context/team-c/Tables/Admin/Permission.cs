@@ -1,5 +1,5 @@
 
-namespace Maasgroep.Database.Members
+namespace Maasgroep.Database.Admin
 {
     public record Permission : GenericRecordActive
 	{

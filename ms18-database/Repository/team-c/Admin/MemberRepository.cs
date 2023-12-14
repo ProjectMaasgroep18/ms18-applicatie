@@ -1,38 +1,26 @@
-﻿using Maasgroep.SharedKernel.Interfaces.Members;
+﻿using Maasgroep.Database.Interfaces;
 using Maasgroep.SharedKernel.ViewModels.Admin;
 
-namespace Maasgroep.Database.Members
+namespace Maasgroep.Database.Admin
 {
-    public class MemberRepository : IMemberRepository
+    public class MemberRepository : DeletableRepository<Member, MemberModel>, IMemberRepository
     {
-		private readonly MaasgroepContext _memberContext;
+        public MemberRepository(MaasgroepContext db) : base(db) {}
 
-		public MemberRepository(MaasgroepContext memberContext)
+		/** Create MemberModel from Member record */
+        public override MemberModel GetModel(Member member)
         {
-			_memberContext = memberContext;
-		}
+            return new MemberModel() {
+				Name = member.Name,
+			};
+        }
 
-		public long CreateMember(MemberModelCreateDb member)
-		{
-			return 1;
-		}
-
-		public MemberModel GetMember(long id)
-		{
-			var result = new MemberModel();
-			var member = _memberContext.Member.Where(m => m.Id == id).FirstOrDefault();
-
-			if (member != null) 
-			{
-				result.Name = member.Name;
-				result.Id = member.Id;
-			}
-			return result;
-		}
-
-		public bool MemberExists(long id)
-		{
-			return _memberContext.Member.Where(m => m.Id == id).FirstOrDefault() == null ? false : true;
-		}
-	}
+		/** Create or update Member record from model */
+        public override Member? GetRecord(MemberModel model, Member? existingMember = null)
+        {
+            var member = existingMember ?? new();
+			member.Name = model.Name;
+			return member;
+        }
+    }
 }

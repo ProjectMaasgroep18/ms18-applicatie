@@ -1,4 +1,4 @@
-﻿using Maasgroep.Database.Members;
+﻿using Maasgroep.Database.Admin;
 
 namespace Maasgroep.Database
 {

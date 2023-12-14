@@ -1,11 +1,11 @@
 using Maasgroep.Database;
-using Maasgroep.SharedKernel.Interfaces.Receipts;
-using Maasgroep.SharedKernel.Interfaces.Members;
-using Maasgroep.SharedKernel.Interfaces.Orders;
+using Maasgroep.Database.Interfaces;
 using Maasgroep.Database.Receipts;
-using Maasgroep.Database.Members;
-using Maasgroep.Database.Orders;
-using Maasgroep.Services;
+using Maasgroep.Database.Admin;
+// using Maasgroep.Database.Orders;
+// using Maasgroep.SharedKernel.Interfaces.Members;
+// using Maasgroep.SharedKernel.Interfaces.Orders;
+// using Maasgroep.Services;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -14,14 +14,14 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<MaasgroepContext>();
 
 // Add repositories
+builder.Services.AddTransient<ICostCentreRepository, CostCentreRepository>();
+builder.Services.AddTransient<IReceiptRepository, ReceiptRepository>();
+builder.Services.AddTransient<IReceiptApprovalRepository, ReceiptApprovalRepository>();
+builder.Services.AddTransient<IReceiptPhotoRepository, ReceiptPhotoRepository>();
+builder.Services.AddTransient<IReceiptStatusRepository, ReceiptStatusRepository>();
 builder.Services.AddTransient<IMemberRepository, MemberRepository>();
-builder.Services.AddTransient<ICostCentreRepository<CostCentre, CostCentreHistory>, CostCentreRepository>();
-builder.Services.AddTransient<IReceiptRepository<Receipt, ReceiptHistory>, ReceiptRepository>();
-builder.Services.AddTransient<IReceiptApprovalRepository<ReceiptApproval>, ReceiptApprovalRepository>();
-builder.Services.AddTransient<IReceiptPhotoRepository<ReceiptPhoto>, ReceiptPhotoRepository>();
-builder.Services.AddTransient<IReceiptStatusRepository<string>, ReceiptStatusRepository>();
-builder.Services.AddTransient<IOrderRepository, OrderRepository>();
-builder.Services.AddTransient<IMemberService, MemberService>();/////????
+// builder.Services.AddTransient<IOrderRepository, OrderRepository>();
+// builder.Services.AddTransient<IMemberService, MemberService>();/////????
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
