@@ -1,6 +1,6 @@
 ﻿using Maasgroep.Database.Members;
 
-namespace Maasgroep.Database.team_d.Models;
+namespace Maasgroep.Database.Context.team_d.Models;
 
 public record Like
 {

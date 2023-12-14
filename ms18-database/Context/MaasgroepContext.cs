@@ -1,7 +1,7 @@
-﻿using Maasgroep.Database.Members;
+﻿using Maasgroep.Database.Context.team_d.Models;
+using Maasgroep.Database.Members;
 using Maasgroep.Database.Orders;
 using Maasgroep.Database.Receipts;
-using Maasgroep.Database.team_d.Models;
 using Maasgroep.Database.ToDoList;
 using Microsoft.EntityFrameworkCore;
 
@@ -70,7 +70,7 @@ namespace Maasgroep.Database.Context
 
         #region PhotoAlbum
 
-        public DbSet<Folder> Folders { get; set; } = null!;
+        public DbSet<Album> Albums { get; set; } = null!;
         public DbSet<Photo> Photos { get; set; } = null!;
         public DbSet<Like> Likes { get; set; } = null!;
         public DbSet<Tag> Tags { get; set; } = null!;
@@ -118,11 +118,11 @@ namespace Maasgroep.Database.Context
 
             #region PhotoAlbum
 
-            CreateFolder(modelBuilder);
-            CreatePhotoD(modelBuilder);
-            CreateTag(modelBuilder);
+            CreateAlbums(modelBuilder);
+            CreatePhotos(modelBuilder);
+            CreateTags(modelBuilder);
             CreateLikes(modelBuilder);
-            CreatePhotoTag(modelBuilder);
+            CreatePhotoTags(modelBuilder);
 
             #endregion
 
@@ -688,24 +688,24 @@ namespace Maasgroep.Database.Context
 
         #region  PhotoAlbum
 
-        private void CreateFolder(ModelBuilder modelBuilder)
+        private void CreateAlbums(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<Folder>(entity =>
+            modelBuilder.Entity<Album>(entity =>
             {
-                entity.ToTable("Folders", "photoAlbum");
+                entity.ToTable("albums", "photoAlbum");
 
                 entity.HasKey(f => f.Id);
 
-                entity.HasIndex(f => new { f.ParentFolderId, f.Name }).IsUnique();
+                entity.HasIndex(f => new { f.ParentAlbumId, f.Name }).IsUnique();
 
-                entity.HasMany(f => f.ChildFolders)
-                    .WithOne(f => f.ParentFolder)
-                    .HasForeignKey(f => f.ParentFolderId)
+                entity.HasMany(f => f.ChildAlbums)
+                    .WithOne(f => f.ParentAlbum)
+                    .HasForeignKey(f => f.ParentAlbumId)
                     .OnDelete(DeleteBehavior.Restrict);
 
                 entity.HasMany(f => f.Photos)
-                    .WithOne(p => p.FolderLocation)
-                    .HasForeignKey(p => p.FolderLocationId);
+                    .WithOne(p => p.AlbumLocation)
+                    .HasForeignKey(p => p.AlbumLocationId);
             });
 
         }
@@ -727,7 +727,7 @@ namespace Maasgroep.Database.Context
             });
         }
 
-        private void CreatePhotoD(ModelBuilder modelBuilder)
+        private void CreatePhotos(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Photo>(entity =>
             {
@@ -738,9 +738,9 @@ namespace Maasgroep.Database.Context
                     .WithMany()
                     .HasForeignKey(p => p.UploaderId);
 
-                entity.HasOne(p => p.FolderLocation)
+                entity.HasOne(p => p.AlbumLocation)
                     .WithMany(f => f.Photos)
-                    .HasForeignKey(p => p.FolderLocationId);
+                    .HasForeignKey(p => p.AlbumLocationId);
 
                 entity.HasMany(p => p.PhotoTags)
                     .WithOne(pt => pt.Photo)
@@ -752,7 +752,7 @@ namespace Maasgroep.Database.Context
             });
         }
 
-        private void CreatePhotoTag(ModelBuilder modelBuilder)
+        private void CreatePhotoTags(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<PhotoTag>(entity =>
             {
@@ -769,7 +769,7 @@ namespace Maasgroep.Database.Context
             });
         }
 
-        private void CreateTag(ModelBuilder modelBuilder)
+        private void CreateTags(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Tag>(entity =>
             {

@@ -1,5 +1,5 @@
 ﻿using Maasgroep.Database.Context;
-using Maasgroep.Database.team_d.Models;
+using Maasgroep.Database.Context.team_d.Models;
 using ms18_applicatie.Interfaces.team_d;
 using ms18_applicatie.Models.team_d;
 
@@ -26,7 +26,7 @@ public class PhotoRepository : IPhotoRepository
             Title = model.Title,
             ImageData = imageBytes,
             ContentType = model.ContentType,
-            FolderLocationId = model.FolderLocationId,
+            AlbumLocationId = model.AlbumLocationId,
             UploadDate = DateTime.UtcNow,
             UploaderId = uploaderId // TODO: Set the uploader's ID based on the authenticated user
         };

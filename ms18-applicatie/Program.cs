@@ -23,7 +23,7 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services.AddDbContext<MaasgroepContext>(options =>
 options.UseNpgsql(connectionString));
 
-builder.Services.AddScoped<IFolderRepository, FolderRepository>();
+builder.Services.AddScoped<IAlbumRepository, AlbumRepository>();
 builder.Services.AddScoped<IPhotoRepository, PhotoRepository>();
 
 builder.Services.AddTransient<IReceiptRepository, ReceiptRepository>();

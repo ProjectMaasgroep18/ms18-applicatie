@@ -1,4 +1,4 @@
-﻿using Maasgroep.Database.team_d.Models;
+﻿using Maasgroep.Database.Context.team_d.Models;
 using ms18_applicatie.Models.team_d;
 
 namespace ms18_applicatie.Interfaces.team_d;

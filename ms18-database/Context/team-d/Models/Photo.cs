@@ -1,6 +1,6 @@
 ﻿using Maasgroep.Database.Members;
 
-namespace Maasgroep.Database.team_d.Models;
+namespace Maasgroep.Database.Context.team_d.Models;
 
 public class Photo
 {
@@ -14,8 +14,8 @@ public class Photo
     public byte[] ImageData { get; set; } = null!;
     public string ContentType { get; set; } = null!;
 
-    public Guid FolderLocationId { get; set; }
-    public Folder FolderLocation { get; set; } = null!;
+    public Guid AlbumLocationId { get; set; }
+    public Album AlbumLocation { get; set; } = null!;
 
     public IEnumerable<PhotoTag> PhotoTags { get; set; } = null!;
     public IEnumerable<Like> Likes { get; set; } = null!;

@@ -9,13 +9,13 @@ namespace ms18_applicatie.Controllers.team_d;
 public class PhotosController : ControllerBase
 {
     private readonly IPhotoRepository _photoRepository;
-    private readonly IFolderRepository _folderRepository;
+    private readonly IAlbumRepository _albumRepository;
     private readonly ILogger<PhotosController> _logger;
 
-    public PhotosController(IPhotoRepository photoRepository, IFolderRepository folderRepository, ILogger<PhotosController> logger)
+    public PhotosController(IPhotoRepository photoRepository, IAlbumRepository albumRepository, ILogger<PhotosController> logger)
     {
         _photoRepository = photoRepository;
-        _folderRepository = folderRepository;
+        _albumRepository = albumRepository;
         _logger = logger;
     }
 
@@ -24,11 +24,11 @@ public class PhotosController : ControllerBase
     {
         try
         {
-            var folderExists = await _folderRepository.FolderExists(model.FolderLocationId);
+            var albumExists = await _albumRepository.AlbumExists(model.AlbumLocationId);
 
-            if (!folderExists)
+            if (!albumExists)
             {
-                return NotFound($"Album with ID {model.FolderLocationId} not found.");
+                return NotFound($"Album with ID {model.AlbumLocationId} not found.");
             }
 
             var photo = await _photoRepository.AddPhoto(model,
@@ -44,7 +44,7 @@ public class PhotosController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Unhandled exception in UploadPhoto");
-            return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing your request." + ex.InnerException?.Message);
+            return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing your request.");
         }
     }
 }
