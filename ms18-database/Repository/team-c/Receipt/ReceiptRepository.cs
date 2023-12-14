@@ -1,11 +1,11 @@
-﻿using Maasgroep.SharedKernel.Interfaces.Receipts;
+﻿using Maasgroep.Database.Interfaces;
 using Maasgroep.SharedKernel.ViewModels.Receipts;
 using Maasgroep.SharedKernel.Services;
 
 namespace Maasgroep.Database.Receipts
 {
 
-    public class ReceiptRepository : EditableRepository<Receipt, ReceiptModel, ReceiptHistory>, IReceiptRepository<Receipt, ReceiptHistory>
+    public class ReceiptRepository : EditableRepository<Receipt, ReceiptModel, ReceiptHistory>, IReceiptRepository
     {
 		public ReceiptRepository(MaasgroepContext db) : base(db) {}
 

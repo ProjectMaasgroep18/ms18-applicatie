@@ -1,10 +1,10 @@
-using Maasgroep.SharedKernel.Interfaces.Receipts;
+using Maasgroep.Database.Interfaces;
 using Maasgroep.SharedKernel.ViewModels.Receipts;
 
 namespace Maasgroep.Database.Receipts
 {
 
-    public class CostCentreRepository : EditableRepository<CostCentre, CostCentreModel, CostCentreHistory>, ICostCentreRepository<CostCentre, CostCentreHistory>
+    public class CostCentreRepository : EditableRepository<CostCentre, CostCentreModel, CostCentreHistory>, ICostCentreRepository
     {
         public CostCentreRepository(MaasgroepContext db) : base(db) {}
 

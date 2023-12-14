@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 
-namespace ms18_applicatie.Controllers;
+namespace Maasgroep.Controllers;
 
 public class DeclaratiesController : Controller
 {

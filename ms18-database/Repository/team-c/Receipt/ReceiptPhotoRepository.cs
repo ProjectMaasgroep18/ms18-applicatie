@@ -1,10 +1,10 @@
-using Maasgroep.SharedKernel.Interfaces.Receipts;
+using Maasgroep.Database.Interfaces;
 using Maasgroep.SharedKernel.ViewModels.Receipts;
 
 namespace Maasgroep.Database.Receipts
 {
 
-    public class ReceiptPhotoRepository : DeletableRepository<ReceiptPhoto, ReceiptPhotoModel>, IReceiptPhotoRepository<ReceiptPhoto>
+    public class ReceiptPhotoRepository : DeletableRepository<ReceiptPhoto, ReceiptPhotoModel>, IReceiptPhotoRepository
     {
 		public ReceiptPhotoRepository(MaasgroepContext db) : base(db) {}
 
@@ -33,5 +33,9 @@ namespace Maasgroep.Database.Receipts
             };
 			return photo;
         }
+
+        /** List photos by receipt */
+		public IEnumerable<ReceiptPhotoModel> ListByReceipt(long receiptId, int offset = default, int limit = default, bool includeDeleted = default)
+			=> GetList(item => item.ReceiptId == receiptId, null, offset, limit, includeDeleted).Select(item => GetModel(item)!);
     }
 }

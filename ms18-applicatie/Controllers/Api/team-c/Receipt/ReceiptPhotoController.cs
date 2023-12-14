@@ -1,9 +1,9 @@
 ﻿using Maasgroep.SharedKernel.Interfaces.Receipts;
 using Maasgroep.SharedKernel.ViewModels.Receipts;
 using Microsoft.AspNetCore.Mvc;
-using ms18_applicatie.Services;
+using Maasgroep.Services;
 
-namespace ms18_applicatie.Controllers.Api;
+namespace Maasgroep.Controllers.Api;
 
 [Route("api/v1/[controller]")]
 [ApiController]

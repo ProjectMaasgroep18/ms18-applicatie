@@ -1,8 +1,8 @@
 ﻿using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
-using ms18_applicatie.Models;
+using Maasgronp.Models;
 
-namespace ms18_applicatie.Controllers;
+namespace Maasgroep.Controllers.Web;
 
 public class HomeController : Controller
 {

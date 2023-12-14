@@ -4,7 +4,7 @@ using Maasgroep.SharedKernel.ViewModels.Receipts;
 using Maasgroep.Services;
 using Microsoft.AspNetCore.Mvc;
 
-namespace ms18_applicatie.Controllers.Api;
+namespace Maasgroep.Controllers.Api;
 
 [Route("api/v1/[controller]")]
 [ApiController]

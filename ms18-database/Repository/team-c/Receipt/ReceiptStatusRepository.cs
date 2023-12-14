@@ -1,22 +1,21 @@
-using Maasgroep.SharedKernel.Interfaces.Receipts;
+using Maasgroep.Database.Interfaces;
 using Maasgroep.SharedKernel.ViewModels.Receipts;
 
 namespace Maasgroep.Database.Receipts
 {
 
-    public class ReceiptStatusRepository : IReceiptStatusRepository<string>
+    public class ReceiptStatusRepository : IReceiptStatusRepository
     {
+        public bool Exists(long id)
+            => Enum.IsDefined(typeof(ReceiptStatus), id);
+
         public string? GetById(long id)
-        {
-            throw new NotImplementedException();
-        }
+            => GetModel(id).ToString();
 
         public ReceiptStatus GetModel(long id)
-        {
-            throw new NotImplementedException();
-        }
+            => Enum.IsDefined(typeof(ReceiptStatus), id) ? (ReceiptStatus)id : ReceiptStatus.Onbekend;
 
-        public ReceiptStatus GetModel(string record)
+        public ReceiptStatus GetModel(string value)
         {
             throw new NotImplementedException();
         }

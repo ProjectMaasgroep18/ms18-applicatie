@@ -1,4 +1,4 @@
-namespace ms18_applicatie.Models;
+namespace Maasgroep.Models;
 
 public class ErrorViewModel
 {

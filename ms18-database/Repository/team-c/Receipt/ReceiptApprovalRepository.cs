@@ -1,10 +1,10 @@
-using Maasgroep.SharedKernel.Interfaces.Receipts;
+using Maasgroep.Database.Interfaces;
 using Maasgroep.SharedKernel.ViewModels.Receipts;
 
 namespace Maasgroep.Database.Receipts
 {
 
-    public class ReceiptApprovalRepository : WritableRepository<ReceiptApproval, ReceiptApprovalModel>, IReceiptApprovalRepository<ReceiptApproval>
+    public class ReceiptApprovalRepository : WritableRepository<ReceiptApproval, ReceiptApprovalModel>, IReceiptApprovalRepository
     {
 		public ReceiptApprovalRepository(MaasgroepContext db) : base(db) {}
 
