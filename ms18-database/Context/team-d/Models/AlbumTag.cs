@@ -1,9 +1,9 @@
 ﻿namespace Maasgroep.Database.Context.team_d.Models;
 
-public class PhotoTag
+public class AlbumTag
 {
-    public Guid PhotoId { get; set; }
-    public Photo Photo { get; set; } = null!;
+    public Guid AlbumId { get; set; }
+    public Album Album { get; set; } = null!;
 
     public Guid TagId { get; set; }
     public Tag Tag { get; set; } = null!;

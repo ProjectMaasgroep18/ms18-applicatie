@@ -17,7 +17,6 @@ public class Photo
     public Guid AlbumLocationId { get; set; }
     public Album AlbumLocation { get; set; } = null!;
 
-    public IEnumerable<PhotoTag> PhotoTags { get; set; } = null!;
     public IEnumerable<Like> Likes { get; set; } = null!;
 }
 

@@ -74,7 +74,7 @@ namespace Maasgroep.Database.Context
         public DbSet<Photo> Photos { get; set; } = null!;
         public DbSet<Like> Likes { get; set; } = null!;
         public DbSet<Tag> Tags { get; set; } = null!;
-        public DbSet<PhotoTag> PhotoTags { get; set; } = null!;
+        public DbSet<AlbumTag> AlbumTags { get; set; } = null!;
 
         #endregion
 
@@ -122,7 +122,7 @@ namespace Maasgroep.Database.Context
             CreatePhotos(modelBuilder);
             CreateTags(modelBuilder);
             CreateLikes(modelBuilder);
-            CreatePhotoTags(modelBuilder);
+            CreateAlbumTags(modelBuilder);
 
             #endregion
 
@@ -706,6 +706,10 @@ namespace Maasgroep.Database.Context
                 entity.HasMany(f => f.Photos)
                     .WithOne(p => p.AlbumLocation)
                     .HasForeignKey(p => p.AlbumLocationId);
+
+                entity.HasMany(p => p.AlbumTags)
+                    .WithOne(pt => pt.Album)
+                    .HasForeignKey(pt => pt.AlbumId);
             });
 
         }
@@ -714,7 +718,7 @@ namespace Maasgroep.Database.Context
         {
             modelBuilder.Entity<Like>(entity =>
             {
-                entity.ToTable("Likes", "photoAlbum");
+                entity.ToTable("likes", "photoAlbum");
                 entity.HasKey(l => l.Id);
 
                 entity.HasOne(l => l.Member)
@@ -731,7 +735,7 @@ namespace Maasgroep.Database.Context
         {
             modelBuilder.Entity<Photo>(entity =>
             {
-                entity.ToTable("Photos", "photoAlbum");
+                entity.ToTable("photos", "photoAlbum");
                 entity.HasKey(p => p.Id);
 
                 entity.HasOne(p => p.Uploader)
@@ -742,29 +746,25 @@ namespace Maasgroep.Database.Context
                     .WithMany(f => f.Photos)
                     .HasForeignKey(p => p.AlbumLocationId);
 
-                entity.HasMany(p => p.PhotoTags)
-                    .WithOne(pt => pt.Photo)
-                    .HasForeignKey(pt => pt.PhotoId);
-
                 entity.HasMany(p => p.Likes)
                     .WithOne(l => l.Photo)
                     .HasForeignKey(l => l.PhotoId);
             });
         }
 
-        private void CreatePhotoTags(ModelBuilder modelBuilder)
+        private void CreateAlbumTags(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<PhotoTag>(entity =>
+            modelBuilder.Entity<AlbumTag>(entity =>
             {
-                entity.ToTable("PhotoTags", "photoAlbum");
-                entity.HasKey(pt => new { pt.PhotoId, pt.TagId });
+                entity.ToTable("albumTags", "photoAlbum");
+                entity.HasKey(pt => new { pt.AlbumId, pt.TagId });
 
-                entity.HasOne(pt => pt.Photo)
-                    .WithMany(p => p.PhotoTags)
-                    .HasForeignKey(pt => pt.PhotoId);
+                entity.HasOne(pt => pt.Album)
+                    .WithMany(p => p.AlbumTags)
+                    .HasForeignKey(pt => pt.AlbumId);
 
                 entity.HasOne(pt => pt.Tag)
-                    .WithMany(t => t.PhotoTags)
+                    .WithMany(t => t.AlbumTags)
                     .HasForeignKey(pt => pt.TagId);
             });
         }
@@ -773,14 +773,14 @@ namespace Maasgroep.Database.Context
         {
             modelBuilder.Entity<Tag>(entity =>
             {
-                entity.ToTable("Tags", "photoAlbum");
+                entity.ToTable("tags", "photoAlbum");
                 entity.HasKey(t => t.Id);
 
                 entity.Property(t => t.Name).HasMaxLength(255).IsRequired();
 
                 entity.HasIndex(t => t.Name).IsUnique();
 
-                entity.HasMany(t => t.PhotoTags)
+                entity.HasMany(t => t.AlbumTags)
                     .WithOne(pt => pt.Tag)
                     .HasForeignKey(pt => pt.TagId);
             });

@@ -22,29 +22,30 @@ public class PhotosController : ControllerBase
     [HttpPost("upload")]
     public async Task<IActionResult> UploadPhoto([FromBody] PhotoUploadModel model)
     {
-        try
-        {
-            var albumExists = await _albumRepository.AlbumExists(model.AlbumLocationId);
+        //try
+        //{
+        //    var albumExists = await _albumRepository.AlbumExists(model.AlbumLocationId);
 
-            if (!albumExists)
-            {
-                return NotFound($"Album with ID {model.AlbumLocationId} not found.");
-            }
+        //    if (!albumExists)
+        //    {
+        //        return NotFound($"Album with ID {model.AlbumLocationId} not found.");
+        //    }
 
-            var photo = await _photoRepository.AddPhoto(model,
-                1); // TODO: Set the uploader's ID based on the authenticated user
+        //    var photo = await _photoRepository.AddPhoto(model,
+        //        1); // TODO: Set the uploader's ID based on the authenticated user
 
-            if (photo == null)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, "Error uploading photo");
-            }
+        //    if (photo == null)
+        //    {
+        //        return StatusCode(StatusCodes.Status500InternalServerError, "Error uploading photo");
+        //    }
 
-            return Ok(new { photo.Id });
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Unhandled exception in UploadPhoto");
-            return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing your request.");
-        }
+        //    return Ok(new { photo.Id });
+        //}
+        //catch (Exception ex)
+        //{
+        //    _logger.LogError(ex, "Unhandled exception in UploadPhoto");
+        //    return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing your request.");
+        //}
+        return Ok();
     }
 }

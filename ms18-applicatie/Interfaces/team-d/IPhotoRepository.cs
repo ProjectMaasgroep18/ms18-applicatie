@@ -5,6 +5,6 @@ namespace ms18_applicatie.Interfaces.team_d;
 
 public interface IPhotoRepository
 {
-    Task<Photo> AddPhoto(PhotoUploadModel model, long uploaderId);
+    //Task<Photo> AddPhoto(PhotoUploadModel model, long uploaderId);
 }
 

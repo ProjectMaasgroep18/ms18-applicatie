@@ -10,5 +10,6 @@ public class Album
 
     public IEnumerable<Album> ChildAlbums { get; set; } = null!;
     public IEnumerable<Photo> Photos { get; set; } = null!;
+    public IEnumerable<AlbumTag> AlbumTags { get; set; } = null!;
 }
 

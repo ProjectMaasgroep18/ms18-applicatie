@@ -4,8 +4,11 @@ namespace ms18_applicatie.Interfaces.team_d;
 
 public interface IAlbumRepository
 {
-    Task<bool> AlbumExists(Guid albumId);
-    Task<Album> CreateAlbum(Album album);
+    Task<bool> AlbumExists(string albumName, Guid? parentAlbumId);
+    Task AddAlbum(Album album);
+    Task<Album?> GetAlbumById(Guid id);
+    Task<IEnumerable<Album>> GetAllAlbums();
+    Task UpdateAlbum(Album album);
 }
 
 

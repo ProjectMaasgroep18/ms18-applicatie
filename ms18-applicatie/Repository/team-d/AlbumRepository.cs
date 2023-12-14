@@ -14,18 +14,34 @@ public class AlbumRepository : IAlbumRepository
         _context = context;
     }
 
-    public async Task<bool> AlbumExists(Guid albumId)
+    public async Task<bool> AlbumExists(string albumName, Guid? parentAlbumId)
     {
-        return await _context.Albums.AnyAsync(f => f.Id == albumId);
+        return await _context.Albums.AnyAsync(a => a.Name == albumName && a.ParentAlbumId == parentAlbumId);
     }
 
-    public async Task<Album> CreateAlbum(Album album)
+    public async Task AddAlbum(Album album)
     {
-        if (album.Id == Guid.Empty) album.Id = Guid.NewGuid();
-
         _context.Albums.Add(album);
         await _context.SaveChangesAsync();
-        return album;
+    }
+
+    public async Task<Album?> GetAlbumById(Guid id)
+    {
+        return await _context.Albums
+            .Include(a => a.ChildAlbums)
+            .Include(a => a.Photos)
+            .FirstOrDefaultAsync(a => a.Id == id);
+    }
+
+    public async Task<IEnumerable<Album>> GetAllAlbums()
+    {
+        return await _context.Albums.ToListAsync();
+    }
+
+    public async Task UpdateAlbum(Album album)
+    {
+        _context.Albums.Update(album);
+        await _context.SaveChangesAsync();
     }
 }
 
