@@ -21,17 +21,32 @@ namespace Maasgroep.Database
         /** Save a record to the database (with history) */
 		protected TRecord? SaveToDb(TRecord record, THistory history)
 		{
+			Console.WriteLine($"Start DB transaction in {this}");
 			Db.Database.BeginTransaction();
 			var success = false;
 			try {
-				Db.Set<TRecord>().Add(record);
+				if (record.Id == 0) {
+					Console.WriteLine($"INSERT new record in {this}");
+					Db.Set<TRecord>().Add(record);
+				} else {
+					Console.WriteLine($"UPDATE record {record.Id} in {this}");
+					Db.Set<TRecord>().Update(record);
+				}
 				Db.Set<THistory>().Add(history);
 				Db.SaveChanges();
 				Db.Database.CommitTransaction();
+				Console.WriteLine($"Commit DB transaction in {this}");
 				success = true;
-			} catch (Exception) {
+			} catch (Exception e) {
+				Console.WriteLine(e.Message);
+				var exception = e.InnerException;
+				while (exception != null) {
+					Console.WriteLine(" -" + exception.Message);
+					exception = exception.InnerException;
+				}
 				Db.Database.RollbackTransaction();
 				Db.ChangeTracker.Clear();
+				Console.WriteLine($"Rollback DB transaction in {this}");
 			}
 			return success ? record : null;
 		}
@@ -40,14 +55,18 @@ namespace Maasgroep.Database
 		public virtual TRecord? Update(long id, TDataModel model, long memberId)
 		{
 			var record = GetById(id);
-			if (record == null)
+			if (record == null) {
+				Console.WriteLine($"Record {id} not found in {this}");
 				return null; // Does not exist
+			}
 
 			var history = GetHistory(record);
 			record = GetRecord(model, record);
 
-			if (record == null)
+			if (record == null) {
+				Console.WriteLine($"No record created for {id} in {this}");
 				return null; // Not editable or invalid data
+			}
 
 			history.MemberCreatedId = record.MemberCreatedId;
 			history.MemberModifiedId = record.MemberModifiedId;

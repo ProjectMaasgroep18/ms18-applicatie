@@ -4,7 +4,6 @@ namespace Maasgroep.Database.Orders
 {
     public record Bill : GenericRecordActive
 	{
-        public long Id { get; set; }
         public long? MemberId { get; set; }
         public bool IsGuest { get; set; }
         public string? Note { get; set; }

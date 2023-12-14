@@ -3,7 +3,6 @@ namespace Maasgroep.Database.Receipts
 {
     public record CostCentre : GenericRecordActive
 	{
-		public long Id { get; set; }
 		public string Name { get; set; }
 
 

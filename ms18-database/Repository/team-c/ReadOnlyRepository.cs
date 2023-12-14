@@ -30,7 +30,7 @@ namespace Maasgroep.Database
 			return Db.Set<TRecord>()
 				.Where(filter ?? (item => true))
 				.OrderByDescending(priority ?? (item => 0))
-				.ThenByDescending(item => item.DateTimeCreated)
+				.ThenBy(item => item.DateTimeCreated)
 				.Skip(offset)
 				.Take(limit)
 				.ToList();

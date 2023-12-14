@@ -3,7 +3,6 @@ namespace Maasgroep.Database.Receipts
 {
     public record ReceiptPhoto : GenericRecordActive
 	{
-        public long Id { get; set; }
         public long ReceiptId { get; set; }
         public string Base64Image { get; set; }
         public string FileExtension { get; set; }
