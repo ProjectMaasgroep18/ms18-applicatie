@@ -206,7 +206,7 @@
                         apiPost('CostCentre/', { name: newCostCentre }).then(result => {    
                             // Saved new cost centre
 
-                            if (!result || !result.costCentre)
+                            if (!result)
                                 return;
                             
                             showOutput(result, costCentreRow);

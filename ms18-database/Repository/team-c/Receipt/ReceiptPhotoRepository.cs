@@ -12,12 +12,17 @@ namespace Maasgroep.Database.Receipts
         /** Create ReceiptPhotoModel from ReceiptPhoto record */
         public override ReceiptPhotoModel GetModel(ReceiptPhoto photo)
         {
+            var member = Db.Member.FirstOrDefault(c => c.Id == photo.MemberCreatedId);
+
             return new ReceiptPhotoModel() {
 				FileExtension = photo.FileExtension,
 				FileName = photo.FileName,
                 ReceiptId = photo.ReceiptId,
 				Base64Image = photo.Base64Image,
-                MemberCreatedId = photo.MemberCreatedId,
+                MemberCreated = member == null ? null : new() {
+					Id = member.Id,
+					Name = member.Name,
+				},
 			};
         }
 

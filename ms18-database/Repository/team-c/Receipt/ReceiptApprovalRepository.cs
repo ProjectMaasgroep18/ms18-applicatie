@@ -12,12 +12,17 @@ namespace Maasgroep.Database.Receipts
         /** Create ReceiptApprovalModel from ReceiptApproval record */
         public override ReceiptApprovalModel GetModel(ReceiptApproval approval)
         {
+            var member = Db.Member.FirstOrDefault(c => c.Id == approval.MemberCreatedId);
+
             return new ReceiptApprovalModel() {
                 Id = approval.Id,
 				Approved = approval.Approved,
 				Note = approval.Note,
 				ReceiptId = approval.ReceiptId,
-                MemberCreatedId = approval.MemberCreatedId,
+                MemberCreated = member == null ? null : new() {
+					Id = member.Id,
+					Name = member.Name,
+				},
 			};
         }
 

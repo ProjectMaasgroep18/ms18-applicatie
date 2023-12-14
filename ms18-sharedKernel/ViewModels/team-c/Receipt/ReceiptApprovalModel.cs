@@ -9,6 +9,6 @@ namespace Maasgroep.SharedKernel.ViewModels.Receipts
 		public string? Note { get; set; }
 		public bool Approved { get; set; }
 		public bool Paid { get; set; }
-		public long? MemberCreatedId { get; set; }
+		public MemberModel? MemberCreated { get; set; }
 	}
 }

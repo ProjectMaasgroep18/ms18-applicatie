@@ -13,5 +13,5 @@ where THistory: GenericRecordHistory
 
     [HttpPut("{id}")]
     public IActionResult RepositoryUpdate(long id, [FromBody] TDataModel data)
-        => Repository.Update(id, data, 1) == null ? BadRequest() : Ok();
+        => Repository.Update(id, data, 1) == null ? BadRequest(data) : Ok();
 }

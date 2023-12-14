@@ -1,4 +1,6 @@
-﻿namespace Maasgroep.SharedKernel.ViewModels.Receipts
+﻿using  Maasgroep.SharedKernel.ViewModels.Admin;
+
+namespace Maasgroep.SharedKernel.ViewModels.Receipts
 {
 	public class ReceiptPhotoModel
 	{
@@ -9,6 +11,6 @@
 		public string FileExtension { get; set; }
 		public string FileName { get; set; }
 		public long ReceiptId { get; set; }
-		public long? MemberCreatedId { get; set; }
+		public MemberModel? MemberCreated { get; set; }
 	}
 }

@@ -17,6 +17,7 @@ namespace Maasgroep.Database.Receipts
         {
 			var status = Statuses.GetModel(receipt.ReceiptStatus);
 			var costCentre = Db.CostCentre.FirstOrDefault(c => c.Id == receipt.CostCentreId);
+			var member = Db.Member.FirstOrDefault(c => c.Id == receipt.MemberCreatedId);
 
             return new ReceiptModel() {
 				Id = receipt.Id,
@@ -24,11 +25,14 @@ namespace Maasgroep.Database.Receipts
 				Amount = receipt.Amount,
 				Status = status,
 				StatusString = status.ToString(),
-				CostCentre = costCentre == null ? null : new() {
+				CostCentre = costCentre == null || costCentre.DateTimeDeleted != null ? null : new() {
 					Id = costCentre.Id,
 					Name = costCentre.Name,
 				},
-				MemberCreatedId = receipt.MemberCreatedId,
+				MemberCreated = member == null ? null : new() {
+					Id = member.Id,
+					Name = member.Name,
+				},
 			};
         }
 
