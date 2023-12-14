@@ -11,7 +11,8 @@ namespace Maasgroep.Database
 		public virtual bool Delete(long id, long memberId)
 		{
 			var record = GetById(id);
-
+			Console.WriteLine($"DELETE RECORD ID {id}");
+			Console.WriteLine(record == null ? "NOT FOUND" : "FOUND");
 			if (record == null)
 				return false; // Does not exist
 

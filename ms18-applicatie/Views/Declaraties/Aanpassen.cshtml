@@ -3,13 +3,25 @@
 <div id="login-user" class="hidden">
     <p id="login-info">Hallo <span rel="name"></span>!</p>
 
+    
     <p>Hier kan je je declaratie aanpassen of aanvullen:</p>
 
     <form method="post" id="receipt-form" class="hidden">
+
+        <p>De status van je declaratie is momenteel <b rel="statusString"></b>.</p>
+        <p>Als de status "Concept" is, wordt deze automatisch aangepast in "Ingediend" zodra alle gegevens ingevuld zijn.</p>
+
         <table>
             <tr>
                 <td>Bedrag: </td>
                 <td><input type="number" name="Amount" step="0.01" rel="amount:value"></td>
+            </tr>
+            <tr>
+                <td>Kostencentrum: </td>
+                <td><select id="cost-centres" name="CostCentreId" rel="costCentre.id:value:zero">
+                    <option value="0" disabled selected>Kies een kostencentrum...</option>
+                    <option value="" id="cost-centre"></option>
+                </select></td>
             </tr>
             <tr>
                 <td>Opmerkingen: </td>
@@ -80,36 +92,54 @@
         showElement(document.querySelector('#login-user'));
         showOutput(member, document.querySelector('#login-info'));
 
-        apiGet('Receipt/' + receiptId).then(receipt => {
-            // Receipt loaded
+        apiGet('CostCentre').then(costCentres => {
+            // Cost centres loaded
 
-            showOutput(receipt, document.querySelector('#receipt-form'));
+            let select = document.querySelector('#cost-centres');
+            for (i in costCentres) {
+                // Populate cost centre <select>
 
-            apiGet('Receipt/' + receiptId + '/Photo').then(result => {
-                // Show all receipt photos
+                let costCentre = document.querySelector('#cost-centre').cloneNode(true);
+                let id = costCentres[i].id;
+                costCentre.id = 'cost-centre-' + id;
+                costCentre.value = id;
+                costCentre.innerText = costCentres[i].name;
+                select.appendChild(costCentre);
+            }
+            select.value = 0;
+            document.querySelector('#cost-centre').remove();
 
-                if (typeof result[0] == 'undefined') {
-                    showElement(document.querySelector('#receipt-photos-none'));
-                    return;
-                }
+            apiGet('Receipt/' + receiptId).then(receipt => {
+                // Receipt loaded
 
-                for (i in result) {
-                    let photo = document.querySelector('#receipt-photo').cloneNode(true);
-                    let img = photo.querySelector('img');
-                    let deleteLink = photo.querySelector('.delete-photo');
-                    let id = result[i].id;
-                    deleteLink.addEventListener('click', event => {
-                        event.preventDefault();
-                        deletePhoto(id);
-                    });
-                    photo.id = 'receipt-photo-' + id;
-                    img.src = result[i].base64Image;
-                    showElement(photo);
-                    photosDiv.appendChild(photo);
-                }
+                showOutput(receipt, document.querySelector('#receipt-form'));
 
+                apiGet('Receipt/' + receiptId + '/Photo').then(result => {
+                    // Show all receipt photos
+
+                    if (typeof result[0] == 'undefined') {
+                        showElement(document.querySelector('#receipt-photos-none'));
+                        return;
+                    }
+
+                    for (i in result) {
+                        let photo = document.querySelector('#receipt-photo').cloneNode(true);
+                        let img = photo.querySelector('img');
+                        let deleteLink = photo.querySelector('.delete-photo');
+                        let id = result[i].id;
+                        deleteLink.addEventListener('click', event => {
+                            event.preventDefault();
+                            deletePhoto(id);
+                        });
+                        photo.id = 'receipt-photo-' + id;
+                        img.src = result[i].base64Image;
+                        showElement(photo);
+                        photosDiv.appendChild(photo);
+                    }
+
+                });
             });
-        })
+        });
     });
 
     const receiptForm = document.querySelector('#receipt-form');
@@ -123,7 +153,11 @@
         event.preventDefault();
         
         let formData = {};
-        receiptForm.querySelectorAll('input[name],textarea[name]').forEach(input => formData[input.name] = input.value);
+        receiptForm.querySelectorAll('input[name],textarea[name],select[name]').forEach(input => {
+            formData[input.name] = input.value;
+            if (input.type == "number" || input.name.match(/Id$/))
+                formData[input.name] = isNaN(+formData[input.name]) ? 0 : +formData[input.name];
+        });
         hideElement(receiptForm);
         hideElement(receiptPhotosForm);
 
@@ -131,7 +165,7 @@
 
         apiPut('Receipt/' + receiptId, formData).then(result => {
             if (result) // PUT should not return a response body, just a success status
-                window.location.href = '/Declaraties'; // Of: /Declaraties/Edit?id=' + result.receipt.id;
+                window.location.href = '/Declaraties/Lijst'; // Of: /Declaraties/Aanpassen?id=' + result.receipt.id;
         });
     });
     
@@ -171,16 +205,16 @@
             // Upload photo
             let result = await apiPost('ReceiptPhoto', formData);
         
-            if (result.photo) {
+            if (result) {
                 uploadsFinished++;
 
                 // Show the photo here
                 let photo = document.querySelector('#receipt-photo').cloneNode(true);
                 let img = photo.querySelector('img');
                 let deleteLink = photo.querySelector('.delete-photo');
-                let id = result.photo.id;
+                let id = result.id;
                 photo.id = 'receipt-photo-' + id;
-                img.src = result.photo.base64Image;
+                img.src = result.base64Image;
                 deleteLink.addEventListener('click', event => {
                     event.preventDefault();
                     deletePhoto(id);

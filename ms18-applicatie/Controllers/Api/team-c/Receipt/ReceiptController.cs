@@ -40,4 +40,8 @@ public class ReceiptController : EditableRepositoryController<IReceiptRepository
             return BadRequest(approval);
         return Ok(approval);
     }
+
+    [HttpGet("Payable")]
+    public IActionResult GetPayableReceipts([FromQuery] int offset = default, [FromQuery] int limit = default, [FromQuery] bool includeDeleted = default)
+        => Ok(Repository.ListPayable(offset, limit, includeDeleted));
 }

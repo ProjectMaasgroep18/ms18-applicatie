@@ -129,10 +129,16 @@ function showOutput(data, container) {
             // Return Edit url of Receipt id
             return '/Declaraties/Aanpassen/' + id;
         },
+        zero(val) {
+            // Default to zero instead of "", null, undefined, etc.
+            return !val ? 0 : val;
+        }
     };
 
     showElement(container);
     const outputElements = container.querySelectorAll('[rel]');
+
+    console.log('Rendering data in container', container, data);
 
     outputElements.forEach(output => {
         const rels = output.getAttribute('rel') ? output.getAttribute('rel').split(',') : [];
@@ -146,6 +152,7 @@ function showOutput(data, container) {
             let transformedData = ((transform && typeof transforms[transform] == 'function') ? transforms[transform](value) : value) ?? null;
             if ((transformedData ?? '') === '' && (prop ?? '') === '' && output.tagName != 'TEXTAREA')
                 transformedData = '\u2014'; // — streepje
+            console.log(key, prop, transform, '=>', transformedData);
             if (typeof prop == 'undefined' || prop == '') {
                 // No property provided
                 output.innerText = transformedData;

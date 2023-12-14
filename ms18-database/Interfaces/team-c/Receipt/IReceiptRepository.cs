@@ -9,5 +9,6 @@ namespace Maasgroep.Database.Interfaces
 	public interface IReceiptRepository : IEditableRepository<Receipt, ReceiptModel, ReceiptData, ReceiptHistory>
 	{
 		IEnumerable<ReceiptModel> ListByCostCentre(long costCentreId, int offset = default, int limit = default, bool includeDeleted = default);
+		IEnumerable<ReceiptModel> ListPayable(int offset = default, int limit = default, bool includeDeleted = default);
 	}
 }

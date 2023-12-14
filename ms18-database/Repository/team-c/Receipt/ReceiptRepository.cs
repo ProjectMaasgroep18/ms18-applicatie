@@ -43,7 +43,7 @@ namespace Maasgroep.Database.Receipts
 			var receiptHeeftFotos = existingReceipt != null && Db.ReceiptPhoto.Where(p => p.ReceiptId == existingReceipt.Id).Any();
 			
 			receipt.Note = data.Note;
-			receipt.Amount = data.Amount;
+			receipt.Amount = data.Amount == 0 ? null : data.Amount;
 			receipt.CostCentreId = data.CostCentreId;
 			if (receiptHeeftFotos
 				&& receipt.Note != null
@@ -73,7 +73,11 @@ namespace Maasgroep.Database.Receipts
 			};
         }
 
-		/** List all receipts */
+		/** List all receipts (with includeDeleted off, see below) */
+		public override IEnumerable<ReceiptModel> ListAll(int offset = default, int limit = default)
+			=> ListAll(offset, limit, false);
+
+		/** List all receipts (without Concepts, with Included first) */
 		public override IEnumerable<ReceiptModel> ListAll(int offset = default, int limit = default, bool includeDeleted = default)
 			=> GetList(item => item.ReceiptStatus != ReceiptStatus.Concept.ToString(), item => Statuses.GetModel(item.ReceiptStatus) switch {
 				// Sorteer op wat nog goedgekeurd moet worden
@@ -84,7 +88,7 @@ namespace Maasgroep.Database.Receipts
 		/** List receipts by member */
 		public override IEnumerable<ReceiptModel> ListByMember(long memberId, int offset = default, int limit = default, bool includeDeleted = default)
 			=> GetList(item => item.MemberCreatedId == memberId, item => Statuses.GetModel(item.ReceiptStatus) switch {
-				// Sorteer op wat nog afgemaakt/verbeterd worden
+				// Sorteer op wat nog afgemaakt/verbeterd moet worden
                 ReceiptStatus.Afgekeurd => 2,
                 ReceiptStatus.Concept => 1,
                 _ => 0,
@@ -100,6 +104,10 @@ namespace Maasgroep.Database.Receipts
 
 		/** List receipts waiting te be paid out */
 		public IEnumerable<ReceiptModel> ListPayable(int offset = default, int limit = default, bool includeDeleted = default)
-			=> GetList(item => item.ReceiptStatus == ReceiptStatus.Goedgekeurd.ToString(), null, offset, limit, includeDeleted).Select(item => GetModel(item)!);
+			=> GetList(item => item.ReceiptStatus == ReceiptStatus.Goedgekeurd.ToString() || item.ReceiptStatus == ReceiptStatus.Uitbetaald.ToString(), item => Statuses.GetModel(item.ReceiptStatus) switch {
+				// Sorteer op wat nog uitbetaald moet worden
+                ReceiptStatus.Goedgekeurd => 1,
+                _ => 0,
+            }, offset, limit, includeDeleted).Select(item => GetModel(item)!);
     }
 }

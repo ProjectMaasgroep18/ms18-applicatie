@@ -274,7 +274,7 @@ namespace Maasgroep.Database
 			modelBuilder.HasSequence<long>("receiptSeq", schema: "receipt").StartsAt(1).IncrementsBy(1);
 			modelBuilder.Entity<Receipt>().Property(r => r.Id).HasDefaultValueSql("nextval('receipt.\"receiptSeq\"')");
 			modelBuilder.Entity<Receipt>().Property(r => r.DateTimeCreated).HasDefaultValueSql("now()");
-			modelBuilder.Entity<Receipt>().Property<string>(r => r.Note).HasMaxLength(2048);
+			modelBuilder.Entity<Receipt>().Property(r => r.Note).HasMaxLength(2048);
 			modelBuilder.Entity<Receipt>().Property(r => r.Amount).HasPrecision(18, 2);
 
 			//Foreign keys

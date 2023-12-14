@@ -24,8 +24,13 @@ namespace Maasgroep.Database
 			Db.Database.BeginTransaction();
 			var success = false;
 			try {
-				Console.WriteLine($"INSERT new record in {this}");
-				Db.Set<TRecord>().Add(record);
+				if (record.Id == 0) {
+					Console.WriteLine($"INSERT new record in {this}");
+					Db.Set<TRecord>().Add(record);
+				} else {
+					Console.WriteLine($"UPDATE record {record.Id} in {this}");
+					Db.Set<TRecord>().Update(record);
+				}
 				Db.SaveChanges();
 				Db.Database.CommitTransaction();
 				Console.WriteLine($"Commit DB transaction in {this}");

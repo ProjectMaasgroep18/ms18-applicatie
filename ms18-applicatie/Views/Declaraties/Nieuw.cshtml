@@ -60,12 +60,12 @@
         apiPost('Receipt', receiptData).then(async result => {
             // Save (empty) receipt and then upload the photo
 
-            if (!result.receipt) {
+            if (!result.id) {
                 handleError('Failed to save receipt');
                 return;
             }
 
-            const createdReceipt = result.receipt;
+            const createdReceipt = result;
 
             let uploadsTotal = imgs.length;
             let uploadsFinished = 0;
@@ -91,7 +91,7 @@
                 // Upload photo
                 let result = await apiPost('ReceiptPhoto', formData).then();
                 
-                if (result.photo) {
+                if (result) {
                     uploadsFinished++;
                 } else {
                     handleError('Uploaden mislukt');
@@ -99,7 +99,7 @@
             }
 
             // All uploads finished
-            window.location.href = '/Declaraties/Edit/' + createdReceipt.id;
+            window.location.href = '/Declaraties/Aanpassen/' + createdReceipt.id;
         });
     });
 </script>
