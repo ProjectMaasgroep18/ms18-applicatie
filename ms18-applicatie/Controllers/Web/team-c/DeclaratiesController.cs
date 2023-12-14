@@ -33,4 +33,20 @@ public class DeclaratiesController : Controller
     {
         return View();
     }
+
+    public IActionResult Goedkeuren()
+    {
+        return View();
+    }
+
+    public IActionResult Bekijken(long id)
+    {
+        ViewData["id"] = id;
+        return View();
+    }
+
+    public IActionResult Uitbetalen()
+    {
+        return View();
+    }
 }

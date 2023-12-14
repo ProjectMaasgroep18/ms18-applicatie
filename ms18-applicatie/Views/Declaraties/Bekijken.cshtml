@@ -1,0 +1,114 @@
+<h1>Declaratie bekijken</h1>
+
+<div id="login-user" class="hidden">
+    <p id="login-info">Hallo <span rel="name"></span>!</p>
+
+    
+    <p>Hier kan je de declaratie bekijken en goed- of afkeuren:</p>
+
+    <div id="receipt-form" class="hidden">
+
+        <p>De status van de declaratie is momenteel <b rel="statusString"></b>.</p>
+        <table>
+            <tr>
+                <td>Bedrag: </td>
+                <td><b rel="amount:euro"></b></td>
+            </tr>
+            <tr>
+                <td>Kostencentrum: </td>
+                <td><b rel="costCentre.name"></b></td>
+            </tr>
+            <tr>
+                <td>Opmerkingen: </td>
+                <td><b rel="note"></b></td>
+            </tr>
+        </table>
+    </div>
+
+    &nbsp;
+
+    <div id="receipt-photos-form">
+
+        <p><i>Foto's:</i></p>
+
+        <div id="receipt-photos">
+            <div id="receipt-photo" class="hidden">
+                <img class="drop-image">
+            </div>
+            <p id="receipt-photos-none" class="hidden">Er zijn geen foto's bij deze declaratie</p>
+        </div>
+
+    </div>
+
+    <p>
+        <button type="button" class="btn btn-primary" id="receipt-approve">Goedkeuren</button>
+        <button type="button" class="btn btn-secondary" id="receipt-reject">Afkeuren</button>
+    </p>
+
+    <p><a href="/Declaraties/Goedkeuren">Terug naar het overzicht</a></p>
+</div>
+
+
+@section scripts {
+<script>
+    const receiptId = @ViewData["id"];
+    const photosDiv = document.querySelector('#receipt-photos');
+
+    getUserSession().then(member => {
+        // User session loaded
+     
+        showElement(document.querySelector('#login-user'));
+        showOutput(member, document.querySelector('#login-info'));
+
+
+        apiGet('Receipt/' + receiptId).then(receipt => {
+            // Receipt loaded
+
+            showOutput(receipt, document.querySelector('#receipt-form'));
+
+            apiGet('Receipt/' + receiptId + '/Photo').then(result => {
+                // Show all receipt photos
+
+                if (typeof result[0] == 'undefined') {
+                    showElement(document.querySelector('#receipt-photos-none'));
+                    return;
+                }
+
+                for (i in result) {
+                    let photo = document.querySelector('#receipt-photo').cloneNode(true);
+                    let img = photo.querySelector('img');
+                    let deleteLink = photo.querySelector('.delete-photo');
+                    let id = result[i].id;
+                    deleteLink.addEventListener('click', event => {
+                        event.preventDefault();
+                        deletePhoto(id);
+                    });
+                    photo.id = 'receipt-photo-' + id;
+                    img.src = result[i].base64Image;
+                    showElement(photo);
+                    photosDiv.appendChild(photo);
+                }
+
+            });
+        });
+    });
+
+    const approveButton = document.querySelector('#receipt-approve');
+    const rejectButton = document.querySelector('#receipt-reject');
+
+    
+    approveButton.addEventListener('click', event => {
+        // Select extra photos
+
+        ///document.querySelector('#receipt-input').click();
+    });
+
+    rejectButton.addEventListener('click', event => {
+        // Select extra photos
+
+        ///document.querySelector('#receipt-input').click();
+    });
+
+
+</script>
+}

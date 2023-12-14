@@ -1,0 +1,70 @@
+<h1>@ViewData["Title"]</h1>
+
+<div id="login-user" class="hidden">
+    <p id="login-info">Hallo <span rel="name"></span>!</p>    
+
+    <p>Hier kan je binnengekomen declaraties goedkeuren:</p>
+
+    <div id="approve-receipts" class="hidden">
+        <p><i>Dit zijn alle ingediende bonnetjes, met alle nog goed te keuren bovenaan:</i></p>
+
+        <table class="data-table">
+            <tr>
+                <th>Bedrag</th>
+                <th>Opmerking</th>
+                <th>Status</th>
+                <th>Post</th>
+                <th></th>
+            </tr>
+            
+            <tr id="approve-receipts-empty" class="hidden">
+                <td colspan="999">Er zijn nog geen bonnetjes ingediend.</td>
+            </tr>
+            
+            <tr id="approve-receipts-row" class="hidden">
+                <td rel="amount::euro"></td>
+                <td rel="note"></td>
+                <td rel="statusString,statusId:data-status"></td>
+                <td rel="costCentre.name,costCentreId:data-cost-centre"></td>
+                <td class="user-actions">
+                    <a rel="id:href:viewUrl">Bekijken</a>
+                </td>
+            </tr>
+        </table>
+
+        <p><a href="/Declaraties">Terug naar Declaraties</a></p>
+    </div>
+</div>
+
+@section scripts {
+<script>
+    getUserSession().then(member => {
+        // User session loaded
+     
+        const userId = member.id;
+        showElement(document.querySelector('#login-user'));
+        showOutput(member, document.querySelector('#login-info'));
+        
+        apiGet('Receipt').then(receipts => {
+            // Receipts data loaded
+
+            const noReceipts = (!receipts || !receipts.length);
+            const receiptsTable = document.querySelector('#approve-receipts .data-table');
+            if (noReceipts) {
+                showElement(document.querySelector('#approve-receipts-empty'));
+            } else {
+                hideElement(document.querySelector('#approve-receipts-empty'));
+            }
+            for (id in receipts) {
+                const receiptRow = document.querySelector('#approve-receipts-row').cloneNode(true);
+                receiptRow.id = 'approve-receipts-' + receipts[id].id;
+                showElement(receiptRow);
+                showOutput(receipts[id], receiptRow);
+                receiptsTable.appendChild(receiptRow);
+            }
+            showElement(document.querySelector('#approve-receipts'));
+            
+        });
+    });
+</script>
+}

@@ -129,6 +129,10 @@ function showOutput(data, container) {
             // Return Edit url of Receipt id
             return '/Declaraties/Aanpassen/' + id;
         },
+        viewUrl(id) {
+            // Return View url of Receipt id
+            return '/Declaraties/Bekijken/' + id;
+        },
         zero(val) {
             // Default to zero instead of "", null, undefined, etc.
             return !val ? 0 : val;
