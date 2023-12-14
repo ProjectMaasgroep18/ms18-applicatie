@@ -73,8 +73,33 @@ namespace Maasgroep.Database.Receipts
 			};
         }
 
+		/** List all receipts */
+		public override IEnumerable<ReceiptModel> ListAll(int offset = default, int limit = default, bool includeDeleted = default)
+			=> GetList(item => item.ReceiptStatus != ReceiptStatus.Concept.ToString(), item => Statuses.GetModel(item.ReceiptStatus) switch {
+				// Sorteer op wat nog goedgekeurd moet worden
+                ReceiptStatus.Ingediend => 1,
+                _ => 0,
+            }, offset, limit, includeDeleted).Select(item => GetModel(item)!);
+		
+		/** List receipts by member */
+		public override IEnumerable<ReceiptModel> ListByMember(long memberId, int offset = default, int limit = default, bool includeDeleted = default)
+			=> GetList(item => item.MemberCreatedId == memberId, item => Statuses.GetModel(item.ReceiptStatus) switch {
+				// Sorteer op wat nog afgemaakt/verbeterd worden
+                ReceiptStatus.Afgekeurd => 2,
+                ReceiptStatus.Concept => 1,
+                _ => 0,
+            }, offset, limit, includeDeleted).Select(item => GetModel(item)!);
+
 		/** List receipts by cost centre */
 		public IEnumerable<ReceiptModel> ListByCostCentre(long costCentreId, int offset = default, int limit = default, bool includeDeleted = default)
-			=> GetList(item => item.CostCentreId == costCentreId, null, offset, limit, includeDeleted).Select(item => GetModel(item)!);
+			=> GetList(item => item.CostCentreId == costCentreId && item.ReceiptStatus != ReceiptStatus.Concept.ToString(), item => Statuses.GetModel(item.ReceiptStatus) switch {
+				// Sorteer op wat nog goedgekeurd moet worden
+                ReceiptStatus.Ingediend => 1,
+                _ => 0,
+            }, offset, limit, includeDeleted).Select(item => GetModel(item)!);
+
+		/** List receipts waiting te be paid out */
+		public IEnumerable<ReceiptModel> ListPayable(int offset = default, int limit = default, bool includeDeleted = default)
+			=> GetList(item => item.ReceiptStatus == ReceiptStatus.Goedgekeurd.ToString(), null, offset, limit, includeDeleted).Select(item => GetModel(item)!);
     }
 }

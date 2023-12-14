@@ -1,4 +1,3 @@
-using System.Text.Json;
 using Maasgroep.Database;
 using Maasgroep.SharedKernel.Interfaces;
 using Microsoft.AspNetCore.Mvc;
@@ -14,9 +13,5 @@ where THistory: GenericRecordHistory
 
     [HttpPut("{id}")]
     public IActionResult RepositoryUpdate(long id, [FromBody] TDataModel data)
-    {
-        Console.WriteLine($"UPDATING {id}");
-        Console.WriteLine(JsonSerializer.Serialize(data));
-        return Repository.Update(id, data, 1) == null ? BadRequest() : Ok();
-    }
+        => Repository.Update(id, data, 1) == null ? BadRequest() : Ok();
 }
