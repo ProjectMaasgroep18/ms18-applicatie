@@ -1,7 +1,7 @@
 ﻿
 namespace Maasgroep.Database.Receipts
 {
-    public record Photo : GenericRecordActive
+    public record ReceiptPhoto : GenericRecordActive
 	{
         public long Id { get; set; }
         public long ReceiptId { get; set; }
