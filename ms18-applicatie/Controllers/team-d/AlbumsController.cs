@@ -111,5 +111,26 @@ public class AlbumsController : ControllerBase
             return StatusCode(500, "An internal error occurred.");
         }
     }
+
+    [HttpDelete("{id}")]
+    public async Task<ActionResult> DeleteAlbum(Guid id)
+    {
+        try
+        {
+            var album = await _albumRepository.GetAlbumById(id);
+            if (album == null)
+            {
+                return NotFound($"Album with ID {id} not found.");
+            }
+
+            await _albumRepository.DeleteAlbum(id);
+            return NoContent();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, $"Error occurred while deleting album with ID {id}.");
+            return StatusCode(500, "An internal error occurred.");
+        }
+    }
 }
 

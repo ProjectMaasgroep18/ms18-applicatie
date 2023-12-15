@@ -9,6 +9,7 @@ public interface IAlbumRepository
     Task<Album?> GetAlbumById(Guid id);
     Task<IEnumerable<Album>> GetAllAlbums();
     Task UpdateAlbum(Album album);
+    Task DeleteAlbum(Guid albumId);
 }
 
 

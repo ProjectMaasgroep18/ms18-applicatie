@@ -43,5 +43,16 @@ public class AlbumRepository : IAlbumRepository
         _context.Albums.Update(album);
         await _context.SaveChangesAsync();
     }
+
+    public async Task DeleteAlbum(Guid albumId)
+    {
+        var album = await _context.Albums.FindAsync(albumId);
+
+        if (album != null)
+        {
+            _context.Albums.Remove(album);
+            await _context.SaveChangesAsync();
+        }
+    }
 }
 
