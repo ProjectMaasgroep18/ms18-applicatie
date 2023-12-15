@@ -79,7 +79,7 @@ public class ReceiptController : ControllerBase
         ,   Member = _memberService.GetMember(1)
         };
 
-		var result = _receiptRepository.Add(receiptToAdd);
+		var result = _receiptRepository.Add(receiptToAdd); //KH nav unittesten errors afvangen als result
 
         return Ok(result);
     }
@@ -213,7 +213,7 @@ public class ReceiptController : ControllerBase
 		ReceiptModel? existingReceipt = _receiptRepository.GetReceipt(id);
 
 		// Check if the receipt with the provided ID exists
-		if (existingReceipt == null)
+		if (existingReceipt == null) //KH, kpnieuw ,kan geen null zijn
         {
             return NotFound(new
             {
@@ -223,7 +223,7 @@ public class ReceiptController : ControllerBase
         }
 
         // Get all photos for the receipt
-        var photos = _receiptRepository.GetPhotosByReceipt(id, 0, int.MaxValue);
+        var photos = _receiptRepository.GetPhotosByReceipt(id, 0, int.MaxValue); //KH nav unittesten, controles
 
         return Ok(photos);
     }
