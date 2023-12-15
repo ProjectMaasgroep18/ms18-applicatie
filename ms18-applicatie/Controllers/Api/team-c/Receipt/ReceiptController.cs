@@ -27,7 +27,7 @@ public class ReceiptController : ControllerBase
 
         var result = _receiptRepository.GetReceipts(0, int.MaxValue);
 
-		if (result == null)
+		if (result == null) //TODO: or count == 0, want ding geeft geen null. Aanleiding is unittest.
 			return NotFound(new
 			{
 				status = 404,
@@ -39,7 +39,7 @@ public class ReceiptController : ControllerBase
 
     [HttpGet("{id}")]
     [ActionName("receiptGetById")]
-    public IActionResult ReceiptGetById(int id)
+    public IActionResult ReceiptGetById(int id) //Kevin nav unittest: long ipv int
     {
 		if (!MemberExists(1)) // Toegangscontrole
 			return Forbidden();
@@ -123,7 +123,7 @@ public class ReceiptController : ControllerBase
 		ReceiptModel? existingReceipt = _receiptRepository.GetReceipt(id);
         
         // Check if the receipt with the provided ID exists
-        if (existingReceipt == null)
+        if (existingReceipt == null) //Object is nooit null. Iets van ID = 0 of leeg ofoz nav unitestn
         {
             return NotFound(new
             {
@@ -139,7 +139,7 @@ public class ReceiptController : ControllerBase
         {
             _receiptRepository.Delete(receiptToDelete); //TODO: deze logica moet nog gebouwd
         }
-        catch (Exception)
+        catch (Exception) // catch in repo, dus nooit hier. false. Of throw in repo
         {
             return Conflict(new
             {
