@@ -1,6 +1,5 @@
 using Maasgroep.Database.Orders;
 using Maasgroep.Database.Receipts;
-using Maasgroep.Database.ToDoList;
 
 namespace Maasgroep.Database.Admin
 {
@@ -43,13 +42,6 @@ namespace Maasgroep.Database.Admin
 		public ICollection<Bill> BillsCreated { get; set; }
 		public ICollection<Bill> BillsModified { get; set; }
 		public ICollection<Bill> BillsDeleted { get; set; }
-
-		// EF ToDo properties
-		public ICollection<ToDo> ToDoOwned { get; set; }
-		public ICollection<ToDo> ToDoCreated { get; set; }
-		public ICollection<ToDo> ToDoModified { get; set; }
-		public ICollection<ToDo> ToDoDeleted { get; set; }
-
 
 		// EF Generic properties
 		public ICollection<Member>? MembersCreated { get; set; }

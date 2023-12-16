@@ -2,7 +2,6 @@
 using Maasgroep.Database.Orders;
 using Maasgroep.Database.Receipts;
 using Maasgroep.Database.Services;
-using Maasgroep.Database.ToDoList;
 using Microsoft.EntityFrameworkCore;
 
 namespace Maasgroep.Database
@@ -49,11 +48,6 @@ namespace Maasgroep.Database
 		public DbSet<LineHistory> LineHistory { get; set; }
 		public DbSet<BillHistory> BillHistory { get; set; }
 
-		#endregion
-
-		#region Todo
-		public DbSet<ToDo> ToDos { get; set; }
-		public DbSet<ToDoHistory> ToDoHistory { get; set; }
 		#endregion
 
 		public MaasgroepContext()
@@ -106,11 +100,6 @@ namespace Maasgroep.Database
 			CreateProductPriceHistory(modelBuilder);
 			CreateOrderLineHistory(modelBuilder);
 			CreateBillHistory(modelBuilder);
-			#endregion
-
-			#region Todo
-			CreateToDo(modelBuilder);
-			CreateToDoHistory(modelBuilder);
 			#endregion
 		}
 
@@ -311,9 +300,8 @@ namespace Maasgroep.Database
 		private void CreateReceiptApproval(ModelBuilder modelBuilder)
 		{
 			modelBuilder.Entity<ReceiptApproval>().ToTable("approval", "receipt");
-			modelBuilder.Entity<ReceiptApproval>().HasKey(ra => new { ra.ReceiptId });
 			modelBuilder.Entity<ReceiptApproval>().Property(ra => ra.DateTimeCreated).HasDefaultValueSql("now()");
-			modelBuilder.Entity<ReceiptApproval>().Property(ra => ra.Note).HasMaxLength(2048);
+			modelBuilder.Entity<ReceiptApproval>().Property(ra => ra.Note).HasMaxLength(64000);
 
 			//Foreign keys
 
@@ -395,7 +383,7 @@ namespace Maasgroep.Database
 			modelBuilder.Entity<ReceiptHistory>().ToTable("receipt", "receiptHistory");
 			modelBuilder.HasSequence<long>("receiptSeq", schema: "receiptHistory").StartsAt(1).IncrementsBy(1);
 			modelBuilder.Entity<ReceiptHistory>().Property(r => r.Id).HasDefaultValueSql("nextval('\"receiptHistory\".\"receiptSeq\"')");
-			modelBuilder.Entity<ReceiptHistory>().Property(r => r.Note).HasMaxLength(2048);
+			modelBuilder.Entity<ReceiptHistory>().Property(r => r.Note).HasMaxLength(64000);
 			modelBuilder.Entity<ReceiptHistory>().Property(r => r.Amount).HasPrecision(18, 2);
 			modelBuilder.Entity<ReceiptHistory>().Property(r => r.RecordCreated).HasDefaultValueSql("now()");
 		}
@@ -565,7 +553,7 @@ namespace Maasgroep.Database
 			modelBuilder.Entity<Bill>().HasKey(b => b.Id);
 			modelBuilder.Entity<Bill>().ToTable("bill", "order");
 			modelBuilder.Entity<Bill>().Property(b => b.Name).HasMaxLength(2048);
-			modelBuilder.Entity<Bill>().Property(b => b.Note).HasMaxLength(2048);
+			modelBuilder.Entity<Bill>().Property(b => b.Note).HasMaxLength(64000);
 			modelBuilder.Entity<Bill>().Property(b => b.DateTimeCreated).HasDefaultValueSql("now()");
 
 			modelBuilder.Entity<Bill>()
@@ -642,63 +630,9 @@ namespace Maasgroep.Database
 			modelBuilder.Entity<BillHistory>().Property(b => b.Id).HasDefaultValueSql("nextval('\"orderHistory\".\"billSeq\"')");
 			modelBuilder.Entity<BillHistory>().Property(b => b.RecordCreated).HasDefaultValueSql("now()");
 			modelBuilder.Entity<BillHistory>().Property(p => p.Name).HasMaxLength(2048);
-			modelBuilder.Entity<BillHistory>().Property(b => b.Note).HasMaxLength(2048);
+			modelBuilder.Entity<BillHistory>().Property(b => b.Note).HasMaxLength(64000);
 		}
 
-
-		#endregion
-
-		#region Todo
-
-		private void CreateToDo(ModelBuilder modelBuilder)
-		{
-			modelBuilder.Entity<ToDo>().ToTable("todo", "todo");
-			modelBuilder.Entity<ToDo>().HasKey(t => t.Id);
-			modelBuilder.HasSequence<long>("todoSeq", "todo").StartsAt(1).IncrementsBy(1); ;
-			modelBuilder.Entity<ToDo>().Property(t => t.Id).HasDefaultValueSql("nextval('todo.\"todoSeq\"')");
-			modelBuilder.Entity<ToDo>().Property(t => t.Action).HasMaxLength(2048);
-
-			modelBuilder.Entity<ToDo>()
-				.HasOne(t => t.Member)
-				.WithMany(m => m.ToDoOwned)
-				.HasForeignKey(t => t.MemberId)
-				.HasConstraintName("FK_todo_memberOwned")
-				.OnDelete(DeleteBehavior.NoAction);
-
-			modelBuilder.Entity<ToDo>()
-				.HasOne(ra => ra.MemberCreated)
-				.WithMany(m => m.ToDoCreated)
-				.HasForeignKey(ra => ra.MemberCreatedId)
-				.HasConstraintName("FK_todo_memberCreated")
-				.OnDelete(DeleteBehavior.NoAction);
-
-			modelBuilder.Entity<ToDo>()
-				.HasOne(ra => ra.MemberModified)
-				.WithMany(m => m.ToDoModified)
-				.HasForeignKey(ra => ra.MemberModifiedId)
-				.HasConstraintName("FK_todo_memberModified")
-				.OnDelete(DeleteBehavior.NoAction);
-
-			modelBuilder.Entity<ToDo>()
-				.HasOne(ra => ra.MemberDeleted)
-				.WithMany(m => m.ToDoDeleted)
-				.HasForeignKey(ra => ra.MemberDeletedId)
-				.HasConstraintName("FK_todo_memberDeleted")
-				.OnDelete(DeleteBehavior.NoAction);
-		}
-
-		#endregion
-
-		#region TodoHistory
-
-		private void CreateToDoHistory(ModelBuilder modelBuilder)
-		{
-			modelBuilder.Entity<ToDoHistory>().ToTable("todo", "todoHistory");
-			modelBuilder.Entity<ToDoHistory>().HasKey(t => t.Id);
-			modelBuilder.HasSequence<long>("todoSeq", "todoHistory").StartsAt(1).IncrementsBy(1); ;
-			modelBuilder.Entity<ToDoHistory>().Property(t => t.Id).HasDefaultValueSql("nextval('\"todoHistory\".\"todoSeq\"')");
-			modelBuilder.Entity<ToDoHistory>().Property(t => t.Action).HasMaxLength(2048);
-		}
 
 		#endregion
 	}
