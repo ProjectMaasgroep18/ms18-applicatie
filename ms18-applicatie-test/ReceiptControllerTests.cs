@@ -43,6 +43,13 @@ namespace ms18_applicatie_test
 			_ = result.Should().NotBeNull();
 			_ = result.Should().BeOfType<NotFoundObjectResult>();
 			_ = result.As<NotFoundObjectResult>().StatusCode.Should().Be(404);
+			_ = result.As<NotFoundObjectResult>().Value.Should().BeEquivalentTo(
+				new
+				{
+					status = 404,
+					message = "Receipt not found"
+				}
+				);
 		}
 
 		[Fact]
@@ -112,6 +119,13 @@ namespace ms18_applicatie_test
 			_ = result.Should().NotBeNull();
 			_ = result.Should().BeOfType<NotFoundObjectResult>();
 			_ = result.As<NotFoundObjectResult>().StatusCode.Should().Be(404);
+			_ = result.As<NotFoundObjectResult>().Value.Should().BeEquivalentTo(
+				new
+				{
+					status = 404,
+					message = "Receipt not found"
+				}
+				);
 		}
 
 		[Fact]
@@ -163,6 +177,13 @@ namespace ms18_applicatie_test
 
 			_ = result.Should().NotBeNull();
 			_ = result.Should().BeOfType<BadRequestObjectResult>();
+			_ = result.As<BadRequestObjectResult>().Value.Should().BeEquivalentTo(
+				new
+				{
+					status = 400,
+					message = "Invalid request body"
+				}
+				);
 		}
 
 		[Fact]
@@ -214,6 +235,13 @@ namespace ms18_applicatie_test
 
 			_ = result.Should().NotBeNull();
 			_ = result.Should().BeOfType<BadRequestObjectResult>();
+			_ = result.As<BadRequestObjectResult>().Value.Should().BeEquivalentTo(
+				new
+				{
+					status = 400,
+					message = "Invalid request body"
+				}
+				);
 		}
 
 		[Fact]
@@ -268,6 +296,13 @@ namespace ms18_applicatie_test
 			_ = result.Should().NotBeNull();
 			_ = result.Should().BeOfType<NotFoundObjectResult>();
 			_ = result.As<NotFoundObjectResult>().StatusCode.Should().Be(404);
+			_ = result.As<NotFoundObjectResult>().Value.Should().BeEquivalentTo(
+				new
+				{
+					status = 404,
+					message = "Receipt not found"
+				}
+				);
 		}
 
 		[Fact]
@@ -304,6 +339,13 @@ namespace ms18_applicatie_test
 			_ = result.Should().NotBeNull();
 			_ = result.Should().BeOfType<ConflictObjectResult>();
 			_ = result.As<ConflictObjectResult>().StatusCode.Should().Be(409);
+			_ = result.As<ConflictObjectResult>().Value.Should().BeEquivalentTo(
+				new
+				{
+					status = 409,
+					message = "Declaratie kon niet worden verwijderd" // TODO Check which dependency is causing the conflict
+				}
+				);
 		}
 
 		#endregion
@@ -339,6 +381,13 @@ namespace ms18_applicatie_test
 
 			_ = result.Should().NotBeNull();
 			_ = result.Should().BeOfType<BadRequestObjectResult>();
+			_ = result.As<BadRequestObjectResult>().Value.Should().BeEquivalentTo(
+				new
+				{
+					status = 400,
+					message = "Invalid request body"
+				}
+				);
 		}
 
 		[Fact]
@@ -356,6 +405,12 @@ namespace ms18_applicatie_test
 			_ = result.Should().NotBeNull();
 			_ = result.Should().BeOfType<NotFoundObjectResult>();
 			_ = result.As<NotFoundObjectResult>().StatusCode.Should().Be(404);
+			_ = result.As<NotFoundObjectResult>().Value.Should().BeEquivalentTo(
+				new
+				{
+					status = 404,
+					message = "Receipt not found"
+				});
 		}
 
 		[Fact]
@@ -363,10 +418,11 @@ namespace ms18_applicatie_test
 		{
 			var receiptRepository = new Mock<IReceiptRepository>();
 			var memberService = new Mock<IMemberService>();
+			var photoExpected = It.IsAny<PhotoModel>();
 			_ = memberService.Setup(p => p.MemberExists(It.IsAny<long>())).Returns(true);
 			_ = receiptRepository.Setup(p => p.GetReceipt(It.IsAny<long>())).Returns(new Mock<ReceiptModel>().Object);
 			_ = receiptRepository.Setup(p => p.Add(new Mock<PhotoModelCreateDb>().Object)).Returns(It.IsAny<long>());
-			_ = receiptRepository.Setup(p => p.GetPhoto(It.IsAny<long>())).Returns(new Mock<PhotoModel>().Object);
+			_ = receiptRepository.Setup(p => p.GetPhoto(It.IsAny<long>())).Returns(photoExpected);
 
 			var sut = new ReceiptController(receiptRepository.Object, memberService.Object);
 
@@ -374,7 +430,15 @@ namespace ms18_applicatie_test
 
 			_ = result.Should().NotBeNull();
 			_ = result.Should().BeOfType<CreatedResult>();
-			_ = result.As<CreatedResult>().StatusCode.Should().Be(404);
+			_ = result.As<CreatedResult>().StatusCode.Should().Be(201);
+			_ = result.As<CreatedResult>().Value.Should().BeEquivalentTo(
+				new
+				{
+					status = 201,
+					message = "Photo created",
+					photo = photoExpected
+				}
+				);
 		}
 
 		#endregion
@@ -411,6 +475,14 @@ namespace ms18_applicatie_test
 			_ = result.Should().NotBeNull();
 			_ = result.Should().BeOfType<NotFoundObjectResult>();
 			_ = result.As<NotFoundObjectResult>().StatusCode.Should().Be(404);
+			_ = result.As<NotFoundObjectResult>().Value.Should().BeEquivalentTo(
+				new
+				{
+					status = 404,
+					message = "Receipt not found"
+				}
+				);
+
 		}
 
 		[Fact]
@@ -500,6 +572,14 @@ namespace ms18_applicatie_test
 
 			_ = result.Should().NotBeNull();
 			_ = result.Should().BeOfType<BadRequestObjectResult>();
+			_ = result.As<BadRequestObjectResult>().Value.Should().BeEquivalentTo(
+				new
+				{
+					status = 400,
+					message = "Invalid request body"
+				}
+				);
+
 		}
 
 		[Fact]
@@ -517,6 +597,13 @@ namespace ms18_applicatie_test
 			_ = result.Should().NotBeNull();
 			_ = result.Should().BeOfType<NotFoundObjectResult>();
 			_ = result.As<NotFoundObjectResult>().StatusCode.Should().Be(404);
+			_ = result.As<NotFoundObjectResult>().Value.Should().BeEquivalentTo(
+				new
+				{
+					status = 404,
+					message = "Receipt not found"
+				}
+				);
 		}
 
 		[Fact]
@@ -534,7 +621,7 @@ namespace ms18_applicatie_test
 
 			_ = result.Should().NotBeNull();
 			_ = result.Should().BeOfType<CreatedResult>();
-			_ = result.As<CreatedResult>().StatusCode.Should().Be(404);
+			_ = result.As<CreatedResult>().StatusCode.Should().Be(201);
 		}
 		#endregion
 

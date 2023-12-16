@@ -73,6 +73,13 @@ namespace ms18_applicatie_test
 
 			_ = result.Should().NotBeNull();
 			_ = result.Should().BeOfType<NotFoundObjectResult>();
+			_ = result.As<NotFoundObjectResult>().Value.Should().BeEquivalentTo(
+				new
+				{
+					status = 404,
+					message = "Kostenpost niet gevonden"
+				}
+				);
 		}
 
 		[Fact]
@@ -123,6 +130,12 @@ namespace ms18_applicatie_test
 
 			_ = result.Should().NotBeNull();
 			_ = result.Should().BeOfType<BadRequestObjectResult>();
+			_ = result.As<BadRequestObjectResult>().Value.Should().BeEquivalentTo(
+				new
+				{
+					status = 400,
+					message = "Invalid request body"
+				});
 		}
 
 		[Fact]
@@ -131,15 +144,21 @@ namespace ms18_applicatie_test
 			var receiptRepository = new Mock<IReceiptRepository>();
 			var memberService = new Mock<IMemberService>();
 			_ = memberService.Setup(p => p.MemberExists(It.IsAny<long>())).Returns(true);
-			_ = receiptRepository.Setup(p => p.Add(new Mock<CostCentreModelCreateDb>().Object)).Returns(It.IsAny<long>());
+			_ = receiptRepository.Setup(p => p.Add(It.IsAny<CostCentreModelCreateDb>())).Returns(123L);
 
 			var sut = new CostCentreController(receiptRepository.Object, memberService.Object);
-			sut.ModelState.AddModelError("blaat", "kapot!");
 
 			var result = sut.CostCentreCreate(new Mock<CostCentreModelCreate>().Object);
 
 			_ = result.Should().NotBeNull();
-			_ = result.Should().BeOfType<OkObjectResult>();
+			_ = result.Should().BeOfType<CreatedResult>();
+			_ = result.As<CreatedResult>().Value.Should().BeEquivalentTo(new
+			{
+				status = 201,
+				message = "Kostenpost aangemaakt",
+				costCentre = 123L,
+			});
+
 		}
 
 		#endregion
@@ -190,7 +209,7 @@ namespace ms18_applicatie_test
 			var receiptRepository = new Mock<IReceiptRepository>();
 			var memberService = new Mock<IMemberService>();
 			_ = memberService.Setup(p => p.MemberExists(It.IsAny<long>())).Returns(true);
-			_ = receiptRepository.Setup(p => p.GetCostCentre(It.IsAny<long>())).Returns(new Mock<CostCentreModel>().Object);
+			_ = receiptRepository.Setup(p => p.GetCostCentre(It.IsAny<long>())).Returns<CostCentreModel>(null);
 
 			var sut = new CostCentreController(receiptRepository.Object, memberService.Object);
 
@@ -303,7 +322,7 @@ namespace ms18_applicatie_test
 			var memberService = new Mock<IMemberService>();
 			_ = memberService.Setup(p => p.MemberExists(It.IsAny<long>())).Returns(true);
 			_ = receiptRepository.Setup(p => p.GetCostCentre(It.IsAny<long>())).Returns(new Mock<CostCentreModel>().Object);
-			_ = receiptRepository.Setup(p => p.Delete(new Mock<CostCentreModelDeleteDb>().Object)).Throws(new Exception());
+			_ = receiptRepository.Setup(p => p.Delete(It.IsAny<CostCentreModelDeleteDb>())).Throws(new Exception());
 
 			var sut = new CostCentreController(receiptRepository.Object, memberService.Object);
 
