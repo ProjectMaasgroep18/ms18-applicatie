@@ -25,6 +25,8 @@ options.UseNpgsql(connectionString));
 
 builder.Services.AddScoped<IAlbumRepository, AlbumRepository>();
 builder.Services.AddScoped<IPhotoRepository, PhotoRepository>();
+builder.Services.AddScoped<ILikesRepository, LikesRepository>();
+builder.Services.AddScoped<ITagsRepository,  TagsRepository>();
 
 builder.Services.AddTransient<IReceiptRepository, ReceiptRepository>();
 builder.Services.AddTransient<IMemberRepository, MemberRepository>();

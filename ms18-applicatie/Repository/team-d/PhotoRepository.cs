@@ -1,7 +1,7 @@
 ﻿using Maasgroep.Database.Context;
 using Maasgroep.Database.Context.team_d.Models;
+using Microsoft.EntityFrameworkCore;
 using ms18_applicatie.Interfaces.team_d;
-using ms18_applicatie.Models.team_d;
 
 namespace ms18_applicatie.Repository.team_d;
 
@@ -14,43 +14,47 @@ public class PhotoRepository : IPhotoRepository
         _context = context;
     }
 
-    //public async Task<Photo> AddPhoto(PhotoUploadModel model, long uploaderId)
-    //{
-    //    // Decode the base64 string to a byte array
-    //    var imageBytes = Convert.FromBase64String(model.ImageBase64);
+    public async Task AddPhoto(Photo photo)
+    {
+        _context.Photos.Add(photo);
+        await _context.SaveChangesAsync();
+    }
 
-    //    // Create a new Photo instance
-    //    var photo = new Photo
-    //    {
-    //        Id = Guid.NewGuid(),
-    //        Title = model.Title,
-    //        ImageData = imageBytes,
-    //        ContentType = model.ContentType,
-    //        AlbumLocationId = model.AlbumLocationId,
-    //        UploadDate = DateTime.UtcNow,
-    //        UploaderId = uploaderId // TODO: Set the uploader's ID based on the authenticated user
-    //    };
+    public async Task DeletePhoto(Guid photoId)
+    {
+        var photo = await _context.Photos.FindAsync(photoId);
+        if (photo != null)
+        {
+            _context.Photos.Remove(photo);
+            await _context.SaveChangesAsync();
+        }
+    }
 
-    //    // Add the photo to the database context
-    //    _context.Photos.Add(photo);
-    //    await _context.SaveChangesAsync();
+    public async Task<Photo?> GetPhotoById(Guid photoId)
+    {
+        return await _context.Photos
+            .Include(p => p.AlbumLocation)
+            .Include(p => p.Likes)         
+            .FirstOrDefaultAsync(p => p.Id == photoId);
+    }
 
-    //    // Associate tags with the photo if any tag IDs are provided
-    //    if (model.TagIds.Count > 0)
-    //    {
-    //        foreach (var tagId in model.TagIds)
-    //        {
-    //            var photoTag = new AlbumTag
-    //            {
-    //                PhotoId = photo.Id,
-    //                TagId = tagId
-    //            };
-    //            _context.PhotoTags.Add(photoTag);
-    //        }
-    //        await _context.SaveChangesAsync();
-    //    }
+    public async Task<(IEnumerable<Photo> Photos, int TotalCount)> GetPhotosByAlbumId(Guid albumId, int pageNumber, int pageSize)
+    {
+        var query = _context.Photos.Where(p => p.AlbumLocationId == albumId);
 
-    //    return photo;
-    //}
+        var totalCount = await query.CountAsync();
+        var photos = await query.OrderBy(p => p.UploadDate)
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+
+        return (photos, totalCount);
+    }
+
+    public async Task UpdatePhoto(Photo photo)
+    {
+        _context.Entry(photo).State = EntityState.Modified;
+        await _context.SaveChangesAsync();
+    }
 }
 

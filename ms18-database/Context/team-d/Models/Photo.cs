@@ -10,9 +10,11 @@ public class Photo
     public Member Uploader { get; set; } = null!;
     public DateTime UploadDate { get; set; }
 
-    public string Title { get; set; } = null!;
+    public string? Title { get; set; } = null!;
     public byte[] ImageData { get; set; } = null!;
     public string ContentType { get; set; } = null!;
+    public DateTime? TakenOn { get; set; }
+    public string? Location { get; set; }
 
     public Guid AlbumLocationId { get; set; }
     public Album AlbumLocation { get; set; } = null!;

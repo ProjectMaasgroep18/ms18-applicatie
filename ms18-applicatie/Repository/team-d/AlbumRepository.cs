@@ -29,7 +29,7 @@ public class AlbumRepository : IAlbumRepository
     {
         return await _context.Albums
             .Include(a => a.ChildAlbums)
-            .Include(a => a.Photos)
+            .Include(a => a.AlbumTags)
             .FirstOrDefaultAsync(a => a.Id == id);
     }
 

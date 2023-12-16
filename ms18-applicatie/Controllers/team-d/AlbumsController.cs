@@ -5,16 +5,14 @@ using ms18_applicatie.Interfaces.team_d;
 namespace ms18_applicatie.Controllers.team_d;
 
 [ApiController]
-[Route("api/photo-album")]
+[Route("api/albums")]
 public class AlbumsController : ControllerBase
 {
-    private readonly IPhotoRepository _photoRepository;
     private readonly IAlbumRepository _albumRepository;
     private readonly ILogger<AlbumsController> _logger;
 
-    public AlbumsController(IPhotoRepository photoRepository, IAlbumRepository albumRepository, ILogger<AlbumsController> logger)
+    public AlbumsController(IAlbumRepository albumRepository, ILogger<AlbumsController> logger)
     {
-        _photoRepository = photoRepository;
         _albumRepository = albumRepository;
         _logger = logger;
     }
@@ -50,6 +48,7 @@ public class AlbumsController : ControllerBase
     [HttpGet("{id}")]
     public async Task<ActionResult<Album>> GetAlbum(Guid id)
     {
+        // This doesn't get the photos for the album that is in the PhotosController since it has to be paginated.
         try
         {
             var album = await _albumRepository.GetAlbumById(id);
