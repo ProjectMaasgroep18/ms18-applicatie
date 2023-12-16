@@ -280,7 +280,6 @@ namespace Maasgroep.Database
 			modelBuilder.Entity<Receipt>().Property(r => r.DateTimeCreated).HasDefaultValueSql("now()");
 			modelBuilder.Entity<Receipt>().Property<string>(r => r.Note).HasMaxLength(2048);
 			modelBuilder.Entity<Receipt>().Property(r => r.Amount).HasPrecision(18, 2);
-			//KH Unittest. Amount > 0...ik dacht dat die er al in zat.
 
 			//Foreign keys
 
