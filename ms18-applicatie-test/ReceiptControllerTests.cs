@@ -348,6 +348,23 @@ namespace ms18_applicatie_test
 				);
 		}
 
+		[Fact]
+		public void Access_ReceiptDelete_With_Authentication_Delete_Attempt_Successful_Return_NoContent()
+		{
+			var receiptRepository = new Mock<IReceiptRepository>();
+			var memberService = new Mock<IMemberService>();
+			_ = memberService.Setup(p => p.MemberExists(It.IsAny<long>())).Returns(true);
+			_ = receiptRepository.Setup(r => r.GetReceipt(It.IsAny<long>())).Returns(new Mock<ReceiptModel>().Object);
+			_ = receiptRepository.Setup(r => r.Delete(It.IsAny<ReceiptModelDeleteDb>())).Returns(true);
+
+			var sut = new ReceiptController(receiptRepository.Object, memberService.Object);
+
+			var result = sut.ReceiptDelete(It.IsAny<long>());
+
+			_ = result.Should().NotBeNull();
+			_ = result.Should().BeOfType<NoContentResult>();			
+		}
+
 		#endregion
 
 		#region ReceiptAddPhoto
