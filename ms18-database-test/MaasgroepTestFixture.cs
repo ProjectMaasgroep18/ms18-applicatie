@@ -1,4 +1,6 @@
-﻿using Maasgroep.Database.Orders;
+﻿using Maasgroep.Database.Members;
+using Maasgroep.Database.Orders;
+using Maasgroep.Database.Receipts;
 
 namespace Maasgroep.Database.Test
 {
@@ -28,11 +30,11 @@ namespace Maasgroep.Database.Test
 					CreateTestDataReceiptApproval();
 
 					// Order
-					CreateTestDataProduct();
-					CreateTestDataStock();
-					CreateTestDataProductPrice();
-					CreateTestDataBill();
-					CreateTestDataLine();
+					//CreateTestDataProduct();
+					//CreateTestDataStock();
+					//CreateTestDataProductPrice();
+					//CreateTestDataBill();
+					//CreateTestDataLine();
 
 					_databaseInitialized = true;
 				}
@@ -56,144 +58,143 @@ namespace Maasgroep.Database.Test
 		#region Member_Admin
 		private void CreateTestDataMember()
 		{
-			//using (var db = CreateContext())
-			//{
-			//    var members = new List<Member>()
-			//    {
-			//        new Member() { Name = "Borgia"}
-			//    };
+			using (var db = CreateContext())
+			{
+				var members = new List<Member>()
+				{
+					new Member() { Name = "Borgia"}
+				};
 
-			//    db.Member.AddRange(members);
+				db.Member.AddRange(members);
 
-			//    db.SaveChanges();
+				db.SaveChanges();
 
-			//    var borgia = db.Member.FirstOrDefault()!;
+				var borgia = db.Member.FirstOrDefault()!;
 
-			//    members = new List<Member>()
-			//    {
-			//        new Member() { Name = "da Gama", MemberCreated = borgia }
-			//    ,   new Member() { Name = "Albuquerque", MemberCreated = borgia }
-			//    };
+				members = new List<Member>()
+				{
+					new Member() { Name = "da Gama", MemberCreated = borgia }
+				,   new Member() { Name = "Albuquerque", MemberCreated = borgia }
+				};
 
-			//    borgia.MemberCreated = borgia;
-			//    borgia.MemberModified = borgia;
-			//    borgia.DateTimeModified = DateTime.UtcNow;
+				borgia.MemberCreated = borgia;
+				borgia.MemberModified = borgia;
+				borgia.DateTimeModified = DateTime.UtcNow;
 
-			//    db.Member.AddRange(members);
+				db.Member.AddRange(members);
 
-			//    db.SaveChanges();
-			//}
+				db.SaveChanges();
+			}
 		}
 		private void CreateTestDataPermissions()
 		{
-			//using (var db = CreateContext())
-			//{
-			//    var borgia = db.Member.FirstOrDefault()!;
+			using (var db = CreateContext())
+			{
+				var borgia = db.Member.FirstOrDefault()!;
 
-			//    var permissions = new List<Permission>()
-			//    {
-			//        new Permission() { Name = "receipt.approve", MemberCreated = borgia}
-			//    ,   new Permission() { Name = "receipt.reject", MemberCreated = borgia}
-			//    ,   new Permission() { Name = "receipt.handIn", MemberCreated = borgia}
-			//    ,   new Permission() { Name = "receipt.payOut", MemberCreated = borgia}
-			//    };
+				var permissions = new List<Permission>()
+				{
+					new Permission() { Name = "receipt.approve", MemberCreated = borgia}
+				,   new Permission() { Name = "receipt.reject", MemberCreated = borgia}
+				,   new Permission() { Name = "receipt.handIn", MemberCreated = borgia}
+				,   new Permission() { Name = "receipt.payOut", MemberCreated = borgia}
+				};
 
-			//    db.Permission.AddRange(permissions);
+				db.Permission.AddRange(permissions);
 
-			//    db.SaveChanges();
-			//}
+				db.SaveChanges();
+			}
 		}
 		private void CreateTestDataMemberPermissions()
 		{
-			//using (var db = CreateContext())
-			//{
-			//    var borgia = db.Member.FirstOrDefault()!;
-			//    var daGama = db.Member.Where(m => m.Name == "da Gama").FirstOrDefault()!;
-			//    var alb = db.Member.Where(m => m.Name == "Albuquerque").FirstOrDefault()!;
+			using (var db = CreateContext())
+			{
+				var borgia = db.Member.FirstOrDefault()!;
+				var daGama = db.Member.Where(m => m.Name == "da Gama").FirstOrDefault()!;
+				var alb = db.Member.Where(m => m.Name == "Albuquerque").FirstOrDefault()!;
 
-			//    var approve = db.Permission.Where(p => p.Name == "receipt.approve").FirstOrDefault()!;
-			//    var reject = db.Permission.Where(p => p.Name == "receipt.reject").FirstOrDefault()!;
-			//    var handIn = db.Permission.Where(p => p.Name == "receipt.handIn").FirstOrDefault()!;
+				var approve = db.Permission.Where(p => p.Name == "receipt.approve").FirstOrDefault()!;
+				var reject = db.Permission.Where(p => p.Name == "receipt.reject").FirstOrDefault()!;
+				var handIn = db.Permission.Where(p => p.Name == "receipt.handIn").FirstOrDefault()!;
 
-			//    var memberPermissions = new List<MemberPermission>()
-			//    {
-			//        new MemberPermission() { Member = daGama, Permission = approve, MemberCreated = borgia }
-			//    ,   new MemberPermission() { Member = daGama, Permission = reject, MemberCreated = borgia }
-			//    ,   new MemberPermission() { Member = alb, Permission = handIn, MemberCreated = borgia }
-			//    };
+				var memberPermissions = new List<MemberPermission>()
+				{
+					new MemberPermission() { Member = daGama, Permission = approve, MemberCreated = borgia }
+				,   new MemberPermission() { Member = daGama, Permission = reject, MemberCreated = borgia }
+				,   new MemberPermission() { Member = alb, Permission = handIn, MemberCreated = borgia }
+				};
 
-			//    db.MemberPermission.AddRange(memberPermissions);
+				db.MemberPermission.AddRange(memberPermissions);
 
-			//    db.SaveChanges();
-			//}
+				db.SaveChanges();
+			}
 		}
 		#endregion
 
 		#region Receipt
 		private void CreateTestDataCostCentre()
 		{
-			//using (var db = CreateContext())
-			//{
-			//    var member = db.Member.Where(m => m.Name == "Borgia").FirstOrDefault()!;
+			using (var db = CreateContext())
+			{
+				var member = db.Member.Where(m => m.Name == "Borgia").FirstOrDefault()!;
 
-			//    var costCentres = new List<CostCentre>()
-			//    {
-			//        new CostCentre() { Name = "Bestuur Maasgroep", MemberCreated = member }
-			//    ,   new CostCentre() { Name = "Penningmeester", MemberCreated = member }
-			//    ,   new CostCentre() { Name = "Moeder van Joopie", MemberCreated = member }
-			//    };
+				var costCentres = new List<CostCentre>()
+				{
+					new CostCentre() { Name = "Bestuur Maasgroep", MemberCreated = member }
+				,   new CostCentre() { Name = "Penningmeester", MemberCreated = member }
+				,   new CostCentre() { Name = "Moeder van Joopie", MemberCreated = member }
+				};
 
-			//    db.CostCentre.AddRange(costCentres);
+				db.CostCentre.AddRange(costCentres);
 
-			//    db.SaveChanges();
-			//}
+				db.SaveChanges();
+			}
 		}
 		private void CreateTestDataReceipt()
 		{
-			//        using (var db = CreateContext())
-			//        {
-			//            var member = db.Member.Where(m => m.Name == "Borgia").FirstOrDefault()!;
-			//            var costCentre1 = db.CostCentre.Where(cc => cc.Name == "Moeder van Joopie").FirstOrDefault()!;
-			//var costCentre2 = db.CostCentre.Where(cc => cc.Name == "Penningmeester").FirstOrDefault()!;
+			using (var db = CreateContext())
+			{
+				var member = db.Member.Where(m => m.Name == "Borgia").FirstOrDefault()!;
+				var costCentre1 = db.CostCentre.Where(cc => cc.Name == "Moeder van Joopie").FirstOrDefault()!;
+				var costCentre2 = db.CostCentre.Where(cc => cc.Name == "Penningmeester").FirstOrDefault()!;
 
-			//var receipts = new List<Receipt>()
-			//            {
-			//                new Receipt()   { MemberCreated = member, ReceiptStatus = "Ingediend"
-			//                                , CostCentre = costCentre1
-			//                                }
-			//            ,   new Receipt()   { MemberCreated = member, ReceiptStatus = "Goedgekeurd"
-			//                                , CostCentre = costCentre2
-			//                                }
-			//            ,   new Receipt()   { MemberCreated = member, ReceiptStatus = "Afgekeurd"
-			//                                , CostCentre = costCentre1
-			//                                }
-			//            };
+				var receipts = new List<Receipt>()
+						{
+							new Receipt()   { MemberCreated = member, ReceiptStatus = "Ingediend"
+											, CostCentre = costCentre1, Amount = 1.11M, Note = "Schroeven voor kapotte sloep"
+											}
+						,   new Receipt()   { MemberCreated = member, ReceiptStatus = "Goedgekeurd"
+											, CostCentre = costCentre2, Amount = 2.22M, Note = "Knakworstjes in de bonus"
+											}
+						,   new Receipt()   { MemberCreated = member, ReceiptStatus = "Afgekeurd"
+											, CostCentre = costCentre1, Amount = 3.33M, Note = "Handboek Woudlopers"
+											}
+						};
 
-			//            db.Receipt.AddRange(receipts);
+				db.Receipt.AddRange(receipts);
 
-			//            db.SaveChanges();
-			//        }
+				db.SaveChanges();
+			}
 		}
-
 		private void CreateTestDataReceiptApproval()
 		{
-			//using (var db = CreateContext())
-			//{
-			//    var member = db.Member.Where(m => m.Name == "Borgia").FirstOrDefault()!;
-			//    var costCentre = db.CostCentre.Where(cc => cc.Name == "Moeder van Joopie").FirstOrDefault()!;
-			//    var receiptGoedgekeurd = db.Receipt.Where(r => r.ReceiptStatus == "Goedgekeurd").FirstOrDefault()!;
-			//    var receiptAfgekeurd = db.Receipt.Where(r => r.ReceiptStatus == "Afgekeurd").FirstOrDefault()!;
+			using (var db = CreateContext())
+			{
+				var member = db.Member.Where(m => m.Name == "Borgia").FirstOrDefault()!;
+				var costCentre = db.CostCentre.Where(cc => cc.Name == "Moeder van Joopie").FirstOrDefault()!;
+				var receiptGoedgekeurd = db.Receipt.Where(r => r.ReceiptStatus == "Goedgekeurd").FirstOrDefault()!;
+				var receiptAfgekeurd = db.Receipt.Where(r => r.ReceiptStatus == "Afgekeurd").FirstOrDefault()!;
 
-			//    var receiptApprovals = new List<ReceiptApproval>()
-			//    {
-			//        new ReceiptApproval() { Receipt = receiptGoedgekeurd, Note = "Lekker duidelijk met zo'n foto!", MemberCreated = member }
-			//    ,   new ReceiptApproval() { Receipt = receiptAfgekeurd, Note = "Dit is niet het soort plug dat we nodig hebben.", MemberCreated = member }
-			//    };
+				var receiptApprovals = new List<ReceiptApproval>()
+				{
+					new ReceiptApproval() { Receipt = receiptGoedgekeurd, Note = "Lekker duidelijk met zo'n foto!", MemberCreated = member }
+				,   new ReceiptApproval() { Receipt = receiptAfgekeurd, Note = "Dit is niet het soort plug dat we nodig hebben.", MemberCreated = member }
+				};
 
-			//    db.ReceiptApproval.AddRange(receiptApprovals);
+				db.ReceiptApproval.AddRange(receiptApprovals);
 
-			//    db.SaveChanges();
-			//}
+				db.SaveChanges();
+			}
 		}
 		#endregion
 

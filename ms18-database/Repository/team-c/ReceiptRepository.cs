@@ -85,6 +85,7 @@ namespace Maasgroep.Database.Receipts
 			var range = new Range(indexStart, indexEnd);
 			//var dbResults = _db.Receipt.Take(range).ToList(); TODO: hiero offset fixen
 			var dbResults = _db.Receipt.Where(r => r.MemberCreatedId == memberId).ToList();
+			//kh unittest, geen check op memberid exist. maarja, hoe terug te geven
 
 			foreach (var dbResult in dbResults)
 				result.Add(GetReceipt(dbResult.Id));
@@ -177,11 +178,11 @@ namespace Maasgroep.Database.Receipts
 			else
 			{
 				return false; //TODO: In de aanroep iets mee doen
+				//KH unittest, throwen is conssiten met de rest ipv false
 			}
 
 			return true;
 		}
-
 
 		#endregion
 
