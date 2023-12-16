@@ -17,40 +17,6 @@ namespace Maasgroep.Database
 
 		// END ABSTRACT METHODS
 
-
-        /** Save a record to the database (with history) */
-		protected TRecord? SaveToDb(TRecord record, THistory history)
-		{
-			Console.WriteLine($"Start DB transaction in {this}");
-			Db.Database.BeginTransaction();
-			var success = false;
-			try {
-				if (record.Id == 0) {
-					Console.WriteLine($"INSERT new record in {this}");
-					Db.Set<TRecord>().Add(record);
-				} else {
-					Console.WriteLine($"UPDATE record {record.Id} in {this}");
-					Db.Set<TRecord>().Update(record);
-				}
-				Db.Set<THistory>().Add(history);
-				Db.SaveChanges();
-				Db.Database.CommitTransaction();
-				Console.WriteLine($"Commit DB transaction in {this}");
-				success = true;
-			} catch (Exception e) {
-				Console.WriteLine(e.Message);
-				var exception = e.InnerException;
-				while (exception != null) {
-					Console.WriteLine(" -" + exception.Message);
-					exception = exception.InnerException;
-				}
-				Db.Database.RollbackTransaction();
-				Db.ChangeTracker.Clear();
-				Console.WriteLine($"Rollback DB transaction in {this}");
-			}
-			return success ? record : null;
-		}
-
 		/** Update an existing record in the database */
 		public virtual TRecord? Update(long id, TDataModel model, long memberId)
 		{
@@ -78,7 +44,7 @@ namespace Maasgroep.Database
 			record.MemberModifiedId = memberId;
 			record.DateTimeModified = DateTime.UtcNow;
 
-			return SaveToDb(record, history);
+			return SaveToDb(record, db => db.Set<THistory>().Add(history));
 		}
     }
 }

@@ -18,20 +18,15 @@ namespace Maasgroep.Database
 
 
 		/** Save a record to the database */
-		protected TRecord? SaveToDb(TRecord record)
+		protected TRecord? SaveToDb(TRecord record, Action<MaasgroepContext>? ExtraChanges = null)
 		{
 			Console.WriteLine($"Start DB transaction in {this}");
 			Db.Database.BeginTransaction();
 			var success = false;
 			try {
-				if (record.Id == 0) {
-					Console.WriteLine($"INSERT new record in {this}");
-					Db.Set<TRecord>().Add(record);
-				} else {
-					Console.WriteLine($"UPDATE record {record.Id} in {this}");
-					Db.Set<TRecord>().Update(record);
-				}
-				Db.SaveChanges();
+				GetSaveAction(record)?.Invoke(Db);
+                ExtraChanges?.Invoke(Db);
+                Db.SaveChanges();
 				Db.Database.CommitTransaction();
 				Console.WriteLine($"Commit DB transaction in {this}");
 				success = true;
@@ -46,6 +41,8 @@ namespace Maasgroep.Database
 				Db.ChangeTracker.Clear();
 				Console.WriteLine($"Rollback DB transaction in {this}");
 			}
+			if (success)
+				GetAfterSaveAction(record)?.Invoke();
 			return success ? record : null;
 		}
 
@@ -66,5 +63,23 @@ namespace Maasgroep.Database
 
 			return SaveToDb(record);
 		}
+
+		/** Get action that will save record changes to DB */
+		public virtual Action<MaasgroepContext> GetSaveAction(TRecord record)
+		{
+			return (MaasgroepContext db) => {
+				if (record.Id == 0) {
+					Console.WriteLine($"INSERT new record in {this}");
+					db.Set<TRecord>().Add(record);
+				} else {
+					Console.WriteLine($"UPDATE record {record.Id} in {this}");
+					db.Set<TRecord>().Update(record);
+				}
+			};
+		}
+
+		/** Get action that will be executed after any save to DB occurs */
+		public virtual Action GetAfterSaveAction(TRecord record)
+			=> () => {}; // Nothing here (yet)
 	}
 }

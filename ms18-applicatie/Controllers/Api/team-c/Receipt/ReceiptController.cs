@@ -42,7 +42,7 @@ public class ReceiptController : EditableRepositoryController<IReceiptRepository
         var approval = Approvals.Create(data, 1);
         if (approval == null)
             return BadRequest(approval);
-        return Ok(approval);
+        return Ok(Approvals.GetModel(approval));
     }
 
     [HttpGet("Payable")]

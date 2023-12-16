@@ -39,11 +39,12 @@ namespace Maasgroep.Database.Receipts
             if (receipt == null)
                 return null; // Receipt not found
 
-
-            if (data.Paid && !receipt.IsPayable) {
-                return null; // Not allowed to mark paid
-            } else if (!receipt.IsApprovable) {
-                return null; // Not allowed to approve
+            if (data.Paid) {
+                if (!receipt.IsPayable)
+                    return null; // Not allowed to mark paid
+            } else {
+                if (!receipt.IsApprovable)
+                    return null; // Not allowed to approve
             }
 
             var approval = new ReceiptApproval() {
@@ -58,5 +59,19 @@ namespace Maasgroep.Database.Receipts
         /** List approvals by receipt */
 		public IEnumerable<ReceiptApprovalModel> ListByReceipt(long receiptId, int offset = default, int limit = default)
 			=> GetList(item => item.ReceiptId == receiptId, null, offset, limit).Select(item => GetModel(item)!);
+
+        /** Save updated receipt status when saving approval */
+        public override Action<MaasgroepContext> GetSaveAction(ReceiptApproval record)
+        {
+            var saveAction = base.GetSaveAction(record);
+            return (MaasgroepContext db) => {
+                saveAction.Invoke(db);
+                var receipt = Receipts.GetById(record.ReceiptId);
+                if (receipt == null)
+                    return;
+                receipt.ReceiptStatus = (record.Paid ? ReceiptStatus.Uitbetaald : record.Approved ? ReceiptStatus.Goedgekeurd : ReceiptStatus.Afgekeurd).ToString();
+                db.Receipt.Update(receipt);
+            };
+        }
     }
 }

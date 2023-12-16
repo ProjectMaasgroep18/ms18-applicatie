@@ -66,6 +66,8 @@
                 receiptRow.id = 'user-receipts-' + receipts[id].id;
                 showElement(receiptRow);
                 showOutput(receipts[id], receiptRow);
+                if (!receipts[id].isEditable) // Not editable (already approved/paid)
+                    hideElement(receiptRow.querySelector('.user-actions'));
                 receiptsTable.appendChild(receiptRow);
             }
             showElement(document.querySelector('#user-receipts'));

@@ -45,25 +45,25 @@ namespace Maasgroep.Database.Receipts
         public override Receipt? GetRecord(ReceiptData data, Receipt? existingReceipt = null)
         {
             var receipt = existingReceipt ?? new();
-			if (receipt.ReceiptStatus == ReceiptStatus.Goedgekeurd.ToString()
-				|| receipt.ReceiptStatus == ReceiptStatus.Uitbetaald.ToString())
-				return null; // Al definitief, dus aanpassen niet meer toegestaan
+			var model = GetModel(receipt);
+			if (!model.IsEditable)
+				return null; // Already approved or even paid
 
-			var receiptHeeftFotos = existingReceipt != null && Db.ReceiptPhoto.Where(p => p.ReceiptId == existingReceipt.Id).Any();
+			var receiptHeeftFotos = existingReceipt != null && Db.ReceiptPhoto.Where(p => p.ReceiptId == existingReceipt.Id && p.DateTimeDeleted == null).Any();
 			
 			receipt.Note = data.Note;
 			receipt.Amount = data.Amount == 0 ? null : data.Amount;
-			receipt.CostCentreId = data.CostCentreId;
+			receipt.CostCentreId = data.CostCentreId == 0 ? null :data.CostCentreId;
 			if (receiptHeeftFotos
 				&& receipt.Note != null
 				&& receipt.Note?.Trim() != ""
 				&& receipt.Amount != null
 				&& receipt.Amount != 0
 				&& receipt.CostCentreId != null) {
-				// We hebben alle benodigde gegevens
+				// All the necessary data is there
 				receipt.ReceiptStatus = ReceiptStatus.Ingediend.ToString();
 			} else {
-				// We hebben niet alle benodigde gegevens
+				// We lack some of the necessary data
 				receipt.ReceiptStatus = ReceiptStatus.Concept.ToString();
 			}
 			return receipt;
