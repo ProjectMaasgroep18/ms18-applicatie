@@ -23,9 +23,9 @@ namespace ms18_applicatie_test
 
 			var result = sut.ReceiptGet();
 
-			result.Should().NotBeNull();
-			result.Should().BeOfType<ForbidResult>();
-			result.As<ForbidResult>().AuthenticationSchemes.Should().BeEquivalentTo("Je hebt geen toegang tot deze functie");
+			_ = result.Should().NotBeNull();
+			_ = result.Should().BeOfType<ForbidResult>();
+			_ = result.As<ForbidResult>().AuthenticationSchemes.Should().BeEquivalentTo("Je hebt geen toegang tot deze functie");
 		}
 
 		[Fact]
@@ -92,9 +92,9 @@ namespace ms18_applicatie_test
 
 			var result = sut.ReceiptGetById(It.IsAny<int>());
 
-			result.Should().NotBeNull();
-			result.Should().BeOfType<ForbidResult>();
-			result.As<ForbidResult>().AuthenticationSchemes.Should().BeEquivalentTo("Je hebt geen toegang tot deze functie");
+			_ = result.Should().NotBeNull();
+			_ = result.Should().BeOfType<ForbidResult>();
+			_ = result.As<ForbidResult>().AuthenticationSchemes.Should().BeEquivalentTo("Je hebt geen toegang tot deze functie");
 		}
 
 		[Fact]
@@ -143,9 +143,9 @@ namespace ms18_applicatie_test
 
 			var result = sut.ReceiptCreate(new Mock<ReceiptModelCreate>().Object);
 
-			result.Should().NotBeNull();
-			result.Should().BeOfType<ForbidResult>();
-			result.As<ForbidResult>().AuthenticationSchemes.Should().BeEquivalentTo("Je hebt geen toegang tot deze functie");
+			_ = result.Should().NotBeNull();
+			_ = result.Should().BeOfType<ForbidResult>();
+			_ = result.As<ForbidResult>().AuthenticationSchemes.Should().BeEquivalentTo("Je hebt geen toegang tot deze functie");
 		}
 
 		[Fact]
@@ -161,8 +161,8 @@ namespace ms18_applicatie_test
 
 			var result = sut.ReceiptCreate(new Mock<ReceiptModelCreate>().Object);
 
-			result.Should().NotBeNull();
-			result.Should().BeOfType<BadRequestObjectResult>();
+			_ = result.Should().NotBeNull();
+			_ = result.Should().BeOfType<BadRequestObjectResult>();
 		}
 
 		[Fact]
@@ -195,9 +195,9 @@ namespace ms18_applicatie_test
 
 			var result = sut.ReceiptUpdate(new Mock<ReceiptModel>().Object);
 
-			result.Should().NotBeNull();
-			result.Should().BeOfType<ForbidResult>();
-			result.As<ForbidResult>().AuthenticationSchemes.Should().BeEquivalentTo("Je hebt geen toegang tot deze functie");
+			_ = result.Should().NotBeNull();
+			_ = result.Should().BeOfType<ForbidResult>();
+			_ = result.As<ForbidResult>().AuthenticationSchemes.Should().BeEquivalentTo("Je hebt geen toegang tot deze functie");
 		}
 
 		[Fact]
@@ -212,8 +212,8 @@ namespace ms18_applicatie_test
 
 			var result = sut.ReceiptUpdate(new Mock<ReceiptModel>().Object);
 
-			result.Should().NotBeNull();
-			result.Should().BeOfType<BadRequestObjectResult>();
+			_ = result.Should().NotBeNull();
+			_ = result.Should().BeOfType<BadRequestObjectResult>();
 		}
 
 		[Fact]
@@ -320,9 +320,9 @@ namespace ms18_applicatie_test
 
 			var result = sut.ReceiptGet();
 
-			result.Should().NotBeNull();
-			result.Should().BeOfType<ForbidResult>();
-			result.As<ForbidResult>().AuthenticationSchemes.Should().BeEquivalentTo("Je hebt geen toegang tot deze functie");
+			_ = result.Should().NotBeNull();
+			_ = result.Should().BeOfType<ForbidResult>();
+			_ = result.As<ForbidResult>().AuthenticationSchemes.Should().BeEquivalentTo("Je hebt geen toegang tot deze functie");
 		}
 
 		[Fact]
@@ -337,8 +337,8 @@ namespace ms18_applicatie_test
 
 			var result = sut.ReceiptAddPhoto(It.IsAny<long>(), new Mock<PhotoModelCreate>().Object);
 
-			result.Should().NotBeNull();
-			result.Should().BeOfType<BadRequestObjectResult>();
+			_ = result.Should().NotBeNull();
+			_ = result.Should().BeOfType<BadRequestObjectResult>();
 		}
 
 		[Fact]
@@ -391,9 +391,9 @@ namespace ms18_applicatie_test
 
 			var result = sut.ReceiptGetPhotos(It.IsAny<long>());
 
-			result.Should().NotBeNull();
-			result.Should().BeOfType<ForbidResult>();
-			result.As<ForbidResult>().AuthenticationSchemes.Should().BeEquivalentTo("Je hebt geen toegang tot deze functie");
+			_ = result.Should().NotBeNull();
+			_ = result.Should().BeOfType<ForbidResult>();
+			_ = result.As<ForbidResult>().AuthenticationSchemes.Should().BeEquivalentTo("Je hebt geen toegang tot deze functie");
 		}
 
 		[Fact]
@@ -469,8 +469,73 @@ namespace ms18_applicatie_test
 
 		#endregion
 
-		//TODO
 		#region ApproveReceipt
+
+		[Fact]
+		public void Access_ApproveReceipt_Without_Authentication_Is_ForbidResult()
+		{
+			var receiptRepository = new Mock<IReceiptRepository>();
+			var memberService = new Mock<IMemberService>();
+
+			var sut = new ReceiptController(receiptRepository.Object, memberService.Object);
+
+			var result = sut.ApproveReceipt(It.IsAny<long>(), new Mock<ReceiptApprovalModelCreate>().Object);
+
+			_ = result.Should().NotBeNull();
+			_ = result.Should().BeOfType<ForbidResult>();
+			_ = result.As<ForbidResult>().AuthenticationSchemes.Should().BeEquivalentTo("Je hebt geen toegang tot deze functie");
+		}
+
+		[Fact]
+		public void Access_ApproveReceipt_With_Authentication_And_Invalid_Model_Is_BadRequest()
+		{
+			var receiptRepository = new Mock<IReceiptRepository>();
+			var memberService = new Mock<IMemberService>();
+			_ = memberService.Setup(p => p.MemberExists(It.IsAny<long>())).Returns(true);
+
+			var sut = new ReceiptController(receiptRepository.Object, memberService.Object);
+			sut.ModelState.AddModelError("blaat", "kapot!");
+
+			var result = sut.ApproveReceipt(It.IsAny<long>(), new Mock<ReceiptApprovalModelCreate>().Object);
+
+			_ = result.Should().NotBeNull();
+			_ = result.Should().BeOfType<BadRequestObjectResult>();
+		}
+
+		[Fact]
+		public void Access_ApproveReceipt_With_Authentication_Receipt_Not_Found_Results_NotFound()
+		{
+			var receiptRepository = new Mock<IReceiptRepository>();
+			var memberService = new Mock<IMemberService>();
+			_ = memberService.Setup(p => p.MemberExists(It.IsAny<long>())).Returns(true);
+			_ = receiptRepository.Setup(p => p.GetReceipt(It.IsAny<long>())).Returns<ReceiptModel>(null);
+
+			var sut = new ReceiptController(receiptRepository.Object, memberService.Object);
+
+			var result = sut.ApproveReceipt(It.IsAny<long>(), new Mock<ReceiptApprovalModelCreate>().Object);
+
+			_ = result.Should().NotBeNull();
+			_ = result.Should().BeOfType<NotFoundObjectResult>();
+			_ = result.As<NotFoundObjectResult>().StatusCode.Should().Be(404);
+		}
+
+		[Fact]
+		public void Access_ApproveReceipt_With_Authentication_Receipt_Found_Results_Created()
+		{
+			var receiptRepository = new Mock<IReceiptRepository>();
+			var memberService = new Mock<IMemberService>();
+			_ = memberService.Setup(p => p.MemberExists(It.IsAny<long>())).Returns(true);
+			_ = receiptRepository.Setup(p => p.GetReceipt(It.IsAny<long>())).Returns(new Mock<ReceiptModel>().Object);
+			_ = receiptRepository.Setup(p => p.AddApproval(new Mock<ReceiptApprovalModelCreateDb>().Object));
+
+			var sut = new ReceiptController(receiptRepository.Object, memberService.Object);
+
+			var result = sut.ApproveReceipt(It.IsAny<long>(), new Mock<ReceiptApprovalModelCreate>().Object);
+
+			_ = result.Should().NotBeNull();
+			_ = result.Should().BeOfType<CreatedResult>();
+			_ = result.As<CreatedResult>().StatusCode.Should().Be(404);
+		}
 		#endregion
 
 	}

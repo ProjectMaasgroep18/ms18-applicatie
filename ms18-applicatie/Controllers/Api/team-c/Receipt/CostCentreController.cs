@@ -25,7 +25,7 @@ public class CostCentreController : ControllerBase
 		if (!MemberExists(1)) // Toegangscontrole
 			return Forbidden();
 
-        return Ok(_receiptRepository.GetCostCentres(0, int.MaxValue));
+        return Ok(_receiptRepository.GetCostCentres(0, int.MaxValue)); //KH unittest; iets met result 0? of nullL?)
     }
 
     [HttpGet("{id}")]
@@ -117,6 +117,7 @@ public class CostCentreController : ControllerBase
         if (existingCostCentre.Equals(updatedCostCentreViewModel))
         {
             // If the data is the same, return a response indicating no update was performed
+            // KH unitest Anonieme objecten neit te unittesten.
             return Ok(new {
                 status = 200,
                 message = "Er zijn geen wijzigingen aan de kostenpost"
