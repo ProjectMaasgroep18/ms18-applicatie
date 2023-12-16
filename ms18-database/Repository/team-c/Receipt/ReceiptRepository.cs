@@ -1,4 +1,5 @@
-﻿using Maasgroep.Database.Interfaces;
+﻿using Maasgroep.Database.Admin;
+using Maasgroep.Database.Interfaces;
 using Maasgroep.SharedKernel.ViewModels.Receipts;
 using Maasgroep.SharedKernel.DataModels.Receipts;
 
@@ -7,17 +8,21 @@ namespace Maasgroep.Database.Receipts
 
     public class ReceiptRepository : EditableRepository<Receipt, ReceiptModel, ReceiptData, ReceiptHistory>, IReceiptRepository
     {
-
 		protected readonly ReceiptStatusRepository Statuses;
-		public ReceiptRepository(MaasgroepContext db) : base(db)
-			=> Statuses = new ReceiptStatusRepository();
+		protected readonly CostCentreRepository CostCentres;
+		protected readonly MemberRepository Members;
+		public ReceiptRepository(MaasgroepContext db) : base(db) {
+			Statuses = new ReceiptStatusRepository();
+			CostCentres = new CostCentreRepository(db);
+			Members = new MemberRepository(db);
+		}
 
 		/** Create ReceiptModel from Receipt record */
 		public override ReceiptModel GetModel(Receipt receipt)
         {
 			var status = Statuses.GetModel(receipt.ReceiptStatus);
-			var costCentre = Db.CostCentre.FirstOrDefault(c => c.Id == receipt.CostCentreId);
-			var member = Db.Member.FirstOrDefault(c => c.Id == receipt.MemberCreatedId);
+			var costCentre = receipt.CostCentreId != null ? CostCentres.GetModel((long)receipt.CostCentreId) : null;
+			var member = receipt.MemberCreatedId != null ? Members.GetModel((long)receipt.MemberCreatedId) : null;
 
             return new ReceiptModel() {
 				Id = receipt.Id,
@@ -25,7 +30,7 @@ namespace Maasgroep.Database.Receipts
 				Amount = receipt.Amount,
 				Status = status,
 				StatusString = status.ToString(),
-				CostCentre = costCentre == null || costCentre.DateTimeDeleted != null ? null : new() {
+				CostCentre = costCentre == null ? null : new() {
 					Id = costCentre.Id,
 					Name = costCentre.Name,
 				},

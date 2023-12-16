@@ -1,3 +1,4 @@
+using Maasgroep.Database.Admin;
 using Maasgroep.Database.Interfaces;
 using Maasgroep.SharedKernel.ViewModels.Receipts;
 using Maasgroep.SharedKernel.DataModels.Receipts;
@@ -7,12 +8,14 @@ namespace Maasgroep.Database.Receipts
 
     public class ReceiptPhotoRepository : DeletableRepository<ReceiptPhoto, ReceiptPhotoModel, ReceiptPhotoData>, IReceiptPhotoRepository
     {
-		public ReceiptPhotoRepository(MaasgroepContext db) : base(db) {}
+        protected MemberRepository Members;
+		public ReceiptPhotoRepository(MaasgroepContext db) : base(db)
+            => Members = new(db);
 
         /** Create ReceiptPhotoModel from ReceiptPhoto record */
         public override ReceiptPhotoModel GetModel(ReceiptPhoto photo)
         {
-            var member = Db.Member.FirstOrDefault(c => c.Id == photo.MemberCreatedId);
+            var member = photo.MemberCreatedId != null ? Members.GetModel((long)photo.MemberCreatedId) : null;
 
             return new ReceiptPhotoModel() {
 				FileExtension = photo.FileExtension,

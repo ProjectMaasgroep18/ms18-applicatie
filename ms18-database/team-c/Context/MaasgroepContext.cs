@@ -8,7 +8,7 @@ namespace Maasgroep.Database
 {
 	public class MaasgroepContext : DbContext
 	{
-		private string _connectionString;
+		private string _connectionString = "UserID=postgres;Password=postgres;Host=localhost;port=5410;Database=Maasgroep;Pooling=true;Include Error Detail=true";
 
 		#region Member
 		public DbSet<Member> Member { get; set; }
@@ -52,14 +52,14 @@ namespace Maasgroep.Database
 
 		public MaasgroepContext()
 		{
-			_connectionString = "UserID=postgres;Password=postgres;Host=localhost;port=5410;Database=Maasgroep;Pooling=true";
+			// _connectionString = .....;
 		}
 
 		public MaasgroepContext(ConfigurationService configurationService)
 		{
 			var hoi = configurationService.GetConnectionString();
 			var ditte = "";
-			_connectionString = "UserID=postgres;Password=postgres;Host=localhost;port=5410;Database=Maasgroep;Pooling=true";
+			//_connectionString = .....;
 		}
 
 		public MaasgroepContext(string connectionString)
@@ -307,8 +307,8 @@ namespace Maasgroep.Database
 
 			modelBuilder.Entity<ReceiptApproval>()
 				.HasOne(ra => ra.Receipt)
-				.WithOne(r => r.ReceiptApproval)
-				.HasForeignKey<ReceiptApproval>(ra => ra.ReceiptId)
+				.WithMany(r => r.ReceiptApprovals)
+				.HasForeignKey(ra => ra.ReceiptId)
 				.HasConstraintName("FK_receiptApproval_receipt")
 				.OnDelete(DeleteBehavior.NoAction);
 

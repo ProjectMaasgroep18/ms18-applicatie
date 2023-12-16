@@ -13,7 +13,7 @@ namespace Maasgroep.Database.Receipts
         // EF receipt properties
         public CostCentre? CostCentre { get; set; }
 		public ICollection<ReceiptPhoto>? Photos { get; set; }
-		public ReceiptApproval? ReceiptApproval { get; set; }
+		public ICollection<ReceiptApproval>? ReceiptApprovals { get; set; }
                 
     }
 }

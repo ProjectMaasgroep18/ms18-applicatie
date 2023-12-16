@@ -1,10 +1,12 @@
-﻿using Maasgroep.Database.Admin;
+﻿using System.ComponentModel.DataAnnotations;
+using Maasgroep.Database.Admin;
 
 namespace Maasgroep.Database
 {
     public abstract record GenericRecordActive
     {
 		// Generic
+		[Key]
 		public long Id { get; set; }
 		public long? MemberCreatedId { get; set; }
 		public long? MemberModifiedId { get; set; }

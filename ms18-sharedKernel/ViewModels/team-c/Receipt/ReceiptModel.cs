@@ -20,5 +20,8 @@ namespace Maasgroep.SharedKernel.ViewModels.Receipts
 		public List<ReceiptPhotoModel>? Photos { get; set; }
 		public ReceiptApprovalModel Approval { get; set; }
 		public MemberModel? MemberCreated { get; set; }
+		public bool IsEditable { get => Status != ReceiptStatus.Goedgekeurd && Status != ReceiptStatus.Uitbetaald; }
+		public bool IsApprovable { get => Status == ReceiptStatus.Ingediend; }
+		public bool IsPayable { get => Status == ReceiptStatus.Goedgekeurd; }
 	}
 }

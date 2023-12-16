@@ -4,7 +4,7 @@
     <p id="login-info">Hallo <span rel="name"></span>!</p>
 
     
-    <p>Hier kan je de declaratie bekijken en goed- of afkeuren:</p>
+    <p>Hier kan je de declaratie bekijken:</p>
 
     <div id="receipt-form" class="hidden">
 
@@ -44,10 +44,33 @@
 
     </div>
 
-    <p>
-        <button type="button" class="btn btn-primary" id="receipt-approve">Goedkeuren</button>
-        <button type="button" class="btn btn-secondary" id="receipt-reject">Afkeuren</button>
-    </p>
+    &nbsp;
+
+    <div id="receipt-approval-form">
+        <p><i>Goedkeuren of afkeuren:</i></p>
+
+        <div id="receipt-approval" class="hidden">
+            <div id="receipt-approval-list">
+                <div id="receipt-approval-previous" class="hidden" rel="0">
+                    ....
+                </div>
+            </div>
+            <p id="receipt-approval-none" class="hidden">Hier kan je de declaratie goed- of afkeuren:</p>
+            <p id="receipt-approval-exists" class="hidden">Hier kan je de goed- of afkeuring aanpassen:</p>
+
+            <div id="receipt-approval-new">
+                <p>
+                    Opmerking: <br>
+                    <textarea id="receipt-approval-note"></textarea>
+                </p>
+                <p>
+                    <button type="button" class="btn btn-primary approval-button" data-approve="1">Goedkeuren</button>
+                    <button type="button" class="btn btn-secondary approval-button" data-approve="0">Afkeuren</button>
+                </p>
+            </div>
+            <p id="receipt-not-approvable" class="hidden">Deze declaratie kan momenteel niet worden goed- of afgekeurd.</p>
+        </div>
+    </div>
 
     <p><a href="/Declaraties/Goedkeuren">Terug naar het overzicht</a></p>
 </div>
@@ -57,6 +80,7 @@
 <script>
     const receiptId = @ViewData["id"];
     const photosDiv = document.querySelector('#receipt-photos');
+    const approvalDiv = document.querySelector('#receipt-approval');
 
     getUserSession().then(member => {
         // User session loaded
@@ -69,9 +93,16 @@
             // Receipt loaded
 
             showOutput(receipt, document.querySelector('#receipt-form'));
+            
+            if (!receipt.isApprovable) {
+                hideElement(document.querySelector('#login-user'));
+                showElement(document.querySelector('#receipt-not-approvable'));
+            }
 
             apiGet('Receipt/' + receiptId + '/Photo').then(result => {
                 // Show all receipt photos
+
+                showElement(photosDiv);
 
                 if (typeof result[0] == 'undefined') {
                     showElement(document.querySelector('#receipt-photos-none'));
@@ -81,12 +112,7 @@
                 for (i in result) {
                     let photo = document.querySelector('#receipt-photo').cloneNode(true);
                     let img = photo.querySelector('img');
-                    let deleteLink = photo.querySelector('.delete-photo');
                     let id = result[i].id;
-                    deleteLink.addEventListener('click', event => {
-                        event.preventDefault();
-                        deletePhoto(id);
-                    });
                     photo.id = 'receipt-photo-' + id;
                     img.src = result[i].base64Image;
                     showElement(photo);
@@ -94,25 +120,48 @@
                 }
 
             });
+
+            apiGet('Receipt/' + receiptId + '/Approve').then(result => {
+                // Show all receipt approvals
+
+                showElement(approvalDiv);
+
+                if (typeof result[0] == 'undefined') {
+                    showElement(document.querySelector('#receipt-approval-none'));
+                    return;
+                }
+
+                showElement(document.querySelector('#receipt-approval-exists'));
+
+                for (i in result) {
+                    let approval = document.querySelector('#receipt-approval-previous').cloneNode(true);
+                    let img = approval.querySelector('img');
+                    let id = result[i].id;
+                    approval.id = 'receipt-approval-' + id;
+                    showOutput(result[i], approval);
+                    photosDiv.appendChild(approval);
+                }
+
+            });
         });
     });
 
-    const approveButton = document.querySelector('#receipt-approve');
-    const rejectButton = document.querySelector('#receipt-reject');
+    document.querySelectorAll('.approval-button').forEach(btn => btn.addEventListener('click', event => {
+        // Approve or Reject
+        
+        let data = {
+            receiptId,
+            approved: !!btn.dataset.approve && btn.dataset.approve != "0",
+            paid: false,
+            note: document.querySelector('#receipt-approval-note').value,
+        };
 
-    
-    approveButton.addEventListener('click', event => {
-        // Select extra photos
+        hideElement(approvalDiv);
 
-        ///document.querySelector('#receipt-input').click();
-    });
-
-    rejectButton.addEventListener('click', event => {
-        // Select extra photos
-
-        ///document.querySelector('#receipt-input').click();
-    });
-
+        apiPost('Receipt/' + receiptId + '/Approve', data).then(result => {
+            window.location = window.location;
+        });
+    }));
 
 </script>
 }

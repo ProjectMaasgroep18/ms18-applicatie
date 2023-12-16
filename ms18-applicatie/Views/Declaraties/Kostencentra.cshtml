@@ -97,19 +97,19 @@
                 const editId = saveLink.dataset.id;
                 const costCentreRow = costCentreTable.querySelector('#cost-centre-' + editId);
                 const costCentreInput = costCentreRow.querySelector('.cost-centre-input');
-                const newCostCentre = costCentreInput.value;
+                const newName = costCentreInput.value;
 
                 costCentreInput.disabled = true;
                 hideElement(costCentreRow.querySelector('.user-actions'));
 
-                apiPut('CostCentre/' + editId, { id: editId, name: newCostCentre }).then(result => {
+                apiPut('CostCentre/' + editId, { id: editId, name: newName }).then(result => {
                     // Saved the updated cost centre: apply it here too
 
                     if (!result)
                         return;
 
                     const costCentreName = costCentreRow.querySelector('.cost-centre-name');
-                    showOutput({ id: editId, name: newCostCentre }, costCentreRow);
+                    showOutput({ id: editId, name: newName }, costCentreRow);
                     costCentreInput.disabled = false;
 
                     showElement(costCentreName);
@@ -119,7 +119,7 @@
                     hideElement(costCentreRow.querySelector('.save-link'));
                     hideElement(costCentreInput);
 
-                    document.querySelectorAll('#user-receipts [data-cost-centre="' + editId + '"]').forEach(label => label.innerText = newCostCentre);
+                    document.querySelectorAll('#user-receipts [data-cost-centre="' + editId + '"]').forEach(label => label.innerText = newName);
                 });
             }));
             
@@ -128,7 +128,7 @@
 
                 event.preventDefault();
 
-                if (!window.confirm('Weet je zeker dat je deze post wilt verwijderen?'))
+                if (!window.confirm('Weet je zeker dat je dit kostencentrum wilt verwijderen?'))
                     return;
 
                 const deleteId = deleteLink.dataset.id;
@@ -139,10 +139,7 @@
                     if (!result)
                         return;
 
-                    // Cost centre deleted in database, clean it up here too
-                    costCentreRow.remove();
-                    if (costCentreTable.querySelectorAll('tr:not(.hidden)').length <= 0)
-                        showElement(document.querySelector('#cost-centres-empty'));
+                    window.location = window.location;
                 });
             }));
 
@@ -195,7 +192,7 @@
                     event.preventDefault();
 
                     const editId = saveLink.dataset.id;
-                    const newCostCentre = costCentreInput.value;
+                    const newName = costCentreInput.value;
 
                     costCentreInput.disabled = true;
                     hideElement(costCentreRow.querySelector('.user-actions'));
@@ -203,36 +200,25 @@
                     if (!editId) {
                         // This newly added cost centre was never saved before, so create it in the database
 
-                        apiPost('CostCentre/', { name: newCostCentre }).then(result => {    
+                        apiPost('CostCentre/', { name: newName }).then(result => {    
                             // Saved new cost centre
 
                             if (!result)
                                 return;
                             
-                            showOutput(result, costCentreRow);
-                            costCentreInput.disabled = false;
-                            const costCentreName = costCentreRow.querySelector('.cost-centre-name');
-
-                            showElement(costCentreName);
-                            showElement(costCentreRow.querySelector('.edit-link'));
-                            showElement(costCentreRow.querySelector('.user-actions'));
-
-                            hideElement(costCentreRow.querySelector('.save-link'));
-                            hideElement(costCentreInput);
-
-                            showOutput(result.costCentre, costCentreRow);
+                            window.location = window.location;
                         });
                         return;
                     }
 
-                    apiPut('CostCentre/' + editId, { name: newCostCentre }).then(result => {
+                    apiPut('CostCentre/' + editId, { name: newName }).then(result => {
                         // Saved the updated cost centre: apply it here too
 
                         if (!result)
                             return;
 
                         const costCentreName = costCentreRow.querySelector('.cost-centre-name');
-                        costCentreName.innerText = newCostCentre;
+                        costCentreName.innerText = newName;
                         costCentreInput.disabled = false;
 
                         showElement(costCentreName);
@@ -242,7 +228,7 @@
                         hideElement(costCentreRow.querySelector('.save-link'));
                         hideElement(costCentreInput);
 
-                        document.querySelectorAll('#user-receipts [data-cost-centre="' + editId + '"]').forEach(label => label.innerText = newCostCentre);
+                        document.querySelectorAll('#user-receipts [data-cost-centre="' + editId + '"]').forEach(label => label.innerText = newName);
                     });
                 });
 
