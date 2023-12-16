@@ -2,7 +2,6 @@
 using Maasgroep.SharedKernel.Interfaces.Receipts;
 using Maasgroep.SharedKernel.ViewModels.Receipts;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Win32.SafeHandles;
 using Moq;
 using ms18_applicatie.Controllers.Api;
 using ms18_applicatie.Services;
@@ -176,6 +175,13 @@ namespace ms18_applicatie_test
 
 			_ = result.Should().NotBeNull();
 			_ = result.Should().BeOfType<BadRequestObjectResult>();
+			_ = result.As<BadRequestObjectResult>().Value.Should().BeEquivalentTo(
+				new
+				{
+					status = 400,
+					message = "Invalid request body"
+				}
+			);
 		}
 
 		[Fact]
@@ -192,6 +198,13 @@ namespace ms18_applicatie_test
 
 			_ = result.Should().NotBeNull();
 			_ = result.Should().BeOfType<NotFoundObjectResult>();
+			_ = result.As<NotFoundObjectResult>().Value.Should().BeEquivalentTo(
+				new
+				{
+					status = 404,
+					message = "Kostenpost niet gevonden"
+				}
+			);
 		}
 
 		[Fact]
@@ -211,21 +224,197 @@ namespace ms18_applicatie_test
 
 			_ = result.Should().NotBeNull();
 			_ = result.Should().BeOfType<OkObjectResult>();
-			_ = result.As<OkObjectResult>().Value.Should().Be(new
-			{
-				status = 200,
-				message = "Er zijn geen wijzigingen aan de kostenpost"
-			});
+			_ = result.As<OkObjectResult>().Value.Should().BeEquivalentTo(
+				new
+				{
+					status = 200,
+					message = "Er zijn geen wijzigingen aan de kostenpost"
+				}
+			);
+		}
 
-			var q = "hoi";
+		[Fact]
+		public void Access_CostCentreUpdate_With_Authentication_CentreFoundNotEqual_Result_Ok()
+		{
+			var receiptRepository = new Mock<IReceiptRepository>();
+			var memberService = new Mock<IMemberService>();
+			_ = memberService.Setup(p => p.MemberExists(It.IsAny<long>())).Returns(true);
+
+			var centreErin = new Mock<CostCentreModel>().Object;
+			centreErin.Name = "pietje";
+			
+			_ = receiptRepository.Setup(p => p.GetCostCentre(It.IsAny<long>())).Returns(centreErin);
+
+			var sut = new CostCentreController(receiptRepository.Object, memberService.Object);
+
+			var result = sut.CostCentreUpdate(It.IsAny<long>(), new Mock<CostCentreModel>().Object);
+
+			_ = result.Should().NotBeNull();
+			_ = result.Should().BeOfType<OkObjectResult>();
+			_ = result.As<OkObjectResult>().Value.Should().Be(false);
 		}
 
 		#endregion
 
 		#region CostCentreDelete
+
+		[Fact]
+		public void Access_CostCentreDelete_Without_Authentication_Result_Forbidden()
+		{
+			var receiptRepository = new Mock<IReceiptRepository>();
+			var memberService = new Mock<IMemberService>();
+
+			var sut = new CostCentreController(receiptRepository.Object, memberService.Object);
+
+			var result = sut.CostCentreDelete(It.IsAny<long>());
+
+			_ = result.Should().NotBeNull();
+			_ = result.Should().BeOfType<ForbidResult>();
+			_ = result.As<ForbidResult>().AuthenticationSchemes.Should().BeEquivalentTo("Je hebt geen toegang tot deze functie");
+		}
+
+		[Fact]
+		public void Access_CostCentreDelete_With_Authentication_CostCentreNotFound_Result_NotFound()
+		{
+			var receiptRepository = new Mock<IReceiptRepository>();
+			var memberService = new Mock<IMemberService>();
+			_ = memberService.Setup(p => p.MemberExists(It.IsAny<long>())).Returns(true);
+			_ = receiptRepository.Setup(p => p.GetCostCentre(It.IsAny<long>())).Returns<CostCentreModel>(null);
+
+			var sut = new CostCentreController(receiptRepository.Object, memberService.Object);
+
+			var result = sut.CostCentreDelete(It.IsAny<long>());
+
+			_ = result.Should().NotBeNull();
+			_ = result.Should().BeOfType<NotFoundObjectResult>();
+			_ = result.As<NotFoundObjectResult>().Value.Should().BeEquivalentTo(
+				new
+				{
+					status = 404,
+					message = "Kostenpost niet gevonden"
+				}
+			);
+		}
+
+		[Fact]
+		public void Access_CostCentreDelete_With_Authentication_CostCentreFound_DeleteFailed_Result_Conflict()
+		{
+			var receiptRepository = new Mock<IReceiptRepository>();
+			var memberService = new Mock<IMemberService>();
+			_ = memberService.Setup(p => p.MemberExists(It.IsAny<long>())).Returns(true);
+			_ = receiptRepository.Setup(p => p.GetCostCentre(It.IsAny<long>())).Returns(new Mock<CostCentreModel>().Object);
+			_ = receiptRepository.Setup(p => p.Delete(new Mock<CostCentreModelDeleteDb>().Object)).Throws(new Exception());
+
+			var sut = new CostCentreController(receiptRepository.Object, memberService.Object);
+
+			var result = sut.CostCentreDelete(It.IsAny<long>());
+
+			_ = result.Should().NotBeNull();
+			_ = result.Should().BeOfType<ConflictObjectResult>();
+			_ = result.As<ConflictObjectResult>().Value.Should().BeEquivalentTo(
+				new
+				{
+					status = 409,
+					message = "Kostenpost kon niet worden verwijderd" // TODO Check which dependency is causing the conflict
+				}
+			);
+		}
+
+		[Fact]
+		public void Access_CostCentreDelete_With_Authentication_CostCentreFound_NoConflict_Result_NoContent()
+		{
+			var receiptRepository = new Mock<IReceiptRepository>();
+			var memberService = new Mock<IMemberService>();
+			_ = memberService.Setup(p => p.MemberExists(It.IsAny<long>())).Returns(true);
+			_ = receiptRepository.Setup(p => p.GetCostCentre(It.IsAny<long>())).Returns(new Mock<CostCentreModel>().Object);
+			_ = receiptRepository.Setup(p => p.Delete(new Mock<CostCentreModelDeleteDb>().Object)).Returns(true);
+
+			var sut = new CostCentreController(receiptRepository.Object, memberService.Object);
+
+			var result = sut.CostCentreDelete(It.IsAny<long>());
+
+			_ = result.Should().NotBeNull();
+			_ = result.Should().BeOfType<NoContentResult>();
+		}
+
 		#endregion
 
 		#region CostCentreGetReceipts
+
+		[Fact]
+		public void Access_CostCentreGetReceipts_Without_Authentication_Result_Forbidden()
+		{
+			var receiptRepository = new Mock<IReceiptRepository>();
+			var memberService = new Mock<IMemberService>();
+
+			var sut = new CostCentreController(receiptRepository.Object, memberService.Object);
+
+			var result = sut.CostCentreGetReceipts(It.IsAny<long>());
+
+			_ = result.Should().NotBeNull();
+			_ = result.Should().BeOfType<ForbidResult>();
+			_ = result.As<ForbidResult>().AuthenticationSchemes.Should().BeEquivalentTo("Je hebt geen toegang tot deze functie");
+		}
+
+		[Fact]
+		public void Access_CostCentreGetReceipts_With_Authentication_CostCentreNotFound_Result_NotFound()
+		{
+			var receiptRepository = new Mock<IReceiptRepository>();
+			var memberService = new Mock<IMemberService>();
+			_ = memberService.Setup(p => p.MemberExists(It.IsAny<long>())).Returns(true);
+			_ = receiptRepository.Setup(p => p.GetCostCentre(It.IsAny<long>())).Returns<CostCentreModel>(null);
+
+			var sut = new CostCentreController(receiptRepository.Object, memberService.Object);
+
+			var result = sut.CostCentreGetReceipts(It.IsAny<long>());
+
+			_ = result.Should().NotBeNull();
+			_ = result.Should().BeOfType<NotFoundObjectResult>();
+			_ = result.As<NotFoundObjectResult>().Value.Should().BeEquivalentTo(
+				new
+				{
+					status = 404,
+					message = "Kostenpost niet gevonden"
+				}
+			);
+		}
+
+		[Fact]
+		public void Access_CostCentreGetReceipts_With_Authentication_CostCentreFound_ReceiptsNot_Result_Ok()
+		{
+			var receiptRepository = new Mock<IReceiptRepository>();
+			var memberService = new Mock<IMemberService>();
+			_ = memberService.Setup(p => p.MemberExists(It.IsAny<long>())).Returns(true);
+			_ = receiptRepository.Setup(p => p.GetCostCentre(It.IsAny<long>())).Returns(new Mock<CostCentreModel>().Object);
+			_ = receiptRepository.Setup(p => p.GetReceiptsByCostCentre(It.IsAny<long>(), It.IsAny<int>(), It.IsAny<int>())).Returns<IEnumerable<ReceiptModel>>(null);
+
+			var sut = new CostCentreController(receiptRepository.Object, memberService.Object);
+
+			var result = sut.CostCentreGetReceipts(It.IsAny<long>());
+			
+			_ = result.Should().NotBeNull();
+			_ = result.Should().BeOfType<OkObjectResult>();
+			_ = result.As<OkObjectResult>().Value.Should().BeNull();//TODO dit is dus echt niet goedd.
+		}
+
+		[Fact]
+		public void Access_CostCentreGetReceipts_With_Authentication_CostCentreFound_ReceiptsOk_Result_Ok()
+		{
+			var receiptRepository = new Mock<IReceiptRepository>();
+			var memberService = new Mock<IMemberService>();
+			_ = memberService.Setup(p => p.MemberExists(It.IsAny<long>())).Returns(true);
+			_ = receiptRepository.Setup(p => p.GetCostCentre(It.IsAny<long>())).Returns(new Mock<CostCentreModel>().Object);
+			_ = receiptRepository.Setup(p => p.GetReceiptsByCostCentre(It.IsAny<long>(), It.IsAny<int>(), It.IsAny<int>())).Returns(new List<ReceiptModel>() { new Mock<ReceiptModel>().Object });
+
+			var sut = new CostCentreController(receiptRepository.Object, memberService.Object);
+
+			var result = sut.CostCentreGetReceipts(It.IsAny<long>());
+
+			_ = result.Should().NotBeNull();
+			_ = result.Should().BeOfType<OkObjectResult>();
+			_ = result.As<OkObjectResult>().Value.Should().NotBeNull();
+		}
+
 		#endregion
 	}
 }

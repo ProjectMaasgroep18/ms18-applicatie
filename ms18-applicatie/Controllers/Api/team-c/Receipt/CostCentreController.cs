@@ -2,6 +2,7 @@ using Maasgroep.SharedKernel.Interfaces.Receipts;
 using Maasgroep.SharedKernel.ViewModels.Receipts;
 using Microsoft.AspNetCore.Mvc;
 using ms18_applicatie.Services;
+using System.Security.Cryptography;
 
 namespace ms18_applicatie.Controllers.Api;
 
@@ -124,7 +125,7 @@ public class CostCentreController : ControllerBase
             });
         }
 
-        var costCentreToUpdate = new CostCentreModelUpdateDb()
+        var costCentreToUpdate = new CostCentreModelUpdateDb() //KHK unittestn. Dit anders opbouwen met service. Afwachten ruben weekend.
         { 
             CostCentre = updatedCostCentreViewModel, 
             Member = _memberService.GetMember(1)
@@ -199,7 +200,7 @@ public class CostCentreController : ControllerBase
         }
 
         // Get all receipts with this status
-        var costCentres = _receiptRepository.GetReceiptsByCostCentre(id, 0, int.MaxValue);
+        var costCentres = _receiptRepository.GetReceiptsByCostCentre(id, 0, int.MaxValue); //kh unittest contol bouwen
         
         return Ok(costCentres);
     }
