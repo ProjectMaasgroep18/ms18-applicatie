@@ -107,7 +107,7 @@ public class ReceiptController : ControllerBase
             Member = new Maasgroep.SharedKernel.ViewModels.Admin.MemberModel() { Id = _memberService.GetMember(1).Id }
         };
 
-		var result = _receiptRepository.Modify(receiptToUpdate);
+		var result = _receiptRepository.Modify(receiptToUpdate); //KH, hier verder uitbreiden / handling
 
         return Ok(result);
     }
@@ -190,7 +190,7 @@ public class ReceiptController : ControllerBase
         };
 
         // Add the photo to the database
-        var createPhotoId = _receiptRepository.Add(createdPhoto);
+        var createPhotoId = _receiptRepository.Add(createdPhoto); //KH, hier verder afhandelen danwel 1 tranacti
         var photoToReturn = _receiptRepository.GetPhoto(createPhotoId);
         
         // Return the created photo
