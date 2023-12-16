@@ -10,8 +10,7 @@
     <div id="user-receipts" class="hidden">
         <p><i>Dit zijn je bestaande declaraties in de database:</i></p>
 
-        <p>Als de status op "Concept" staat, betekent dat dat de gegevens nog niet volledig zijn.</p>
-        <p>Een bon die "Afgekeurd" is kan je hier aanpassen en opnieuw indienen.</p>
+        <p>Als de status op "Concept" staat, betekent dat dat de gegevens nog niet volledig zijn. Ook bonnen die "Afgekeurd" zijn kan je hier aanpassen en opnieuw indienen.</p>
 
         <table class="data-table">
             <tr>
@@ -19,6 +18,7 @@
                 <th>Opmerking</th>
                 <th>Status</th>
                 <th>Kostencentrum</th>
+                <th>Datum</th>
                 <th></th>
             </tr>
             
@@ -31,9 +31,11 @@
                 <td rel="note"></td>
                 <td rel="statusString,statusId:data-status"></td>
                 <td rel="costCentre.name,costCentreId:data-cost-centre"></td>
+                <td>(DATUM)</td>
                 <td class="user-actions">
-                    <a rel="id:href:editUrl">Aanpassen</a>
-                    <a rel="id:data-id" href="#" class="delete-link">Verwijderen</a>
+                    <a class="view-action" rel="id:href:viewUrl">Bekijken</a>
+                    <a class="edit-action" rel="id:href:editUrl">Aanpassen</a>
+                    <a class="edit-action" rel="id:data-id" href="#" class="delete-link">Verwijderen</a>
                 </td>
             </tr>
         </table>
@@ -66,8 +68,13 @@
                 receiptRow.id = 'user-receipts-' + receipts[id].id;
                 showElement(receiptRow);
                 showOutput(receipts[id], receiptRow);
-                if (!receipts[id].isEditable) // Not editable (already approved/paid)
-                    hideElement(receiptRow.querySelector('.user-actions'));
+                if (!receipts[id].isEditable) {
+                    // Not editable (already approved/paid)
+                    receiptRow.querySelectorAll('.user-actions .edit-action').forEach(element => hideElement(element));
+                } else {
+                    // No need to have "view" if there's already "edit"
+                    receiptRow.querySelectorAll('.user-actions .view-action').forEach(element => hideElement(element));
+                }
                 receiptsTable.appendChild(receiptRow);
             }
             showElement(document.querySelector('#user-receipts'));

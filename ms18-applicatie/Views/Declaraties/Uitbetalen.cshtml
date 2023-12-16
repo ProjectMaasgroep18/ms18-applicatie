@@ -3,10 +3,10 @@
 <div id="login-user" class="hidden">
     <p id="login-info">Hallo <span rel="name"></span>!</p>    
 
-    <p>Hier kan je goedgekeurde declaraties uitbetalen:</p>
+    <p>Hier kan je binnengekomen declaraties uitbetalen:</p>
 
     <div id="approve-receipts" class="hidden">
-        <p><i>Dit zijn alle goedgekeurde en eerder uitbetaalde bonnetjes:</i></p>
+        <p><i>Dit zijn alle bonnetjes die goedgekeurd of al eerder uitbetaald zijn:</i></p>
 
         <table class="data-table">
             <tr>
@@ -14,12 +14,13 @@
                 <th>Opmerking</th>
                 <th>Ingediend door</th>
                 <th>Status</th>
-                <th>Post</th>
+                <th>Kostencentrum</th>
+                <th>Datum</th>
                 <th></th>
             </tr>
             
             <tr id="approve-receipts-empty" class="hidden">
-                <td colspan="999">Er zijn nog geen bonnetjes goedgekeurd.</td>
+                <td colspan="999">Er zijn geen declaraties om uit te betalen.</td>
             </tr>
             
             <tr id="approve-receipts-row" class="hidden">
@@ -28,8 +29,9 @@
                 <td rel="memberCreated.name"></td>
                 <td rel="statusString,statusId:data-status"></td>
                 <td rel="costCentre.name,costCentreId:data-cost-centre"></td>
+                <td>(DATUM)</td>
                 <td class="user-actions">
-                    <a href="#">Markeren als uitbetaald</a>
+                    <a rel="id:href:viewUrl">Bekijken</a>
                 </td>
             </tr>
         </table>

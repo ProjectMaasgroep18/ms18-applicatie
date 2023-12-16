@@ -8,7 +8,6 @@
 
     <div id="receipt-form" class="hidden">
 
-        <p>De status van de declaratie is momenteel <b rel="statusString"></b>.</p>
         <table>
             <tr>
                 <td>Bedrag: </td>
@@ -25,6 +24,14 @@
             <tr>
                 <td>Ingediend door: </td>
                 <td><b rel="memberCreated.name"></b></td>
+            </tr>
+            <tr>
+                <td>Aangemaakt op: </td>
+                <td><b>(DATUM)</b></td>
+            </tr>
+            <tr>
+                <td>Status: </td>
+                <td><b rel="statusString"></b></td>
             </tr>
         </table>
     </div>
@@ -46,17 +53,25 @@
 
     &nbsp;
 
-    <div id="receipt-approval-form">
+    <div id="receipt-approval-list">
+        <p id="receipt-approval-previous" class="hidden">
+            <b class="status-approved">Goedgekeurd</b>
+            <b class="status-rejected">Afgekeurd</b>
+            <b class="status-paid">Uitbetaald</b>
+            door
+            <b rel="memberCreated.name"></b>
+            op
+            <b>(DATUM)</b>
+            <br>
+            <i rel="note"></i>
+        </p>
+    </div>
+
+    <div id="receipt-approval-form" class="hidden">
         <p><i>Goedkeuren of afkeuren:</i></p>
 
-        <div id="receipt-approval" class="hidden">
-            <div id="receipt-approval-list">
-                <div id="receipt-approval-previous" class="hidden" rel="0">
-                    ....
-                </div>
-            </div>
+        <div id="receipt-approval">
             <p id="receipt-approval-none" class="hidden">Hier kan je de declaratie goed- of afkeuren:</p>
-            <p id="receipt-approval-exists" class="hidden">Hier kan je de goed- of afkeuring aanpassen:</p>
 
             <div id="receipt-approval-new">
                 <p>
@@ -68,11 +83,30 @@
                     <button type="button" class="btn btn-secondary approval-button" data-approve="0">Afkeuren</button>
                 </p>
             </div>
-            <p id="receipt-not-approvable" class="hidden">Deze declaratie kan momenteel niet worden goed- of afgekeurd.</p>
         </div>
     </div>
 
-    <p><a href="/Declaraties/Goedkeuren">Terug naar het overzicht</a></p>
+    <div id="receipt-payment-form" class="hidden">
+        <p><i>Markeer hier de declaratie als uitbetaald:</i></p>
+
+        <div id="receipt-payment">
+            <p id="receipt-payment-none" class="hidden">Hier kan je de declaratie markeren als uitbetaald:</p>
+
+            <div id="receipt-payment-new">
+                <p>
+                    Opmerking: <br>
+                    <textarea id="receipt-payment-note"></textarea>
+                </p>
+                <p>
+                    <button type="button" class="btn btn-primary payment-button" data-pay="1">Markeren als uitbetaald</button>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <p id="receipt-processed" class="hidden">Deze declaratie is al verwerkt.</p>
+
+    <p><a href="/Declaraties">Terug naar Declaraties</a></p>
 </div>
 
 
@@ -80,7 +114,7 @@
 <script>
     const receiptId = @ViewData["id"];
     const photosDiv = document.querySelector('#receipt-photos');
-    const approvalDiv = document.querySelector('#receipt-approval');
+    const approvalDiv = document.querySelector('#receipt-approval-list');
 
     getUserSession().then(member => {
         // User session loaded
@@ -94,10 +128,14 @@
 
             showOutput(receipt, document.querySelector('#receipt-form'));
             
-            if (!receipt.isApprovable) {
-                hideElement(document.querySelector('#login-user'));
-                showElement(document.querySelector('#receipt-not-approvable'));
-            }
+            if (receipt.isApprovable)
+                showElement(document.querySelector('#receipt-approval-form'));
+
+            if (receipt.isPayable)
+                showElement(document.querySelector('#receipt-payment-form'));
+
+            if (!receipt.isApprovable && !receipt.isPayable)
+                showElement(document.querySelector('#receipt-processed'));
 
             apiGet('Receipt/' + receiptId + '/Photo').then(result => {
                 // Show all receipt photos
@@ -131,15 +169,27 @@
                     return;
                 }
 
-                showElement(document.querySelector('#receipt-approval-exists'));
-
                 for (i in result) {
                     let approval = document.querySelector('#receipt-approval-previous').cloneNode(true);
                     let img = approval.querySelector('img');
                     let id = result[i].id;
+                    
+                    if (result[i].paid) {
+                        // Uitbetaald
+                        approval.querySelector('.status-approved')?.remove();
+                        approval.querySelector('.status-rejected')?.remove();
+                    } else if (result[i].approved) {
+                        // Goedgekeurd
+                        approval.querySelector('.status-paid')?.remove();
+                        approval.querySelector('.status-rejected')?.remove();
+                    } else {
+                        // Afgekeurd
+                        approval.querySelector('.status-paid')?.remove();
+                        approval.querySelector('.status-approved')?.remove();
+                    }
                     approval.id = 'receipt-approval-' + id;
                     showOutput(result[i], approval);
-                    photosDiv.appendChild(approval);
+                    approvalDiv.appendChild(approval);
                 }
 
             });
@@ -156,10 +206,33 @@
             note: document.querySelector('#receipt-approval-note').value,
         };
 
-        hideElement(approvalDiv);
+        if (!window.confirm('Weet je zeker dat je deze declaratie wilt ' + (data.approved ? 'goedkeuren' : 'afkeuren') + '?'))
+            return;
+
+        hideElement(document.querySelector('#receipt-approval-form'));
 
         apiPost('Receipt/' + receiptId + '/Approve', data).then(result => {
-            window.location = window.location;
+            window.location = '/Declaraties/Goedkeuren';
+        });
+    }));
+
+     document.querySelectorAll('.payment-button').forEach(btn => btn.addEventListener('click', event => {
+        // Approve or Reject
+        
+        let data = {
+            receiptId,
+            approved: true,
+            paid: !!btn.dataset.pay && btn.dataset.pay != "0",
+            note: document.querySelector('#receipt-payment-note').value,
+        };
+
+        if (!window.confirm('Weet je zeker dat je deze declaratie wilt markeren als "Uitbetaald"?'))
+            return;
+
+        hideElement(document.querySelector('#receipt-payment-form'));
+
+        apiPost('Receipt/' + receiptId + '/Approve', data).then(result => {
+            window.location = '/Declaraties/Uitbetalen';
         });
     }));
 
