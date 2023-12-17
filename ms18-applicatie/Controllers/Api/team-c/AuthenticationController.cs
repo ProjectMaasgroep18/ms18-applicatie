@@ -1,6 +1,4 @@
-﻿using Maasgroep.Database;
-using Maasgroep.Database.Members;
-using Maasgroep.SharedKernel.Interfaces.Token;
+﻿using Maasgroep.SharedKernel.Interfaces.Token;
 using Maasgroep.SharedKernel.ViewModels.Admin;
 using Maasgroep.SharedKernel.ViewModels.team_c.Authentication;
 using Microsoft.AspNetCore.Mvc;

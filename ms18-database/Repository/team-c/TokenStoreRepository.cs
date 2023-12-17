@@ -69,5 +69,11 @@ namespace Maasgroep.Database.Tokens
 
             return token;
         }
+
+        public long? GetMemberFromToken(string token)
+        {
+            var savedToken = _db.TokenStore.FirstOrDefault(t => t.Token == token && t.ExperationDate > DateTime.UtcNow);
+            return savedToken?.MemberId ?? null;
+        }
     }
 }

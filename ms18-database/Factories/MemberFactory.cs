@@ -6,7 +6,7 @@ namespace Maasgroep.Database.Factories
 	{
 		public MaasgroepContext CreateDbContext(string[] args)
 		{
-			return new MaasgroepContext("UserID=postgres;Password=postgres;Host=localhost;port=5432;Database=Maasgroep;Pooling=true");
+			return new MaasgroepContext("UserID=postgres;Password=postgres;Host=localhost;port=5410;Database=Maasgroep;Pooling=true");
 		}
 	}
 }

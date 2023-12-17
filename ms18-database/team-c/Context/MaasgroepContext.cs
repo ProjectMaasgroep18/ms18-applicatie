@@ -67,14 +67,14 @@ namespace Maasgroep.Database
 
 		public MaasgroepContext()
 		{
-			_connectionString = "UserID=postgres;Password=postgres;Host=localhost;port=5432;Database=Maasgroep;Pooling=true";
+			_connectionString = "UserID=postgres;Password=postgres;Host=localhost;port=5410;Database=Maasgroep;Pooling=true";
 		}
 
 		public MaasgroepContext(ConfigurationService configurationService)
 		{
 			var hoi = configurationService.GetConnectionString();
 			var ditte = "";
-			_connectionString = "UserID=postgres;Password=postgres;Host=localhost;port=5432;Database=Maasgroep;Pooling=true";
+			_connectionString = "UserID=postgres;Password=postgres;Host=localhost;port=5410;Database=Maasgroep;Pooling=true";
 		}
 
 		public MaasgroepContext(string connectionString)

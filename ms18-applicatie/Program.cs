@@ -1,17 +1,20 @@
 using Maasgroep.Database;
-using Maasgroep.SharedKernel.Interfaces.Receipts;
-using Maasgroep.SharedKernel.Interfaces.Members;
-using Maasgroep.SharedKernel.Interfaces.Orders;
-using Maasgroep.SharedKernel.Interfaces.Token;
 using Maasgroep.Database.Receipts;
 using Maasgroep.Database.Members;
 using Maasgroep.Database.Orders;
 using Maasgroep.Database.Tokens;
+using Maasgroep.Middleware;
+using Maasgroep.SharedKernel.Interfaces.Receipts;
+using Maasgroep.SharedKernel.Interfaces.Members;
+using Maasgroep.SharedKernel.Interfaces.Orders;
+using Maasgroep.SharedKernel.Interfaces.Token;
 using ms18_applicatie.Services;
 
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+
+using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -26,8 +29,35 @@ builder.Services.AddTransient<ITokenStoreRepository, TokenStoreRepository>();
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(setup =>
+{
+    // Include 'SecurityScheme' to use JWT Authentication
+    var jwtSecurityScheme = new OpenApiSecurityScheme
+    {
+        BearerFormat = "JWT",
+        Name = "JWT Authentication",
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.Http,
+        Scheme = JwtBearerDefaults.AuthenticationScheme,
+        Description = "Paste your token here",
 
+        Reference = new OpenApiReference
+        {
+            Id = JwtBearerDefaults.AuthenticationScheme,
+            Type = ReferenceType.SecurityScheme
+        }
+    };
+
+    setup.AddSecurityDefinition(jwtSecurityScheme.Reference.Id, jwtSecurityScheme);
+
+    setup.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        { jwtSecurityScheme, Array.Empty<string>() }
+    });
+
+});
+
+builder.Services.AddAuthorization();
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -42,6 +72,9 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
         };
     });
+
+
+
 
 var app = builder.Build();
 
@@ -62,6 +95,8 @@ app.UseRouting();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.UseMiddleware<TokenMiddleware>();
 
 app.MapControllers();
 

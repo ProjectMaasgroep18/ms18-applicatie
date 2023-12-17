@@ -12,5 +12,6 @@ namespace Maasgroep.SharedKernel.Interfaces.Token
         TokenModel RetrieveToken(long id);
         TokenModelCreate SaveToken(TokenModelCreate token);
         TokenModelUpdate UpdateUserToken(TokenModelUpdate token, long userId);
+        long? GetMemberFromToken(string token);
     }
 }
