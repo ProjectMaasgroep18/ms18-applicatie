@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Maasgroep.Database.Migrations
 {
     /// <inheritdoc />
-    public partial class productUpdate : Migration
+    public partial class auth : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -152,6 +152,8 @@ namespace Maasgroep.Database.Migrations
                 {
                     Id = table.Column<long>(type: "bigint", nullable: false, defaultValueSql: "nextval('admin.\"memberSeq\"')"),
                     Name = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: false),
+                    Email = table.Column<string>(type: "text", nullable: false),
+                    Password = table.Column<string>(type: "text", nullable: false),
                     MemberCreatedId = table.Column<long>(type: "bigint", nullable: true),
                     MemberModifiedId = table.Column<long>(type: "bigint", nullable: true),
                     MemberDeletedId = table.Column<long>(type: "bigint", nullable: true),
@@ -413,6 +415,29 @@ namespace Maasgroep.Database.Migrations
                         principalSchema: "admin",
                         principalTable: "member",
                         principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "tokenStore",
+                schema: "admin",
+                columns: table => new
+                {
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Token = table.Column<string>(type: "text", nullable: false),
+                    ExperationDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    MemberId = table.Column<long>(type: "bigint", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_tokenStore", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_tokenStore_member",
+                        column: x => x.MemberId,
+                        principalSchema: "admin",
+                        principalTable: "member",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -957,6 +982,13 @@ namespace Maasgroep.Database.Migrations
                 schema: "order",
                 table: "stock",
                 column: "MemberModifiedId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_tokenStore_MemberId",
+                schema: "admin",
+                table: "tokenStore",
+                column: "MemberId",
+                unique: true);
         }
 
         /// <inheritdoc />
@@ -1005,6 +1037,10 @@ namespace Maasgroep.Database.Migrations
             migrationBuilder.DropTable(
                 name: "stock",
                 schema: "orderHistory");
+
+            migrationBuilder.DropTable(
+                name: "tokenStore",
+                schema: "admin");
 
             migrationBuilder.DropTable(
                 name: "bill",

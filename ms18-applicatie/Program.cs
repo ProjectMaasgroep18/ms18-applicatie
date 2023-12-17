@@ -1,11 +1,9 @@
-using Maasgroep.Filters;
 using Maasgroep.Database;
 using Maasgroep.Database.Interfaces;
 using Maasgroep.Database.Receipts;
 using Maasgroep.Database.Admin;
 using Maasgroep.Database.Orders;
 using Maasgroep.Middleware;
-using Maasgroep.SharedKernel.Interfaces;
 using Maasgroep.Services;
 
 using Microsoft.AspNetCore.Mvc;

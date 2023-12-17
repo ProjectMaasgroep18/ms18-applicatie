@@ -81,6 +81,7 @@ namespace Maasgroep.Database
 			CreateMember(modelBuilder);
 			CreatePermission(modelBuilder);
 			CreateMemberPermission(modelBuilder);
+			CreateTokenStore(modelBuilder);
 
 			#region Receipt
 			CreateReceipt(modelBuilder);
@@ -220,6 +221,22 @@ namespace Maasgroep.Database
 				.HasConstraintName("FK_memberPermission_memberDeleted")
 				.OnDelete(DeleteBehavior.NoAction);
 		}
+
+		private void CreateTokenStore(ModelBuilder modelBuilder)
+		{
+			modelBuilder.Entity<TokenStore>().ToTable("tokenStore", "admin");
+
+			//Foreign keys
+
+			modelBuilder.Entity<TokenStore>()
+				.HasOne(t => t.Member)
+				.WithOne(m => m.Token)
+				.HasForeignKey<TokenStore>(t => t.MemberId)
+				.HasConstraintName("FK_tokenStore_member")
+				.OnDelete(DeleteBehavior.Cascade);
+		}
+
+
 		#endregion
 
 		#region Receipt

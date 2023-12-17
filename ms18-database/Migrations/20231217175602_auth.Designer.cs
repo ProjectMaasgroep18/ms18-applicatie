@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Maasgroep.Database.Migrations
 {
     [DbContext(typeof(MaasgroepContext))]
-    [Migration("20231217143928_productUpdate")]
-    partial class productUpdate
+    [Migration("20231217175602_auth")]
+    partial class auth
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -67,6 +67,10 @@ namespace Maasgroep.Database.Migrations
                     b.Property<DateTime?>("DateTimeModified")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<long?>("MemberCreatedId")
                         .HasColumnType("bigint");
 
@@ -80,6 +84,10 @@ namespace Maasgroep.Database.Migrations
                         .IsRequired()
                         .HasMaxLength(256)
                         .HasColumnType("character varying(256)");
+
+                    b.Property<string>("Password")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -183,6 +191,32 @@ namespace Maasgroep.Database.Migrations
                         .IsUnique();
 
                     b.ToTable("permission", "admin");
+                });
+
+            modelBuilder.Entity("Maasgroep.Database.Admin.TokenStore", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<DateTime>("ExperationDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<long?>("MemberId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("Token")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MemberId")
+                        .IsUnique();
+
+                    b.ToTable("tokenStore", "admin");
                 });
 
             modelBuilder.Entity("Maasgroep.Database.Orders.Bill", b =>
@@ -1013,6 +1047,17 @@ namespace Maasgroep.Database.Migrations
                     b.Navigation("MemberModified");
                 });
 
+            modelBuilder.Entity("Maasgroep.Database.Admin.TokenStore", b =>
+                {
+                    b.HasOne("Maasgroep.Database.Admin.Member", "Member")
+                        .WithOne("Token")
+                        .HasForeignKey("Maasgroep.Database.Admin.TokenStore", "MemberId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .HasConstraintName("FK_tokenStore_member");
+
+                    b.Navigation("Member");
+                });
+
             modelBuilder.Entity("Maasgroep.Database.Orders.Bill", b =>
                 {
                     b.HasOne("Maasgroep.Database.Admin.Member", "MemberCreated")
@@ -1361,6 +1406,8 @@ namespace Maasgroep.Database.Migrations
                     b.Navigation("StocksDeleted");
 
                     b.Navigation("StocksModified");
+
+                    b.Navigation("Token");
                 });
 
             modelBuilder.Entity("Maasgroep.Database.Admin.Permission", b =>

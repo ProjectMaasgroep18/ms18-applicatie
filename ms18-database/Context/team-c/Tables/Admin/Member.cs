@@ -14,6 +14,7 @@ namespace Maasgroep.Database.Admin
 
         // EF admin properties
         public ICollection<MemberPermission> Permissions { get; set; }
+        public TokenStore? Token { get; set; }
 
 		// EF receipt properties
 		public ICollection<CostCentre> CostCentresCreated { get; set; }

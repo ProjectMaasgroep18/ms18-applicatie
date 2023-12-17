@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc.Filters;
 
 using Maasgroep.Exceptions;
 
-namespace Maasgroep.Filters;
+namespace Maasgroep.Middleware;
 
 public class MaasgroepExceptionFilter : IActionFilter, IOrderedFilter
 {
