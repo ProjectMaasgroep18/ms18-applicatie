@@ -21,6 +21,7 @@ public class TokenMiddleware
             var token = String.Join(' ', authHeader.Skip(1)); // Token without the word "bearer"
             var member = memberService.GetMemberByToken(token);
             context.Items["CurrentUser"] = member;
+            context.Items["Token"] = token;
         }
 
         await _next(context);

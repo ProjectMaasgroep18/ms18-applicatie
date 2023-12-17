@@ -130,11 +130,24 @@ async function apiDelete(action) {
 async function requireLogin(onValidLogin) {
     // Make sure user is logged in (and show login screen if they aren't)
 
-    let result = await apiGet('User/Current', null, null, onValidLogin);
+    let afterLogin = member => {
+        showElement(document.querySelectorAll('.login-only'));
+        if (typeof onValidLogin == 'function')
+            onValidLogin(member);
+    };
+    let result = await apiGet('User/Current', null, null, afterLogin);
     
     // If we got here, it worked
-    onValidLogin(result);
+    afterLogin(result);
     return result;
+}
+
+async function logout() {
+    // Logout and try to remove token from the server
+
+    hideElement(document.querySelectorAll('.login-only'));
+    apiGet('User/Logout', null, true).then(_ => window.location.href = '/');
+    localStorage.removeItem("AUTH_TOKEN");
 }
 
 function showOutput(data, container) {
@@ -390,7 +403,13 @@ async function apiGetInfinite(action, container, onLoadItems, perPage, page) {
     return results;
 }
 
-LOGIN_FORM?.addEventListener('click', () => {
+LOGIN_FORM?.querySelector('.login-password')?.addEventListener('keyup', event => {
+    if (event.which != 13 || !event.target.value)
+        return;
+    LOGIN_FORM?.querySelector('.login-button')?.dispatchEvent(new Event('click'));
+});
+
+LOGIN_FORM?.querySelector('.login-button')?.addEventListener('click', () => {
     // Log in, retry whatever we were doing before
 
     let email = LOGIN_FORM.querySelector('.login-email')?.value;

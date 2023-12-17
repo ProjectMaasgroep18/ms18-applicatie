@@ -29,5 +29,15 @@ namespace Maasgroep.Database.Admin
                 Member = new MemberRepository(Db).GetModel(tokenRecord.MemberId),
                 ExpirationDate = tokenRecord.ExperationDate,
             };
+
+        public bool DeleteToken(string token, long memberId)
+        {
+            var tokenRecord = Db.TokenStore.FirstOrDefault(t => t.Token == token && t.MemberId == memberId);
+            if (tokenRecord == null)
+                return false;
+            Db.Remove(tokenRecord);
+            return Db.SaveChanges() > 0;
+        }
+
     }
 }

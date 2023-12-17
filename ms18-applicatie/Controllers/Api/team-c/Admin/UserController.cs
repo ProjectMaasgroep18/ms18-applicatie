@@ -71,4 +71,12 @@ public class UserController : DeletableRepositoryController<IMemberRepository, M
             ExpirationDate = expire,
         });
     }
+
+    [HttpGet("Logout")]
+    public IActionResult Logout()
+    {
+        if (HttpContext.Items["Token"] is string token)
+            TokenStore.DeleteToken(token, CurrentMember?.Id ?? 0);
+        return NoContent();
+    }
 }
