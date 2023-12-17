@@ -34,10 +34,10 @@ public class UserController : DeletableRepositoryController<IMemberRepository, M
     public IActionResult CurrentUser()
         => Ok(CurrentMember ?? throw new MaasgroepUnauthorized());
 
-    [HttpGet("Login")]
-    public IActionResult Login(string email, string password)
+    [HttpPost("Login")]
+    public IActionResult Login([FromBody] LoginData data)
     {
-        var user = Repository.GetByEmail(email, password) ?? throw new MaasgroepUnauthorized("E-mailadres of wachtwoord is niet juist");
+        var user = Repository.GetByEmail(data.Email, data.Password) ?? throw new MaasgroepUnauthorized("E-mailadres of wachtwoord is niet juist");
         
         var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Config["Jwt:Key"] ?? ""));
         var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);

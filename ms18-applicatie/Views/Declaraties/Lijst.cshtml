@@ -50,7 +50,7 @@
 
 @section scripts {
 <script>
-    getUserSession().then(member => {
+    requireLogin(member => {
         // User session loaded
      
         const userId = member.id;

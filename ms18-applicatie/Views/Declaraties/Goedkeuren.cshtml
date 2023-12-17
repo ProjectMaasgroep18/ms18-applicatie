@@ -46,7 +46,7 @@
 
 @section scripts {
 <script>
-    getUserSession().then(async member => {
+    requireLogin(async member => {
         // User session loaded
      
         const userId = member.id;

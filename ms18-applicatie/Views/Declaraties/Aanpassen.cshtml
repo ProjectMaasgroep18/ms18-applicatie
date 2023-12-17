@@ -108,7 +108,7 @@
         window.location.href = window.location.href.toString().replace(/#.*$/, '');
     }
 
-    getUserSession().then(async member => {
+    requireLogin(async member => {
         // User session loaded
      
         showElement(document.querySelector('#login-user'));
@@ -155,6 +155,7 @@
                     let img = photo.querySelector('img');
                     let deleteLink = photo.querySelector('.delete-photo');
                     let id = result[i].id;
+                    photo.id = 'receipt-photo-' + id;
                     deleteLink.addEventListener('click', event => {
                         event.preventDefault();
                         deletePhoto(id);

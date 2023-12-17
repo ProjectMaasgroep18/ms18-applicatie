@@ -122,7 +122,7 @@
     const photosDiv = document.querySelector('#receipt-photos');
     const approvalDiv = document.querySelector('#receipt-approval-list');
 
-    getUserSession().then(async member => {
+    requireLogin(async member => {
         // User session loaded
      
         showElement(document.querySelector('#login-user'));

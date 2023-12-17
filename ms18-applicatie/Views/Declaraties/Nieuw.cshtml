@@ -21,7 +21,7 @@
 
 @section scripts {
 <script>
-    getUserSession().then(member => {
+    requireLogin(member => {
         // User session loaded
      
         showElement(document.querySelector('#login-user'));

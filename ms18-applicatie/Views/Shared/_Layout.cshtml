@@ -42,8 +42,25 @@
 <div class="container">
     <main role="main" class="pb-3">
         @RenderBody()
-        <div id="loading" class="hidden">Laden...</div>
         <div id="error" class="hidden"></div>
+        <div id="login" class="hidden">
+            &nbsp;<br>
+            <table class="data-table">
+                <tr>
+                    <td>E-mailadres</td>
+                    <td><input type="email" class="login-email"></td>
+                </tr>
+                <tr>
+                    <td>Wachtwoord</td>
+                    <td><input type="password" class="login-password"></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td><button type="button" class="btn btn-primary login-button">Inloggen</td>
+                </tr>
+            </table>
+        </div>
+        <div id="loading" class="hidden">Laden...</div>
     </main>
 </div>
 

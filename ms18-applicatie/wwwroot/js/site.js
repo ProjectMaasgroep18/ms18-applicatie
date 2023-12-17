@@ -8,6 +8,8 @@
 const BASE_URL = '/api/v1/';
 const LOAD_MSG = document.querySelector('#loading');
 const ERROR_MSG = document.querySelector('#error');
+const LOGIN_FORM = document.querySelector('#login');
+let AFTER_LOGIN = null;
 
 
 function hideElement(el) {
@@ -43,9 +45,9 @@ function handleError(message) {
     return Promise.reject(message);
 }
 
-async function apiGet(action, _fetchData, _skipJson) {
+async function apiGet(action, _fetchData, _skipJson, _onValidLogin) {
     // Send a Get request to the API (no request body, with response body)
-    // do not use _fetchData and _skipJson directly; it is used by the other API functions
+    // do not use _fetchData,  _skipJson, and _onValidLogin directly; it is used by the other API functions
 
     _fetchData = (_fetchData && typeof _fetchData == 'object') ? _fetchData : {
         headers: {
@@ -55,12 +57,24 @@ async function apiGet(action, _fetchData, _skipJson) {
         redirect: "follow",
     };
 
+    let token = localStorage.getItem("AUTH_TOKEN");
+    if (token) {
+        if (!_fetchData.headers)
+            _fetchData.headers = {};
+        _fetchData.headers.Authorization = "Bearer " + token;
+    }
+
     showElement(LOAD_MSG);
     const json = await fetch(BASE_URL + action, _fetchData).catch(handleError).then(response => {
         if (response.status >= 400 && response.status < 600) {
             // Server error
             return response.text().then(rawdata => {
                 try {
+                    if (response.status == 401) {
+                        showElement(LOGIN_FORM);
+                        if (typeof _onValidLogin == 'function')
+                            AFTER_LOGIN = _onValidLogin;
+                    }
                     return handleError(JSON.parse(rawdata).message || 'Er is een onbekende fout opgetreden'); // Foutstatus, maar JSON zonder error message? 
                 } catch {
                     console.warn('Failed to parse JSON data', rawdata);
@@ -113,10 +127,14 @@ async function apiDelete(action) {
     return await apiGet(action, fetchData, true);
 }
 
-function getUserSession() {
-    // Get user session (todo: mogelijk uitbreiden met tokens etc. en zo nodig login popup tonen)
+async function requireLogin(onValidLogin) {
+    // Make sure user is logged in (and show login screen if they aren't)
 
-    return apiGet('User/Current');
+    let result = await apiGet('User/Current', null, null, onValidLogin);
+    
+    // If we got here, it worked
+    onValidLogin(result);
+    return result;
 }
 
 function showOutput(data, container) {
@@ -164,7 +182,7 @@ function showOutput(data, container) {
     showElement(container);
     const outputElements = container.querySelectorAll('[rel]');
 
-    console.log('Rendering data in container', container, data);
+    // console.log('Rendering data in container', container, data);
 
     outputElements.forEach(output => {
         const rels = output.getAttribute('rel') ? output.getAttribute('rel').split(',') : [];
@@ -178,7 +196,7 @@ function showOutput(data, container) {
             let transformedData = ((transform && typeof transforms[transform] == 'function') ? transforms[transform](value) : value) ?? null;
             if ((transformedData ?? '') === '' && (prop ?? '') === '' && output.tagName != 'TEXTAREA')
                 transformedData = '\u2014'; // — streepje
-            console.log(key, prop, transform, '=>', transformedData);
+            // console.log(key, prop, transform, '=>', transformedData);
             if (typeof prop == 'undefined' || prop == '') {
                 // No property provided
                 output.innerText = transformedData;
@@ -371,3 +389,24 @@ async function apiGetInfinite(action, container, onLoadItems, perPage, page) {
 
     return results;
 }
+
+LOGIN_FORM?.addEventListener('click', () => {
+    // Log in, retry whatever we were doing before
+
+    let email = LOGIN_FORM.querySelector('.login-email')?.value;
+    let password = LOGIN_FORM.querySelector('.login-password')?.value;
+    LOGIN_FORM.querySelector('.login-password').value = null;
+
+    if (!email || !password)
+        return;
+
+    apiPost('User/Login', { email, password }).then(result => {
+        hideElement(LOGIN_FORM);
+        hideElement(ERROR_MSG);
+        if (result.token)
+            localStorage.setItem("AUTH_TOKEN", result.token);
+        if (typeof AFTER_LOGIN == 'function' && result.member)
+            AFTER_LOGIN(result.member);
+        AFTER_LOGIN = null;
+    });
+});
