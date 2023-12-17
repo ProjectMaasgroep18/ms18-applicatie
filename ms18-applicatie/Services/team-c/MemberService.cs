@@ -20,5 +20,10 @@ namespace ms18_applicatie.Services
 		{
 			return _memberRepository.GetMember(id);
 		}
+
+		public MemberModel GetMemberByEmail(string email)
+		{
+			return _memberRepository.GetMemberByEmail(email);
+		}
 	}
 }

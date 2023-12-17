@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Maasgroep.Database.Context.team_c.Tables.Admin
+namespace Maasgroep.Database.Tokens
 {
     public record TokenStore
     {

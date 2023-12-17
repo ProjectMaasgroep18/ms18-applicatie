@@ -2,9 +2,11 @@ using Maasgroep.Database;
 using Maasgroep.SharedKernel.Interfaces.Receipts;
 using Maasgroep.SharedKernel.Interfaces.Members;
 using Maasgroep.SharedKernel.Interfaces.Orders;
+using Maasgroep.SharedKernel.Interfaces.Token;
 using Maasgroep.Database.Receipts;
 using Maasgroep.Database.Members;
 using Maasgroep.Database.Orders;
+using Maasgroep.Database.Tokens;
 using ms18_applicatie.Services;
 
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -19,6 +21,7 @@ builder.Services.AddTransient<IReceiptRepository, ReceiptRepository>();
 builder.Services.AddTransient<IMemberRepository, MemberRepository>();
 builder.Services.AddTransient<IOrderRepository, OrderRepository>();
 builder.Services.AddTransient<IMemberService, MemberService>();
+builder.Services.AddTransient<ITokenStoreRepository, TokenStoreRepository>();
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();

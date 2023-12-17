@@ -9,6 +9,10 @@ namespace Maasgroep.Database.Members
         public long Id { get; set; }
         public string Name { get; set; }
 
+		public string Email { get; set; }
+
+		public string Password { get; set; }
+
 
         // EF admin properties
         public ICollection<MemberPermission> Permissions { get; set; }

@@ -61,7 +61,7 @@ namespace Maasgroep.Console
 			{
 				var members = new List<Member>()
 				{
-					new Member() { Name = "Borgia" }
+					new Member() { Name = "Borgia", Email = "borgia@mstest.gg", Password = "12345" }
 				};
 
 				db.Member.AddRange(members);
@@ -72,8 +72,8 @@ namespace Maasgroep.Console
 
 				members = new List<Member>()
 				{
-					new Member() { Name = "da Gama", MemberCreated = borgia }
-				,   new Member() { Name = "Albuquerque", MemberCreated = borgia }
+					new Member() { Name = "da Gama", Email = "gama@mstest.gg", Password= "45321", MemberCreated = borgia }
+				,   new Member() { Name = "Albuquerque", Email = "albuq@mstest.gg", Password = "54321", MemberCreated = borgia }
 				};
 
 				borgia.MemberCreated = borgia;

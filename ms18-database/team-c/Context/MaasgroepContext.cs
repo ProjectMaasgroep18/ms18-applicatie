@@ -3,6 +3,7 @@ using Maasgroep.Database.Orders;
 using Maasgroep.Database.Receipts;
 using Maasgroep.Database.Services;
 using Maasgroep.Database.ToDoList;
+using Maasgroep.Database.Tokens;
 using Microsoft.EntityFrameworkCore;
 
 namespace Maasgroep.Database
@@ -51,10 +52,16 @@ namespace Maasgroep.Database
 		public DbSet<LineHistory> LineHistory { get; set; }
 		public DbSet<BillHistory> BillHistory { get; set; }
 
-		#endregion
+        #endregion
 
-		#region Todo
-		public DbSet<ToDo> ToDos { get; set; }
+        #region Authentication
+
+		public DbSet<TokenStore> TokenStore { get; set; }
+
+        #endregion
+
+        #region Todo
+        public DbSet<ToDo> ToDos { get; set; }
 		public DbSet<ToDoHistory> ToDoHistory { get; set; }
 		#endregion
 

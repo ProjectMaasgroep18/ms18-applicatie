@@ -5,6 +5,8 @@ namespace ms18_applicatie.Services
 	public interface IMemberService
 	{
 		MemberModel GetMember(long id);
-		bool MemberExists(long id);
+		MemberModel GetMemberByEmail(string email);
+
+        bool MemberExists(long id);
 	}
 }
