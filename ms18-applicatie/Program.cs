@@ -1,3 +1,4 @@
+using Maasgroep.Filters;
 using Maasgroep.Database;
 using Maasgroep.Database.Interfaces;
 using Maasgroep.Database.Receipts;
@@ -24,21 +25,20 @@ builder.Services.AddTransient<IMemberRepository, MemberRepository>();
 // builder.Services.AddTransient<IMemberService, MemberService>();/////????
 
 // Add services to the container.
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews(options => {
+    
+    options.Filters.Add<MaasgroepExceptionFilter>();
+});
 
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-// if (!app.Environment.IsDevelopment())
-// {
-    app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-    app.UseHsts();
-    app.UseSwagger();
-    app.UseSwaggerUI();
-// }
+// The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+app.UseHsts();
+app.UseSwagger();
+app.UseSwaggerUI();
+
 
 // app.UseHttpsRedirection(); // TODO Reenable for production, only disabled for testing
 app.UseStaticFiles();

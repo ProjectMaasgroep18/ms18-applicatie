@@ -301,7 +301,7 @@ async function apiGetInfinite(action, container, onLoadItems, perPage, page) {
     const toElement = value => typeof value == 'string' ? document.querySelector(value) : typeof value == 'object' ? value : null;
     container = toElement(container);
 
-    const limit = perPage || 1; ///////////////
+    const limit = perPage || 100;
     const offset = ((page || 1) - 1) * limit;
     const params = '?offset=' + encodeURIComponent(offset) + '&limit=' + encodeURIComponent(limit);
     

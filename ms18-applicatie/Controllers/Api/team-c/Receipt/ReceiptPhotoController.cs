@@ -7,5 +7,6 @@ namespace Maasgroep.Controllers.Api;
 
 public class ReceiptPhotoController : DeletableRepositoryController<IReceiptPhotoRepository, ReceiptPhoto, ReceiptPhotoModel, ReceiptPhotoData>
 {
+    public override string ItemName { get => "Foto"; }
     public ReceiptPhotoController(IReceiptPhotoRepository repository) : base(repository) {}
 }

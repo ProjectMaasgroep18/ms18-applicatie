@@ -12,6 +12,8 @@ where TRecord: GenericRecordActive
 {
 	protected readonly TRepository Repository;
 
+    public virtual string ItemName { get => "Item"; }
+
 	public ReadOnlyRepositoryController(TRepository repository) 
 		=> Repository = repository;
 
@@ -21,9 +23,7 @@ where TRecord: GenericRecordActive
     
     [HttpGet("{id}")]
     public IActionResult RepositoryGetById(long id) {
-        var repository = Repository.GetById(id);
-        if (repository == null)
-            return NotFound();
+        var repository = Repository.GetById(id) ?? throw new Exceptions.MaasgroepNotFound($"{ItemName} niet gevonden");
         return Ok(Repository.GetModel(repository));
     }
 }

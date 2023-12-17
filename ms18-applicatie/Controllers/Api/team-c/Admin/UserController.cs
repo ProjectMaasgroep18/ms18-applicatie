@@ -19,5 +19,5 @@ public class UserController : WritableRepositoryController<IMemberRepository, Me
 
     [HttpGet("Current")]
     public IActionResult CurrentUser()
-        => Ok(Repository.GetModel(Repository.GetById(1)));
+        => Ok(Repository.GetModel(Repository.GetById(CurrentMemberId) ?? throw new Exceptions.MaasgroepUnauthorized()));
 }
