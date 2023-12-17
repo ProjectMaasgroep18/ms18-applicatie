@@ -472,7 +472,6 @@ namespace Maasgroep.Database
 
 		private void CreateStock(ModelBuilder modelBuilder)
 		{
-			modelBuilder.Entity<Stock>().HasKey(s => s.ProductId);
 			modelBuilder.Entity<Stock>().ToTable("stock", "order");
 			modelBuilder.Entity<Stock>().Property(s => s.DateTimeCreated).HasDefaultValueSql("now()");
 			modelBuilder.Entity<Stock>().ToTable(s => s.HasCheckConstraint("CK_order_quantity", "\"Quantity\" >= 0"));
@@ -480,7 +479,7 @@ namespace Maasgroep.Database
 			modelBuilder.Entity<Stock>()
 				.HasOne(s => s.Product)
 				.WithOne(p => p.Stock)
-				.HasForeignKey<Stock>(s => s.ProductId)
+				.HasForeignKey<Stock>(s => s.Id)
 				.HasConstraintName("FK_orderStock_product")
 				.OnDelete(DeleteBehavior.NoAction);
 

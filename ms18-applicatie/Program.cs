@@ -29,8 +29,9 @@ builder.Services.AddTransient<IReceiptPhotoRepository, ReceiptPhotoRepository>()
 builder.Services.AddTransient<IReceiptStatusRepository, ReceiptStatusRepository>();
 builder.Services.AddTransient<IMemberRepository, MemberRepository>();
 builder.Services.AddTransient<IProductRepository, ProductRepository>();
-builder.Services.AddTransient<IMemberService, MemberService>();
+builder.Services.AddTransient<IStockRepository, StockRepository>();
 builder.Services.AddTransient<ITokenStoreRepository, TokenStoreRepository>();
+builder.Services.AddTransient<IMemberService, MemberService>();
 
 // Add services to the container.
 builder.Services.AddControllersWithViews(options => {

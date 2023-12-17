@@ -42,9 +42,9 @@ namespace Maasgroep.Database.Test
 
         //    context.ChangeTracker.Clear();
 
-        //    var stockAdded = context.Stock.Single(b => b.ProductId == 1);
+        //    var stockAdded = context.Stock.Single(b => b.Id == 1);
         //    var stockHistoryAdded = context.StockHistory.Where(b => b.ProductId == 1).OrderByDescending(x => x.Id).FirstOrDefault();
-        //    Assert.Equal(1, stockAdded.ProductId);
+        //    Assert.Equal(1, stockAdded.Id);
         //    Assert.Equal(1, stockAdded.Quantity);
         //    Assert.Equal(1, stockHistoryAdded.ProductId);
         //    Assert.Equal(5, stockHistoryAdded.Quantity);

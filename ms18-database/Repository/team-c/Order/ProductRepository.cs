@@ -6,7 +6,9 @@ namespace Maasgroep.Database.Orders
 {
     public class ProductRepository : EditableRepository<Product, ProductModel, ProductData, ProductHistory>, IProductRepository
     {
-        public ProductRepository(MaasgroepContext db) : base(db) {}
+        protected StockRepository Stock;
+        public ProductRepository(MaasgroepContext db) : base(db)
+            => Stock = new(db);
 
         /** Create ProductModel from Product record */
         public override ProductModel GetModel(Product product)
@@ -44,6 +46,25 @@ namespace Maasgroep.Database.Orders
 				Price = product.Price,
                 PriceQuantity = product.PriceQuantity,
 			};
+        }
+
+        /** Ensure stock is created when saving product */
+        public override Action<MaasgroepContext> GetSaveAction(Product record)
+        {
+            var saveAction = base.GetSaveAction(record);
+            return (MaasgroepContext db) => {
+                saveAction.Invoke(db);
+                var stock = Stock.GetById(record.Id);
+                if (stock == null)
+                {
+                    db.Stock.Add(new Stock() { Id = record.Id, MemberCreatedId = record.MemberCreatedId, DateTimeDeleted = record.DateTimeDeleted });
+                }
+                else if (record.DateTimeDeleted != null && stock?.DateTimeDeleted != null)
+                {
+                    stock.DateTimeDeleted = record.DateTimeDeleted;
+                    db.Stock.Update(stock);    
+                }
+            };
         }
     }
 }

@@ -282,10 +282,10 @@ namespace Maasgroep.Console
 
                 var linesToAdd = new List<Line>()
                 {
-                    new Line() { Bill = bill1, Product = product1!, Quantity = 1, MemberCreated = member },
-                    new Line() { Bill = bill2, Product = product2!, Quantity = 2, MemberCreated = member },
-                    new Line() { Bill = bill3, Product = product1!, Quantity = 3, MemberCreated = member },
-                    new Line() { Bill = bill3, Product = product2!, Quantity = 4, MemberCreated = member }
+                    new Line() { Bill = bill1, Product = product1!, Quantity = 1, MemberCreatedId = 1 },
+                    new Line() { Bill = bill2, Product = product2!, Quantity = 2, MemberCreatedId = 1 },
+                    new Line() { Bill = bill3, Product = product1!, Quantity = 3, MemberCreatedId = 1 },
+                    new Line() { Bill = bill3, Product = product2!, Quantity = 4, MemberCreatedId = 1 },
                 };
 
                 db.OrderLines.AddRange(linesToAdd);

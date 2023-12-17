@@ -7,7 +7,7 @@ namespace Maasgroep.Database.Orders
 
         public StockHistory(Stock current)
         {
-            ProductId = current.ProductId;
+            ProductId = current.Id;
             Quantity = current.Quantity;
 
             MemberCreatedId = current.MemberCreatedId;

@@ -23,10 +23,8 @@ namespace Maasgroep.Database
 			var history = GetHistory(record);
 			var newRecord = GetRecord(model, record);
 
-			if (newRecord == null) {
-				Console.WriteLine($"No record created in {this}");
+			if (newRecord == null)
 				return null; // Not editable or invalid data
-			}
 
 			history.MemberCreatedId = record.MemberCreatedId;
 			history.MemberModifiedId = record.MemberModifiedId;

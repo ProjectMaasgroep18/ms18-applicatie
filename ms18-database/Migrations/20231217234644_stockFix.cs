@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Maasgroep.Database.Migrations
 {
     /// <inheritdoc />
-    public partial class authentication : Migration
+    public partial class stockFix : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -620,9 +620,8 @@ namespace Maasgroep.Database.Migrations
                 schema: "order",
                 columns: table => new
                 {
-                    ProductId = table.Column<long>(type: "bigint", nullable: false),
-                    Quantity = table.Column<long>(type: "bigint", nullable: false),
                     Id = table.Column<long>(type: "bigint", nullable: false),
+                    Quantity = table.Column<long>(type: "bigint", nullable: false),
                     MemberCreatedId = table.Column<long>(type: "bigint", nullable: true),
                     MemberModifiedId = table.Column<long>(type: "bigint", nullable: true),
                     MemberDeletedId = table.Column<long>(type: "bigint", nullable: true),
@@ -632,7 +631,7 @@ namespace Maasgroep.Database.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_stock", x => x.ProductId);
+                    table.PrimaryKey("PK_stock", x => x.Id);
                     table.CheckConstraint("CK_order_quantity", "\"Quantity\" >= 0");
                     table.ForeignKey(
                         name: "FK_orderStock_memberCreated",
@@ -654,7 +653,7 @@ namespace Maasgroep.Database.Migrations
                         principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_orderStock_product",
-                        column: x => x.ProductId,
+                        column: x => x.Id,
                         principalSchema: "order",
                         principalTable: "product",
                         principalColumn: "Id");

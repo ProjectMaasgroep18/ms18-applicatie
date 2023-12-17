@@ -570,7 +570,7 @@ namespace Maasgroep.Database.Migrations
 
             modelBuilder.Entity("Maasgroep.Database.Orders.Stock", b =>
                 {
-                    b.Property<long>("ProductId")
+                    b.Property<long>("Id")
                         .HasColumnType("bigint");
 
                     b.Property<DateTime>("DateTimeCreated")
@@ -584,9 +584,6 @@ namespace Maasgroep.Database.Migrations
                     b.Property<DateTime?>("DateTimeModified")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<long>("Id")
-                        .HasColumnType("bigint");
-
                     b.Property<long?>("MemberCreatedId")
                         .HasColumnType("bigint");
 
@@ -599,7 +596,7 @@ namespace Maasgroep.Database.Migrations
                     b.Property<long>("Quantity")
                         .HasColumnType("bigint");
 
-                    b.HasKey("ProductId");
+                    b.HasKey("Id");
 
                     b.HasIndex("MemberCreatedId");
 
@@ -1212,6 +1209,13 @@ namespace Maasgroep.Database.Migrations
 
             modelBuilder.Entity("Maasgroep.Database.Orders.Stock", b =>
                 {
+                    b.HasOne("Maasgroep.Database.Orders.Product", "Product")
+                        .WithOne("Stock")
+                        .HasForeignKey("Maasgroep.Database.Orders.Stock", "Id")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired()
+                        .HasConstraintName("FK_orderStock_product");
+
                     b.HasOne("Maasgroep.Database.Admin.Member", "MemberCreated")
                         .WithMany("StocksCreated")
                         .HasForeignKey("MemberCreatedId")
@@ -1229,13 +1233,6 @@ namespace Maasgroep.Database.Migrations
                         .HasForeignKey("MemberModifiedId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .HasConstraintName("FK_orderStock_memberModified");
-
-                    b.HasOne("Maasgroep.Database.Orders.Product", "Product")
-                        .WithOne("Stock")
-                        .HasForeignKey("Maasgroep.Database.Orders.Stock", "ProductId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired()
-                        .HasConstraintName("FK_orderStock_product");
 
                     b.Navigation("MemberCreated");
 
