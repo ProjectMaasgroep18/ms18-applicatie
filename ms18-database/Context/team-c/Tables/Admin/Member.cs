@@ -7,6 +7,10 @@ namespace Maasgroep.Database.Admin
 	{
         public string Name { get; set; }
 
+		public string Email { get; set; }
+
+		public string Password { get; set; }
+
 
         // EF admin properties
         public ICollection<MemberPermission> Permissions { get; set; }

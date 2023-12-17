@@ -4,8 +4,20 @@ using Maasgroep.Database.Interfaces;
 using Maasgroep.Database.Receipts;
 using Maasgroep.Database.Admin;
 using Maasgroep.Database.Orders;
-using Microsoft.AspNetCore.Mvc;
+using Maasgroep.Database.Tokens;
+using Maasgroep.Middleware;
+using Maasgroep.SharedKernel.Interfaces.Receipts;
+using Maasgroep.SharedKernel.Interfaces.Members;
+using Maasgroep.SharedKernel.Interfaces.Orders;
+using Maasgroep.SharedKernel.Interfaces.Token;
+using ms18_applicatie.Services;
 
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+
+using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,6 +32,8 @@ builder.Services.AddTransient<IReceiptPhotoRepository, ReceiptPhotoRepository>()
 builder.Services.AddTransient<IReceiptStatusRepository, ReceiptStatusRepository>();
 builder.Services.AddTransient<IMemberRepository, MemberRepository>();
 builder.Services.AddTransient<IProductRepository, ProductRepository>();
+builder.Services.AddTransient<IMemberService, MemberService>();
+builder.Services.AddTransient<ITokenStoreRepository, TokenStoreRepository>();
 
 // Add services to the container.
 builder.Services.AddControllersWithViews(options => {
@@ -36,7 +50,52 @@ builder.Services.AddControllersWithViews(options => {
     });
 });
 
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(setup =>
+{
+    // Include 'SecurityScheme' to use JWT Authentication
+    var jwtSecurityScheme = new OpenApiSecurityScheme
+    {
+        BearerFormat = "JWT",
+        Name = "JWT Authentication",
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.Http,
+        Scheme = JwtBearerDefaults.AuthenticationScheme,
+        Description = "Paste your token here",
+
+        Reference = new OpenApiReference
+        {
+            Id = JwtBearerDefaults.AuthenticationScheme,
+            Type = ReferenceType.SecurityScheme
+        }
+    };
+
+    setup.AddSecurityDefinition(jwtSecurityScheme.Reference.Id, jwtSecurityScheme);
+
+    setup.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        { jwtSecurityScheme, Array.Empty<string>() }
+    });
+
+});
+
+builder.Services.AddAuthorization();
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            ValidAudience = builder.Configuration["Jwt:Issuer"],
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
+        };
+    });
+
+
+
 
 var app = builder.Build();
 
@@ -47,7 +106,11 @@ app.UseSwaggerUI();
 
 app.UseStaticFiles();
 app.UseRouting();
+
+app.UseAuthentication();
 app.UseAuthorization();
+
+app.UseMiddleware<TokenMiddleware>();
 
 app.MapControllers();
 

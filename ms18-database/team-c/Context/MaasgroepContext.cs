@@ -2,6 +2,7 @@
 using Maasgroep.Database.Orders;
 using Maasgroep.Database.Receipts;
 using Maasgroep.Database.Services;
+using Maasgroep.Database.Tokens;
 using Microsoft.EntityFrameworkCore;
 
 namespace Maasgroep.Database
@@ -46,7 +47,7 @@ namespace Maasgroep.Database
 		public DbSet<LineHistory> LineHistory { get; set; }
 		public DbSet<BillHistory> BillHistory { get; set; }
 
-		#endregion
+        #endregion
 
 		public MaasgroepContext()
 		{
@@ -57,7 +58,7 @@ namespace Maasgroep.Database
 		{
 			var hoi = configurationService.GetConnectionString();
 			var ditte = "";
-			//_connectionString = .....;
+			_connectionString = "UserID=postgres;Password=postgres;Host=localhost;port=5410;Database=Maasgroep;Pooling=true";
 		}
 
 		public MaasgroepContext(string connectionString)
