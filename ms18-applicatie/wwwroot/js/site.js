@@ -139,6 +139,10 @@ function showOutput(data, container) {
             // Return View url of Receipt id
             return '/Declaraties/Bekijken/' + id;
         },
+        productUrl(id) {
+            // Return Product url of Product id
+            return '/Producten/' + id;
+        },
         zero(val) {
             // Default to zero instead of "", null, undefined, etc.
             return !val ? 0 : val;
@@ -326,14 +330,15 @@ async function apiGetInfinite(action, container, onLoadItems, perPage, page) {
         return results;
     }
 
-    for (id in results) {
+    for (i in results) {
         // Generate and populate output elements
 
         const resultItem = baseItem.cloneNode(true);
         if (!resultItem)
             continue;
         resultItem.classList.add('result-item-loaded');
-        showOutput(results[id], resultItem);
+        resultItem.dataset.id = results[i].id;
+        showOutput(results[i], resultItem);
         let allItems = container.querySelectorAll('.result-item-loaded');
         let lastItem = allItems.length ? allItems[allItems.length - 1] : baseItem;
         lastItem.insertAdjacentElement('afterend', resultItem);

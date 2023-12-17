@@ -3,26 +3,26 @@
 <div id="login-user" class="hidden">
     <p id="login-info">Hallo <span rel="name"></span>!</p>    
 
-    <p>Declaraties vallen altijd onder een bepaald “kostencentrum”.</p>
+    <p>Hier kun je de accounts van leden beheren.</p>
 
-    <div id="cost-centres" class="hidden">
-        <p><i>Dit zijn de kostencentra waar een declaratie onder kan vallen:</i></p>
+    <div id="members" class="hidden">
+        <p><i>Dit zijn de leden die momenteel in de database staan:</i></p>
 
         <table class="data-table">
             <tr>
-                <th>Kostencentrum</th>
+                <th>Naam</th>
                 <th></th>
             </tr>
             <tr class="result-empty">
-                <td colspan="999">Er zijn geen kostencentra</td>
+                <td colspan="999">Er zijn geen leden</td>
             </tr>    
             <tr class="result-add">
-                <td colspan="999"><a href="#" id="cost-centres-add">Kostencentrum toevoegen</a></td>
+                <td colspan="999"><a href="#" id="members-add">Lid toevoegen</a></td>
             </tr>
             <tr class="result-item" class="hidden">
                 <td>
-                    <span rel="name" class="cost-centre-name"></span>
-                    <input rel="name:value" class="cost-centre-input hidden">
+                    <span rel="name" class="member-name"></span>
+                    <input rel="name:value" class="member-input hidden">
                 </td>
                 <td class="user-actions">
                     <a href="#" class="edit-link">Aanpassen</a>
@@ -34,10 +34,10 @@
                 <td colspan="999"><a href="#" class="result-show-more">Toon meer</a></td>
             </tr>
         </table>
-        
+
         &nbsp;
 
-        <p><a href="/Declaraties">Terug naar Declaraties</a></p>
+        <p><a href="/">Terug naar Home</a></p>
 
     </div>
 </div>
@@ -50,15 +50,18 @@
         const userId = member.id;
         showElement(document.querySelector('#login-user'));
         showOutput(member, document.querySelector('#login-info'));
-        const costCentreTable = document.querySelector('#cost-centres');
+        const memberTable = document.querySelector('#members');
 
-        apiGetInfinite('CostCentre', costCentreTable, (elements, costCentres) => {
-            for (i in costCentres) {
-                // Newly loaded cost centre
+        apiGetInfinite('User', memberTable, (elements, members) => {
+            for (i in members) {
+                // Newly loaded member
 
                 let element = elements[i];
+
+                //// LEDEN NIET AANPASBAAR
+                hideElement(memberTable.querySelectorAll('.edit-link'));
                 
-                element.querySelector('.cost-centre-input')?.addEventListener('keyup', event => {
+                element.querySelector('.member-input')?.addEventListener('keyup', event => {
                     // Save on enter key
 
                     if (event.which != 13)
@@ -73,14 +76,14 @@
                     event.preventDefault();
 
                     const editId = element.dataset.id;
-                    const costCentreInput = element.querySelector('.cost-centre-input');
+                    const memberInput = element.querySelector('.member-input');
 
-                    hideElement(element.querySelector('.cost-centre-name'));
+                    hideElement(element.querySelector('.member-name'));
                     hideElement(element.querySelector('.edit-link'));
                     
                     showElement(element.querySelector('.save-link'));
-                    showElement(costCentreInput);
-                    costCentreInput.focus();
+                    showElement(memberInput);
+                    memberInput.focus();
                 });
 
                 element.querySelector('.save-link')?.addEventListener('click', event => {
@@ -89,28 +92,28 @@
                     event.preventDefault();
 
                     const editId = element.dataset.id;
-                    const costCentreInput = element.querySelector('.cost-centre-input');
-                    const newName = costCentreInput.value;
+                    const memberInput = element.querySelector('.member-input');
+                    const newName = memberInput.value;
 
-                    costCentreInput.disabled = true;
+                    memberInput.disabled = true;
                     hideElement(element.querySelector('.user-actions'));
 
-                    apiPut('CostCentre/' + editId, { id: editId, name: newName }).then(result => {
-                        // Saved the updated cost centre: apply it here too
+                    apiPut('User/' + editId, { id: editId, name: newName }).then(result => {
+                        // Saved the updated member: apply it here too
 
                         if (!result)
                             return;
 
-                        const costCentreName = element.querySelector('.cost-centre-name');
+                        const memberName = element.querySelector('.member-name');
                         showOutput({ id: editId, name: newName }, element);
-                        costCentreInput.disabled = false;
+                        memberInput.disabled = false;
 
-                        showElement(costCentreName);
+                        showElement(memberName);
                         showElement(element.querySelector('.edit-link'));
                         showElement(element.querySelector('.user-actions'));
 
                         hideElement(element.querySelector('.save-link'));
-                        hideElement(costCentreInput);
+                        hideElement(memberInput);
                     });
                 });
                 
@@ -119,13 +122,13 @@
 
                     event.preventDefault();
 
-                    if (!window.confirm('Weet je zeker dat je dit kostencentrum wilt verwijderen?'))
+                    if (!window.confirm('Weet je zeker dat je dit lid wilt verwijderen?'))
                         return;
 
                     const deleteId = element.dataset.id;
                     hideElement(element.querySelector('.user-actions'));
 
-                    apiDelete('CostCentre/' + deleteId).then(result => {
+                    apiDelete('User/' + deleteId).then(result => {
                         if (!result)
                             return;
 
@@ -135,30 +138,30 @@
             }
         });
 
-        document.querySelector('#cost-centres-add')?.addEventListener('click', event => {
-            // Add cost centre link
+        document.querySelector('#members-add')?.addEventListener('click', event => {
+            // Add member link
 
             event.preventDefault();
 
-            const baseRow = document.querySelector('#cost-centres .result-item');
-            const costCentreRow = baseRow.cloneNode(true);
-            showElement(costCentreRow);
-            baseRow.insertAdjacentElement('beforebegin', costCentreRow);
+            const baseRow = document.querySelector('#members .result-item');
+            const memberRow = baseRow.cloneNode(true);
+            showElement(memberRow);
+            baseRow.insertAdjacentElement('beforebegin', memberRow);
             
-            hideElement(document.querySelector('#cost-centres .result-add'));
+            hideElement(document.querySelector('#members .result-add'));
 
-            const costCentreInput = costCentreRow.querySelector('.cost-centre-input');
-            const saveLink = costCentreRow.querySelector('.save-link');
-            const deleteLink = costCentreRow.querySelector('.delete-link');
+            const memberInput = memberRow.querySelector('.member-input');
+            const saveLink = memberRow.querySelector('.save-link');
+            const deleteLink = memberRow.querySelector('.delete-link');
 
-            hideElement(costCentreRow.querySelector('.cost-centre-name'));
-            hideElement(costCentreRow.querySelector('.edit-link'));
+            hideElement(memberRow.querySelector('.member-name'));
+            hideElement(memberRow.querySelector('.edit-link'));
             
             showElement(saveLink);
-            showElement(costCentreInput);
-            costCentreInput.focus();
+            showElement(memberInput);
+            memberInput.focus();
 
-            costCentreInput.addEventListener('keyup', event => {
+            memberInput.addEventListener('keyup', event => {
                 // Save on enter key
 
                 if (event.which != 13)
@@ -168,18 +171,18 @@
             })
 
             saveLink.addEventListener('click', event => {
-                // Click Save link of newly added cost centre
+                // Click Save link of newly added member
                 
                 event.preventDefault();
-                const newName = costCentreInput.value;
+                const newName = memberInput.value;
 
-                costCentreInput.disabled = true;
-                hideElement(costCentreRow.querySelector('.user-actions'));
+                memberInput.disabled = true;
+                hideElement(memberRow.querySelector('.user-actions'));
 
-                // This newly added cost centre was never saved before, so create it in the database
+                // This newly added member was never saved before, so create it in the database
 
-                apiPost('CostCentre/', { name: newName }).then(result => {    
-                    // Saved new cost centre
+                apiPost('User/', { name: newName }).then(result => {    
+                    // Saved new member
 
                     if (!result)
                         return;
@@ -190,17 +193,17 @@
             });
 
             deleteLink.addEventListener('click', event => {
-                // Click Delete link of newly added cost centre
+                // Click Delete link of newly added member
                 
                 event.preventDefault();
 
                 if (!window.confirm('Weet je zeker dat je deze post wilt verwijderen?'))
                     return;
 
-                // This newly added cost centre was never saved, just remove it here
-                costCentreRow.remove();
-                if (costCentreTable.querySelectorAll('tr:not(.hidden)').length <= 0)
-                    showElement(document.querySelector('#cost-centres-empty'));
+                // This newly added member was never saved, just remove it here
+                memberRow.remove();
+                if (memberTable.querySelectorAll('tr:not(.hidden)').length <= 0)
+                    showElement(document.querySelector('#members-empty'));
                 return;
             });
         });

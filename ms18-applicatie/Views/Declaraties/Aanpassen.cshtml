@@ -130,7 +130,6 @@
 
             let costCentre = document.querySelector('#cost-centre').cloneNode(true);
             let id = costCentres[i].id;
-            costCentre.id = 'cost-centre-' + id;
             costCentre.value = id;
             costCentre.innerText = costCentres[i].name;
             select.appendChild(costCentre);
@@ -160,7 +159,6 @@
                         event.preventDefault();
                         deletePhoto(id);
                     });
-                    photo.id = 'receipt-photo-' + id;
                     img.src = result[i].base64Image;
                 }
             });

@@ -4,10 +4,6 @@ namespace Maasgroep.Controllers;
 
 public class DeclaratiesController : Controller
 {
-    public DeclaratiesController()
-    {
-    }
-
     public IActionResult Index()
     {
         return View();

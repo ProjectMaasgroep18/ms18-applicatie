@@ -64,8 +64,7 @@
 
             for (i in receipts) {
                 const element = elements[i];
-                element.id = 'user-receipts-' + receipts[i].id;
-                if (!receipts[id].isEditable) {
+                if (!receipts[i].isEditable) {
                     // Not editable (already approved/paid)
                     element.querySelectorAll('.user-actions .edit-action').forEach(element => hideElement(element));
                 } else {
@@ -81,7 +80,7 @@
                     if (!window.confirm('Weet je zeker dat je deze declaratie wilt verwijderen?'))
                         return;
 
-                    const deleteId = receipts[i].id;
+                    const deleteId = element.dataset.id;
                     hideElement(element.querySelector('.user-actions'));
 
                     apiDelete('Receipt/' + deleteId).then(result => {
