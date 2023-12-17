@@ -90,7 +90,7 @@
                         // Receipt deleted in database, clean it up here too
                         element.remove();
                         if (receiptsTable.querySelectorAll('tr:not(.hidden)').length <= 1)
-                            showElement(document.querySelector('#user-receipts-empty'));
+                            showElement(receiptsDiv.querySelectorAll('.result-empty'));
                     });
                 });
             }

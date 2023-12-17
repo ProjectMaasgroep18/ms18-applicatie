@@ -319,7 +319,7 @@ async function apiGetInfinite(action, container, onLoadItems, perPage, page) {
     showElement(container);
     
     // Show or hide "no results" message
-    const noResults = (!results || results.length == 0) && page == 1;
+    const noResults = (!results || results.length == 0) && offset == 0;
     noResults ? showElement(container.querySelectorAll('.result-empty')) : hideElement(container.querySelectorAll('.result-empty'));
     
     const baseItem = container.querySelector('.result-item');
