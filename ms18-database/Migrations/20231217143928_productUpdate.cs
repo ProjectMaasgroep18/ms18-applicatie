@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Maasgroep.Database.Migrations
 {
     /// <inheritdoc />
-    public partial class fixApproval : Migration
+    public partial class productUpdate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -54,10 +54,6 @@ namespace Maasgroep.Database.Migrations
             migrationBuilder.CreateSequence(
                 name: "photoSeq",
                 schema: "receipt");
-
-            migrationBuilder.CreateSequence(
-                name: "productPriceSeq",
-                schema: "orderHistory");
 
             migrationBuilder.CreateSequence(
                 name: "productSeq",
@@ -194,6 +190,10 @@ namespace Maasgroep.Database.Migrations
                     Id = table.Column<long>(type: "bigint", nullable: false, defaultValueSql: "nextval('\"orderHistory\".\"productSeq\"')"),
                     ProductId = table.Column<long>(type: "bigint", nullable: false),
                     Name = table.Column<string>(type: "character varying(2048)", maxLength: 2048, nullable: false),
+                    Color = table.Column<string>(type: "text", nullable: false),
+                    Icon = table.Column<string>(type: "text", nullable: false),
+                    Price = table.Column<double>(type: "double precision", nullable: false),
+                    PriceQuantity = table.Column<int>(type: "integer", nullable: false),
                     RecordCreated = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "now()"),
                     MemberCreatedId = table.Column<long>(type: "bigint", nullable: true),
                     MemberModifiedId = table.Column<long>(type: "bigint", nullable: true),
@@ -205,27 +205,6 @@ namespace Maasgroep.Database.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_product", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "productPrice",
-                schema: "orderHistory",
-                columns: table => new
-                {
-                    Id = table.Column<long>(type: "bigint", nullable: false, defaultValueSql: "nextval('\"orderHistory\".\"productPriceSeq\"')"),
-                    ProductId = table.Column<long>(type: "bigint", nullable: false),
-                    Price = table.Column<decimal>(type: "numeric(18,2)", precision: 18, scale: 2, nullable: false),
-                    RecordCreated = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "now()"),
-                    MemberCreatedId = table.Column<long>(type: "bigint", nullable: true),
-                    MemberModifiedId = table.Column<long>(type: "bigint", nullable: true),
-                    MemberDeletedId = table.Column<long>(type: "bigint", nullable: true),
-                    DateTimeCreated = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    DateTimeModified = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    DateTimeDeleted = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_productPrice", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -405,6 +384,7 @@ namespace Maasgroep.Database.Migrations
                     Color = table.Column<string>(type: "text", nullable: false),
                     Icon = table.Column<string>(type: "text", nullable: false),
                     Price = table.Column<double>(type: "double precision", nullable: false),
+                    PriceQuantity = table.Column<int>(type: "integer", nullable: false),
                     MemberCreatedId = table.Column<long>(type: "bigint", nullable: true),
                     MemberModifiedId = table.Column<long>(type: "bigint", nullable: true),
                     MemberDeletedId = table.Column<long>(type: "bigint", nullable: true),
@@ -580,51 +560,6 @@ namespace Maasgroep.Database.Migrations
                         principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_orderLine_product",
-                        column: x => x.ProductId,
-                        principalSchema: "order",
-                        principalTable: "product",
-                        principalColumn: "Id");
-                });
-
-            migrationBuilder.CreateTable(
-                name: "productPrice",
-                schema: "order",
-                columns: table => new
-                {
-                    ProductId = table.Column<long>(type: "bigint", nullable: false),
-                    Price = table.Column<decimal>(type: "numeric(18,2)", precision: 18, scale: 2, nullable: false),
-                    Id = table.Column<long>(type: "bigint", nullable: false),
-                    MemberCreatedId = table.Column<long>(type: "bigint", nullable: true),
-                    MemberModifiedId = table.Column<long>(type: "bigint", nullable: true),
-                    MemberDeletedId = table.Column<long>(type: "bigint", nullable: true),
-                    DateTimeCreated = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "now()"),
-                    DateTimeModified = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    DateTimeDeleted = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_productPrice", x => x.ProductId);
-                    table.CheckConstraint("CK_orderProductPrice_price", "\"Price\" >= 0");
-                    table.ForeignKey(
-                        name: "FK_orderProductPrice_memberCreated",
-                        column: x => x.MemberCreatedId,
-                        principalSchema: "admin",
-                        principalTable: "member",
-                        principalColumn: "Id");
-                    table.ForeignKey(
-                        name: "FK_orderProductPrice_memberDeleted",
-                        column: x => x.MemberDeletedId,
-                        principalSchema: "admin",
-                        principalTable: "member",
-                        principalColumn: "Id");
-                    table.ForeignKey(
-                        name: "FK_orderProductPrice_memberModified",
-                        column: x => x.MemberModifiedId,
-                        principalSchema: "admin",
-                        principalTable: "member",
-                        principalColumn: "Id");
-                    table.ForeignKey(
-                        name: "FK_orderProductPrice_product",
                         column: x => x.ProductId,
                         principalSchema: "order",
                         principalTable: "product",
@@ -836,13 +771,6 @@ namespace Maasgroep.Database.Migrations
                 column: "MemberModifiedId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_costCentre_Name",
-                schema: "receipt",
-                table: "costCentre",
-                column: "Name",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
                 name: "IX_line_BillId",
                 schema: "order",
                 table: "line",
@@ -989,24 +917,6 @@ namespace Maasgroep.Database.Migrations
                 column: "MemberModifiedId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_productPrice_MemberCreatedId",
-                schema: "order",
-                table: "productPrice",
-                column: "MemberCreatedId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_productPrice_MemberDeletedId",
-                schema: "order",
-                table: "productPrice",
-                column: "MemberDeletedId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_productPrice_MemberModifiedId",
-                schema: "order",
-                table: "productPrice",
-                column: "MemberModifiedId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_receipt_CostCentreId",
                 schema: "receipt",
                 table: "receipt",
@@ -1085,14 +995,6 @@ namespace Maasgroep.Database.Migrations
                 schema: "orderHistory");
 
             migrationBuilder.DropTable(
-                name: "productPrice",
-                schema: "order");
-
-            migrationBuilder.DropTable(
-                name: "productPrice",
-                schema: "orderHistory");
-
-            migrationBuilder.DropTable(
                 name: "receipt",
                 schema: "receiptHistory");
 
@@ -1155,10 +1057,6 @@ namespace Maasgroep.Database.Migrations
             migrationBuilder.DropSequence(
                 name: "photoSeq",
                 schema: "receipt");
-
-            migrationBuilder.DropSequence(
-                name: "productPriceSeq",
-                schema: "orderHistory");
 
             migrationBuilder.DropSequence(
                 name: "productSeq",

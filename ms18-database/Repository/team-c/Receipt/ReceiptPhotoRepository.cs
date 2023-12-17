@@ -5,7 +5,6 @@ using Maasgroep.SharedKernel.DataModels.Receipts;
 
 namespace Maasgroep.Database.Receipts
 {
-
     public class ReceiptPhotoRepository : DeletableRepository<ReceiptPhoto, ReceiptPhotoModel, ReceiptPhotoData>, IReceiptPhotoRepository
     {
         protected ReceiptRepository Receipts;

@@ -4,7 +4,6 @@ using Maasgroep.SharedKernel.DataModels.Receipts;
 
 namespace Maasgroep.Database.Receipts
 {
-
     public class CostCentreRepository : EditableRepository<CostCentre, CostCentreModel, CostCentreData, CostCentreHistory>, ICostCentreRepository
     {
         public CostCentreRepository(MaasgroepContext db) : base(db) {}

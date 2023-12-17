@@ -1,5 +1,3 @@
-using System.Data.Common;
-using System.Dynamic;
 using Maasgroep.Database;
 using Maasgroep.Database.Admin;
 using Maasgroep.Database.Orders;
@@ -43,7 +41,6 @@ namespace Maasgroep.Console
                 // PRODUCT data
                 CreateTestDataProduct();
                 CreateTestDataStock();
-                CreateTestDataProductPrice();
                 CreateTestDataBill();
                 CreateTestDataLine();
             } catch (Microsoft.EntityFrameworkCore.DbUpdateException e) {
@@ -170,13 +167,30 @@ namespace Maasgroep.Console
                 {
                     new Product()
                     {
-                        Name = "Duifis Scharrelnootjes", MemberCreated = member, Price = 3.45, Color = "#FF0000",
-                        Icon = "fas fa-bowl"
+                        Name = "Duifis Scharrelnootjes",
+                        Color = "#FF0000",
+                        Icon = "fas fa-bowl",
+                        Price = 3.45,
+                        PriceQuantity = 1,
+                        MemberCreated = member,
                     },
-                    new Product() { Name = "Vorta Cola", MemberCreated = member, Price = 3.45, Color = "#FFF000",
-                        Icon = "fas fa-bottle" },
-                    new Product() { Name = "Jasmijn Thee", MemberCreated = member, Price = 3.45, Color = "#FF00F0",
-                        Icon = "fas fa-cup" }
+                    new Product()
+                    {
+                        Name = "Vorta Cola",
+                        MemberCreated = member,
+                        Color = "#FFF000",
+                        Icon = "fas fa-bottle",
+                        Price = 3.45,
+                        PriceQuantity = 1,
+                    },
+                    new Product() {
+                        Name = "Jasmijn Thee",
+                        Color = "#FF00F0",
+                        Icon = "fas fa-cup",
+                        Price = 3.45,
+                        PriceQuantity = 1,
+                        MemberCreated = member,
+                    }
                 };
                 db.Product.AddRange(products);
 
@@ -209,30 +223,6 @@ namespace Maasgroep.Console
             }
         }
 
-        private void CreateTestDataProductPrice()
-        {
-            System.Console.WriteLine("CREATE PRODUCT PRICE");
-
-            using (var db = CreateContext())
-            {
-                var member = db.Member.Where(m => m.Name == "admin").FirstOrDefault()!;
-
-                var product1 = db.Product.Where(p => p.Name == "Duifis Scharrelnootjes").FirstOrDefault();
-                var product2 = db.Product.Where(p => p.Name == "Vorta Cola").FirstOrDefault();
-
-                var priceToAdd = new List<ProductPrice>()
-                {
-                    new ProductPrice() { MemberCreated = member, Product = product1, Price = 5.5m },
-                    new ProductPrice() { MemberCreated = member, Product = product2, Price = 2.5m }
-                };
-
-                db.ProductPrice.AddRange(priceToAdd);
-
-                var rows = db.SaveChanges();
-                System.Console.WriteLine($"Number of rows: {rows}");
-            }
-        }
-
         private void CreateTestDataBill()
         {
             System.Console.WriteLine("CREATE BILLS");
@@ -245,11 +235,11 @@ namespace Maasgroep.Console
 
                 var billToAdd = new List<Bill>()
                 {
-                    new Bill() { MemberCreated = member, IsGuest = false, Member = member1 },
-                    new Bill() { MemberCreated = member, IsGuest = false, Member = member2 },
+                    new Bill() { MemberCreatedId = member.Id, IsGuest = false, Member = member1 },
+                    new Bill() { MemberCreatedId = member.Id, IsGuest = false, Member = member2 },
                     new Bill()
                     {
-                        MemberCreated = member, IsGuest = true, Name = "Neefje van Donald",
+                        MemberCreatedId = member.Id, IsGuest = true, Name = "Neefje van Donald",
                         Note = "Meteen betaald in Duckaten"
                     }
                 };

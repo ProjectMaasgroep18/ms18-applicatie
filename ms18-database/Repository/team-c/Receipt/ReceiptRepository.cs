@@ -5,7 +5,6 @@ using Maasgroep.SharedKernel.DataModels.Receipts;
 
 namespace Maasgroep.Database.Receipts
 {
-
     public class ReceiptRepository : EditableRepository<Receipt, ReceiptModel, ReceiptData, ReceiptHistory>, IReceiptRepository
     {
 		protected readonly ReceiptStatusRepository Statuses;

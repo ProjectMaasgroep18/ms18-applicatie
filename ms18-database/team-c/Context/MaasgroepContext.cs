@@ -34,7 +34,6 @@ namespace Maasgroep.Database
 
 		public DbSet<Product> Product { get; set; }
 		public DbSet<Stock> Stock { get; set; }
-		public DbSet<ProductPrice> ProductPrice { get; set; }
 		public DbSet<Line> OrderLines { get; set; }
 		public DbSet<Bill> Bills { get; set; }
 
@@ -44,7 +43,6 @@ namespace Maasgroep.Database
 
 		public DbSet<ProductHistory> ProductHistory { get; set; }
 		public DbSet<StockHistory> StockHistory { get; set; }
-		public DbSet<ProductPriceHistory> ProductPriceHistory { get; set; }
 		public DbSet<LineHistory> LineHistory { get; set; }
 		public DbSet<BillHistory> BillHistory { get; set; }
 
@@ -91,13 +89,11 @@ namespace Maasgroep.Database
 			#region Order
 			CreateProduct(modelBuilder);
 			CreateStock(modelBuilder);
-			CreateProductPrice(modelBuilder);
 			CreateOrderLine(modelBuilder);
 			CreateBill(modelBuilder);
 
 			CreateProductHistory(modelBuilder);
 			CreateStockHistory(modelBuilder);
-			CreateProductPriceHistory(modelBuilder);
 			CreateOrderLineHistory(modelBuilder);
 			CreateBillHistory(modelBuilder);
 			#endregion
@@ -510,43 +506,6 @@ namespace Maasgroep.Database
 				.OnDelete(DeleteBehavior.NoAction);
 		}
 
-		private void CreateProductPrice(ModelBuilder modelBuilder)
-		{
-			modelBuilder.Entity<ProductPrice>().HasKey(pp => pp.ProductId);
-			modelBuilder.Entity<ProductPrice>().ToTable("productPrice", "order");
-			modelBuilder.Entity<ProductPrice>().ToTable(pp => pp.HasCheckConstraint("CK_orderProductPrice_price", "\"Price\" >= 0"));
-			modelBuilder.Entity<ProductPrice>().Property(pp => pp.DateTimeCreated).HasDefaultValueSql("now()");
-			modelBuilder.Entity<ProductPrice>().Property(pp => pp.Price).HasPrecision(18, 2);
-
-			modelBuilder.Entity<ProductPrice>()
-				.HasOne(pp => pp.Product)
-				.WithOne(p => p.ProductPrice)
-				.HasForeignKey<ProductPrice>(pp => pp.ProductId)
-				.HasConstraintName("FK_orderProductPrice_product")
-				.OnDelete(DeleteBehavior.NoAction);
-
-			modelBuilder.Entity<ProductPrice>()
-				.HasOne(pp => pp.MemberCreated)
-				.WithMany(m => m.ProductPricesCreated)
-				.HasForeignKey(pp => pp.MemberCreatedId)
-				.HasConstraintName("FK_orderProductPrice_memberCreated")
-				.OnDelete(DeleteBehavior.NoAction);
-
-			modelBuilder.Entity<ProductPrice>()
-				.HasOne(pp => pp.MemberModified)
-				.WithMany(m => m.ProductPricesModified)
-				.HasForeignKey(pp => pp.MemberModifiedId)
-				.HasConstraintName("FK_orderProductPrice_memberModified")
-				.OnDelete(DeleteBehavior.NoAction);
-
-			modelBuilder.Entity<ProductPrice>()
-				.HasOne(pp => pp.MemberDeleted)
-				.WithMany(m => m.ProductPricesDeleted)
-				.HasForeignKey(pp => pp.MemberDeletedId)
-				.HasConstraintName("FK_orderProductPrice_memberDeleted")
-				.OnDelete(DeleteBehavior.NoAction);
-		}
-
 		private void CreateBill(ModelBuilder modelBuilder)
 		{
 			modelBuilder.Entity<Bill>().HasKey(b => b.Id);
@@ -611,15 +570,6 @@ namespace Maasgroep.Database
 			modelBuilder.HasSequence<long>("lineSeq", schema: "orderHistory").StartsAt(1).IncrementsBy(1);
 			modelBuilder.Entity<LineHistory>().Property(l => l.Id).HasDefaultValueSql("nextval('\"orderHistory\".\"lineSeq\"')");
 			modelBuilder.Entity<LineHistory>().Property(l => l.RecordCreated).HasDefaultValueSql("now()");
-		}
-
-		private void CreateProductPriceHistory(ModelBuilder modelBuilder)
-		{
-			modelBuilder.Entity<ProductPriceHistory>().ToTable("productPrice", "orderHistory");
-			modelBuilder.HasSequence<long>("productPriceSeq", schema: "orderHistory").StartsAt(1).IncrementsBy(1);
-			modelBuilder.Entity<ProductPriceHistory>().Property(pp => pp.Id).HasDefaultValueSql("nextval('\"orderHistory\".\"productPriceSeq\"')");
-			modelBuilder.Entity<ProductPriceHistory>().Property(pp => pp.RecordCreated).HasDefaultValueSql("now()");
-			modelBuilder.Entity<ProductPriceHistory>().Property(pp => pp.Price).HasPrecision(18, 2);
 		}
 
 		private void CreateBillHistory(ModelBuilder modelBuilder)

@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Maasgroep.Database.Migrations
 {
     [DbContext(typeof(MaasgroepContext))]
-    [Migration("20231216141504_fixApproval")]
-    partial class fixApproval
+    [Migration("20231217143928_productUpdate")]
+    partial class productUpdate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -38,8 +38,6 @@ namespace Maasgroep.Database.Migrations
             modelBuilder.HasSequence("permissionSeq", "admin");
 
             modelBuilder.HasSequence("photoSeq", "receipt");
-
-            modelBuilder.HasSequence("productPriceSeq", "orderHistory");
 
             modelBuilder.HasSequence("productSeq", "order");
 
@@ -445,6 +443,9 @@ namespace Maasgroep.Database.Migrations
                     b.Property<double>("Price")
                         .HasColumnType("double precision");
 
+                    b.Property<int>("PriceQuantity")
+                        .HasColumnType("integer");
+
                     b.HasKey("Id");
 
                     b.HasIndex("MemberCreatedId");
@@ -463,6 +464,10 @@ namespace Maasgroep.Database.Migrations
                         .HasColumnType("bigint")
                         .HasDefaultValueSql("nextval('\"orderHistory\".\"productSeq\"')");
 
+                    b.Property<string>("Color")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<DateTime>("DateTimeCreated")
                         .HasColumnType("timestamp with time zone");
 
@@ -471,6 +476,10 @@ namespace Maasgroep.Database.Migrations
 
                     b.Property<DateTime?>("DateTimeModified")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Icon")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<long?>("MemberCreatedId")
                         .HasColumnType("bigint");
@@ -486,6 +495,12 @@ namespace Maasgroep.Database.Migrations
                         .HasMaxLength(2048)
                         .HasColumnType("character varying(2048)");
 
+                    b.Property<double>("Price")
+                        .HasColumnType("double precision");
+
+                    b.Property<int>("PriceQuantity")
+                        .HasColumnType("integer");
+
                     b.Property<long>("ProductId")
                         .HasColumnType("bigint");
 
@@ -497,94 +512,6 @@ namespace Maasgroep.Database.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("product", "orderHistory");
-                });
-
-            modelBuilder.Entity("Maasgroep.Database.Orders.ProductPrice", b =>
-                {
-                    b.Property<long>("ProductId")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime>("DateTimeCreated")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasDefaultValueSql("now()");
-
-                    b.Property<DateTime?>("DateTimeDeleted")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime?>("DateTimeModified")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<long>("Id")
-                        .HasColumnType("bigint");
-
-                    b.Property<long?>("MemberCreatedId")
-                        .HasColumnType("bigint");
-
-                    b.Property<long?>("MemberDeletedId")
-                        .HasColumnType("bigint");
-
-                    b.Property<long?>("MemberModifiedId")
-                        .HasColumnType("bigint");
-
-                    b.Property<decimal>("Price")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("numeric(18,2)");
-
-                    b.HasKey("ProductId");
-
-                    b.HasIndex("MemberCreatedId");
-
-                    b.HasIndex("MemberDeletedId");
-
-                    b.HasIndex("MemberModifiedId");
-
-                    b.ToTable("productPrice", "order", t =>
-                        {
-                            t.HasCheckConstraint("CK_orderProductPrice_price", "\"Price\" >= 0");
-                        });
-                });
-
-            modelBuilder.Entity("Maasgroep.Database.Orders.ProductPriceHistory", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasDefaultValueSql("nextval('\"orderHistory\".\"productPriceSeq\"')");
-
-                    b.Property<DateTime>("DateTimeCreated")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime?>("DateTimeDeleted")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime?>("DateTimeModified")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<long?>("MemberCreatedId")
-                        .HasColumnType("bigint");
-
-                    b.Property<long?>("MemberDeletedId")
-                        .HasColumnType("bigint");
-
-                    b.Property<long?>("MemberModifiedId")
-                        .HasColumnType("bigint");
-
-                    b.Property<decimal>("Price")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("numeric(18,2)");
-
-                    b.Property<long>("ProductId")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime>("RecordCreated")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasDefaultValueSql("now()");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("productPrice", "orderHistory");
                 });
 
             modelBuilder.Entity("Maasgroep.Database.Orders.Stock", b =>
@@ -712,9 +639,6 @@ namespace Maasgroep.Database.Migrations
                     b.HasIndex("MemberDeletedId");
 
                     b.HasIndex("MemberModifiedId");
-
-                    b.HasIndex("Name")
-                        .IsUnique();
 
                     b.ToTable("costCentre", "receipt");
                 });
@@ -1196,42 +1120,6 @@ namespace Maasgroep.Database.Migrations
                     b.Navigation("MemberModified");
                 });
 
-            modelBuilder.Entity("Maasgroep.Database.Orders.ProductPrice", b =>
-                {
-                    b.HasOne("Maasgroep.Database.Admin.Member", "MemberCreated")
-                        .WithMany("ProductPricesCreated")
-                        .HasForeignKey("MemberCreatedId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .HasConstraintName("FK_orderProductPrice_memberCreated");
-
-                    b.HasOne("Maasgroep.Database.Admin.Member", "MemberDeleted")
-                        .WithMany("ProductPricesDeleted")
-                        .HasForeignKey("MemberDeletedId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .HasConstraintName("FK_orderProductPrice_memberDeleted");
-
-                    b.HasOne("Maasgroep.Database.Admin.Member", "MemberModified")
-                        .WithMany("ProductPricesModified")
-                        .HasForeignKey("MemberModifiedId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .HasConstraintName("FK_orderProductPrice_memberModified");
-
-                    b.HasOne("Maasgroep.Database.Orders.Product", "Product")
-                        .WithOne("ProductPrice")
-                        .HasForeignKey("Maasgroep.Database.Orders.ProductPrice", "ProductId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired()
-                        .HasConstraintName("FK_orderProductPrice_product");
-
-                    b.Navigation("MemberCreated");
-
-                    b.Navigation("MemberDeleted");
-
-                    b.Navigation("MemberModified");
-
-                    b.Navigation("Product");
-                });
-
             modelBuilder.Entity("Maasgroep.Database.Orders.Stock", b =>
                 {
                     b.HasOne("Maasgroep.Database.Admin.Member", "MemberCreated")
@@ -1450,12 +1338,6 @@ namespace Maasgroep.Database.Migrations
 
                     b.Navigation("PhotosModified");
 
-                    b.Navigation("ProductPricesCreated");
-
-                    b.Navigation("ProductPricesDeleted");
-
-                    b.Navigation("ProductPricesModified");
-
                     b.Navigation("ProductsCreated");
 
                     b.Navigation("ProductsDeleted");
@@ -1494,9 +1376,6 @@ namespace Maasgroep.Database.Migrations
             modelBuilder.Entity("Maasgroep.Database.Orders.Product", b =>
                 {
                     b.Navigation("OrderLines");
-
-                    b.Navigation("ProductPrice")
-                        .IsRequired();
 
                     b.Navigation("Stock")
                         .IsRequired();

@@ -3,10 +3,8 @@ using Maasgroep.Database;
 using Maasgroep.Database.Interfaces;
 using Maasgroep.Database.Receipts;
 using Maasgroep.Database.Admin;
-// using Maasgroep.Database.Orders;
-// using Maasgroep.SharedKernel.Interfaces.Members;
-// using Maasgroep.SharedKernel.Interfaces.Orders;
-// using Maasgroep.Services;
+using Maasgroep.Database.Orders;
+using Microsoft.AspNetCore.Mvc;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -21,13 +19,21 @@ builder.Services.AddTransient<IReceiptApprovalRepository, ReceiptApprovalReposit
 builder.Services.AddTransient<IReceiptPhotoRepository, ReceiptPhotoRepository>();
 builder.Services.AddTransient<IReceiptStatusRepository, ReceiptStatusRepository>();
 builder.Services.AddTransient<IMemberRepository, MemberRepository>();
-// builder.Services.AddTransient<IOrderRepository, OrderRepository>();
-// builder.Services.AddTransient<IMemberService, MemberService>();/////????
+builder.Services.AddTransient<IProductRepository, ProductRepository>();
 
 // Add services to the container.
 builder.Services.AddControllersWithViews(options => {
     
+    // Filter special MaasgroepExceptions that are thrown in our controllers
     options.Filters.Add<MaasgroepExceptionFilter>();
+    
+}).ConfigureApiBehaviorOptions(options =>
+{
+    // Model validation error when posting/putting data
+    options.InvalidModelStateResponseFactory = context => new BadRequestObjectResult(new {
+        error = 400,
+        message = "Ongeldige gegevens opgegeven",
+    });
 });
 
 builder.Services.AddSwaggerGen();
@@ -39,12 +45,8 @@ app.UseHsts();
 app.UseSwagger();
 app.UseSwaggerUI();
 
-
-// app.UseHttpsRedirection(); // TODO Reenable for production, only disabled for testing
 app.UseStaticFiles();
-
 app.UseRouting();
-
 app.UseAuthorization();
 
 app.MapControllers();

@@ -5,7 +5,6 @@ using Maasgroep.SharedKernel.DataModels.Receipts;
 
 namespace Maasgroep.Database.Receipts
 {
-
     public class ReceiptApprovalRepository : WritableRepository<ReceiptApproval, ReceiptApprovalModel, ReceiptApprovalData>, IReceiptApprovalRepository
     {
         protected ReceiptRepository Receipts;

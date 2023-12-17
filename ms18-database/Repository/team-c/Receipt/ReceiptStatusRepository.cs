@@ -3,7 +3,6 @@ using Maasgroep.SharedKernel.ViewModels.Receipts;
 
 namespace Maasgroep.Database.Receipts
 {
-
     public class ReceiptStatusRepository : IReceiptStatusRepository
     {
         const ReceiptStatus UnknownStatus = ReceiptStatus.Onbekend; 
