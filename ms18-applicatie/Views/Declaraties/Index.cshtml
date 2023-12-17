@@ -15,7 +15,7 @@
 
 @section scripts {
 <script>
-    getUserSession().then(member => {
+    getUserSession().then(async member => {
         // User session loaded
      
         const userId = member.id;

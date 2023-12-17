@@ -12,14 +12,20 @@ const ERROR_MSG = document.querySelector('#error');
 
 function hideElement(el) {
     // Add "hidden" class to element
-
-    el.classList.add('hidden');
+    
+    if (el.toString() == '[object NodeList]')
+        el.forEach(el => el.classList.add('hidden'));
+    else if ('classList' in el)
+        el.classList.add('hidden');
 }
 
 function showElement(el) {
     // Remove "hidden" class from element
     
-    el.classList.remove('hidden');
+    if (el.toString() == '[object NodeList]')
+        el.forEach(el => el.classList.remove('hidden'));
+    else if ('classList' in el)
+        el.classList.remove('hidden');
 }
 
 function setLoadMessage(msg) {
@@ -136,6 +142,13 @@ function showOutput(data, container) {
         zero(val) {
             // Default to zero instead of "", null, undefined, etc.
             return !val ? 0 : val;
+        },
+        dateTime(val) {
+            // Readable date/time (in browser timezone)
+            let date = new Date(val);
+            if (date === "Invalid Date" || isNaN(date))
+                return val;
+            return date.getDate() + '-' + (date.getMonth() + 1) + '-' + date.getFullYear() + ' ' + date.getHours() + ':' + date.getMinutes();
         }
     };
 
@@ -276,3 +289,75 @@ function dropContainer(container) {
 
 // Init drop containers
 document.querySelectorAll('.drop-container').forEach(dropContainer);
+
+async function apiGetInfinite(action, container, onLoadItems, perPage, page) {
+    // Call API get method that supports infinite scroll (i.e., offset/limit parameters)
+
+    const toElement = value => typeof value == 'string' ? document.querySelector(value) : typeof value == 'object' ? value : null;
+    container = toElement(container);
+
+    const limit = perPage || 1; ///////////////
+    const offset = ((page || 1) - 1) * limit;
+    const params = '?offset=' + encodeURIComponent(offset) + '&limit=' + encodeURIComponent(limit);
+    
+    const results = await apiGet(action + params);
+    if (!container || !('querySelector' in container)) {
+        if (typeof onLoadItems == 'function')
+            onLoadItems(null, results);
+        return results;
+    }
+
+    showElement(container);
+    
+    // Show or hide "no results" message
+    const noResults = (!results || results.length == 0) && page == 1;
+    noResults ? showElement(container.querySelectorAll('.result-empty')) : hideElement(container.querySelectorAll('.result-empty'));
+    
+    const baseItem = container.querySelector('.result-item');
+    const newItems = [];
+    if (!baseItem) {
+        if (typeof onLoadItems == 'function')
+            onLoadItems(null, results);
+        return results;
+    }
+
+    for (id in results) {
+        // Generate and populate output elements
+
+        const resultItem = baseItem.cloneNode(true);
+        if (!resultItem)
+            continue;
+        resultItem.classList.add('result-item-loaded');
+        showOutput(results[id], resultItem);
+        let allItems = container.querySelectorAll('.result-item-loaded');
+        let lastItem = allItems.length ? allItems[allItems.length - 1] : baseItem;
+        lastItem.insertAdjacentElement('afterend', resultItem);
+        newItems.push(resultItem);
+    }
+
+    hideElement(baseItem);
+
+    if (results.length < limit) {
+        // No more results
+        hideElement(container.querySelectorAll('.result-has-more'));
+    } else {
+        // There are more results
+        const moreLink = container.querySelector('.result-show-more');
+        if (moreLink) {
+            const newMoreLink = moreLink.cloneNode(true); // Removes old data
+            newMoreLink.addEventListener('click', event => {
+                // Load next page of results
+                event.preventDefault();
+                apiGetInfinite(action, container, onLoadItems, perPage, (page || 1) + 1);
+            });
+            moreLink.insertAdjacentElement('afterend', newMoreLink);
+            moreLink.remove();
+        }
+        showElement(container.querySelectorAll('.result-has-more'));
+    }
+
+    if (typeof onLoadItems == 'function')
+        onLoadItems(newItems, results);
+
+    return results;
+}

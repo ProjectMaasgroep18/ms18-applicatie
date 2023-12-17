@@ -18,25 +18,29 @@
                 <th>Opmerking</th>
                 <th>Status</th>
                 <th>Kostencentrum</th>
-                <th>Datum</th>
+                <th>Aangemaakt</th>
                 <th></th>
             </tr>
             
-            <tr id="user-receipts-empty" class="hidden">
+            <tr class="result-empty hidden">
                 <td colspan="999">Je hebt nog geen bonnetjes ingeleverd.</td>
             </tr>
             
-            <tr id="user-receipts-row" class="hidden">
+            <tr class="result-item hidden">
                 <td rel="amount::euro"></td>
                 <td rel="note"></td>
                 <td rel="statusString,statusId:data-status"></td>
                 <td rel="costCentre.name,costCentreId:data-cost-centre"></td>
-                <td>(DATUM)</td>
+                <td rel="dateTimeCreated::dateTime"></td>
                 <td class="user-actions">
                     <a class="view-action" rel="id:href:viewUrl">Bekijken</a>
                     <a class="edit-action" rel="id:href:editUrl">Aanpassen</a>
-                    <a class="edit-action" rel="id:data-id" href="#" class="delete-link">Verwijderen</a>
+                    <a class="edit-action" href="#" class="delete-link">Verwijderen</a>
                 </td>
+            </tr>
+
+            <tr class="result-has-more hidden">
+                <td colspan="999"><a href="#" class="result-show-more">Toon meer</a></td>
             </tr>
         </table>
 
@@ -52,54 +56,46 @@
         const userId = member.id;
         showElement(document.querySelector('#login-user'));
         showOutput(member, document.querySelector('#login-info'));
+
+        const receiptsDiv = document.querySelector('#user-receipts');
         
-        apiGet('User/' + userId + '/Receipt').then(receipts => {
+        apiGetInfinite('User/' + userId + '/Receipt', receiptsDiv, (elements, receipts) => {
             // Receipts data loaded
 
-            const noReceipts = (!receipts || !receipts.length);
-            const receiptsTable = document.querySelector('#user-receipts .data-table');
-            if (noReceipts) {
-                showElement(document.querySelector('#user-receipts-empty'));
-            } else {
-                hideElement(document.querySelector('#user-receipts-empty'));
-            }
-            for (id in receipts) {
-                const receiptRow = document.querySelector('#user-receipts-row').cloneNode(true);
-                receiptRow.id = 'user-receipts-' + receipts[id].id;
-                showElement(receiptRow);
-                showOutput(receipts[id], receiptRow);
+            for (i in receipts) {
+                const element = elements[i];
+                element.id = 'user-receipts-' + receipts[i].id;
                 if (!receipts[id].isEditable) {
                     // Not editable (already approved/paid)
-                    receiptRow.querySelectorAll('.user-actions .edit-action').forEach(element => hideElement(element));
+                    element.querySelectorAll('.user-actions .edit-action').forEach(element => hideElement(element));
                 } else {
                     // No need to have "view" if there's already "edit"
-                    receiptRow.querySelectorAll('.user-actions .view-action').forEach(element => hideElement(element));
+                    element.querySelectorAll('.user-actions .view-action').forEach(element => hideElement(element));
                 }
-                receiptsTable.appendChild(receiptRow);
-            }
-            showElement(document.querySelector('#user-receipts'));
-            receiptsTable.querySelectorAll('.delete-link').forEach(deleteLink => deleteLink.addEventListener('click', event => {
-                // Click Delete link
 
-                event.preventDefault();
+                element.querySelector('.delete-link')?.addEventListener('click', event => {
+                    // Click Delete link
 
-                if (!window.confirm('Weet je zeker dat je deze declaratie wilt verwijderen?'))
-                    return;
+                    event.preventDefault();
 
-                const deleteId = deleteLink.dataset.id;
-                const receiptRow = receiptsTable.querySelector('#user-receipts-' + deleteId);
-                hideElement(receiptRow.querySelector('.user-actions'));
-
-                apiDelete('Receipt/' + deleteId).then(result => {
-                    if (!result)
+                    if (!window.confirm('Weet je zeker dat je deze declaratie wilt verwijderen?'))
                         return;
 
-                    // Receipt deleted in database, clean it up here too
-                    receiptRow.remove();
-                    if (receiptsTable.querySelectorAll('tr:not(.hidden)').length <= 1)
-                        showElement(document.querySelector('#user-receipts-empty'));
+                    const deleteId = receipts[i];
+                    const element = receiptsTable.querySelector('#user-receipts-' + deleteId);
+                    hideElement(element.querySelector('.user-actions'));
+
+                    apiDelete('Receipt/' + deleteId).then(result => {
+                        if (!result)
+                            return;
+
+                        // Receipt deleted in database, clean it up here too
+                        element.remove();
+                        if (receiptsTable.querySelectorAll('tr:not(.hidden)').length <= 1)
+                            showElement(document.querySelector('#user-receipts-empty'));
+                    });
                 });
-            }));
+            }
         });
     });
 </script>

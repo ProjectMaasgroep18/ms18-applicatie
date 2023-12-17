@@ -12,7 +12,7 @@
             door
             <b rel="memberCreated.name"></b>
             op
-            <b>(DATUM)</b>
+            <b rel="dateTimeCreated::dateTime"></b>
             <br>
             <i rel="note"></i>
         </p>
@@ -22,7 +22,7 @@
 
     <form method="post" id="receipt-form" class="hidden">
 
-        <table>
+        <table class="data-table">
             <tr>
                 <td>Bedrag: </td>
                 <td><input type="number" name="Amount" step="0.01" rel="amount:value"></td>
@@ -58,13 +58,16 @@
         <p><i>Foto's:</i></p>
 
         <div id="receipt-photos">
-            <div id="receipt-photo" class="hidden">
+            <div class="result-item hidden">
                 <img class="drop-image">
                 <p class="user-actions">
                     <a href="#" class="delete-photo">Verwijderen</a>
                 </p>
             </div>
-            <p id="receipt-photos-none" class="hidden">Er zijn foto's bij deze declaratie</p>
+            <p class="result-empty hidden">Er zijn geen foto's bij deze declaratie</p>
+            <p class="result-has-more hidden">
+                <a href="#" class="result-show-more">Toon meer</a>
+            </p>
         </div>
 
         <p><button type="button" class="btn btn-secondary" id="receipt-extra-photo">Extra foto toevoegen</button></p>
@@ -102,101 +105,92 @@
         if (!result)
             return;
 
-        // Photo deleted in database, clean it up here too
-        photoContainer.remove();
-        if (photosDiv.querySelectorAll(':not(.hidden) img').length <= 1)
-            showElement(document.querySelector('#receipt-photos-none'));
+        window.location.href = window.location.href.toString().replace(/#.*$/, '');
     }
 
-    getUserSession().then(member => {
+    getUserSession().then(async member => {
         // User session loaded
      
         showElement(document.querySelector('#login-user'));
         showOutput(member, document.querySelector('#login-info'));
 
-        apiGet('CostCentre').then(costCentres => {
-            // Cost centres loaded
+        // Load all cost centres
+        let costCentrePage = 1;
+        let costCentres = [];
+        let newCostCentres;
+        do {
+            newCostCentres = await apiGetInfinite('CostCentre', null, null, null, costCentrePage);
+            newCostCentres.forEach(c => costCentres.push(c));
+            costCentrePage++;
+        } while (newCostCentres && newCostCentres.length > 0);
 
-            let select = document.querySelector('#cost-centres');
-            for (i in costCentres) {
-                // Populate cost centre <select>
+        let select = document.querySelector('#cost-centres');
+        for (i in costCentres) {
+            // Populate cost centre <select>
 
-                let costCentre = document.querySelector('#cost-centre').cloneNode(true);
-                let id = costCentres[i].id;
-                costCentre.id = 'cost-centre-' + id;
-                costCentre.value = id;
-                costCentre.innerText = costCentres[i].name;
-                select.appendChild(costCentre);
+            let costCentre = document.querySelector('#cost-centre').cloneNode(true);
+            let id = costCentres[i].id;
+            costCentre.id = 'cost-centre-' + id;
+            costCentre.value = id;
+            costCentre.innerText = costCentres[i].name;
+            select.appendChild(costCentre);
+        }
+        select.value = 0;
+        document.querySelector('#cost-centre').remove();
+
+        apiGet('Receipt/' + receiptId).then(receipt => {
+            // Receipt loaded
+
+            if (!receipt.isEditable) {
+                // No longer editable, redirect to View page instead
+                window.location.href = '/Declaraties/Bekijken/' + receiptId;
+                return;
             }
-            select.value = 0;
-            document.querySelector('#cost-centre').remove();
 
-            apiGet('Receipt/' + receiptId).then(receipt => {
-                // Receipt loaded
+            showOutput(receipt, document.querySelector('#receipt-form'));
 
-                if (!receipt.isEditable) {
-                    // No longer editable, redirect to View page instead
-                    window.location = '/Declaraties/Bekijken/' + receiptId;
-                    return;
+            apiGetInfinite('Receipt/' + receiptId + '/Photo', photosDiv, (elements, result) => {
+                // Load receipt photos
+                for (i in result) {
+                    let photo = elements[i];
+                    let img = photo.querySelector('img');
+                    let deleteLink = photo.querySelector('.delete-photo');
+                    let id = result[i].id;
+                    deleteLink.addEventListener('click', event => {
+                        event.preventDefault();
+                        deletePhoto(id);
+                    });
+                    photo.id = 'receipt-photo-' + id;
+                    img.src = result[i].base64Image;
                 }
+            });
 
-                showOutput(receipt, document.querySelector('#receipt-form'));
+            apiGet('Receipt/' + receiptId + '/Approve?limit=1').then(result => {
+                // Get the first (newest) receipt approval, if any
 
-                apiGet('Receipt/' + receiptId + '/Photo').then(result => {
-                    // Show all receipt photos
+                if (typeof result[0] == 'undefined')
+                    return;
 
-                    if (typeof result[0] == 'undefined') {
-                        showElement(document.querySelector('#receipt-photos-none'));
-                        return;
-                    }
-
-                    for (i in result) {
-                        let photo = document.querySelector('#receipt-photo').cloneNode(true);
-                        let img = photo.querySelector('img');
-                        let deleteLink = photo.querySelector('.delete-photo');
-                        let id = result[i].id;
-                        deleteLink.addEventListener('click', event => {
-                            event.preventDefault();
-                            deletePhoto(id);
-                        });
-                        photo.id = 'receipt-photo-' + id;
-                        img.src = result[i].base64Image;
-                        showElement(photo);
-                        photosDiv.appendChild(photo);
-                    }
-
-                });
-
-                apiGet('Receipt/' + receiptId + '/Approve').then(result => {
-                    // Get receipt approvals
-
-                    if (typeof result[0] == 'undefined')
-                        return;
-
-                    // Show only first (newest) approval
-
-                    showElement(approvalDiv);
-                    let approval = document.querySelector('#receipt-approval-previous').cloneNode(true);
-                    let img = approval.querySelector('img');
-                    let id = result[0].id;
-                    
-                    if (result[0].paid) {
-                        // Uitbetaald
-                        approval.querySelector('.status-approved')?.remove();
-                        approval.querySelector('.status-rejected')?.remove();
-                    } else if (result[0].approved) {
-                        // Goedgekeurd
-                        approval.querySelector('.status-paid')?.remove();
-                        approval.querySelector('.status-rejected')?.remove();
-                    } else {
-                        // Afgekeurd
-                        approval.querySelector('.status-paid')?.remove();
-                        approval.querySelector('.status-approved')?.remove();
-                    }
-                    approval.id = 'receipt-approval-' + id;
-                    showOutput(result[0], approval);
-                    approvalDiv.appendChild(approval);
-                });
+                showElement(approvalDiv);
+                let approval = document.querySelector('#receipt-approval-previous').cloneNode(true);
+                let id = result[0].id;
+                
+                if (result[0].paid) {
+                    // Uitbetaald
+                    approval.querySelector('.status-approved')?.remove();
+                    approval.querySelector('.status-rejected')?.remove();
+                } else if (result[0].approved) {
+                    // Goedgekeurd
+                    approval.querySelector('.status-paid')?.remove();
+                    approval.querySelector('.status-rejected')?.remove();
+                } else {
+                    // Afgekeurd
+                    approval.querySelector('.status-paid')?.remove();
+                    approval.querySelector('.status-approved')?.remove();
+                }
+                approval.id = 'receipt-approval-' + id;
+                showOutput(result[0], approval);
+                approvalDiv.appendChild(approval);
             });
         });
     });
@@ -266,24 +260,12 @@
         
             if (result) {
                 uploadsFinished++;
-
-                // Show the photo here
-                let photo = document.querySelector('#receipt-photo').cloneNode(true);
-                let img = photo.querySelector('img');
-                let deleteLink = photo.querySelector('.delete-photo');
-                let id = result.id;
-                photo.id = 'receipt-photo-' + id;
-                img.src = result.base64Image;
-                deleteLink.addEventListener('click', event => {
-                    event.preventDefault();
-                    deletePhoto(id);
-                });
-                showElement(photo);
-                photosDiv.appendChild(photo);
             } else {
                 handleError('Uploaden mislukt');
             }
         }
+        if (uploadsFinished == uploadsTotal)
+            window.location.href = window.location.href.toString().replace(/#.*$/, '');
     });
 
 

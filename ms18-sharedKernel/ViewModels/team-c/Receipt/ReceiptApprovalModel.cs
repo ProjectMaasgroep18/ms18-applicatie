@@ -10,5 +10,6 @@ namespace Maasgroep.SharedKernel.ViewModels.Receipts
 		public bool Approved { get; set; }
 		public bool Paid { get; set; }
 		public MemberModel? MemberCreated { get; set; }
+		public DateTime? DateTimeCreated { get; set; }
 	}
 }

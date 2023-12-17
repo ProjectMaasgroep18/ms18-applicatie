@@ -23,5 +23,7 @@ namespace Maasgroep.SharedKernel.ViewModels.Receipts
 		public bool IsEditable { get => Status != ReceiptStatus.Goedgekeurd && Status != ReceiptStatus.Uitbetaald; }
 		public bool IsApprovable { get => Status == ReceiptStatus.Ingediend; }
 		public bool IsPayable { get => Status == ReceiptStatus.Goedgekeurd; }
+		public DateTime? DateTimeCreated { get; set; }
+		public DateTime? DateTimeModified { get; set; }
 	}
 }

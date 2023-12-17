@@ -38,6 +38,8 @@ namespace Maasgroep.Database.Receipts
 					Id = member.Id,
 					Name = member.Name,
 				},
+				DateTimeCreated = receipt.DateTimeCreated,
+				DateTimeModified = receipt.DateTimeModified,
 			};
         }
 

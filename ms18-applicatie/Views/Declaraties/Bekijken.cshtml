@@ -8,7 +8,7 @@
 
     <div id="receipt-form" class="hidden">
 
-        <table>
+        <table class="data-table">
             <tr>
                 <td>Bedrag: </td>
                 <td><b rel="amount:euro"></b></td>
@@ -27,7 +27,7 @@
             </tr>
             <tr>
                 <td>Aangemaakt op: </td>
-                <td><b>(DATUM)</b></td>
+                <td><b rel="dateTimeCreated::dateTime"></b></td>
             </tr>
             <tr>
                 <td>Status: </td>
@@ -43,10 +43,13 @@
         <p><i>Foto's:</i></p>
 
         <div id="receipt-photos">
-            <div id="receipt-photo" class="hidden">
+            <div class="result-item hidden">
                 <img class="drop-image">
             </div>
-            <p id="receipt-photos-none" class="hidden">Er zijn geen foto's bij deze declaratie</p>
+            <p class="result-empty hidden">Er zijn geen foto's bij deze declaratie</p>
+            <p class="result-has-more hidden">
+                <a href="#" class="result-show-more">Toon meer</a>
+            </p>
         </div>
 
     </div>
@@ -54,16 +57,19 @@
     &nbsp;
 
     <div id="receipt-approval-list">
-        <p id="receipt-approval-previous" class="hidden">
+        <p class="result-item" class="hidden">
             <b class="status-approved">Goedgekeurd</b>
             <b class="status-rejected">Afgekeurd</b>
             <b class="status-paid">Uitbetaald</b>
             door
             <b rel="memberCreated.name"></b>
             op
-            <b>(DATUM)</b>
+            <b rel="dateTimeCreated::dateTime"></b>
             <br>
             <i rel="note"></i>
+        </p>
+        <p class="result-has-more hidden">
+            <a href="#" class="result-show-more">Toon meer</a>
         </p>
     </div>
 
@@ -116,7 +122,7 @@
     const photosDiv = document.querySelector('#receipt-photos');
     const approvalDiv = document.querySelector('#receipt-approval-list');
 
-    getUserSession().then(member => {
+    getUserSession().then(async member => {
         // User session loaded
      
         showElement(document.querySelector('#login-user'));
@@ -137,61 +143,39 @@
             if (!receipt.isApprovable && !receipt.isPayable)
                 showElement(document.querySelector('#receipt-processed'));
 
-            apiGet('Receipt/' + receiptId + '/Photo').then(result => {
-                // Show all receipt photos
-
-                showElement(photosDiv);
-
-                if (typeof result[0] == 'undefined') {
-                    showElement(document.querySelector('#receipt-photos-none'));
-                    return;
-                }
-
-                for (i in result) {
-                    let photo = document.querySelector('#receipt-photo').cloneNode(true);
+            
+            apiGetInfinite('Receipt/' + receiptId + '/Photo', photosDiv, (elements, photos) => {
+                // Load receipt photos
+                for (i in photos) {
+                    let photo = elements[i];
                     let img = photo.querySelector('img');
-                    let id = result[i].id;
+                    let id = photos[i].id;
                     photo.id = 'receipt-photo-' + id;
-                    img.src = result[i].base64Image;
-                    showElement(photo);
-                    photosDiv.appendChild(photo);
+                    img.src = photos[i].base64Image;
                 }
-
             });
 
-            apiGet('Receipt/' + receiptId + '/Approve').then(result => {
-                // Show all receipt approvals
-
-                showElement(approvalDiv);
-
-                if (typeof result[0] == 'undefined') {
-                    showElement(document.querySelector('#receipt-approval-none'));
-                    return;
-                }
-
-                for (i in result) {
-                    let approval = document.querySelector('#receipt-approval-previous').cloneNode(true);
-                    let img = approval.querySelector('img');
-                    let id = result[i].id;
+            apiGetInfinite('Receipt/' + receiptId + '/Approve', approvalDiv, (elements, approvals) => {
+                // Load receipt approvals
+                for (i in approvals) {
+                    let element = elements[i];
+                    let id = approvals[i].id;
                     
-                    if (result[i].paid) {
+                    if (approvals[i].paid) {
                         // Uitbetaald
-                        approval.querySelector('.status-approved')?.remove();
-                        approval.querySelector('.status-rejected')?.remove();
-                    } else if (result[i].approved) {
+                        element.querySelector('.status-approved')?.remove();
+                        element.querySelector('.status-rejected')?.remove();
+                    } else if (approvals[i].approved) {
                         // Goedgekeurd
-                        approval.querySelector('.status-paid')?.remove();
-                        approval.querySelector('.status-rejected')?.remove();
+                        element.querySelector('.status-paid')?.remove();
+                        element.querySelector('.status-rejected')?.remove();
                     } else {
                         // Afgekeurd
-                        approval.querySelector('.status-paid')?.remove();
-                        approval.querySelector('.status-approved')?.remove();
+                        element.querySelector('.status-paid')?.remove();
+                        element.querySelector('.status-approved')?.remove();
                     }
-                    approval.id = 'receipt-approval-' + id;
-                    showOutput(result[i], approval);
-                    approvalDiv.appendChild(approval);
+                    element.id = 'receipt-approval-' + id;
                 }
-
             });
         });
     });
@@ -212,7 +196,7 @@
         hideElement(document.querySelector('#receipt-approval-form'));
 
         apiPost('Receipt/' + receiptId + '/Approve', data).then(result => {
-            window.location = '/Declaraties/Goedkeuren';
+            window.location.href = '/Declaraties/Goedkeuren';
         });
     }));
 
@@ -232,7 +216,7 @@
         hideElement(document.querySelector('#receipt-payment-form'));
 
         apiPost('Receipt/' + receiptId + '/Approve', data).then(result => {
-            window.location = '/Declaraties/Uitbetalen';
+            window.location.href = '/Declaraties/Uitbetalen';
         });
     }));
 

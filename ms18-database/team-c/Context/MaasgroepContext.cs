@@ -229,7 +229,6 @@ namespace Maasgroep.Database
 			modelBuilder.Entity<CostCentre>().Property(cc => cc.Id).HasDefaultValueSql("nextval('receipt.\"costCentreSeq\"')");
 			modelBuilder.Entity<CostCentre>().Property(cc => cc.DateTimeCreated).HasDefaultValueSql("now()");
 			modelBuilder.Entity<CostCentre>().Property(cc => cc.Name).HasMaxLength(256);
-			modelBuilder.Entity<CostCentre>().HasIndex(cc => cc.Name).IsUnique();
 
 			// Foreign keys
 
