@@ -17,6 +17,7 @@ namespace Maasgroep.Database.Admin
                 Id = member.Id,
 				Name = member.Name,
                 Email = member.Email,
+                Permissions = GetPermissions(member.Id),
 			};
         }
 
@@ -56,5 +57,28 @@ namespace Maasgroep.Database.Admin
         /** Check if password is correct for hash */
         public bool CheckPassword(string password, string hash)
             => hash == GetPasswordHash(password);
+
+        /** Get all member permissions */
+        public List<string> GetPermissions(long memberId)
+        {
+            var permissions = new Dictionary<string, bool>();
+            var memberPermissions = Db.MemberPermission
+                .Where(mp => mp.MemberId == memberId)
+                .Join(Db.Permission, mp => mp.PermissionId, p => p.Id, (mp, p) => p.Name)
+                .ToList();
+
+            foreach (var permission in memberPermissions)
+            {
+                // Make sure members with e.g. "basePermission.subPermission" also have "basePermission" set
+                var n = 1;
+                var splitPermission = permission.Split(".");
+                while (n <= splitPermission.Length)
+                {
+                    permissions.Add(String.Join('.', splitPermission.Take(n)), true);
+                    n++;
+                }
+            }
+            return permissions.Select(p => p.Key).ToList();
+        }
     }
 }

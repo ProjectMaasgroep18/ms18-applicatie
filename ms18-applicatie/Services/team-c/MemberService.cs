@@ -30,7 +30,6 @@ namespace Maasgroep.Services
 			if (memberId == null)
 				return null;
 			var currentMember = _memberRepository.GetModel((long)memberId);
-			Console.WriteLine("CurrentMember: " + currentMember?.Name);
 			return currentMember;
 		}
 	}

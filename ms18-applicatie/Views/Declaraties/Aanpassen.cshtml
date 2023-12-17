@@ -3,8 +3,8 @@
 <div id="login-user" class="hidden">
     <p id="login-info">Hallo <span rel="name"></span>!</p>
 
-    <div id="receipt-approval-list">
-        <p id="receipt-approval-previous" class="hidden">
+    <div id="receipt-approval-list" class="hidden">
+        <p id="receipt-approval-previous">
             Deze delaratie is
             <b class="status-approved">Goedgekeurd</b>
             <b class="status-rejected">Afgekeurd</b>
@@ -53,7 +53,7 @@
 
     <p>Vul alle gegevens volledig in om je declaratie in te dienen.</p>
 
-    <form id="receipt-photos-form">
+    <form id="receipt-photos-form" class="hidden">
 
         <p><i>Foto's:</i></p>
 
@@ -150,6 +150,7 @@
 
             apiGetInfinite('Receipt/' + receiptId + '/Photo', photosDiv, (elements, result) => {
                 // Load receipt photos
+                showElement(document.querySelector('#receipt-photos-form'));
                 for (i in result) {
                     let photo = elements[i];
                     let img = photo.querySelector('img');

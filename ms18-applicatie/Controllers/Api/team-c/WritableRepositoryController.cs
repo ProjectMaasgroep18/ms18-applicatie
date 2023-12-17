@@ -19,7 +19,12 @@ where TRecord: GenericRecordActive
     {
         if (!AllowCreate(data))
             NoAccess();
-        var record = Repository.Create(data, CurrentMember?.Id) ?? throw new MaasgroepBadRequest($"{ItemName} kon niet worden aangemaakt");
-        return Created($"/api/v1/{RouteData.Values["controller"]}/{record.Id}", Repository.GetModel(record));
+        var record = Repository.Create(data, CurrentMember?.Id);
+        if (record == null)
+            NotWritable();
+        return Created($"/api/v1/{RouteData.Values["controller"]}/{record!.Id}", Repository.GetModel(record));
     }
+
+    protected void NotWritable()
+        => throw new MaasgroepBadRequest($"{ItemName} kon niet worden aangemaakt");
 }

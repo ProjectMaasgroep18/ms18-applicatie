@@ -36,11 +36,14 @@ where TRecord: GenericRecordActive
     
     [HttpGet("{id}")]
     public IActionResult RepositoryGetById(long id) {
-        var record = Repository.GetById(id) ?? throw new MaasgroepNotFound($"{ItemName} niet gevonden");
-        if (!AllowView(record))
-            NoAccess();
-        return Ok(Repository.GetModel(record));
+        var record = Repository.GetById(id);
+        if (record == null || !AllowView(record))
+            NotFound();
+        return Ok(Repository.GetModel(record!));
     }
+
+    protected bool HasPermission(string permission)
+        => CurrentMember != null && (CurrentMember.Permissions.Contains("admin") || CurrentMember.Permissions.Contains(permission));
 
     protected void NoAccess()
     {
@@ -50,4 +53,7 @@ where TRecord: GenericRecordActive
         else
             throw new MaasgroepForbidden();
     }
+
+    protected new void NotFound()
+        => throw new MaasgroepNotFound($"{ItemName} niet gevonden");
 }

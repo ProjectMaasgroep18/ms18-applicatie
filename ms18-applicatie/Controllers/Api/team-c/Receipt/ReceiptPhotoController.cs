@@ -9,4 +9,16 @@ public class ReceiptPhotoController : DeletableRepositoryController<IReceiptPhot
 {
     public override string ItemName { get => "Foto"; }
     public ReceiptPhotoController(IReceiptPhotoRepository repository) : base(repository) {}
+    
+    protected override bool AllowList()
+        => HasPermission("receipt.approve") || HasPermission("receipt.pay");
+
+    protected override bool AllowView(ReceiptPhoto receiptPhoto)
+        => HasPermission("receipt.approve") || HasPermission("receipt.pay") || receiptPhoto.MemberCreatedId == CurrentMember?.Id;
+
+    protected override bool AllowCreate(ReceiptPhotoData receiptPhoto)
+        => HasPermission("receipt");
+
+    protected override bool AllowDelete(ReceiptPhoto receipt) // +Edit
+        => receipt.MemberCreatedId == CurrentMember?.Id;
 }

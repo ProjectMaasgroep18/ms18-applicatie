@@ -57,7 +57,7 @@ builder.Services.AddSwaggerGen(setup =>
         In = ParameterLocation.Header,
         Type = SecuritySchemeType.Http,
         Scheme = JwtBearerDefaults.AuthenticationScheme,
-        Description = "Paste your token here",
+        Description = "Make a call to User/Login, then paste your token here:",
 
         Reference = new OpenApiReference
         {

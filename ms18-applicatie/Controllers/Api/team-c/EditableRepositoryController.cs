@@ -13,7 +13,7 @@ where THistory: GenericRecordHistory
 {
     protected EditableRepositoryController(TRepository repository) : base(repository) {}
 
-    protected virtual bool AllowEdit(TRecord record)
+    protected virtual bool AllowEdit(TRecord record, TDataModel data)
         => AllowDelete(record); // By default, same as delete (i.e., only allowed to delete their own items)
 
     [HttpPut("{id}")]
@@ -22,7 +22,7 @@ where THistory: GenericRecordHistory
         var record = Repository.GetById(id);
         if (record == null || !AllowView(record))
             throw new MaasgroepNotFound($"{ItemName} niet gevonden");
-        if (!AllowEdit(record))
+        if (!AllowEdit(record, data))
             NoAccess();
         if (Repository.Update(record, data, CurrentMember?.Id) == null)
             throw new MaasgroepNotFound($"{ItemName} kon niet worden opgeslagen");

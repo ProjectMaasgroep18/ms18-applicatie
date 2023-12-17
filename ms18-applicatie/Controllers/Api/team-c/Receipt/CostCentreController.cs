@@ -14,6 +14,12 @@ public class CostCentreController : EditableRepositoryController<ICostCentreRepo
     public CostCentreController(ICostCentreRepository repository, IReceiptRepository receipts) : base(repository)
         => Receipts = receipts;
 
+    protected override bool AllowCreate(CostCentreData costCentre)
+        => HasPermission("admin");
+
+    protected override bool AllowDelete(CostCentre costCentre) // +Edit
+        => HasPermission("admin");
+
     [HttpGet("{id}/Receipt")]
     public IActionResult CostCentreGetReceipts(long id, [FromQuery] int offset = default, [FromQuery] int limit = default, [FromQuery] bool includeDeleted = default)
         => Ok(Receipts.ListByCostCentre(id, offset, limit, includeDeleted));

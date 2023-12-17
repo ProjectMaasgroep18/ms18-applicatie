@@ -19,7 +19,8 @@ public class TokenMiddleware
         {
             // Seems like we've received a bearer token!
             var token = String.Join(' ', authHeader.Skip(1)); // Token without the word "bearer"
-            context.Items["CurrentUser"] = memberService.GetMemberByToken(token);
+            var member = memberService.GetMemberByToken(token);
+            context.Items["CurrentUser"] = member;
         }
 
         await _next(context);

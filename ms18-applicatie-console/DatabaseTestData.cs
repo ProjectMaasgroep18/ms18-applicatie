@@ -97,6 +97,9 @@ namespace Maasgroep.Console
 
             using (var db = CreateContext())
             {
+                // Speciale admin permission (mag alles)
+                var admin = new Permission() { Name = "admin", MemberCreatedId = 1 };
+                
                 // Toegang tot het order gedeelte: producten zien; eigen bestelling inzien, plaatsen
                 var order = new Permission() { Name = "order.submit", MemberCreatedId = 1 };
 
@@ -114,6 +117,7 @@ namespace Maasgroep.Console
 
                 var permissions = new List<Permission>()
                 {
+                    admin,
                     order, orderProduct, // Team A
                     receipt, receiptApprove, receiptPay, // Team C
                 };
@@ -125,7 +129,7 @@ namespace Maasgroep.Console
 
                 var memberPermissions = new List<MemberPermission>()
                 {
-                    // Guest member mag alle basisdingen
+                    new MemberPermission() { MemberId = Members["Admin"]!.Id, Permission = admin, MemberCreatedId = 1 },
                     new MemberPermission() { MemberId = Members["Gast"]!.Id, Permission = order, MemberCreatedId = 1 },
                     new MemberPermission() { MemberId = Members["Gast"]!.Id, Permission = receipt, MemberCreatedId = 1 },
                     new MemberPermission() { MemberId = Members["Product"]!.Id, Permission = orderProduct, MemberCreatedId = 1 },
@@ -243,8 +247,8 @@ namespace Maasgroep.Console
 
                 var billToAdd = new List<Bill>()
                 {
-                    new Bill() { MemberCreatedId = member.Id, IsGuest = false, Member = member1 },
-                    new Bill() { MemberCreatedId = member.Id, IsGuest = false, Member = member2 },
+                    new Bill() { MemberCreatedId = member.Id, IsGuest = false, MemberId = member1.Id },
+                    new Bill() { MemberCreatedId = member.Id, IsGuest = false, MemberId = member2.Id },
                     new Bill()
                     {
                         MemberCreatedId = member.Id, IsGuest = true, Name = "Neefje van Donald",
