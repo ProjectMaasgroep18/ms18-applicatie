@@ -13,5 +13,11 @@ where THistory: GenericRecordHistory
 
     [HttpPut("{id}")]
     public IActionResult RepositoryUpdate(long id, [FromBody] TDataModel data)
-        => Repository.Update(id, data, CurrentMemberId) == null ? throw new Exceptions.MaasgroepBadRequest($"{ItemName} kon niet worden opgeslagen") : Ok();
+    {
+        if (!Repository.Exists(id))
+            throw new Exceptions.MaasgroepNotFound($"{ItemName} niet gevonden");
+        if (Repository.Update(id, data, CurrentMemberId) == null)
+            throw new Exceptions.MaasgroepNotFound($"{ItemName} kon niet worden opgeslagen");
+        return NoContent();
+    }
 }

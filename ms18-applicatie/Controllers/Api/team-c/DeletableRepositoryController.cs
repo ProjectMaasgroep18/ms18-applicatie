@@ -12,5 +12,11 @@ where TRecord: GenericRecordActive
 
     [HttpDelete("{id}")]
     public IActionResult RepositoryDelete(long id)
-        => Repository.Delete(id, CurrentMemberId) ? NoContent() : throw new Exceptions.MaasgroepNotFound($"{ItemName} niet gevonden");
+    {
+        if (!Repository.Exists(id))
+            throw new Exceptions.MaasgroepNotFound($"{ItemName} niet gevonden");
+        if (!Repository.Delete(id, CurrentMemberId))
+            throw new Exceptions.MaasgroepNotFound($"{ItemName} kon niet worden verwijderd");
+        return NoContent();
+    }
 }

@@ -23,7 +23,7 @@ where TRecord: GenericRecordActive
     
     [HttpGet("{id}")]
     public IActionResult RepositoryGetById(long id) {
-        var repository = Repository.GetById(id) ?? throw new Exceptions.MaasgroepNotFound($"{ItemName} niet gevonden");
-        return Ok(Repository.GetModel(repository));
+        var record = Repository.GetById(id) ?? throw new Exceptions.MaasgroepNotFound($"{ItemName} niet gevonden");
+        return Ok(Repository.GetModel(record));
     }
 }
