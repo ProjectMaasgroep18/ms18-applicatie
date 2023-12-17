@@ -20,5 +20,5 @@ public class ReceiptPhotoController : DeletableRepositoryController<IReceiptPhot
         => HasPermission("receipt");
 
     protected override bool AllowDelete(ReceiptPhoto receipt) // +Edit
-        => receipt.MemberCreatedId == CurrentMember?.Id;
+        => HasPermission("admin") || receipt.MemberCreatedId == CurrentMember?.Id;
 }

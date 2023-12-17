@@ -13,6 +13,6 @@ public class ProductController : EditableRepositoryController<IProductRepository
         => HasPermission("order.product");
 
     protected override bool AllowDelete(Product product) // +Edit
-        => HasPermission("order.product") && product.MemberCreatedId == CurrentMember!.Id;
+        => HasPermission("admin") || product.MemberCreatedId == CurrentMember!.Id;
 
 }

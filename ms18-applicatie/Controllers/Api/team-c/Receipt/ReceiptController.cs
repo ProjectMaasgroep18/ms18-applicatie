@@ -29,7 +29,7 @@ public class ReceiptController : EditableRepositoryController<IReceiptRepository
         => HasPermission("receipt");
 
     protected override bool AllowDelete(Receipt receipt) // +Edit
-        => receipt.MemberCreatedId == CurrentMember?.Id;
+        => HasPermission("admin") || receipt.MemberCreatedId == CurrentMember?.Id;
 
     [HttpPost("{id}/Photo")]
     public IActionResult ReceiptAddPhoto(long id, [FromBody] ReceiptPhotoData data)
