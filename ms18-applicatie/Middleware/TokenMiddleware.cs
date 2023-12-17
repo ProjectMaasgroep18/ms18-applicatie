@@ -1,6 +1,6 @@
 namespace Maasgroep.Middleware;
 
-using ms18_applicatie.Services;
+using Maasgroep.Services;
 
 public class TokenMiddleware
 {

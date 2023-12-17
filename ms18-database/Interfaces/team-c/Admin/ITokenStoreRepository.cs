@@ -1,11 +1,6 @@
 ﻿using Maasgroep.SharedKernel.ViewModels.team_c.Authentication;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace Maasgroep.SharedKernel.Interfaces.Token
+namespace Maasgroep.Database.Interfaces
 {
     public interface ITokenStoreRepository
     {

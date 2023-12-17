@@ -4,13 +4,9 @@ using Maasgroep.Database.Interfaces;
 using Maasgroep.Database.Receipts;
 using Maasgroep.Database.Admin;
 using Maasgroep.Database.Orders;
-using Maasgroep.Database.Tokens;
 using Maasgroep.Middleware;
-using Maasgroep.SharedKernel.Interfaces.Receipts;
-using Maasgroep.SharedKernel.Interfaces.Members;
-using Maasgroep.SharedKernel.Interfaces.Orders;
-using Maasgroep.SharedKernel.Interfaces.Token;
-using ms18_applicatie.Services;
+using Maasgroep.SharedKernel.Interfaces;
+using Maasgroep.Services;
 
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authentication.JwtBearer;

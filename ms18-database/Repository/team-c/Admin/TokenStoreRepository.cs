@@ -1,13 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Maasgroep.SharedKernel.Interfaces.Token;
+﻿using Maasgroep.Database.Interfaces;
 using Maasgroep.SharedKernel.ViewModels.team_c.Authentication;
-using Microsoft.EntityFrameworkCore;
 
-namespace Maasgroep.Database.Tokens
+namespace Maasgroep.Database.Admin
 {
     public class TokenStoreRepository : ITokenStoreRepository
     {

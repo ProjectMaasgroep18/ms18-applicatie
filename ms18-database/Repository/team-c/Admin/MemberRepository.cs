@@ -32,5 +32,14 @@ namespace Maasgroep.Database.Admin
                 return false;
             return base.Delete(id, memberId);
         }
+
+        /** Get member by e-mail */
+        public MemberModel? GetByEmail(string email)
+        {
+            var member = Db.Member.FirstOrDefault(item => item.Email == email && item.DateTimeDeleted == null);
+            if (member == null)
+                return null;
+            return GetModel(member);
+        }
     }
 }

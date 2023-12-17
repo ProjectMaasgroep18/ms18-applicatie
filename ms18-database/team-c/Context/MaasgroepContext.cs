@@ -2,7 +2,6 @@
 using Maasgroep.Database.Orders;
 using Maasgroep.Database.Receipts;
 using Maasgroep.Database.Services;
-using Maasgroep.Database.Tokens;
 using Microsoft.EntityFrameworkCore;
 
 namespace Maasgroep.Database
@@ -46,6 +45,12 @@ namespace Maasgroep.Database
 		public DbSet<StockHistory> StockHistory { get; set; }
 		public DbSet<LineHistory> LineHistory { get; set; }
 		public DbSet<BillHistory> BillHistory { get; set; }
+
+        #endregion
+
+		#region TokenStore
+
+		public DbSet<TokenStore> TokenStore { get; set; }
 
         #endregion
 

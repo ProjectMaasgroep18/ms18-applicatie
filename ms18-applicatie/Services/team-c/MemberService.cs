@@ -1,8 +1,7 @@
-﻿using Maasgroep.SharedKernel.Interfaces.Members;
-using Maasgroep.SharedKernel.Interfaces.Token;
+﻿using Maasgroep.Database.Interfaces;
 using Maasgroep.SharedKernel.ViewModels.Admin;
 
-namespace ms18_applicatie.Services
+namespace Maasgroep.Services
 {
 	public class MemberService : IMemberService
 	{
@@ -19,17 +18,17 @@ namespace ms18_applicatie.Services
 
 		public bool MemberExists(long id)
 		{
-			return _memberRepository.MemberExists(id);
+			return _memberRepository.Exists(id);
 		}
 
 		public MemberModel? GetMember(long id)
 		{
-			return _memberRepository.GetMember(id);
+			return _memberRepository.GetModel(id);
 		}
 
 		public MemberModel GetMemberByEmail(string email)
 		{
-			return _memberRepository.GetMemberByEmail(email);
+			return _memberRepository.GetByEmail(email);
 		}
 
 		public MemberModel? GetMemberByToken(string token)
@@ -37,7 +36,7 @@ namespace ms18_applicatie.Services
 			var memberId = _tokenStoreRepository.GetMemberFromToken(token);
 			if (memberId == null)
 				return null;
-			CurrentMember = _memberRepository.GetMember((long)memberId);
+			CurrentMember = _memberRepository.GetModel((long)memberId);
 			return CurrentMember;
 		}
 	}
