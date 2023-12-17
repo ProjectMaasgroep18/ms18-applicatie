@@ -35,7 +35,7 @@
                 <td class="user-actions">
                     <a class="view-action" rel="id:href:viewUrl">Bekijken</a>
                     <a class="edit-action" rel="id:href:editUrl">Aanpassen</a>
-                    <a class="edit-action" href="#" class="delete-link">Verwijderen</a>
+                    <a class="edit-action delete-link" href="#">Verwijderen</a>
                 </td>
             </tr>
 
@@ -81,8 +81,7 @@
                     if (!window.confirm('Weet je zeker dat je deze declaratie wilt verwijderen?'))
                         return;
 
-                    const deleteId = receipts[i];
-                    const element = receiptsTable.querySelector('#user-receipts-' + deleteId);
+                    const deleteId = receipts[i].id;
                     hideElement(element.querySelector('.user-actions'));
 
                     apiDelete('Receipt/' + deleteId).then(result => {

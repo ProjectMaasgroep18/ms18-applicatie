@@ -148,7 +148,12 @@ function showOutput(data, container) {
             let date = new Date(val);
             if (date === "Invalid Date" || isNaN(date))
                 return val;
-            return date.getDate() + '-' + (date.getMonth() + 1) + '-' + date.getFullYear() + ' ' + date.getHours() + ':' + date.getMinutes();
+
+            return (date.getDate() < 10 ? '0' : '') + date.getDate()
+                + '-' + (date.getMonth() < 9 ? '0' : '') + (date.getMonth() + 1)
+                + '-' + date.getFullYear()
+                + ' ' + (date.getHours() < 10 ? '0' : '') + date.getHours()
+                + ':' + (date.getMinutes() < 10 ? '0' : '') + date.getMinutes();
         }
     };
 

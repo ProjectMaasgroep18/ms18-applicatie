@@ -53,8 +53,8 @@
         showElement(document.querySelector('#login-user'));
         showOutput(member, document.querySelector('#login-info'));
         
-        const receiptsDiv = document.querySelector('#approve-receipts');
-        apiGetInfinite('Receipt/Pay', receiptsDiv);
+        const receiptsDiv = document.querySelector('#payable-receipts');
+        apiGetInfinite('Receipt/Payable', receiptsDiv);
     });
 </script>
 }
