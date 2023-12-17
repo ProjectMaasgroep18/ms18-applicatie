@@ -24,5 +24,13 @@ namespace Maasgroep.Database.Admin
 			member.Name = data.Name;
 			return member;
         }
+
+        /** Prevent deletion of oneself */
+        public override bool Delete(long id, long memberId)
+        {
+            if (id == memberId)
+                return false;
+            return base.Delete(id, memberId);
+        }
     }
 }

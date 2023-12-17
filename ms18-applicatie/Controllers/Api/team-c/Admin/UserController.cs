@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Maasgroep.Controllers.Api;
 
-public class UserController : WritableRepositoryController<IMemberRepository, Member, MemberModel, MemberData>
+public class UserController : DeletableRepositoryController<IMemberRepository, Member, MemberModel, MemberData>
 {
     protected readonly IReceiptRepository Receipts;
 

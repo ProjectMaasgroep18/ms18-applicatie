@@ -6,7 +6,7 @@ using Maasgroep.SharedKernel.DataModels.Admin;
 namespace Maasgroep.Database.Interfaces
 {
 	/** Member repository interface, connecting to Member database records */
-	public interface IMemberRepository : IWritableRepository<Member, MemberModel, MemberData>
+	public interface IMemberRepository : IDeletableRepository<Member, MemberModel, MemberData>
 	{
 
 	}
