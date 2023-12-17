@@ -1,4 +1,5 @@
 using Maasgroep.Database;
+using Maasgroep.Exceptions;
 using Maasgroep.SharedKernel.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,13 +10,16 @@ where TRepository : IWritableRepository<TRecord, TViewModel, TDataModel>
 where TRecord: GenericRecordActive
 {
 	public WritableRepositoryController(TRepository repository) : base(repository) {}
-
-    public virtual long CurrentMemberId { get => 1; } ///// TODO: ergens de ingelogde member vandaan halen
+    
+    protected virtual bool AllowCreate(TDataModel data)
+        => CurrentMember != null; // By default, all logged-in members are allowed to create items
     
     [HttpPost]
     public IActionResult RepositoryCreate([FromBody] TDataModel data)
     {
-        var record = Repository.Create(data, CurrentMemberId) ?? throw new Exceptions.MaasgroepBadRequest($"{ItemName} kon niet worden aangemaakt");
+        if (!AllowCreate(data))
+            NoAccess();
+        var record = Repository.Create(data, CurrentMember?.Id) ?? throw new MaasgroepBadRequest($"{ItemName} kon niet worden aangemaakt");
         return Created($"/api/v1/{RouteData.Values["controller"]}/{record.Id}", Repository.GetModel(record));
     }
 }

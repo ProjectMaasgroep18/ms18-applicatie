@@ -18,6 +18,9 @@ var builder = WebApplication.CreateBuilder(args);
 // Add database context
 builder.Services.AddDbContext<MaasgroepContext>();
 
+// Add HTTP context
+builder.Services.AddHttpContextAccessor();
+
 // Add repositories
 builder.Services.AddTransient<ICostCentreRepository, CostCentreRepository>();
 builder.Services.AddTransient<IReceiptRepository, ReceiptRepository>();

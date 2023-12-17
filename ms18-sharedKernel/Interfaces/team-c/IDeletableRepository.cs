@@ -8,6 +8,6 @@ namespace Maasgroep.SharedKernel.Interfaces
 		IEnumerable<TViewModel> ListByMember(long memberId, int offset = default, int limit = default, bool includeDeleted = default);
 
 		// Methods to update the database from models 
-    	bool Delete(long id, long memberId);
+    	bool Delete(TRecord record, long? memberId);
 	}
 }

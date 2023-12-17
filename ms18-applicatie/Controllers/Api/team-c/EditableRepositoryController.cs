@@ -1,4 +1,6 @@
 using Maasgroep.Database;
+using Maasgroep.Exceptions;
+using Maasgroep.Services;
 using Maasgroep.SharedKernel.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,13 +13,19 @@ where THistory: GenericRecordHistory
 {
     protected EditableRepositoryController(TRepository repository) : base(repository) {}
 
+    protected virtual bool AllowEdit(TRecord record)
+        => AllowDelete(record); // By default, same as delete (i.e., only allowed to delete their own items)
+
     [HttpPut("{id}")]
     public IActionResult RepositoryUpdate(long id, [FromBody] TDataModel data)
     {
-        if (!Repository.Exists(id))
-            throw new Exceptions.MaasgroepNotFound($"{ItemName} niet gevonden");
-        if (Repository.Update(id, data, CurrentMemberId) == null)
-            throw new Exceptions.MaasgroepNotFound($"{ItemName} kon niet worden opgeslagen");
+        var record = Repository.GetById(id);
+        if (record == null || !AllowView(record))
+            throw new MaasgroepNotFound($"{ItemName} niet gevonden");
+        if (!AllowEdit(record))
+            NoAccess();
+        if (Repository.Update(record, data, CurrentMember?.Id) == null)
+            throw new MaasgroepNotFound($"{ItemName} kon niet worden opgeslagen");
         return NoContent();
     }
 }

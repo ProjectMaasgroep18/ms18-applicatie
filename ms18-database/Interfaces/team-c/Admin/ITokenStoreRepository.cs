@@ -1,12 +1,12 @@
-﻿using Maasgroep.SharedKernel.ViewModels.team_c.Authentication;
+﻿using Maasgroep.Database.Admin;
+using Maasgroep.SharedKernel.Interfaces;
+using Maasgroep.SharedKernel.ViewModels.Admin;
 
 namespace Maasgroep.Database.Interfaces
 {
-    public interface ITokenStoreRepository
+    public interface ITokenStoreRepository : IReadOnlyRepository<TokenStore, TokenModel>
     {
-        TokenModel RetrieveToken(long id);
-        TokenModelCreate SaveToken(TokenModelCreate token);
-        TokenModelUpdate UpdateUserToken(TokenModelUpdate token, long userId);
-        long? GetMemberFromToken(string token);
+        bool SaveToken(string token, DateTime expire, long userId);
+        long? GetMemberIdFromToken(string token);
     }
 }

@@ -8,8 +8,6 @@ namespace Maasgroep.Services
 		private readonly IMemberRepository _memberRepository;
 		private readonly ITokenStoreRepository _tokenStoreRepository;
 
-		public MemberModel? CurrentMember { get; private set; }
-
 		public MemberService(IMemberRepository memberRepository, ITokenStoreRepository tokenStoreRepository)
 		{
 			_memberRepository = memberRepository;
@@ -26,18 +24,14 @@ namespace Maasgroep.Services
 			return _memberRepository.GetModel(id);
 		}
 
-		public MemberModel GetMemberByEmail(string email)
-		{
-			return _memberRepository.GetByEmail(email);
-		}
-
 		public MemberModel? GetMemberByToken(string token)
 		{
-			var memberId = _tokenStoreRepository.GetMemberFromToken(token);
+			var memberId = _tokenStoreRepository.GetMemberIdFromToken(token);
 			if (memberId == null)
 				return null;
-			CurrentMember = _memberRepository.GetModel((long)memberId);
-			return CurrentMember;
+			var currentMember = _memberRepository.GetModel((long)memberId);
+			Console.WriteLine("CurrentMember: " + currentMember?.Name);
+			return currentMember;
 		}
 	}
 }

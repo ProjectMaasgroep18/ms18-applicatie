@@ -18,19 +18,13 @@ namespace Maasgroep.Database
 		// END ABSTRACT METHODS
 
 		/** Update an existing record in the database */
-		public virtual TRecord? Update(long id, TDataModel model, long memberId)
+		public virtual TRecord? Update(TRecord record, TDataModel model, long? memberId)
 		{
-			var record = GetById(id);
-			if (record == null) {
-				Console.WriteLine($"Record {id} not found in {this}");
-				return null; // Does not exist
-			}
-
 			var history = GetHistory(record);
-			record = GetRecord(model, record);
+			var newRecord = GetRecord(model, record);
 
-			if (record == null) {
-				Console.WriteLine($"No record created for {id} in {this}");
+			if (newRecord == null) {
+				Console.WriteLine($"No record created in {this}");
 				return null; // Not editable or invalid data
 			}
 
@@ -41,10 +35,10 @@ namespace Maasgroep.Database
 			history.DateTimeModified = record.DateTimeModified;
 			history.DateTimeDeleted = record.DateTimeDeleted;
 
-			record.MemberModifiedId = memberId;
-			record.DateTimeModified = DateTime.UtcNow;
+			newRecord.MemberModifiedId = memberId;
+			newRecord.DateTimeModified = DateTime.UtcNow;
 
-			return SaveToDb(record, db => db.Set<THistory>().Add(history));
+			return SaveToDb(newRecord, db => db.Set<THistory>().Add(history));
 		}
     }
 }

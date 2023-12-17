@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Maasgroep.Database.Migrations
 {
     [DbContext(typeof(MaasgroepContext))]
-    [Migration("20231217175602_auth")]
-    partial class auth
+    [Migration("20231217194816_authentication")]
+    partial class authentication
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -201,10 +201,28 @@ namespace Maasgroep.Database.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
+                    b.Property<DateTime>("DateTimeCreated")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("DateTimeDeleted")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("DateTimeModified")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<DateTime>("ExperationDate")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<long?>("MemberId")
+                    b.Property<long?>("MemberCreatedId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("MemberDeletedId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("MemberId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("MemberModifiedId")
                         .HasColumnType("bigint");
 
                     b.Property<string>("Token")
@@ -213,8 +231,13 @@ namespace Maasgroep.Database.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("MemberId")
-                        .IsUnique();
+                    b.HasIndex("MemberCreatedId");
+
+                    b.HasIndex("MemberDeletedId");
+
+                    b.HasIndex("MemberId");
+
+                    b.HasIndex("MemberModifiedId");
 
                     b.ToTable("tokenStore", "admin");
                 });
@@ -1049,13 +1072,38 @@ namespace Maasgroep.Database.Migrations
 
             modelBuilder.Entity("Maasgroep.Database.Admin.TokenStore", b =>
                 {
+                    b.HasOne("Maasgroep.Database.Admin.Member", "MemberCreated")
+                        .WithMany("TokenStoresCreated")
+                        .HasForeignKey("MemberCreatedId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .HasConstraintName("FK_tokenStore_memberCreated");
+
+                    b.HasOne("Maasgroep.Database.Admin.Member", "MemberDeleted")
+                        .WithMany("TokenStoresDeleted")
+                        .HasForeignKey("MemberDeletedId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .HasConstraintName("FK_tokenStore_memberDeleted");
+
                     b.HasOne("Maasgroep.Database.Admin.Member", "Member")
-                        .WithOne("Token")
-                        .HasForeignKey("Maasgroep.Database.Admin.TokenStore", "MemberId")
+                        .WithMany("Token")
+                        .HasForeignKey("MemberId")
                         .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
                         .HasConstraintName("FK_tokenStore_member");
 
+                    b.HasOne("Maasgroep.Database.Admin.Member", "MemberModified")
+                        .WithMany("TokenStoresModified")
+                        .HasForeignKey("MemberModifiedId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .HasConstraintName("FK_tokenStore_memberModified");
+
                     b.Navigation("Member");
+
+                    b.Navigation("MemberCreated");
+
+                    b.Navigation("MemberDeleted");
+
+                    b.Navigation("MemberModified");
                 });
 
             modelBuilder.Entity("Maasgroep.Database.Orders.Bill", b =>
@@ -1408,6 +1456,12 @@ namespace Maasgroep.Database.Migrations
                     b.Navigation("StocksModified");
 
                     b.Navigation("Token");
+
+                    b.Navigation("TokenStoresCreated");
+
+                    b.Navigation("TokenStoresDeleted");
+
+                    b.Navigation("TokenStoresModified");
                 });
 
             modelBuilder.Entity("Maasgroep.Database.Admin.Permission", b =>

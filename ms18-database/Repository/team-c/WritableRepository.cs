@@ -51,7 +51,7 @@ namespace Maasgroep.Database
 			GetList(item => item.MemberCreatedId == memberId, null, offset, limit).Select(item => GetModel(item)!);
 
 		/** Create a new record and save it to the database */
-		public virtual TRecord? Create(TDataModel data, long memberId)
+		public virtual TRecord? Create(TDataModel data, long? memberId)
 		{
 			var record = GetRecord(data);
 			if (record == null) // Could not be created from model

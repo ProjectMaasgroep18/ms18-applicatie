@@ -7,7 +7,7 @@ namespace Maasgroep.SharedKernel.Interfaces
 		TRecord? GetRecord(TDataModel model, TRecord? existingRecord = default);
 
 		// Methods to update the database from models 
-		TRecord? Create(TDataModel model, long memberId);
+		TRecord? Create(TDataModel model, long? memberId);
 
 		// Methods to query items
 		IEnumerable<TViewModel> ListByMember(long memberId, int offset = default, int limit = default);

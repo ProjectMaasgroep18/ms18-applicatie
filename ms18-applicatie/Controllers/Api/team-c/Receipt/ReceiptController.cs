@@ -1,4 +1,5 @@
-﻿using Maasgroep.Database.Receipts;
+﻿using Maasgroep.Exceptions;
+using Maasgroep.Database.Receipts;
 using Maasgroep.Database.Interfaces;
 using Maasgroep.SharedKernel.ViewModels.Receipts;
 using Maasgroep.SharedKernel.DataModels.Receipts;
@@ -22,7 +23,7 @@ public class ReceiptController : EditableRepositoryController<IReceiptRepository
     public IActionResult ReceiptAddPhoto(long id, [FromBody] ReceiptPhotoData data)
     {
         data.ReceiptId = id;
-        var photo = Photos.Create(data, CurrentMemberId) ?? throw new Exceptions.MaasgroepBadRequest($"{ItemName} kon niet worden aangemaakt");
+        var photo = Photos.Create(data, CurrentMember?.Id) ?? throw new MaasgroepBadRequest($"{ItemName} kon niet worden aangemaakt");
         return Created($"/api/v1/ReceiptPhotos/{photo.Id}", photo);
     }
 
@@ -38,7 +39,7 @@ public class ReceiptController : EditableRepositoryController<IReceiptRepository
     public IActionResult ReceiptApprove(long id, [FromBody] ReceiptApprovalData data)
     {
         data.ReceiptId = id;
-        var approval = Approvals.Create(data, CurrentMemberId) ?? throw new Exceptions.MaasgroepBadRequest($"{ItemName} kon niet worden aangemaakt");
+        var approval = Approvals.Create(data, CurrentMember?.Id) ?? throw new MaasgroepBadRequest($"{ItemName} kon niet worden aangemaakt");
         return Ok(Approvals.GetModel(approval));
     }
 

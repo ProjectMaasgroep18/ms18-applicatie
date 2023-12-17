@@ -8,6 +8,8 @@ namespace Maasgroep.Database.Interfaces
 	/** Member repository interface, connecting to Member database records */
 	public interface IMemberRepository : IDeletableRepository<Member, MemberModel, MemberData>
 	{
-		public MemberModel? GetByEmail(string email);
+		MemberModel? GetByEmail(string email, string password);
+		string GetPasswordHash(string password);
+		bool CheckPassword(string password, string hash);
 	}
 }

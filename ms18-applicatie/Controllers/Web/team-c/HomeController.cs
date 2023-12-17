@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Maasgroep.Exceptions;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Maasgroep.Controllers.Web;
 
@@ -19,6 +20,6 @@ public class HomeController : Controller
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     public IActionResult Error()
     {
-        throw new Exceptions.MaasgroepBadRequest("Er is een onbekende fout opgetreden");
+        throw new MaasgroepBadRequest("Er is een onbekende fout opgetreden");
     }
 }

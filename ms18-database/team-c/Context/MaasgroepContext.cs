@@ -230,10 +230,31 @@ namespace Maasgroep.Database
 
 			modelBuilder.Entity<TokenStore>()
 				.HasOne(t => t.Member)
-				.WithOne(m => m.Token)
-				.HasForeignKey<TokenStore>(t => t.MemberId)
+				.WithMany(m => m.Token)
+				.HasForeignKey(t => t.MemberId)
 				.HasConstraintName("FK_tokenStore_member")
 				.OnDelete(DeleteBehavior.Cascade);
+
+			modelBuilder.Entity<TokenStore>()
+				.HasOne(mp => mp.MemberCreated)
+				.WithMany(m => m.TokenStoresCreated)
+				.HasForeignKey(mp => mp.MemberCreatedId)
+				.HasConstraintName("FK_tokenStore_memberCreated")
+				.OnDelete(DeleteBehavior.NoAction);
+
+			modelBuilder.Entity<TokenStore>()
+				.HasOne(mp => mp.MemberModified)
+				.WithMany(m => m.TokenStoresModified)
+				.HasForeignKey(mp => mp.MemberModifiedId)
+				.HasConstraintName("FK_tokenStore_memberModified")
+				.OnDelete(DeleteBehavior.NoAction);
+
+			modelBuilder.Entity<TokenStore>()
+				.HasOne(mp => mp.MemberDeleted)
+				.WithMany(m => m.TokenStoresDeleted)
+				.HasForeignKey(mp => mp.MemberDeletedId)
+				.HasConstraintName("FK_tokenStore_memberDeleted")
+				.OnDelete(DeleteBehavior.NoAction);
 		}
 
 

@@ -54,6 +54,13 @@ namespace Maasgroep.Console
             return new MaasgroepContext();
         }
 
+        private string GetPasswordHash(string password)
+        {
+            var bytes = System.Text.Encoding.UTF8.GetBytes(password);
+            var hash = System.Security.Cryptography.SHA256.HashData(bytes);
+            return Convert.ToHexString(hash);
+        }
+
         #region Member_Admin
 
         private void CreateTestDataMember()
@@ -62,18 +69,19 @@ namespace Maasgroep.Console
 
             using (var db = CreateContext())
             {
-                var admin = Members.ContainsKey("Admin") ? Members["Admin"] : new Member() { Name = "Admin", Email = "admin@example.com", Password = "123456" };
+                var verySafePassword = GetPasswordHash("123456");
+                var admin = Members.ContainsKey("Admin") ? Members["Admin"] : new Member() { Name = "Admin", Email = "admin@example.com", Password = verySafePassword };
                 Members = new Dictionary<string, Member>
                 {
                     ["Admin"] = admin,
                  
                     // Team A
-                    ["Gast"] = new Member() { Name = "Gast", MemberCreated = admin, Email = "gast@example.com", Password = "123456" },
-                    ["Product"] = new Member() { Name = "Product", MemberCreated = admin, Email = "product@example.com", Password = "123456" },
+                    ["Gast"] = new Member() { Name = "Gast", MemberCreated = admin, Email = "gast@example.com", Password = verySafePassword },
+                    ["Product"] = new Member() { Name = "Product", MemberCreated = admin, Email = "product@example.com", Password = verySafePassword },
 
                     // Team C
-                    ["Goedkeur"] = new Member() { Name = "Goedkeur", MemberCreated = admin, Email = "goedkeur@example.com", Password = "123456" },
-                    ["Betaal"] = new Member() { Name = "Betaal", MemberCreated = admin, Email = "betaal@example.com", Password = "123456" },
+                    ["Goedkeur"] = new Member() { Name = "Goedkeur", MemberCreated = admin, Email = "goedkeur@example.com", Password = verySafePassword },
+                    ["Betaal"] = new Member() { Name = "Betaal", MemberCreated = admin, Email = "betaal@example.com", Password = verySafePassword },
                 };
 
                 db.Member.AddRange(Members.Select(m => m.Value));
