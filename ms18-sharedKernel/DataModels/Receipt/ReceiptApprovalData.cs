@@ -1,7 +1,7 @@
 ﻿
 namespace Maasgroep.SharedKernel.DataModels.Receipts
 {
-	public class ReceiptApprovalData
+	public record ReceiptApprovalData
 	{
 		public long ReceiptId { get; set; }
 		public string? Note { get; set; }

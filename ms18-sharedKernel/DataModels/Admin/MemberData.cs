@@ -1,6 +1,6 @@
 ﻿namespace Maasgroep.SharedKernel.DataModels.Admin
 {
-	public class MemberData
+	public record MemberData
 	{
 		public string Name { get; set; }
 	}

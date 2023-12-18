@@ -1,7 +1,7 @@
 ﻿
 namespace Maasgroep.SharedKernel.ViewModels.Orders
 {
-	public class ProductModel
+	public record ProductModel
 	{
 		public long Id { get; set; }
 		public string Name { get; set; }

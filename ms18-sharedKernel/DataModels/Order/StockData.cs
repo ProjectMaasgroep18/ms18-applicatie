@@ -1,7 +1,7 @@
 ﻿
 namespace Maasgroep.SharedKernel.DataModels.Orders
 {
-	public class StockData
+	public record StockData
 	{	
 		public long Quantity { get; set; }
 	}

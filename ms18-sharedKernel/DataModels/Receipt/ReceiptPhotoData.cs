@@ -1,7 +1,7 @@
 ﻿
 namespace Maasgroep.SharedKernel.DataModels.Receipts
 {
-	public class ReceiptPhotoData
+	public record ReceiptPhotoData
 	{
 		public string Base64Image { get; set; }
 		public string FileExtension { get; set; }

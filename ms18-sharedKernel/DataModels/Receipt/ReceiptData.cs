@@ -1,7 +1,7 @@
 ﻿
 namespace Maasgroep.SharedKernel.DataModels.Receipts
 {
-	public class ReceiptData
+	public record ReceiptData
 	{
 		public decimal? Amount { get; set; }
 		public long? CostCentreId { get; set; }

@@ -1,6 +1,6 @@
 ﻿namespace Maasgroep.SharedKernel.ViewModels.Receipts
 {
-	public class CostCentreModel
+	public record CostCentreModel
 	{
 		public long Id { get; set; }
 		public string Name { get; set; }

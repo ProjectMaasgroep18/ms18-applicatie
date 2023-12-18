@@ -33,6 +33,9 @@ namespace Maasgroep.Database.Receipts
 					Id = costCentre.Id,
 					Name = costCentre.Name,
 				},
+				IsEditable = status != ReceiptStatus.Goedgekeurd && status != ReceiptStatus.Uitbetaald,
+				IsApprovable = status == ReceiptStatus.Ingediend,
+				IsPayable = status == ReceiptStatus.Goedgekeurd,
 				MemberCreated = member == null ? null : new() {
 					Id = member.Id,
 					Name = member.Name,

@@ -1,6 +1,6 @@
 ﻿namespace Maasgroep.SharedKernel.ViewModels.Admin
 {
-    public class TokenModel
+    public record TokenModel
     {
         public MemberModel? Member { get; set; }
         public string Token { get; set; }

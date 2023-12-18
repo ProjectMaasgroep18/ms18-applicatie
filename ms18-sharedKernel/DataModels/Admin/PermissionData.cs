@@ -1,7 +1,7 @@
 ﻿
 namespace Maasgroep.SharedKernel.DataModels.Admin
 {
-	public class PermissionData
+	public record PermissionData
 	{
 		public string Name { get; set; }
 	}

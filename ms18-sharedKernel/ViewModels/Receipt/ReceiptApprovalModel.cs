@@ -2,7 +2,7 @@
 
 namespace Maasgroep.SharedKernel.ViewModels.Receipts
 {
-	public class ReceiptApprovalModel
+	public record ReceiptApprovalModel
 	{
 		public long Id { get; set; }
 		public long ReceiptId { get; set; }
