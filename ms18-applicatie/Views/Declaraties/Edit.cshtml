@@ -1,0 +1,198 @@
+<h1>Declaratie aanpassen</h1>
+
+<div id="login-user" class="hidden">
+    <p id="login-info">Hallo <span rel="name"></span>!</p>
+
+    <p>Hier kan je je declaratie aanpassen of aanvullen:</p>
+
+    <form method="post" id="receipt-form" class="hidden">
+        <table>
+            <tr>
+                <td>Bedrag: </td>
+                <td><input type="number" name="Amount" step="0.01" rel="amount:value"></td>
+            </tr>
+            <tr>
+                <td>Opmerkingen: </td>
+                <td><textarea name="Note" rel="note"></textarea></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td><input type="submit" value="Aanpassingen opslaan" class="btn btn-primary"></td>
+            </tr>
+        </table>
+    </form>
+
+    <form id="receipt-photos-form">
+
+        <p><i>Foto's:</i></p>
+
+        <div id="receipt-photos">
+            <div id="receipt-photo" class="hidden">
+                <img class="drop-image">
+                <p class="user-actions">
+                    <a href="#" class="delete-photo">Verwijderen</a>
+                </p>
+            </div>
+            <p id="receipt-photos-none" class="hidden">Er zijn geen foto's bij deze declaratie</p>
+        </div>
+
+        <p><button type="button" class="btn btn-secondary" id="receipt-extra-photo">Extra foto toevoegen</button></p>
+        
+        <label for="FormFile" class="drop-container hidden" id="receipt-new-photos">
+            <span class="drop-title">Upload je foto</span>
+            <div class="drop-image-div"></div>
+            <span class="drop-hint">sleep of klik om een bestand te selecteren</span>
+            <input type="file" accept="image/*" required class="hidden" id="receipt-input" multiple>
+        </label>
+    </form>
+</div>
+
+
+@section scripts {
+<script>
+    const receiptId = @ViewData["id"];
+    const photosDiv = document.querySelector('#receipt-photos');
+
+    async function deletePhoto(deleteId) {
+        // Delete photo by ID
+
+        if (!window.confirm('Weet je zeker dat je deze foto wilt verwijderen?'))
+            return;
+
+        const photoContainer = document.querySelector('#receipt-photo-' + deleteId);
+        hideElement(photoContainer.querySelector('.user-actions'));
+
+        setLoadMessage('Foto verwijderen...');
+        let result = await apiDelete('ReceiptPhoto/' + deleteId);
+        
+        if (!result)
+            return;
+
+        // Photo deleted in database, clean it up here too
+        photoContainer.remove();
+        if (photosDiv.querySelectorAll(':not(.hidden) img').length <= 1)
+            showElement(document.querySelector('#receipt-photos-none'));
+    }
+
+    getUserSession().then(member => {
+        // User session loaded
+     
+        showElement(document.querySelector('#login-user'));
+        showOutput(member, document.querySelector('#login-info'));
+
+        apiGet('Receipt/' + receiptId).then(receipt => {
+            // Receipt loaded
+
+            showOutput(receipt, document.querySelector('#receipt-form'));
+
+            apiGet('Receipt/' + receiptId + '/Photo').then(result => {
+                // Show all receipt photos
+
+                if (typeof result[0] == 'undefined') {
+                    showElement(document.querySelector('#receipt-photos-none'));
+                    return;
+                }
+
+                for (i in result) {
+                    let photo = document.querySelector('#receipt-photo').cloneNode(true);
+                    let img = photo.querySelector('img');
+                    let deleteLink = photo.querySelector('.delete-photo');
+                    let id = result[i].id;
+                    deleteLink.addEventListener('click', event => {
+                        event.preventDefault();
+                        deletePhoto(id);
+                    });
+                    photo.id = 'receipt-photo-' + id;
+                    img.src = result[i].base64Image;
+                    showElement(photo);
+                    photosDiv.appendChild(photo);
+                }
+
+            });
+        })
+    });
+
+    const receiptForm = document.querySelector('#receipt-form');
+    const receiptPhotosForm = document.querySelector('#receipt-photos-form');
+    const extraPhoto = document.querySelector('#receipt-extra-photo');
+    const dropInput = document.querySelector('#receipt-new-photos');
+
+    receiptForm.addEventListener('submit', event => {
+        // Submit form
+
+        event.preventDefault();
+        
+        let formData = {};
+        receiptForm.querySelectorAll('input[name],textarea[name]').forEach(input => formData[input.name] = input.value);
+        hideElement(receiptForm);
+        hideElement(receiptPhotosForm);
+
+        setLoadMessage('Bezig met opslaan...');
+
+        apiPut('Receipt/' + receiptId, formData).then(result => {
+            if (result) // PUT should not return a response body, just a success status
+                window.location.href = '/Declaraties'; // Of: /Declaraties/Edit?id=' + result.receipt.id;
+        });
+    });
+    
+    extraPhoto.addEventListener('click', event => {
+        // Select extra photos
+
+        document.querySelector('#receipt-input').click();
+    });
+
+    dropInput.addEventListener('photos-resized', async event => {
+        // Extra photos selected and resized (see site.js)
+
+        if (!event.detail || !event.detail.length)
+            return;
+        
+        let uploadsFinished = 0;
+        let uploadsTotal = event.detail.length;
+
+        for (id in event.detail) {
+            // Loop through all selected receipt photos
+
+            setLoadMessage('Foto\'s uploaden (' + Math.round(uploadsFinished/uploadsTotal * 100) + '%)...')
+
+            let fileData = event.detail[id];
+            let fileName = fileData.filename;
+            fileName = typeof fileName == 'string' ? fileName.split('.') : '';
+            let fileExt = fileName.pop();
+            fileName = fileName.join('.');
+
+            const formData = {
+                fileName: fileName,
+                fileExtension: fileExt,
+                base64Image: fileData.data,
+                ReceiptId: receiptId,
+            };
+
+            // Upload photo
+            let result = await apiPost('ReceiptPhoto', formData);
+        
+            if (result.photo) {
+                uploadsFinished++;
+
+                // Show the photo here
+                let photo = document.querySelector('#receipt-photo').cloneNode(true);
+                let img = photo.querySelector('img');
+                let deleteLink = photo.querySelector('.delete-photo');
+                let id = result.photo.id;
+                photo.id = 'receipt-photo-' + id;
+                img.src = result.photo.base64Image;
+                deleteLink.addEventListener('click', event => {
+                    event.preventDefault();
+                    deletePhoto(id);
+                });
+                showElement(photo);
+                photosDiv.appendChild(photo);
+            } else {
+                handleError('Uploaden mislukt');
+            }
+        }
+    });
+
+
+</script>
+}
