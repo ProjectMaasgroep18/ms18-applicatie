@@ -283,16 +283,27 @@ namespace Maasgroep.Console
 
                 var linesToAdd = new List<Line>()
                 {
-                    new Line() { Bill = bill1, Product = product1!, Name = product1!.Name, Price = product1!.Price, Quantity = 1, MemberCreatedId = 1 },
-                    new Line() { Bill = bill2, Product = product2!, Name = product2!.Name, Price = product2!.Price, Quantity = 2, MemberCreatedId = 1 },
-                    new Line() { Bill = bill3, Product = product1!, Name = product1!.Name, Price = product1!.Price, Quantity = 3, MemberCreatedId = 1 },
-                    new Line() { Bill = bill3, Product = product2!, Name = product2!.Name, Price = product2!.Price, Quantity = 4, MemberCreatedId = 1 },
+                    new Line() { Bill = bill1, Product = product1!, Name = product1!.Name, Price = product1!.Price, Quantity = 1, Amount = product1!.Price * 1, MemberCreatedId = 1 },
+                    new Line() { Bill = bill2, Product = product2!, Name = product2!.Name, Price = product2!.Price, Quantity = 2, Amount = product2!.Price * 2, MemberCreatedId = 1 },
+                    new Line() { Bill = bill3, Product = product1!, Name = product1!.Name, Price = product1!.Price, Quantity = 3, Amount = product1!.Price * 3, MemberCreatedId = 1 },
+                    new Line() { Bill = bill3, Product = product2!, Name = product2!.Name, Price = product2!.Price, Quantity = 4, Amount = product2!.Price * 4, MemberCreatedId = 1 },
                 };
 
                 db.OrderLines.AddRange(linesToAdd);
 
                 var rows = db.SaveChanges();
                 System.Console.WriteLine($"Number of bill lines: {rows}");
+
+                bill1.TotalAmount = linesToAdd.Where(line => line.Bill == bill1).Sum(line => line.Amount);
+                bill2.TotalAmount = linesToAdd.Where(line => line.Bill == bill2).Sum(line => line.Amount);
+                bill3.TotalAmount = linesToAdd.Where(line => line.Bill == bill3).Sum(line => line.Amount);
+
+                db.Bills.Update(bill1);
+                db.Bills.Update(bill2);
+                db.Bills.Update(bill3);
+
+                rows = db.SaveChanges();
+                System.Console.WriteLine($"Number of bills updated: {rows}");
             }
         }
 

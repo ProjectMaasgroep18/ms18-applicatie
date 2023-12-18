@@ -8,6 +8,7 @@ namespace Maasgroep.Database.Orders
         public string Name { get; set; }
         public double Price { get; set; }
         public long Quantity { get; set; }
+        public double Amount { get; set; }
 
 
         // Ef

@@ -7,12 +7,14 @@ namespace Maasgroep.Database.Orders
 {
     public class BillRepository : EditableRepository<Bill, BillModel, BillData, BillHistory>, IBillRepository
     {
+        protected BillLineRepository Lines;
         protected ProductRepository Products;
         protected StockRepository Stock;
         protected MemberRepository Members;
+
         public BillRepository(MaasgroepContext db) : base(db)
         {
-            // BillLines = new(db);
+            Lines = new(db);
             Products = new(db);
             Stock = new(db);
             Members = new(db);
@@ -28,16 +30,50 @@ namespace Maasgroep.Database.Orders
 				Note = bill.Note,
                 IsGuest = bill.IsGuest,
                 MemberCreated = member,
-                //Lines = BillLines.GetByBill(bill.Id),
+                Lines = Lines.ListByBill(bill.Id).Where(line => line.Quantity > 0).ToList(),
+                TotalAmount = bill.TotalAmount,
 			};
         }
         
         /** Create or update Bill record from data model */
         public override Bill? GetRecord(BillData data, Bill? existingBill = null)
         {
+            var lines = new Dictionary<long, LineData>();
+            if (existingBill != null)
+            {
+                // Create existing lines with 0 quantity
+                Lines.ListByBill(existingBill.Id).ToList().ForEach(line => {
+                    if (!lines.ContainsKey(line.ProductId))
+                    {
+                        lines.Add(line.ProductId, new () {
+                            ProductId = line.ProductId,
+                            Quantity = 0,
+                        });
+                    }
+                });
+            }
+   
+            data.Lines.ForEach(line => {
+                // Merge with new lines
+                if (lines.ContainsKey(line.ProductId))
+                {
+                    lines[line.ProductId].Quantity += line.Quantity;
+                }
+                else
+                {
+                    lines.Add(line.ProductId, new () {
+                        ProductId = line.ProductId,
+                        Quantity = line.Quantity,
+                    });;
+                }
+            });
+
             var bill = existingBill ?? new();
 			bill.Name = data.Name;
 			bill.Note = data.Note;
+            bill.Lines = lines.ToList()
+                .Select(line => Lines.GetRecord(line.Value, existingBill != null ? Lines.GetByBillProduct(existingBill.Id, line.Key) : null))
+                .Where(line => line != null).ToList()!;
 			return bill;
         }
         
@@ -49,6 +85,7 @@ namespace Maasgroep.Database.Orders
 				Name = bill.Name,
 				Note = bill.Note,
 				IsGuest = bill.IsGuest,
+                TotalAmount = bill.TotalAmount,
 			};
         }
 
@@ -58,8 +95,8 @@ namespace Maasgroep.Database.Orders
             var saveAction = base.GetSaveAction(record);
             return (MaasgroepContext db) => {
                 record.IsGuest = record.MemberCreatedId == null;
+
                 saveAction.Invoke(db);
-                /////// CREATE LINES?? (or auto based on getRecord????)
             };
         }
     }
