@@ -5,6 +5,7 @@
     <RootNamespace>Maasgroep.Database</RootNamespace>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <NoWarn>8618</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
@@ -19,6 +20,10 @@
   <ItemGroup>
     <Folder Include="Migrations\" />
     <Folder Include="Notes\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ms18-sharedKernel\ms18-sharedKernel.csproj" />
   </ItemGroup>
 
 </Project>

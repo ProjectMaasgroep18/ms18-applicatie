@@ -1,0 +1,60 @@
+<h1>@ViewData["Title"]</h1>
+
+<div id="login-user" class="hidden">
+    <p id="login-info">Hallo <span rel="name"></span>!</p>    
+
+    <p>Hier kan je binnengekomen declaraties goedkeuren:</p>
+
+    <div id="approve-receipts" class="hidden">
+        <p><i>Dit zijn alle ingediende bonnetjes, met alle nog goed te keuren bovenaan:</i></p>
+
+        <table class="data-table">
+            <tr>
+                <th>Bedrag</th>
+                <th>Opmerking</th>
+                <th>Ingediend door</th>
+                <th>Status</th>
+                <th>Kostencentrum</th>
+                <th>Aangemaakt</th>
+                <th></th>
+            </tr>
+            
+            <tr class="result-empty hidden">
+                <td colspan="999">Er zijn nog geen bonnetjes ingediend.</td>
+            </tr>
+            
+            <tr class="result-item hidden">
+                <td rel="amount::euro"></td>
+                <td rel="note"></td>
+                <td rel="memberCreated.name"></td>
+                <td rel="statusString,statusId:data-status"></td>
+                <td rel="costCentre.name,costCentreId:data-cost-centre"></td>
+                <td rel="dateTimeCreated::dateTime"></td>
+                <td class="user-actions">
+                    <a rel="id:href:viewUrl">Bekijken</a>
+                </td>
+            </tr>
+
+            <tr class="result-has-more hidden">
+                <td colspan="999"><a href="#" class="result-show-more">Toon meer</a></td>
+            </tr>
+        </table>
+
+        <p><a href="/Declaraties">Terug naar Declaraties</a></p>
+    </div>
+</div>
+
+@section scripts {
+<script>
+    requireLogin(async member => {
+        // User session loaded
+     
+        const userId = member.id;
+        showElement(document.querySelector('#login-user'));
+        showOutput(member, document.querySelector('#login-info'));
+        
+        const receiptsDiv = document.querySelector('#approve-receipts');
+        apiGetInfinite('Receipt', receiptsDiv);
+    });
+</script>
+}

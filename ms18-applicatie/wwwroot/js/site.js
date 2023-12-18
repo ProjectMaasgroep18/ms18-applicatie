@@ -3,23 +3,31 @@
 
 
 
-// DEMO SCRIPT
+// Script for web front-end
 
 const BASE_URL = '/api/v1/';
 const LOAD_MSG = document.querySelector('#loading');
 const ERROR_MSG = document.querySelector('#error');
+const LOGIN_FORM = document.querySelector('#login');
+let AFTER_LOGIN = null;
 
 
 function hideElement(el) {
     // Add "hidden" class to element
-
-    el.classList.add('hidden');
+    
+    if (el.toString() == '[object NodeList]')
+        el.forEach(el => el.classList.add('hidden'));
+    else if ('classList' in el)
+        el.classList.add('hidden');
 }
 
 function showElement(el) {
     // Remove "hidden" class from element
     
-    el.classList.remove('hidden');
+    if (el.toString() == '[object NodeList]')
+        el.forEach(el => el.classList.remove('hidden'));
+    else if ('classList' in el)
+        el.classList.remove('hidden');
 }
 
 function setLoadMessage(msg) {
@@ -37,9 +45,9 @@ function handleError(message) {
     return Promise.reject(message);
 }
 
-async function apiGet(action, _fetchData, _skipJson) {
+async function apiGet(action, _fetchData, _skipJson, _onValidLogin) {
     // Send a Get request to the API (no request body, with response body)
-    // do not use _fetchData and _skipJson directly; it is used by the other API functions
+    // do not use _fetchData,  _skipJson, and _onValidLogin directly; it is used by the other API functions
 
     _fetchData = (_fetchData && typeof _fetchData == 'object') ? _fetchData : {
         headers: {
@@ -49,12 +57,24 @@ async function apiGet(action, _fetchData, _skipJson) {
         redirect: "follow",
     };
 
+    let token = localStorage.getItem("AUTH_TOKEN");
+    if (token) {
+        if (!_fetchData.headers)
+            _fetchData.headers = {};
+        _fetchData.headers.Authorization = "Bearer " + token;
+    }
+
     showElement(LOAD_MSG);
     const json = await fetch(BASE_URL + action, _fetchData).catch(handleError).then(response => {
         if (response.status >= 400 && response.status < 600) {
             // Server error
             return response.text().then(rawdata => {
                 try {
+                    if (response.status == 401) {
+                        showElement(LOGIN_FORM);
+                        if (typeof _onValidLogin == 'function')
+                            AFTER_LOGIN = _onValidLogin;
+                    }
                     return handleError(JSON.parse(rawdata).message || 'Er is een onbekende fout opgetreden'); // Foutstatus, maar JSON zonder error message? 
                 } catch {
                     console.warn('Failed to parse JSON data', rawdata);
@@ -107,10 +127,27 @@ async function apiDelete(action) {
     return await apiGet(action, fetchData, true);
 }
 
-function getUserSession() {
-    // Get user session (todo: mogelijk uitbreiden met tokens etc. en zo nodig login popup tonen)
+async function requireLogin(onValidLogin) {
+    // Make sure user is logged in (and show login screen if they aren't)
 
-    return apiGet('User/Current');
+    let afterLogin = member => {
+        showElement(document.querySelectorAll('.login-only'));
+        if (typeof onValidLogin == 'function')
+            onValidLogin(member);
+    };
+    let result = await apiGet('User/Current', null, null, afterLogin);
+    
+    // If we got here, it worked
+    afterLogin(result);
+    return result;
+}
+
+async function logout() {
+    // Logout and try to remove token from the server
+
+    hideElement(document.querySelectorAll('.login-only'));
+    apiGet('User/Logout', null, true).then(_ => window.location.href = '/');
+    localStorage.removeItem("AUTH_TOKEN");
 }
 
 function showOutput(data, container) {
@@ -121,40 +158,70 @@ function showOutput(data, container) {
 
         euro(amount) {
             // Format number to Euro value: 1.95 -> € 1,95
-            if (isNaN(+amount))
+            if (isNaN(+amount) || amount === null)
                 return amount;
             return (new Intl.NumberFormat('nl-NL', { style: 'currency', currency: 'EUR' })).format(amount);
         },
         editUrl(id) {
             // Return Edit url of Receipt id
-            return '/Declaraties/Edit/' + id;
+            return '/Declaraties/Aanpassen/' + id;
         },
+        viewUrl(id) {
+            // Return View url of Receipt id
+            return '/Declaraties/Bekijken/' + id;
+        },
+        productUrl(id) {
+            // Return Product url of Product id
+            return '/Producten/' + id;
+        },
+        zero(val) {
+            // Default to zero instead of "", null, undefined, etc.
+            return !val ? 0 : val;
+        },
+        dateTime(val) {
+            // Readable date/time (in browser timezone)
+            let date = new Date(val);
+            if (date === "Invalid Date" || isNaN(date))
+                return val;
+
+            return (date.getDate() < 10 ? '0' : '') + date.getDate()
+                + '-' + (date.getMonth() < 9 ? '0' : '') + (date.getMonth() + 1)
+                + '-' + date.getFullYear()
+                + ' ' + (date.getHours() < 10 ? '0' : '') + date.getHours()
+                + ':' + (date.getMinutes() < 10 ? '0' : '') + date.getMinutes();
+        }
     };
 
     showElement(container);
     const outputElements = container.querySelectorAll('[rel]');
-    for (key in data) {
-        outputElements.forEach(output => {
-            const rels = output.getAttribute('rel') ? output.getAttribute('rel').split(',') : [];
-            rels.forEach(rel => {
-                const [relKey, prop, transform] = rel.split(':');
-                if (relKey != key)
-                    return;
-                const value = typeof data[key] == 'object' ? JSON.stringify(data[key]) : data[key];
-                const transformedData = (transform && typeof transforms[transform] == 'function') ? transforms[transform](value) : value;
-                if (typeof prop == 'undefined' || prop == '') {
-                    // No property provided
-                    output.innerText = transformedData;
-                } else if (prop.slice(0, 5) == 'data-') {
-                    // Dataset property ('data-test-test' => output.dataset.testTest)
-                    output.dataset[prop.slice(5).replace(/-[a-z]/g, substr => substr[1].toUpperCase())] = transformedData;
-                } else {
-                    // Regular property
-                    output[prop] = transformedData;
-                }
-            });
+
+    // console.log('Rendering data in container', container, data);
+
+    outputElements.forEach(output => {
+        const rels = output.getAttribute('rel') ? output.getAttribute('rel').split(',') : [];
+        rels.forEach(rel => {
+            const [key, prop, transform] = rel.split(':');
+            let splitKey = key.split('.'); // Support data in structures (rel="key.subkey" with { "key": { "subkey": "value" }} will show "value")
+            let keyData = data[splitKey.shift()] ?? null;
+            while (splitKey.length > 0 && (keyData ?? null) !== null)
+                keyData = keyData[splitKey.shift()] ?? null;
+            const value = typeof keyData == 'object' && keyData !== null ? JSON.stringify(keyData) : keyData;
+            let transformedData = ((transform && typeof transforms[transform] == 'function') ? transforms[transform](value) : value) ?? null;
+            if ((transformedData ?? '') === '' && (prop ?? '') === '' && output.tagName != 'TEXTAREA')
+                transformedData = '\u2014'; // — streepje
+            // console.log(key, prop, transform, '=>', transformedData);
+            if (typeof prop == 'undefined' || prop == '') {
+                // No property provided
+                output.innerText = transformedData;
+            } else if (prop.slice(0, 5) == 'data-') {
+                // Dataset property ('data-test-test' => output.dataset.testTest)
+                output.dataset[prop.slice(5).replace(/-[a-z]/g, substr => substr[1].toUpperCase())] = transformedData;
+            } else {
+                // Regular property
+                output[prop] = transformedData;
+            }
         });
-    }
+    });
 }
 
 async function resizeImage(file, maxSize) {
@@ -262,3 +329,103 @@ function dropContainer(container) {
 
 // Init drop containers
 document.querySelectorAll('.drop-container').forEach(dropContainer);
+
+async function apiGetInfinite(action, container, onLoadItems, perPage, page) {
+    // Call API get method that supports infinite scroll (i.e., offset/limit parameters)
+
+    const toElement = value => typeof value == 'string' ? document.querySelector(value) : typeof value == 'object' ? value : null;
+    container = toElement(container);
+
+    const limit = perPage || 100;
+    const offset = ((page || 1) - 1) * limit;
+    const params = '?offset=' + encodeURIComponent(offset) + '&limit=' + encodeURIComponent(limit);
+    
+    const results = await apiGet(action + params);
+    if (!container || !('querySelector' in container)) {
+        if (typeof onLoadItems == 'function')
+            onLoadItems(null, results);
+        return results;
+    }
+
+    showElement(container);
+    
+    // Show or hide "no results" message
+    const noResults = (!results || results.length == 0) && offset == 0;
+    noResults ? showElement(container.querySelectorAll('.result-empty')) : hideElement(container.querySelectorAll('.result-empty'));
+    
+    const baseItem = container.querySelector('.result-item');
+    const newItems = [];
+    if (!baseItem) {
+        if (typeof onLoadItems == 'function')
+            onLoadItems(null, results);
+        return results;
+    }
+
+    for (i in results) {
+        // Generate and populate output elements
+
+        const resultItem = baseItem.cloneNode(true);
+        if (!resultItem)
+            continue;
+        resultItem.classList.add('result-item-loaded');
+        resultItem.dataset.id = results[i].id;
+        showOutput(results[i], resultItem);
+        let allItems = container.querySelectorAll('.result-item-loaded');
+        let lastItem = allItems.length ? allItems[allItems.length - 1] : baseItem;
+        lastItem.insertAdjacentElement('afterend', resultItem);
+        newItems.push(resultItem);
+    }
+
+    hideElement(baseItem);
+
+    if (results.length < limit) {
+        // No more results
+        hideElement(container.querySelectorAll('.result-has-more'));
+    } else {
+        // There are more results
+        const moreLink = container.querySelector('.result-show-more');
+        if (moreLink) {
+            const newMoreLink = moreLink.cloneNode(true); // Removes old data
+            newMoreLink.addEventListener('click', event => {
+                // Load next page of results
+                event.preventDefault();
+                apiGetInfinite(action, container, onLoadItems, perPage, (page || 1) + 1);
+            });
+            moreLink.insertAdjacentElement('afterend', newMoreLink);
+            moreLink.remove();
+        }
+        showElement(container.querySelectorAll('.result-has-more'));
+    }
+
+    if (typeof onLoadItems == 'function')
+        onLoadItems(newItems, results);
+
+    return results;
+}
+
+LOGIN_FORM?.querySelector('.login-password')?.addEventListener('keyup', event => {
+    if (event.which != 13 || !event.target.value)
+        return;
+    LOGIN_FORM?.querySelector('.login-button')?.dispatchEvent(new Event('click'));
+});
+
+LOGIN_FORM?.querySelector('.login-button')?.addEventListener('click', () => {
+    // Log in, retry whatever we were doing before
+
+    let email = LOGIN_FORM.querySelector('.login-email')?.value;
+    let password = LOGIN_FORM.querySelector('.login-password')?.value;
+    LOGIN_FORM.querySelector('.login-password').value = null;
+
+    if (!email || !password)
+        return;
+
+    apiPost('User/Login', { email, password }).then(result => {
+        hideElement(LOGIN_FORM);
+        hideElement(ERROR_MSG);
+        if (result.token)
+            localStorage.setItem("AUTH_TOKEN", result.token);
+        if (typeof AFTER_LOGIN == 'function' && result.member)
+            AFTER_LOGIN(result.member);
+        AFTER_LOGIN = null;
+    });
+});

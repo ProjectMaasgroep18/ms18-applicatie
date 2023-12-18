@@ -1,0 +1,215 @@
+<h1>@ViewData["Title"]</h1>
+
+<div id="login-user" class="hidden">
+    <p id="login-info">Hallo <span rel="name"></span>!</p>    
+
+    <p>Hier kun je de accounts van leden beheren.</p>
+
+    <div id="members" class="hidden">
+        <p><i>Dit zijn de leden die momenteel in de database staan:</i></p>
+
+        <table class="data-table">
+            <tr>
+                <th>Naam</th>
+                <th>E-mailadres</th>
+                <th></th>
+            </tr>
+            <tr class="result-empty">
+                <td colspan="999">Er zijn geen leden</td>
+            </tr>    
+            <tr class="result-add hidden">
+                <td colspan="999"><a href="#" id="members-add">Lid toevoegen</a></td>
+            </tr>
+            <tr class="result-item" class="hidden">
+                <td>
+                    <span rel="name" class="member-name"></span>
+                    <input rel="name:value" class="member-input hidden">
+                </td>
+                <td rel="email"></td>
+                <td class="user-actions hidden">
+                    Voorlopig niet aanpasbaar
+                    <a href="#" class="edit-link">Aanpassen</a>
+                    <a href="#" class="save-link hidden">Opslaan</a>
+                    <a href="#" class="delete-link">Verwijderen</a>
+                </td>
+            </tr>
+            <tr class="result-has-more">
+                <td colspan="999"><a href="#" class="result-show-more">Toon meer</a></td>
+            </tr>
+        </table>
+
+        &nbsp;
+
+        <p><a href="/">Terug naar Home</a></p>
+
+    </div>
+</div>
+
+@section scripts {
+<script>
+    requireLogin(member => {
+        // User session loaded
+     
+        const userId = member.id;
+        showElement(document.querySelector('#login-user'));
+        showOutput(member, document.querySelector('#login-info'));
+        const memberTable = document.querySelector('#members');
+
+        apiGetInfinite('User', memberTable, (elements, members) => {
+            for (i in members) {
+                // Newly loaded member
+
+                let element = elements[i];
+
+                //// LEDEN NIET AANPASBAAR
+                hideElement(memberTable.querySelectorAll('.edit-link'));
+                
+                element.querySelector('.member-input')?.addEventListener('keyup', event => {
+                    // Save on enter key
+
+                    if (event.which != 13)
+                        return
+
+                    element.querySelector('.save-link')?.dispatchEvent(new Event('click'));
+                });
+                
+                element.querySelector('.edit-link')?.addEventListener('click', event => {
+                    // Click Edit link
+                    
+                    event.preventDefault();
+
+                    const editId = element.dataset.id;
+                    const memberInput = element.querySelector('.member-input');
+
+                    hideElement(element.querySelector('.member-name'));
+                    hideElement(element.querySelector('.edit-link'));
+                    
+                    showElement(element.querySelector('.save-link'));
+                    showElement(memberInput);
+                    memberInput.focus();
+                });
+
+                element.querySelector('.save-link')?.addEventListener('click', event => {
+                    // Click Save link
+                    
+                    event.preventDefault();
+
+                    const editId = element.dataset.id;
+                    const memberInput = element.querySelector('.member-input');
+                    const newName = memberInput.value;
+
+                    memberInput.disabled = true;
+                    hideElement(element.querySelector('.user-actions'));
+
+                    apiPut('User/' + editId, { id: editId, name: newName }).then(result => {
+                        // Saved the updated member: apply it here too
+
+                        if (!result)
+                            return;
+
+                        const memberName = element.querySelector('.member-name');
+                        showOutput({ id: editId, name: newName }, element);
+                        memberInput.disabled = false;
+
+                        showElement(memberName);
+                        showElement(element.querySelector('.edit-link'));
+                        showElement(element.querySelector('.user-actions'));
+
+                        hideElement(element.querySelector('.save-link'));
+                        hideElement(memberInput);
+                    });
+                });
+                
+                element.querySelector('.delete-link')?.addEventListener('click', event => {
+                    // Click Delete link
+
+                    event.preventDefault();
+
+                    if (!window.confirm('Weet je zeker dat je dit lid wilt verwijderen?'))
+                        return;
+
+                    const deleteId = element.dataset.id;
+                    hideElement(element.querySelector('.user-actions'));
+
+                    apiDelete('User/' + deleteId).then(result => {
+                        if (!result)
+                            return;
+
+                        window.location.href = window.location.href.toString().replace(/#.*$/, '');
+                    });
+                });
+            }
+        });
+
+        document.querySelector('#members-add')?.addEventListener('click', event => {
+            // Add member link
+
+            event.preventDefault();
+
+            const baseRow = document.querySelector('#members .result-item');
+            const memberRow = baseRow.cloneNode(true);
+            showElement(memberRow);
+            baseRow.insertAdjacentElement('beforebegin', memberRow);
+            
+            hideElement(document.querySelector('#members .result-add'));
+
+            const memberInput = memberRow.querySelector('.member-input');
+            const saveLink = memberRow.querySelector('.save-link');
+            const deleteLink = memberRow.querySelector('.delete-link');
+
+            hideElement(memberRow.querySelector('.member-name'));
+            hideElement(memberRow.querySelector('.edit-link'));
+            
+            showElement(saveLink);
+            showElement(memberInput);
+            memberInput.focus();
+
+            memberInput.addEventListener('keyup', event => {
+                // Save on enter key
+
+                if (event.which != 13)
+                    return
+
+                saveLink.dispatchEvent(new Event('click'));
+            })
+
+            saveLink.addEventListener('click', event => {
+                // Click Save link of newly added member
+                
+                event.preventDefault();
+                const newName = memberInput.value;
+
+                memberInput.disabled = true;
+                hideElement(memberRow.querySelector('.user-actions'));
+
+                // This newly added member was never saved before, so create it in the database
+
+                apiPost('User/', { name: newName }).then(result => {    
+                    // Saved new member
+
+                    if (!result)
+                        return;
+                    
+                    window.location.href = window.location.href.toString().replace(/#.*$/, '');
+                });
+                return;
+            });
+
+            deleteLink.addEventListener('click', event => {
+                // Click Delete link of newly added member
+                
+                event.preventDefault();
+
+                if (!window.confirm('Weet je zeker dat je deze post wilt verwijderen?'))
+                    return;
+
+                // This newly added member was never saved, just remove it here
+                memberRow.remove();
+                if (memberTable.querySelectorAll('tr:not(.hidden)').length <= 0)
+                    showElement(document.querySelector('#members-empty'));
+                return;
+            });
+        });
+    });
+</script>
+}
