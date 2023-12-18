@@ -5,7 +5,7 @@ using Maasgroep.Database.Admin;
 
 namespace Maasgroep.Database.Orders
 {
-    public class BillLineRepository : EditableRepository<Line, LineModel, LineData, LineHistory>, IBillLineRepository
+    public class BillLineRepository : DeletableRepository<Line, LineModel, LineData>, IBillLineRepository
     {
         protected ProductRepository Products;
         public BillLineRepository(MaasgroepContext db) : base(db)
@@ -42,20 +42,6 @@ namespace Maasgroep.Database.Orders
 			line.Quantity = data.Quantity;
 			line.Amount = product.Price * data.Quantity;
 			return line;
-        }
-        
-        /** Create a LineHistory record from a Line record */
-        public override LineHistory GetHistory(Line Line)
-        {
-            return new LineHistory() {
-				Id = Line.Id,
-				BillId = Line.BillId,
-				ProductId = Line.ProductId,
-                Name = Line.Name,
-				Price = Line.Price,
-				Quantity = Line.Quantity,
-				Amount = Line.Amount,
-			};
         }
 
         /** Get line record by BillId/ProductId combination */

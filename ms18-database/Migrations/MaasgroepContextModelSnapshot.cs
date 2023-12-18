@@ -22,13 +22,9 @@ namespace Maasgroep.Database.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.HasSequence("billSeq", "orderHistory");
-
             modelBuilder.HasSequence("costCentreSeq", "receipt");
 
             modelBuilder.HasSequence("costCentreSeq", "receiptHistory");
-
-            modelBuilder.HasSequence("lineSeq", "orderHistory");
 
             modelBuilder.HasSequence("memberSeq", "admin");
 
@@ -297,58 +293,6 @@ namespace Maasgroep.Database.Migrations
                     b.ToTable("bill", "order");
                 });
 
-            modelBuilder.Entity("Maasgroep.Database.Orders.BillHistory", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasDefaultValueSql("nextval('\"orderHistory\".\"billSeq\"')");
-
-                    b.Property<long>("BillId")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime>("DateTimeCreated")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime?>("DateTimeDeleted")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime?>("DateTimeModified")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<bool>("IsGuest")
-                        .HasColumnType("boolean");
-
-                    b.Property<long?>("MemberCreatedId")
-                        .HasColumnType("bigint");
-
-                    b.Property<long?>("MemberDeletedId")
-                        .HasColumnType("bigint");
-
-                    b.Property<long?>("MemberModifiedId")
-                        .HasColumnType("bigint");
-
-                    b.Property<string>("Name")
-                        .HasMaxLength(2048)
-                        .HasColumnType("character varying(2048)");
-
-                    b.Property<string>("Note")
-                        .HasMaxLength(64000)
-                        .HasColumnType("character varying(64000)");
-
-                    b.Property<DateTime>("RecordCreated")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasDefaultValueSql("now()");
-
-                    b.Property<double>("TotalAmount")
-                        .HasColumnType("double precision");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("bill", "orderHistory");
-                });
-
             modelBuilder.Entity("Maasgroep.Database.Orders.Line", b =>
                 {
                     b.Property<long>("Id")
@@ -412,72 +356,6 @@ namespace Maasgroep.Database.Migrations
                         {
                             t.HasCheckConstraint("CK_orderLine_quantity", "\"Quantity\" > 0");
                         });
-                });
-
-            modelBuilder.Entity("Maasgroep.Database.Orders.LineHistory", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasDefaultValueSql("nextval('\"orderHistory\".\"lineSeq\"')");
-
-                    b.Property<double>("Amount")
-                        .HasColumnType("double precision");
-
-                    b.Property<long>("BillId")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime>("DateTimeCreated")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime?>("DateTimeDeleted")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime?>("DateTimeModified")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<bool>("IsGuest")
-                        .HasColumnType("boolean");
-
-                    b.Property<long>("LineId")
-                        .HasColumnType("bigint");
-
-                    b.Property<long?>("MemberCreatedId")
-                        .HasColumnType("bigint");
-
-                    b.Property<long?>("MemberDeletedId")
-                        .HasColumnType("bigint");
-
-                    b.Property<long?>("MemberId")
-                        .HasColumnType("bigint");
-
-                    b.Property<long?>("MemberModifiedId")
-                        .HasColumnType("bigint");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Note")
-                        .HasColumnType("text");
-
-                    b.Property<double>("Price")
-                        .HasColumnType("double precision");
-
-                    b.Property<long>("ProductId")
-                        .HasColumnType("bigint");
-
-                    b.Property<long>("Quantity")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime>("RecordCreated")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasDefaultValueSql("now()");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("line", "orderHistory");
                 });
 
             modelBuilder.Entity("Maasgroep.Database.Orders.Product", b =>

@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Maasgroep.Database.Migrations
 {
     /// <inheritdoc />
-    public partial class lines : Migration
+    public partial class orderLines : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -19,17 +19,13 @@ namespace Maasgroep.Database.Migrations
                 name: "order");
 
             migrationBuilder.EnsureSchema(
-                name: "orderHistory");
-
-            migrationBuilder.EnsureSchema(
                 name: "receiptHistory");
 
             migrationBuilder.EnsureSchema(
                 name: "admin");
 
-            migrationBuilder.CreateSequence(
-                name: "billSeq",
-                schema: "orderHistory");
+            migrationBuilder.EnsureSchema(
+                name: "orderHistory");
 
             migrationBuilder.CreateSequence(
                 name: "costCentreSeq",
@@ -38,10 +34,6 @@ namespace Maasgroep.Database.Migrations
             migrationBuilder.CreateSequence(
                 name: "costCentreSeq",
                 schema: "receiptHistory");
-
-            migrationBuilder.CreateSequence(
-                name: "lineSeq",
-                schema: "orderHistory");
 
             migrationBuilder.CreateSequence(
                 name: "memberSeq",
@@ -76,30 +68,6 @@ namespace Maasgroep.Database.Migrations
                 schema: "orderHistory");
 
             migrationBuilder.CreateTable(
-                name: "bill",
-                schema: "orderHistory",
-                columns: table => new
-                {
-                    Id = table.Column<long>(type: "bigint", nullable: false, defaultValueSql: "nextval('\"orderHistory\".\"billSeq\"')"),
-                    BillId = table.Column<long>(type: "bigint", nullable: false),
-                    IsGuest = table.Column<bool>(type: "boolean", nullable: false),
-                    Note = table.Column<string>(type: "character varying(64000)", maxLength: 64000, nullable: true),
-                    Name = table.Column<string>(type: "character varying(2048)", maxLength: 2048, nullable: true),
-                    TotalAmount = table.Column<double>(type: "double precision", nullable: false),
-                    RecordCreated = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "now()"),
-                    MemberCreatedId = table.Column<long>(type: "bigint", nullable: true),
-                    MemberModifiedId = table.Column<long>(type: "bigint", nullable: true),
-                    MemberDeletedId = table.Column<long>(type: "bigint", nullable: true),
-                    DateTimeCreated = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    DateTimeModified = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    DateTimeDeleted = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_bill", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "costCentre",
                 schema: "receiptHistory",
                 columns: table => new
@@ -118,35 +86,6 @@ namespace Maasgroep.Database.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_costCentre", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "line",
-                schema: "orderHistory",
-                columns: table => new
-                {
-                    Id = table.Column<long>(type: "bigint", nullable: false, defaultValueSql: "nextval('\"orderHistory\".\"lineSeq\"')"),
-                    LineId = table.Column<long>(type: "bigint", nullable: false),
-                    BillId = table.Column<long>(type: "bigint", nullable: false),
-                    ProductId = table.Column<long>(type: "bigint", nullable: false),
-                    Name = table.Column<string>(type: "text", nullable: false),
-                    Price = table.Column<double>(type: "double precision", nullable: false),
-                    Quantity = table.Column<long>(type: "bigint", nullable: false),
-                    Amount = table.Column<double>(type: "double precision", nullable: false),
-                    MemberId = table.Column<long>(type: "bigint", nullable: true),
-                    IsGuest = table.Column<bool>(type: "boolean", nullable: false),
-                    Note = table.Column<string>(type: "text", nullable: true),
-                    RecordCreated = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "now()"),
-                    MemberCreatedId = table.Column<long>(type: "bigint", nullable: true),
-                    MemberModifiedId = table.Column<long>(type: "bigint", nullable: true),
-                    MemberDeletedId = table.Column<long>(type: "bigint", nullable: true),
-                    DateTimeCreated = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    DateTimeModified = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    DateTimeDeleted = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_line", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -1047,20 +986,12 @@ namespace Maasgroep.Database.Migrations
                 schema: "receipt");
 
             migrationBuilder.DropTable(
-                name: "bill",
-                schema: "orderHistory");
-
-            migrationBuilder.DropTable(
                 name: "costCentre",
                 schema: "receiptHistory");
 
             migrationBuilder.DropTable(
                 name: "line",
                 schema: "order");
-
-            migrationBuilder.DropTable(
-                name: "line",
-                schema: "orderHistory");
 
             migrationBuilder.DropTable(
                 name: "memberPermission",
@@ -1115,20 +1046,12 @@ namespace Maasgroep.Database.Migrations
                 schema: "admin");
 
             migrationBuilder.DropSequence(
-                name: "billSeq",
-                schema: "orderHistory");
-
-            migrationBuilder.DropSequence(
                 name: "costCentreSeq",
                 schema: "receipt");
 
             migrationBuilder.DropSequence(
                 name: "costCentreSeq",
                 schema: "receiptHistory");
-
-            migrationBuilder.DropSequence(
-                name: "lineSeq",
-                schema: "orderHistory");
 
             migrationBuilder.DropSequence(
                 name: "memberSeq",

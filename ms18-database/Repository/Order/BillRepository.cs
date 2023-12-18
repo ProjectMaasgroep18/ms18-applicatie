@@ -5,7 +5,7 @@ using Maasgroep.Database.Admin;
 
 namespace Maasgroep.Database.Orders
 {
-    public class BillRepository : EditableRepository<Bill, BillModel, BillData, BillHistory>, IBillRepository
+    public class BillRepository : DeletableRepository<Bill, BillModel, BillData>, IBillRepository
     {
         protected BillLineRepository Lines;
         protected ProductRepository Products;
@@ -30,7 +30,7 @@ namespace Maasgroep.Database.Orders
 				Note = bill.Note,
                 IsGuest = bill.IsGuest,
                 MemberCreated = member,
-                Lines = Lines.ListByBill(bill.Id).Where(line => line.Quantity > 0).ToList(),
+                Lines = Lines.ListByBill(bill.Id, 0, Int32.MaxValue).Where(line => line.Quantity > 0).ToList(),
                 TotalAmount = bill.TotalAmount,
 			};
         }
@@ -38,67 +38,40 @@ namespace Maasgroep.Database.Orders
         /** Create or update Bill record from data model */
         public override Bill? GetRecord(BillData data, Bill? existingBill = null)
         {
-            var lines = new Dictionary<long, LineData>();
             if (existingBill != null)
-            {
-                // Create existing lines with 0 quantity
-                Lines.ListByBill(existingBill.Id).ToList().ForEach(line => {
-                    if (!lines.ContainsKey(line.ProductId))
-                    {
-                        lines.Add(line.ProductId, new () {
-                            ProductId = line.ProductId,
-                            Quantity = 0,
-                        });
-                    }
-                });
-            }
-   
-            data.Lines.ForEach(line => {
-                // Merge with new lines
-                if (lines.ContainsKey(line.ProductId))
-                {
-                    lines[line.ProductId].Quantity += line.Quantity;
-                }
-                else
-                {
+                return null;
+
+            var lines = new Dictionary<long, LineData>();
+
+            foreach (var line in data.Lines) {
+                // Build lines from data model
+
+                if (!lines.ContainsKey(line.ProductId)) {
+                    // There is no line for this product yet
+
                     lines.Add(line.ProductId, new () {
                         ProductId = line.ProductId,
-                        Quantity = line.Quantity,
-                    });;
+                        Quantity = 0,
+                    });
                 }
-            });
+                
+                // Increment quantity in Data model (this way duplicate lines are merged)
+                lines[line.ProductId].Quantity += line.Quantity;
+            }
 
-            var bill = existingBill ?? new();
-			bill.Name = data.Name;
-			bill.Note = data.Note;
-            bill.Lines = lines.ToList()
-                .Select(line => Lines.GetRecord(line.Value, existingBill != null ? Lines.GetByBillProduct(existingBill.Id, line.Key) : null))
-                .Where(line => line != null).ToList()!;
+            var bill = new Bill
+            {
+                Name = data.Name,
+                Note = data.Note,
+                Lines = lines.ToList()
+                    .Select(line => Lines.GetRecord(line.Value))
+                    .Where(line => line != null)
+                    .ToList()!
+            };
+            if (bill.Lines.Count == 0)
+                return null; // There must be at least one line in the bill
             bill.TotalAmount = bill.Lines.Sum(line => line.Amount);
 			return bill;
-        }
-        
-        /** Create a BillHistory record from a Bill record */
-        public override BillHistory GetHistory(Bill bill)
-        {
-            return new BillHistory() {
-				Id = bill.Id,
-				Name = bill.Name,
-				Note = bill.Note,
-				IsGuest = bill.IsGuest,
-                TotalAmount = bill.TotalAmount,
-			};
-        }
-
-        /** Ensure lines are created and IsGuest is set correctly when saving bill */
-        public override Action<MaasgroepContext> GetSaveAction(Bill record)
-        {
-            var saveAction = base.GetSaveAction(record);
-            return (MaasgroepContext db) => {
-                record.IsGuest = record.MemberCreatedId == null;
-
-                saveAction.Invoke(db);
-            };
         }
     }
 }

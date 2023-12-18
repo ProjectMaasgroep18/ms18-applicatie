@@ -43,8 +43,6 @@ namespace Maasgroep.Database
 
 		public DbSet<ProductHistory> ProductHistory { get; set; }
 		public DbSet<StockHistory> StockHistory { get; set; }
-		public DbSet<LineHistory> LineHistory { get; set; }
-		public DbSet<BillHistory> BillHistory { get; set; }
 
         #endregion
 
@@ -93,8 +91,6 @@ namespace Maasgroep.Database
 
 			CreateProductHistory(modelBuilder);
 			CreateStockHistory(modelBuilder);
-			CreateOrderLineHistory(modelBuilder);
-			CreateBillHistory(modelBuilder);
 			#endregion
 		}
 
@@ -591,25 +587,6 @@ namespace Maasgroep.Database
 			modelBuilder.Entity<StockHistory>().Property(s => s.Id).HasDefaultValueSql("nextval('\"orderHistory\".\"stockSeq\"')");
 			modelBuilder.Entity<StockHistory>().Property(s => s.RecordCreated).HasDefaultValueSql("now()");
 		}
-
-		private void CreateOrderLineHistory(ModelBuilder modelBuilder)
-		{
-			modelBuilder.Entity<LineHistory>().ToTable("line", "orderHistory");
-			modelBuilder.HasSequence<long>("lineSeq", schema: "orderHistory").StartsAt(1).IncrementsBy(1);
-			modelBuilder.Entity<LineHistory>().Property(l => l.Id).HasDefaultValueSql("nextval('\"orderHistory\".\"lineSeq\"')");
-			modelBuilder.Entity<LineHistory>().Property(l => l.RecordCreated).HasDefaultValueSql("now()");
-		}
-
-		private void CreateBillHistory(ModelBuilder modelBuilder)
-		{
-			modelBuilder.Entity<BillHistory>().ToTable("bill", "orderHistory");
-			modelBuilder.HasSequence<long>("billSeq", schema: "orderHistory").StartsAt(1).IncrementsBy(1);
-			modelBuilder.Entity<BillHistory>().Property(b => b.Id).HasDefaultValueSql("nextval('\"orderHistory\".\"billSeq\"')");
-			modelBuilder.Entity<BillHistory>().Property(b => b.RecordCreated).HasDefaultValueSql("now()");
-			modelBuilder.Entity<BillHistory>().Property(p => p.Name).HasMaxLength(2048);
-			modelBuilder.Entity<BillHistory>().Property(b => b.Note).HasMaxLength(64000);
-		}
-
 
 		#endregion
 	}

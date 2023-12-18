@@ -6,20 +6,20 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Maasgroep.Controllers.Api;
 
-public class BillController : EditableRepositoryController<IBillRepository, Bill, BillModel, BillData, BillHistory>
+public class BillController : DeletableRepositoryController<IBillRepository, Bill, BillModel, BillData>
 {
-    //protected IStockRepository Stock;
-    // protected IBillLinesRepository BillLines;
     public override string ItemName { get => "Bestelling"; }
     public BillController(IBillRepository repository) : base(repository) {}
-        // => BillLines
     
     protected override bool AllowCreate(BillData Bill)
         => true; // Everyone can place orders, even not logged in (= guest)
-    
+
+    protected override bool AllowList()
+        => HasPermission("order.view");
+
     protected override bool AllowView(Bill? Bill)
         => HasPermission("order.view") || (CurrentMember != null && Bill?.MemberCreatedId == CurrentMember.Id);
 
-    protected override bool AllowDelete(Bill? Bill) // +Edit
+    protected override bool AllowDelete(Bill? Bill)
         => HasPermission("admin") || (CurrentMember != null && Bill?.MemberCreatedId == CurrentMember.Id);
 }
