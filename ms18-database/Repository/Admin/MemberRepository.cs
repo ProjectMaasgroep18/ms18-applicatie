@@ -74,7 +74,7 @@ namespace Maasgroep.Database.Admin
                 var splitPermission = permission.Split(".");
                 while (n <= splitPermission.Length)
                 {
-                    permissions.Add(String.Join('.', splitPermission.Take(n)), true);
+                    permissions.TryAdd(String.Join('.', splitPermission.Take(n)), true);
                     n++;
                 }
             }
