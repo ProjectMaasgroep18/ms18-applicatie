@@ -2,7 +2,6 @@
 {
     public record TokenStore : GenericRecordActive
     {
-        public long Id { get; set; }
         public string Token { get; set; }
         public DateTime ExperationDate { get; set; }
         

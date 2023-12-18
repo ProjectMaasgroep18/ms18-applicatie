@@ -20,6 +20,7 @@ namespace Maasgroep.Database.Orders
 				Icon = product.Icon,
 				Price = product.Price,
                 PriceQuantity = product.PriceQuantity,
+                Stock = Stock.GetById(product.Id)?.Quantity ?? 0,
 			};
         }
 

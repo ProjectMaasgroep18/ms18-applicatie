@@ -224,8 +224,8 @@ namespace Maasgroep.Console
 
                 var stockToAdd = new List<Stock>()
                 {
-                    new Stock() { MemberCreated = member, Product = product1, Quantity = 5 },
-                    new Stock() { MemberCreated = member, Product = product2, Quantity = 10 }
+                    new Stock() { MemberCreated = member, Product = product1!, Quantity = 5 },
+                    new Stock() { MemberCreated = member, Product = product2!, Quantity = 10 }
                 };
 
                 db.Stock.AddRange(stockToAdd);

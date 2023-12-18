@@ -8,6 +8,7 @@ namespace Maasgroep.SharedKernel.ViewModels.Orders
 		public string? Color { get; set; }
 		public string? Icon { get; set; }
 		public double Price { get; set; }
-		public int PriceQuantity { get; set; } = 1;
+		public long PriceQuantity { get; set; }
+		public long Stock { get; set; }
 	}
 }
