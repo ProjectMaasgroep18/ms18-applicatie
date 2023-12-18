@@ -1,0 +1,222 @@
+<h1>Declaratie bekijken</h1>
+
+<div id="login-user" class="hidden">
+    <p id="login-info">Hallo <span rel="name"></span>!</p>
+
+    
+    <p>Hier kan je de declaratie bekijken:</p>
+
+    <div id="receipt-form" class="hidden">
+
+        <table class="data-table">
+            <tr>
+                <td>Bedrag: </td>
+                <td><b rel="amount:euro"></b></td>
+            </tr>
+            <tr>
+                <td>Kostencentrum: </td>
+                <td><b rel="costCentre.name"></b></td>
+            </tr>
+            <tr>
+                <td>Opmerkingen: </td>
+                <td><b rel="note"></b></td>
+            </tr>
+            <tr>
+                <td>Ingediend door: </td>
+                <td><b rel="memberCreated.name"></b></td>
+            </tr>
+            <tr>
+                <td>Aangemaakt op: </td>
+                <td><b rel="dateTimeCreated::dateTime"></b></td>
+            </tr>
+            <tr>
+                <td>Status: </td>
+                <td><b rel="statusString"></b></td>
+            </tr>
+        </table>
+    </div>
+
+    &nbsp;
+
+    <div id="receipt-photos-form">
+
+        <p><i>Foto's:</i></p>
+
+        <div id="receipt-photos">
+            <div class="result-item hidden">
+                <img class="drop-image">
+            </div>
+            <p class="result-empty hidden">Er zijn geen foto's bij deze declaratie</p>
+            <p class="result-has-more hidden">
+                <a href="#" class="result-show-more">Toon meer</a>
+            </p>
+        </div>
+
+    </div>
+
+    &nbsp;
+
+    <div id="receipt-approval-list">
+        <p class="result-item" class="hidden">
+            <b class="status-approved">Goedgekeurd</b>
+            <b class="status-rejected">Afgekeurd</b>
+            <b class="status-paid">Uitbetaald</b>
+            door
+            <b rel="memberCreated.name"></b>
+            op
+            <b rel="dateTimeCreated::dateTime"></b>
+            <br>
+            <i rel="note"></i>
+        </p>
+        <p class="result-has-more hidden">
+            <a href="#" class="result-show-more">Toon meer</a>
+        </p>
+    </div>
+
+    <div id="receipt-approval-form" class="hidden">
+        <p><i>Goedkeuren of afkeuren:</i></p>
+
+        <div id="receipt-approval">
+            <p id="receipt-approval-none" class="hidden">Hier kan je de declaratie goed- of afkeuren:</p>
+
+            <div id="receipt-approval-new">
+                <p>
+                    Opmerking: <br>
+                    <textarea id="receipt-approval-note"></textarea>
+                </p>
+                <p>
+                    <button type="button" class="btn btn-primary approval-button" data-approve="1">Goedkeuren</button>
+                    <button type="button" class="btn btn-secondary approval-button" data-approve="0">Afkeuren</button>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div id="receipt-payment-form" class="hidden">
+        <p><i>Markeer hier de declaratie als uitbetaald:</i></p>
+
+        <div id="receipt-payment">
+            <p id="receipt-payment-none" class="hidden">Hier kan je de declaratie markeren als uitbetaald:</p>
+
+            <div id="receipt-payment-new">
+                <p>
+                    Opmerking: <br>
+                    <textarea id="receipt-payment-note"></textarea>
+                </p>
+                <p>
+                    <button type="button" class="btn btn-primary payment-button" data-pay="1">Markeren als uitbetaald</button>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <p id="receipt-processed" class="hidden">Deze declaratie is al verwerkt.</p>
+
+    <p><a href="/Declaraties">Terug naar Declaraties</a></p>
+</div>
+
+
+@section scripts {
+<script>
+    const receiptId = @ViewData["id"];
+    const photosDiv = document.querySelector('#receipt-photos');
+    const approvalDiv = document.querySelector('#receipt-approval-list');
+
+    requireLogin(async member => {
+        // User session loaded
+     
+        showElement(document.querySelector('#login-user'));
+        showOutput(member, document.querySelector('#login-info'));
+
+
+        apiGet('Receipt/' + receiptId).then(receipt => {
+            // Receipt loaded
+
+            showOutput(receipt, document.querySelector('#receipt-form'));
+            
+            if (receipt.isApprovable)
+                showElement(document.querySelector('#receipt-approval-form'));
+
+            if (receipt.isPayable)
+                showElement(document.querySelector('#receipt-payment-form'));
+
+            if (!receipt.isApprovable && !receipt.isPayable)
+                showElement(document.querySelector('#receipt-processed'));
+
+            
+            apiGetInfinite('Receipt/' + receiptId + '/Photo', photosDiv, (elements, photos) => {
+                // Load receipt photos
+                for (i in photos) {
+                    let photo = elements[i];
+                    let img = photo.querySelector('img');
+                    let id = photos[i].id;
+                    img.src = photos[i].base64Image;
+                }
+            });
+
+            apiGetInfinite('Receipt/' + receiptId + '/Approve', approvalDiv, (elements, approvals) => {
+                // Load receipt approvals
+                for (i in approvals) {
+                    let element = elements[i];
+                    let id = approvals[i].id;
+                    
+                    if (approvals[i].paid) {
+                        // Uitbetaald
+                        element.querySelector('.status-approved')?.remove();
+                        element.querySelector('.status-rejected')?.remove();
+                    } else if (approvals[i].approved) {
+                        // Goedgekeurd
+                        element.querySelector('.status-paid')?.remove();
+                        element.querySelector('.status-rejected')?.remove();
+                    } else {
+                        // Afgekeurd
+                        element.querySelector('.status-paid')?.remove();
+                        element.querySelector('.status-approved')?.remove();
+                    }
+                }
+            });
+        });
+    });
+
+    document.querySelectorAll('.approval-button').forEach(btn => btn.addEventListener('click', event => {
+        // Approve or Reject
+        
+        let data = {
+            receiptId,
+            approved: !!btn.dataset.approve && btn.dataset.approve != "0",
+            paid: false,
+            note: document.querySelector('#receipt-approval-note').value,
+        };
+
+        if (!window.confirm('Weet je zeker dat je deze declaratie wilt ' + (data.approved ? 'goedkeuren' : 'afkeuren') + '?'))
+            return;
+
+        hideElement(document.querySelector('#receipt-approval-form'));
+
+        apiPost('Receipt/' + receiptId + '/Approve', data).then(result => {
+            window.location.href = '/Declaraties/Goedkeuren';
+        });
+    }));
+
+     document.querySelectorAll('.payment-button').forEach(btn => btn.addEventListener('click', event => {
+        // Approve or Reject
+        
+        let data = {
+            receiptId,
+            approved: true,
+            paid: !!btn.dataset.pay && btn.dataset.pay != "0",
+            note: document.querySelector('#receipt-payment-note').value,
+        };
+
+        if (!window.confirm('Weet je zeker dat je deze declaratie wilt markeren als "Uitbetaald"?'))
+            return;
+
+        hideElement(document.querySelector('#receipt-payment-form'));
+
+        apiPost('Receipt/' + receiptId + '/Approve', data).then(result => {
+            window.location.href = '/Declaraties/Uitbetalen';
+        });
+    }));
+
+</script>
+}
