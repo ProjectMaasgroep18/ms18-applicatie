@@ -2,12 +2,12 @@ using Maasgroep.SharedKernel.Interfaces;
 
 namespace Maasgroep.Database
 {
-    public abstract class ReadOnlyRepository<TRecord, TViewModel> : IReadOnlyRepository<TRecord, TViewModel>
+    public abstract class ReadableRepository<TRecord, TViewModel> : IReadableRepository<TRecord, TViewModel>
 	where TRecord : GenericRecordActive
     {
         protected readonly MaasgroepContext Db;
 
-        public ReadOnlyRepository(MaasgroepContext db) => Db = db;
+        public ReadableRepository(MaasgroepContext db) => Db = db;
 
 		// Default number of items per page
 		const int defaultLimit = 100;

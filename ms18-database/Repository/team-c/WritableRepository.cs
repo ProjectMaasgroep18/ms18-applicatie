@@ -2,7 +2,7 @@ using Maasgroep.SharedKernel.Interfaces;
 
 namespace Maasgroep.Database
 {
-    public abstract class WritableRepository<TRecord, TViewModel, TDataModel> : ReadOnlyRepository<TRecord, TViewModel>, IWritableRepository<TRecord, TViewModel, TDataModel>
+    public abstract class WritableRepository<TRecord, TViewModel, TDataModel> : ReadableRepository<TRecord, TViewModel>, IWritableRepository<TRecord, TViewModel, TDataModel>
 	where TRecord : GenericRecordActive
     {
         public WritableRepository(MaasgroepContext db) : base(db) {}

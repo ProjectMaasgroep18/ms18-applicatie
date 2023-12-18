@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Maasgroep.Controllers.Api;
 
-public abstract class WritableRepositoryController<TRepository, TRecord, TViewModel, TDataModel> : ReadOnlyRepositoryController<TRepository, TRecord, TViewModel>
+public abstract class WritableRepositoryController<TRepository, TRecord, TViewModel, TDataModel> : ReadableRepositoryController<TRepository, TRecord, TViewModel>
 where TRepository : IWritableRepository<TRecord, TViewModel, TDataModel>
 where TRecord: GenericRecordActive
 {

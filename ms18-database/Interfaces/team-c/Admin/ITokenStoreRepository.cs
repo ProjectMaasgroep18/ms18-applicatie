@@ -4,7 +4,7 @@ using Maasgroep.SharedKernel.ViewModels.Admin;
 
 namespace Maasgroep.Database.Interfaces
 {
-    public interface ITokenStoreRepository : IReadOnlyRepository<TokenStore, TokenModel>
+    public interface ITokenStoreRepository : IReadableRepository<TokenStore, TokenModel>
     {
         bool SaveToken(string token, DateTime expire, long memberId);
         bool DeleteToken(string token, long memberId);

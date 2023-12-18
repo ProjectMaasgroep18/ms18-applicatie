@@ -3,7 +3,7 @@ using Maasgroep.SharedKernel.ViewModels.Admin;
 
 namespace Maasgroep.Database.Admin
 {
-    public class TokenStoreRepository : ReadOnlyRepository<TokenStore, TokenModel>, ITokenStoreRepository
+    public class TokenStoreRepository : ReadableRepository<TokenStore, TokenModel>, ITokenStoreRepository
     {
         public TokenStoreRepository(MaasgroepContext db) : base(db) {}
 

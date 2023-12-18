@@ -8,8 +8,8 @@ namespace Maasgroep.Controllers.Api;
 
 [Route("api/v1/[controller]")]
 [ApiController]
-public abstract class ReadOnlyRepositoryController<TRepository, TRecord, TViewModel> : ControllerBase
-where TRepository : IReadOnlyRepository<TRecord, TViewModel>
+public abstract class ReadableRepositoryController<TRepository, TRecord, TViewModel> : ControllerBase
+where TRepository : IReadableRepository<TRecord, TViewModel>
 where TRecord: GenericRecordActive
 {
 	protected readonly TRepository Repository;
@@ -23,7 +23,7 @@ where TRecord: GenericRecordActive
 
     public virtual string ItemName { get => "Item"; }
 
-	public ReadOnlyRepositoryController(TRepository repository) 
+	public ReadableRepositoryController(TRepository repository) 
 	    => Repository = repository;
 
     [HttpGet]

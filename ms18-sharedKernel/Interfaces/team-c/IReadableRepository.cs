@@ -1,7 +1,7 @@
 namespace Maasgroep.SharedKernel.Interfaces
 {
 	/** A generic data repository that handles Records and View Models. Data can only be read, not Created, Edited or Deleted */
-	public interface IReadOnlyRepository<TRecord, TViewModel>
+	public interface IReadableRepository<TRecord, TViewModel>
 	{
 		// Methods to convert between record/model
 		TViewModel? GetModel(long id);
