@@ -5,9 +5,9 @@ using Maasgroep.SharedKernel.DataModels.Orders;
 
 namespace Maasgroep.Database.Interfaces
 {
-	/** Stock repository interface, connecting to Stock database records */
-	public interface IStockRepository : IEditableRepository<Stock, StockModel, StockData, StockHistory>
-	{
+    /** Stock repository interface, connecting to Stock database records */
+    public interface IStockRepository : IEditableRepository<Stock, StockModel, StockData, StockHistory>
+    {
 
-	}
+    }
 }

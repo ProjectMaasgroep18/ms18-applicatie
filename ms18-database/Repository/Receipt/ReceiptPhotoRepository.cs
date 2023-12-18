@@ -9,7 +9,7 @@ namespace Maasgroep.Database.Receipts
     {
         protected ReceiptRepository Receipts;
         protected MemberRepository Members;
-		public ReceiptPhotoRepository(MaasgroepContext db) : base(db)
+        public ReceiptPhotoRepository(MaasgroepContext db) : base(db)
         {
             Receipts = new(db);
             Members = new(db);
@@ -22,12 +22,12 @@ namespace Maasgroep.Database.Receipts
 
             return new ReceiptPhotoModel() {
                 Id = photo.Id,
-				FileExtension = photo.FileExtension,
-				FileName = photo.FileName,
+                FileExtension = photo.FileExtension,
+                FileName = photo.FileName,
                 ReceiptId = photo.ReceiptId,
-				Base64Image = photo.Base64Image,
+                Base64Image = photo.Base64Image,
                 MemberCreated = member,
-			};
+            };
         }
 
         /** Create or update ReceiptPhoto record from data model */
@@ -41,16 +41,16 @@ namespace Maasgroep.Database.Receipts
 
             var photo = new ReceiptPhoto() {
                 Base64Image = data.Base64Image,
-				FileExtension = data.FileExtension,
-				FileName = data.FileName,
-				ReceiptId = data.ReceiptId,
+                FileExtension = data.FileExtension,
+                FileName = data.FileName,
+                ReceiptId = data.ReceiptId,
             };
-			return photo;
+            return photo;
         }
 
         /** List photos by receipt */
-		public IEnumerable<ReceiptPhotoModel> ListByReceipt(long receiptId, int offset = default, int limit = default, bool includeDeleted = default)
-			=> GetList(item => item.ReceiptId == receiptId, null, offset, limit, includeDeleted).Select(item => GetModel(item)!);
+        public IEnumerable<ReceiptPhotoModel> ListByReceipt(long receiptId, int offset = default, int limit = default, bool includeDeleted = default)
+            => GetList(item => item.ReceiptId == receiptId, null, offset, limit, includeDeleted).Select(item => GetModel(item)!);
 
         /** Make sure receipt status is updated (Concept / Ingediend) if related photo is added or deleted */
         public override Action GetAfterSaveAction(ReceiptPhoto record)

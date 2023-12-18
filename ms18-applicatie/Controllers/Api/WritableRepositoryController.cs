@@ -9,7 +9,7 @@ public abstract class WritableRepositoryController<TRepository, TRecord, TViewMo
 where TRepository : IWritableRepository<TRecord, TViewModel, TDataModel>
 where TRecord: GenericRecordActive
 {
-	public WritableRepositoryController(TRepository repository) : base(repository) {}
+    public WritableRepositoryController(TRepository repository) : base(repository) {}
     
     protected virtual bool AllowCreate(TDataModel data)
         => CurrentMember != null; // By default, all logged-in members are allowed to create items

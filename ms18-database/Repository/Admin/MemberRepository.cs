@@ -10,23 +10,23 @@ namespace Maasgroep.Database.Admin
     {
         public MemberRepository(MaasgroepContext db) : base(db) {}
 
-		/** Create MemberModel from Member record */
+        /** Create MemberModel from Member record */
         public override MemberModel GetModel(Member member)
         {
             return new MemberModel() {
                 Id = member.Id,
-				Name = member.Name,
+                Name = member.Name,
                 Email = member.Email,
                 Permissions = GetPermissions(member.Id),
-			};
+            };
         }
 
-		/** Create or update Member record from data model */
+        /** Create or update Member record from data model */
         public override Member? GetRecord(MemberData data, Member? existingMember = null)
         {
             var member = existingMember ?? new();
-			member.Name = data.Name;
-			return member;
+            member.Name = data.Name;
+            return member;
         }
 
         /** Prevent deletion of oneself */

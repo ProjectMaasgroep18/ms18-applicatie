@@ -12,26 +12,26 @@ namespace Maasgroep.Database.Receipts
         public override CostCentreModel GetModel(CostCentre costCentre)
         {
             return new CostCentreModel() {
-				Id = costCentre.Id,
-				Name = costCentre.Name,
-			};
+                Id = costCentre.Id,
+                Name = costCentre.Name,
+            };
         }
 
-		/** Create or update CostCentre record from data model */
+        /** Create or update CostCentre record from data model */
         public override CostCentre? GetRecord(CostCentreData data, CostCentre? existingCostCentre = null)
         {
             var costCentre = existingCostCentre ?? new();
-			costCentre.Name = data.Name;
-			return costCentre;
+            costCentre.Name = data.Name;
+            return costCentre;
         }
 
-		/** Create a CostCentreHistory record from a CostCentre record */
+        /** Create a CostCentreHistory record from a CostCentre record */
         public override CostCentreHistory GetHistory(CostCentre costCentre)
         {
             return new CostCentreHistory() {
-				CostCentreId = costCentre.Id,
-				Name = costCentre.Name,
-			};
+                CostCentreId = costCentre.Id,
+                Name = costCentre.Name,
+            };
         }
     }
 }

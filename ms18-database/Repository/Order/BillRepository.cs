@@ -25,14 +25,14 @@ namespace Maasgroep.Database.Orders
         {
             var member = bill.MemberCreatedId != null ? Members.GetModel((long)bill.MemberCreatedId) : null;
             return new BillModel() {
-				Id = bill.Id,
-				Name = bill.Name,
-				Note = bill.Note,
+                Id = bill.Id,
+                Name = bill.Name,
+                Note = bill.Note,
                 IsGuest = bill.IsGuest,
                 MemberCreated = member,
                 Lines = Lines.ListByBill(bill.Id, 0, Int32.MaxValue).Where(line => line.Quantity > 0).ToList(),
                 TotalAmount = bill.TotalAmount,
-			};
+            };
         }
         
         /** Create or update Bill record from data model */
@@ -71,7 +71,7 @@ namespace Maasgroep.Database.Orders
             if (bill.Lines.Count == 0)
                 return null; // There must be at least one line in the bill
             bill.TotalAmount = bill.Lines.Sum(line => line.Amount);
-			return bill;
+            return bill;
         }
     }
 }

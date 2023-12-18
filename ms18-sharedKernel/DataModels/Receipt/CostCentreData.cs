@@ -1,8 +1,8 @@
 ﻿
 namespace Maasgroep.SharedKernel.DataModels.Receipts
 {
-	public record CostCentreData
-	{
-		public string Name { get; set; }
-	}
+    public record CostCentreData
+    {
+        public string Name { get; set; }
+    }
 }

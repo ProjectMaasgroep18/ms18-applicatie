@@ -2,7 +2,7 @@
 namespace Maasgroep.Database.Orders
 {
     public record Line : GenericRecordActive
-	{
+    {
         public long BillId { get; set; }
         public long ProductId { get; set; }
         public string Name { get; set; }

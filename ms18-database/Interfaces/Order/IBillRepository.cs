@@ -5,9 +5,9 @@ using Maasgroep.SharedKernel.DataModels.Orders;
 
 namespace Maasgroep.Database.Interfaces
 {
-	/** Bill repository interface, connecting to Bill database records */
-	public interface IBillRepository : IDeletableRepository<Bill, BillModel, BillData>
-	{
+    /** Bill repository interface, connecting to Bill database records */
+    public interface IBillRepository : IDeletableRepository<Bill, BillModel, BillData>
+    {
 
-	}
+    }
 }

@@ -12,7 +12,7 @@ public abstract class ReadableRepositoryController<TRepository, TRecord, TViewMo
 where TRepository : IReadableRepository<TRecord, TViewModel>
 where TRecord: GenericRecordActive
 {
-	protected readonly TRepository Repository;
+    protected readonly TRepository Repository;
     public virtual MemberModel? CurrentMember { get => HttpContext.Items["CurrentUser"] as MemberModel; }
         
     protected virtual bool AllowList()
@@ -23,8 +23,8 @@ where TRecord: GenericRecordActive
 
     public virtual string ItemName { get => "Item"; }
 
-	public ReadableRepositoryController(TRepository repository) 
-	    => Repository = repository;
+    public ReadableRepositoryController(TRepository repository) 
+        => Repository = repository;
 
     [HttpGet]
     public IActionResult RepositoryGet([FromQuery] int offset = default, [FromQuery] int limit = default)

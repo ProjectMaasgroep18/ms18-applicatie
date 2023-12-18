@@ -9,8 +9,8 @@ namespace Maasgroep.Controllers.Api;
 
 public class ReceiptController : EditableRepositoryController<IReceiptRepository, Receipt, ReceiptModel, ReceiptData, ReceiptHistory>
 {
-	protected readonly IReceiptPhotoRepository Photos;
-	protected readonly IReceiptApprovalRepository Approvals;
+    protected readonly IReceiptPhotoRepository Photos;
+    protected readonly IReceiptApprovalRepository Approvals;
     public override string ItemName { get => "Declaratie"; }
 
     public ReceiptController(IReceiptRepository repository, IReceiptPhotoRepository photos, IReceiptApprovalRepository approvals) : base(repository)

@@ -9,7 +9,7 @@ namespace Maasgroep.Database.Receipts
     {
         protected ReceiptRepository Receipts;
         protected MemberRepository Members;
-		public ReceiptApprovalRepository(MaasgroepContext db) : base(db) {
+        public ReceiptApprovalRepository(MaasgroepContext db) : base(db) {
             Receipts = new(db);
             Members = new(db);
         }
@@ -21,12 +21,12 @@ namespace Maasgroep.Database.Receipts
 
             return new ReceiptApprovalModel() {
                 Id = approval.Id,
-				Approved = approval.Approved,
-				Note = approval.Note,
-				ReceiptId = approval.ReceiptId,
+                Approved = approval.Approved,
+                Note = approval.Note,
+                ReceiptId = approval.ReceiptId,
                 MemberCreated = member,
                 DateTimeCreated = approval.DateTimeCreated,
-			};
+            };
         }
 
         /** Create or update ReceiptApproval record from data model */
@@ -50,15 +50,15 @@ namespace Maasgroep.Database.Receipts
             var approval = new ReceiptApproval() {
                 Approved = data.Approved,
                 Paid = data.Paid,
-				Note = data.Note,
-				ReceiptId = data.ReceiptId,
+                Note = data.Note,
+                ReceiptId = data.ReceiptId,
             };
-			return approval;
+            return approval;
         }
 
         /** List approvals by receipt */
-		public IEnumerable<ReceiptApprovalModel> ListByReceipt(long receiptId, int offset = default, int limit = default)
-			=> GetList(item => item.ReceiptId == receiptId, null, offset, limit).Select(item => GetModel(item)!);
+        public IEnumerable<ReceiptApprovalModel> ListByReceipt(long receiptId, int offset = default, int limit = default)
+            => GetList(item => item.ReceiptId == receiptId, null, offset, limit).Select(item => GetModel(item)!);
 
         /** Save updated receipt status when saving approval */
         public override Action<MaasgroepContext> GetSaveAction(ReceiptApproval record)

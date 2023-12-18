@@ -8,7 +8,7 @@ namespace Maasgroep.Controllers.Api;
 
 public class CostCentreController : EditableRepositoryController<ICostCentreRepository, CostCentre, CostCentreModel, CostCentreData, CostCentreHistory>
 {
-	protected readonly IReceiptRepository Receipts;
+    protected readonly IReceiptRepository Receipts;
     public override string ItemName { get => "Kostencentrum"; }
 
     public CostCentreController(ICostCentreRepository repository, IReceiptRepository receipts) : base(repository)
