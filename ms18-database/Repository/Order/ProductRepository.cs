@@ -58,6 +58,7 @@ namespace Maasgroep.Database.Orders
                 var stock = Stock.GetById(record.Id);
                 if (stock == null)
                 {
+                    db.SaveChanges();
                     db.Stock.Add(new Stock() { Id = record.Id, MemberCreatedId = record.MemberCreatedId, DateTimeDeleted = record.DateTimeDeleted });
                 }
                 else if (record.DateTimeDeleted != null && stock?.DateTimeDeleted != null)
