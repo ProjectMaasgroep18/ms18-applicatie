@@ -74,6 +74,7 @@ namespace Maasgroep.Database.Orders
             bill.Lines = lines.ToList()
                 .Select(line => Lines.GetRecord(line.Value, existingBill != null ? Lines.GetByBillProduct(existingBill.Id, line.Key) : null))
                 .Where(line => line != null).ToList()!;
+            bill.TotalAmount = bill.Lines.Sum(line => line.Amount);
 			return bill;
         }
         
