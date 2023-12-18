@@ -235,6 +235,126 @@ namespace Maasgroep.Database.Migrations
                     b.ToTable("tokenStore", "admin");
                 });
 
+            modelBuilder.Entity("Maasgroep.Database.Context.Tables.PhotoAlbum.Album", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Guid?>("ParentAlbumId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ParentAlbumId", "Name")
+                        .IsUnique();
+
+                    b.ToTable("albums", "photoAlbum");
+                });
+
+            modelBuilder.Entity("Maasgroep.Database.Context.Tables.PhotoAlbum.AlbumTag", b =>
+                {
+                    b.Property<Guid>("AlbumId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("TagId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("AlbumId", "TagId");
+
+                    b.HasIndex("TagId");
+
+                    b.ToTable("albumTags", "photoAlbum");
+                });
+
+            modelBuilder.Entity("Maasgroep.Database.Context.Tables.PhotoAlbum.Like", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("LikedOn")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<long>("MemberId")
+                        .HasColumnType("bigint");
+
+                    b.Property<Guid>("PhotoId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MemberId");
+
+                    b.HasIndex("PhotoId");
+
+                    b.ToTable("likes", "photoAlbum");
+                });
+
+            modelBuilder.Entity("Maasgroep.Database.Context.Tables.PhotoAlbum.Photo", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("AlbumLocationId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ContentType")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<byte[]>("ImageData")
+                        .IsRequired()
+                        .HasColumnType("bytea");
+
+                    b.Property<string>("Location")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("TakenOn")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Title")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("UploadDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<long>("UploaderId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AlbumLocationId");
+
+                    b.HasIndex("UploaderId");
+
+                    b.ToTable("photos", "photoAlbum");
+                });
+
+            modelBuilder.Entity("Maasgroep.Database.Context.Tables.PhotoAlbum.Tag", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
+
+                    b.ToTable("tags", "photoAlbum");
+                });
+
             modelBuilder.Entity("Maasgroep.Database.Orders.Bill", b =>
                 {
                     b.Property<long>("Id")
@@ -1004,6 +1124,73 @@ namespace Maasgroep.Database.Migrations
                     b.Navigation("MemberModified");
                 });
 
+            modelBuilder.Entity("Maasgroep.Database.Context.Tables.PhotoAlbum.Album", b =>
+                {
+                    b.HasOne("Maasgroep.Database.Context.Tables.PhotoAlbum.Album", "ParentAlbum")
+                        .WithMany("ChildAlbums")
+                        .HasForeignKey("ParentAlbumId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("ParentAlbum");
+                });
+
+            modelBuilder.Entity("Maasgroep.Database.Context.Tables.PhotoAlbum.AlbumTag", b =>
+                {
+                    b.HasOne("Maasgroep.Database.Context.Tables.PhotoAlbum.Album", "Album")
+                        .WithMany("AlbumTags")
+                        .HasForeignKey("AlbumId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Maasgroep.Database.Context.Tables.PhotoAlbum.Tag", "Tag")
+                        .WithMany("AlbumTags")
+                        .HasForeignKey("TagId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Album");
+
+                    b.Navigation("Tag");
+                });
+
+            modelBuilder.Entity("Maasgroep.Database.Context.Tables.PhotoAlbum.Like", b =>
+                {
+                    b.HasOne("Maasgroep.Database.Admin.Member", "Member")
+                        .WithMany()
+                        .HasForeignKey("MemberId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Maasgroep.Database.Context.Tables.PhotoAlbum.Photo", "Photo")
+                        .WithMany("Likes")
+                        .HasForeignKey("PhotoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Member");
+
+                    b.Navigation("Photo");
+                });
+
+            modelBuilder.Entity("Maasgroep.Database.Context.Tables.PhotoAlbum.Photo", b =>
+                {
+                    b.HasOne("Maasgroep.Database.Context.Tables.PhotoAlbum.Album", "AlbumLocation")
+                        .WithMany("Photos")
+                        .HasForeignKey("AlbumLocationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Maasgroep.Database.Admin.Member", "Uploader")
+                        .WithMany()
+                        .HasForeignKey("UploaderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("AlbumLocation");
+
+                    b.Navigation("Uploader");
+                });
+
             modelBuilder.Entity("Maasgroep.Database.Orders.Bill", b =>
                 {
                     b.HasOne("Maasgroep.Database.Admin.Member", "MemberCreated")
@@ -1361,6 +1548,25 @@ namespace Maasgroep.Database.Migrations
             modelBuilder.Entity("Maasgroep.Database.Admin.Permission", b =>
                 {
                     b.Navigation("Members");
+                });
+
+            modelBuilder.Entity("Maasgroep.Database.Context.Tables.PhotoAlbum.Album", b =>
+                {
+                    b.Navigation("AlbumTags");
+
+                    b.Navigation("ChildAlbums");
+
+                    b.Navigation("Photos");
+                });
+
+            modelBuilder.Entity("Maasgroep.Database.Context.Tables.PhotoAlbum.Photo", b =>
+                {
+                    b.Navigation("Likes");
+                });
+
+            modelBuilder.Entity("Maasgroep.Database.Context.Tables.PhotoAlbum.Tag", b =>
+                {
+                    b.Navigation("AlbumTags");
                 });
 
             modelBuilder.Entity("Maasgroep.Database.Orders.Bill", b =>

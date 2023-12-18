@@ -2,6 +2,7 @@ using Maasgroep.Database;
 using Maasgroep.Database.Admin;
 using Maasgroep.Database.Orders;
 using Maasgroep.Database.Receipts;
+using Microsoft.Extensions.Configuration;
 
 namespace Maasgroep.Console
 {
@@ -50,9 +51,11 @@ namespace Maasgroep.Console
         }
 
         private MaasgroepContext CreateContext()
-        {
-            return new MaasgroepContext();
+        {   
+            // TODO Link this properly to a link of appSettings.development.json
+            return new MaasgroepContext("UserID=postgres;Password=postgres;Host=localhost;port=5432;Database=Maasgroep;Pooling=true");
         }
+
 
         private string GetPasswordHash(string password)
         {
