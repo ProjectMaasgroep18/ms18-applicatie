@@ -6,6 +6,7 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <RootNamespace>ms18_applicatie</RootNamespace>
         <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+        <UserSecretsId>9c7c241f-7783-4d86-b780-c0b6052fafcf</UserSecretsId>
     </PropertyGroup>
 
     <ItemGroup>
@@ -29,4 +30,10 @@
       <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
     </ItemGroup>
     
+    <ItemGroup>
+      <PackageReference Include="Google.Apis.Auth" Version="1.64.0" />
+      <PackageReference Include="Google.Apis.Auth.AspNetCore3" Version="1.64.0" />
+      <PackageReference Include="Google.Apis.Calendar.v3" Version="1.64.0.3171" />
+    </ItemGroup>
+
 </Project>
