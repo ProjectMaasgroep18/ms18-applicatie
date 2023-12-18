@@ -26,10 +26,7 @@ namespace Maasgroep.Database.Receipts
 				FileName = photo.FileName,
                 ReceiptId = photo.ReceiptId,
 				Base64Image = photo.Base64Image,
-                MemberCreated = member == null ? null : new() {
-					Id = member.Id,
-					Name = member.Name,
-				},
+                MemberCreated = member,
 			};
         }
 

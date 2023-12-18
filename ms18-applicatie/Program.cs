@@ -30,6 +30,7 @@ builder.Services.AddTransient<IMemberRepository, MemberRepository>();
 builder.Services.AddTransient<ITokenStoreRepository, TokenStoreRepository>();
 builder.Services.AddTransient<IProductRepository, ProductRepository>();
 builder.Services.AddTransient<IStockRepository, StockRepository>();
+builder.Services.AddTransient<IBillRepository, BillRepository>();
 
 // Add services to the container.
 builder.Services.AddControllersWithViews(options => {

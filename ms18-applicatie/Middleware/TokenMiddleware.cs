@@ -15,7 +15,7 @@ public class TokenMiddleware
     {
         var authHeader = context.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ");
 
-        if (authHeader != null && authHeader.Count() > 0 && authHeader[0].ToLower() == "bearer")
+        if (authHeader != null && authHeader.Length > 0 && authHeader[0].ToLower() == "bearer")
         {
             // Seems like we've received a bearer token!
             var token = String.Join(' ', authHeader.Skip(1)); // Token without the word "bearer"

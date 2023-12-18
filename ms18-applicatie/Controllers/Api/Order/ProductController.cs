@@ -9,14 +9,15 @@ namespace Maasgroep.Controllers.Api;
 public class ProductController : EditableRepositoryController<IProductRepository, Product, ProductModel, ProductData, ProductHistory>
 {
     protected IStockRepository Stock;
+    public override string ItemName { get => "Product"; }
     public ProductController(IProductRepository repository, IStockRepository stock) : base(repository)
         => Stock = stock;
     
     protected override bool AllowCreate(ProductData product)
         => HasPermission("order.product");
 
-    protected override bool AllowDelete(Product product) // +Edit
-        => HasPermission("admin") || product.MemberCreatedId == CurrentMember!.Id;
+    protected override bool AllowDelete(Product? product) // +Edit
+        => HasPermission("order.product");
 
     [HttpGet("{id}/Stock")]
     public IActionResult GetStock(long id)

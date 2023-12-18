@@ -100,8 +100,8 @@ namespace Maasgroep.Console
                 // Speciale admin permission (mag alles)
                 var admin = new Permission() { Name = "admin", MemberCreatedId = 1 };
                 
-                // Toegang tot het order gedeelte: producten zien; eigen bestelling inzien, plaatsen
-                var order = new Permission() { Name = "order.submit", MemberCreatedId = 1 };
+                // Toegang tot het order gedeelte: producten zien; bestellingen zien;
+                var order = new Permission() { Name = "order.view", MemberCreatedId = 1 };
 
                 // Mag producten toevoegen, wijzigen
                 var orderProduct = new Permission() { Name = "order.product", MemberCreatedId = 1 };
@@ -247,12 +247,13 @@ namespace Maasgroep.Console
 
                 var billToAdd = new List<Bill>()
                 {
-                    new Bill() { MemberCreatedId = member.Id, IsGuest = false, MemberId = member1.Id },
-                    new Bill() { MemberCreatedId = member.Id, IsGuest = false, MemberId = member2.Id },
+                    new Bill() { MemberCreatedId = member1.Id, IsGuest = false },
+                    new Bill() { MemberCreatedId = member2.Id, IsGuest = false },
                     new Bill()
                     {
-                        MemberCreatedId = member.Id, IsGuest = true, Name = "Neefje van Donald",
-                        Note = "Meteen betaald in Duckaten"
+                        IsGuest = true,
+                        Name = "Neefje van Donald",
+                        Note = "Meteen betaald in Duckaten",
                     }
                 };
 
@@ -273,8 +274,8 @@ namespace Maasgroep.Console
                 var member1 = Members["Gast"];
                 var member2 = Members["Product"];
 
-                var bill1 = db.Bills.Where(b => b.MemberId == member1.Id).FirstOrDefault()!;
-                var bill2 = db.Bills.Where(b => b.MemberId == member2.Id).FirstOrDefault()!;
+                var bill1 = db.Bills.Where(b => b.MemberCreatedId == member1.Id).FirstOrDefault()!;
+                var bill2 = db.Bills.Where(b => b.MemberCreatedId == member2.Id).FirstOrDefault()!;
                 var bill3 = db.Bills.Where(b => b.IsGuest).FirstOrDefault()!;
 
                 var product1 = db.Product.Where(p => p.Name == "Duifis Scharrelnootjes").FirstOrDefault();
@@ -282,10 +283,10 @@ namespace Maasgroep.Console
 
                 var linesToAdd = new List<Line>()
                 {
-                    new Line() { Bill = bill1, Product = product1!, Quantity = 1, MemberCreatedId = 1 },
-                    new Line() { Bill = bill2, Product = product2!, Quantity = 2, MemberCreatedId = 1 },
-                    new Line() { Bill = bill3, Product = product1!, Quantity = 3, MemberCreatedId = 1 },
-                    new Line() { Bill = bill3, Product = product2!, Quantity = 4, MemberCreatedId = 1 },
+                    new Line() { Bill = bill1, Product = product1!, Name = product1!.Name, Price = product1!.Price, Quantity = 1, MemberCreatedId = 1 },
+                    new Line() { Bill = bill2, Product = product2!, Name = product2!.Name, Price = product2!.Price, Quantity = 2, MemberCreatedId = 1 },
+                    new Line() { Bill = bill3, Product = product1!, Name = product1!.Name, Price = product1!.Price, Quantity = 3, MemberCreatedId = 1 },
+                    new Line() { Bill = bill3, Product = product2!, Name = product2!.Name, Price = product2!.Price, Quantity = 4, MemberCreatedId = 1 },
                 };
 
                 db.OrderLines.AddRange(linesToAdd);

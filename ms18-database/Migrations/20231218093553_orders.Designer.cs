@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Maasgroep.Database.Migrations
 {
     [DbContext(typeof(MaasgroepContext))]
-    [Migration("20231217234644_stockFix")]
-    partial class stockFix
+    [Migration("20231218093553_orders")]
+    partial class orders
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -325,9 +325,6 @@ namespace Maasgroep.Database.Migrations
                     b.Property<long?>("MemberDeletedId")
                         .HasColumnType("bigint");
 
-                    b.Property<long?>("MemberId")
-                        .HasColumnType("bigint");
-
                     b.Property<long?>("MemberModifiedId")
                         .HasColumnType("bigint");
 
@@ -379,6 +376,13 @@ namespace Maasgroep.Database.Migrations
 
                     b.Property<long?>("MemberModifiedId")
                         .HasColumnType("bigint");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<double>("Price")
+                        .HasColumnType("double precision");
 
                     b.Property<long>("ProductId")
                         .HasColumnType("bigint");
@@ -438,8 +442,15 @@ namespace Maasgroep.Database.Migrations
                     b.Property<long?>("MemberModifiedId")
                         .HasColumnType("bigint");
 
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<string>("Note")
                         .HasColumnType("text");
+
+                    b.Property<double>("Price")
+                        .HasColumnType("double precision");
 
                     b.Property<long>("ProductId")
                         .HasColumnType("bigint");
@@ -1117,19 +1128,15 @@ namespace Maasgroep.Database.Migrations
                         .OnDelete(DeleteBehavior.NoAction)
                         .HasConstraintName("FK_orderBill_memberDeleted");
 
-                    b.HasOne("Maasgroep.Database.Admin.Member", "Member")
+                    b.HasOne("Maasgroep.Database.Admin.Member", null)
                         .WithMany("BillsOwned")
-                        .HasForeignKey("MemberId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .HasConstraintName("FK_orderBill_memberOwned");
+                        .HasForeignKey("MemberId");
 
                     b.HasOne("Maasgroep.Database.Admin.Member", "MemberModified")
                         .WithMany("BillsModified")
                         .HasForeignKey("MemberModifiedId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .HasConstraintName("FK_orderBill_memberModified");
-
-                    b.Navigation("Member");
 
                     b.Navigation("MemberCreated");
 

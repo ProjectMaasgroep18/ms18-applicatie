@@ -29,13 +29,13 @@ public class UserController : DeletableRepositoryController<IMemberRepository, M
     protected override bool AllowList()
         => HasPermission("admin");
 
-    protected override bool AllowView(Member member)
-        => HasPermission("admin") || member.Id == CurrentMember?.Id;
+    protected override bool AllowView(Member? member)
+        => HasPermission("admin") || member?.Id == CurrentMember?.Id;
 
     protected override bool AllowCreate(MemberData member)
         => HasPermission("admin");
 
-    protected override bool AllowDelete(Member member) // +Edit
+    protected override bool AllowDelete(Member? member) // +Edit
         => HasPermission("admin");
 
     [HttpGet("{id}/Receipt")]

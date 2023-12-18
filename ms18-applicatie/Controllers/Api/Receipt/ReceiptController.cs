@@ -22,14 +22,14 @@ public class ReceiptController : EditableRepositoryController<IReceiptRepository
     protected override bool AllowList()
         => HasPermission("receipt.approve");
 
-    protected override bool AllowView(Receipt receipt)
-        => HasPermission("receipt.approve") || HasPermission("receipt.pay") || receipt.MemberCreatedId == CurrentMember?.Id;
+    protected override bool AllowView(Receipt? receipt)
+        => HasPermission("receipt.approve") || HasPermission("receipt.pay") || (CurrentMember != null && receipt?.MemberCreatedId == CurrentMember.Id);
 
     protected override bool AllowCreate(ReceiptData receipt)
         => HasPermission("receipt");
 
-    protected override bool AllowDelete(Receipt receipt) // +Edit
-        => HasPermission("admin") || receipt.MemberCreatedId == CurrentMember?.Id;
+    protected override bool AllowDelete(Receipt? receipt) // +Edit
+        => HasPermission("admin") || (CurrentMember != null && receipt?.MemberCreatedId == CurrentMember.Id);
 
     [HttpPost("{id}/Photo")]
     public IActionResult ReceiptAddPhoto(long id, [FromBody] ReceiptPhotoData data)

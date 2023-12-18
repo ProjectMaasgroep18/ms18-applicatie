@@ -17,7 +17,7 @@ public class CostCentreController : EditableRepositoryController<ICostCentreRepo
     protected override bool AllowCreate(CostCentreData costCentre)
         => HasPermission("admin");
 
-    protected override bool AllowDelete(CostCentre costCentre) // +Edit
+    protected override bool AllowDelete(CostCentre? costCentre) // +Edit
         => HasPermission("admin");
 
     [HttpGet("{id}/Receipt")]

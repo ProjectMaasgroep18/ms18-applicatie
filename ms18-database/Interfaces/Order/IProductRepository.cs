@@ -5,7 +5,7 @@ using Maasgroep.SharedKernel.DataModels.Orders;
 
 namespace Maasgroep.Database.Interfaces
 {
-	/** Cost Centre repository interface, connecting to Cost Centre database records */
+	/** Product repository interface, connecting to Product database records */
 	public interface IProductRepository : IEditableRepository<Product, ProductModel, ProductData, ProductHistory>
 	{
 

@@ -550,13 +550,6 @@ namespace Maasgroep.Database
 			modelBuilder.Entity<Bill>().Property(b => b.DateTimeCreated).HasDefaultValueSql("now()");
 
 			modelBuilder.Entity<Bill>()
-				.HasOne(b => b.Member)
-				.WithMany(m => m.BillsOwned)
-				.HasForeignKey(b => b.MemberId)
-				.HasConstraintName("FK_orderBill_memberOwned")
-				.OnDelete(DeleteBehavior.NoAction);
-
-			modelBuilder.Entity<Bill>()
 				.HasOne(b => b.MemberCreated)
 				.WithMany(m => m.BillsCreated)
 				.HasForeignKey(b => b.MemberCreatedId)

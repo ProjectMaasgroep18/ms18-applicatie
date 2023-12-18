@@ -18,7 +18,7 @@ where TRecord: GenericRecordActive
     protected virtual bool AllowList()
         => true; // By default, everyone is allowed to list all items
     
-    protected virtual bool AllowView(TRecord record)
+    protected virtual bool AllowView(TRecord? record)
         => true; // By default, everyone can view every single item
 
     public virtual string ItemName { get => "Item"; }
@@ -35,9 +35,12 @@ where TRecord: GenericRecordActive
     }
     
     [HttpGet("{id}")]
-    public IActionResult RepositoryGetById(long id) {
+    public IActionResult RepositoryGetById(long id)
+    {
         var record = Repository.GetById(id);
-        if (record == null || !AllowView(record))
+        if (!AllowView(record))
+            NoAccess();
+        if (record == null)
             NotFound();
         return Ok(Repository.GetModel(record!));
     }

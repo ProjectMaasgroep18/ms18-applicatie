@@ -10,8 +10,8 @@ where TRepository : IDeletableRepository<TRecord, TViewModel, TDataModel>
 where TRecord: GenericRecordActive
 {
     protected DeletableRepositoryController(TRepository repository) : base(repository) {}
-    protected virtual bool AllowDelete(TRecord record)
-        => CurrentMember != null && record.MemberCreatedId == CurrentMember.Id; // By default, logged-in members are only allowed to delete their own items
+    protected virtual bool AllowDelete(TRecord? record)
+        => CurrentMember != null && record?.MemberCreatedId == CurrentMember.Id; // By default, logged-in members are only allowed to delete their own items
 
     [HttpDelete("{id}")]
     public IActionResult RepositoryDelete(long id)

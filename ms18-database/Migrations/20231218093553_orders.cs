@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Maasgroep.Database.Migrations
 {
     /// <inheritdoc />
-    public partial class stockFix : Migration
+    public partial class orders : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -82,7 +82,6 @@ namespace Maasgroep.Database.Migrations
                 {
                     Id = table.Column<long>(type: "bigint", nullable: false, defaultValueSql: "nextval('\"orderHistory\".\"billSeq\"')"),
                     BillId = table.Column<long>(type: "bigint", nullable: false),
-                    MemberId = table.Column<long>(type: "bigint", nullable: true),
                     IsGuest = table.Column<bool>(type: "boolean", nullable: false),
                     Note = table.Column<string>(type: "character varying(64000)", maxLength: 64000, nullable: true),
                     Name = table.Column<string>(type: "character varying(2048)", maxLength: 2048, nullable: true),
@@ -128,6 +127,8 @@ namespace Maasgroep.Database.Migrations
                     Id = table.Column<long>(type: "bigint", nullable: false, defaultValueSql: "nextval('\"orderHistory\".\"lineSeq\"')"),
                     LineId = table.Column<long>(type: "bigint", nullable: false),
                     ProductId = table.Column<long>(type: "bigint", nullable: false),
+                    Name = table.Column<string>(type: "text", nullable: false),
+                    Price = table.Column<double>(type: "double precision", nullable: false),
                     Quantity = table.Column<long>(type: "bigint", nullable: false),
                     MemberId = table.Column<long>(type: "bigint", nullable: true),
                     IsGuest = table.Column<bool>(type: "boolean", nullable: false),
@@ -262,10 +263,10 @@ namespace Maasgroep.Database.Migrations
                 {
                     Id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    MemberId = table.Column<long>(type: "bigint", nullable: true),
                     IsGuest = table.Column<bool>(type: "boolean", nullable: false),
                     Note = table.Column<string>(type: "character varying(64000)", maxLength: 64000, nullable: true),
                     Name = table.Column<string>(type: "character varying(2048)", maxLength: 2048, nullable: true),
+                    MemberId = table.Column<long>(type: "bigint", nullable: true),
                     MemberCreatedId = table.Column<long>(type: "bigint", nullable: true),
                     MemberModifiedId = table.Column<long>(type: "bigint", nullable: true),
                     MemberDeletedId = table.Column<long>(type: "bigint", nullable: true),
@@ -276,6 +277,12 @@ namespace Maasgroep.Database.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_bill", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_bill_member_MemberId",
+                        column: x => x.MemberId,
+                        principalSchema: "admin",
+                        principalTable: "member",
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_orderBill_memberCreated",
                         column: x => x.MemberCreatedId,
@@ -291,12 +298,6 @@ namespace Maasgroep.Database.Migrations
                     table.ForeignKey(
                         name: "FK_orderBill_memberModified",
                         column: x => x.MemberModifiedId,
-                        principalSchema: "admin",
-                        principalTable: "member",
-                        principalColumn: "Id");
-                    table.ForeignKey(
-                        name: "FK_orderBill_memberOwned",
-                        column: x => x.MemberId,
                         principalSchema: "admin",
                         principalTable: "member",
                         principalColumn: "Id");
@@ -571,6 +572,8 @@ namespace Maasgroep.Database.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     BillId = table.Column<long>(type: "bigint", nullable: false),
                     ProductId = table.Column<long>(type: "bigint", nullable: false),
+                    Name = table.Column<string>(type: "text", nullable: false),
+                    Price = table.Column<double>(type: "double precision", nullable: false),
                     Quantity = table.Column<long>(type: "bigint", nullable: false),
                     MemberCreatedId = table.Column<long>(type: "bigint", nullable: true),
                     MemberModifiedId = table.Column<long>(type: "bigint", nullable: true),

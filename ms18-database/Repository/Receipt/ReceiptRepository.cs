@@ -29,17 +29,11 @@ namespace Maasgroep.Database.Receipts
 				Amount = receipt.Amount,
 				Status = status,
 				StatusString = status.ToString(),
-				CostCentre = costCentre == null ? null : new() {
-					Id = costCentre.Id,
-					Name = costCentre.Name,
-				},
+				CostCentre = costCentre,
 				IsEditable = status != ReceiptStatus.Goedgekeurd && status != ReceiptStatus.Uitbetaald,
 				IsApprovable = status == ReceiptStatus.Ingediend,
 				IsPayable = status == ReceiptStatus.Goedgekeurd,
-				MemberCreated = member == null ? null : new() {
-					Id = member.Id,
-					Name = member.Name,
-				},
+				MemberCreated = member,
 				DateTimeCreated = receipt.DateTimeCreated,
 				DateTimeModified = receipt.DateTimeModified,
 			};
