@@ -14,6 +14,12 @@ public class CostCentreController : EditableRepositoryController<ICostCentreRepo
     public CostCentreController(ICostCentreRepository repository, IReceiptRepository receipts) : base(repository)
         => Receipts = receipts;
 
+    protected override bool AllowList()
+        => HasPermission("receipt");
+
+    protected override bool AllowView(CostCentre? costCentre)
+        => HasPermission("receipt");
+
     protected override bool AllowCreate(CostCentreData costCentre)
         => HasPermission("admin");
 
