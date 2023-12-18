@@ -1,6 +1,5 @@
 using Maasgroep.Database;
 using Maasgroep.Exceptions;
-using Maasgroep.Services;
 using Maasgroep.SharedKernel.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 

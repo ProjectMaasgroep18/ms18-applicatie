@@ -4,7 +4,6 @@ using Maasgroep.Database.Receipts;
 using Maasgroep.Database.Admin;
 using Maasgroep.Database.Orders;
 using Maasgroep.Middleware;
-using Maasgroep.Services;
 
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -28,10 +27,9 @@ builder.Services.AddTransient<IReceiptApprovalRepository, ReceiptApprovalReposit
 builder.Services.AddTransient<IReceiptPhotoRepository, ReceiptPhotoRepository>();
 builder.Services.AddTransient<IReceiptStatusRepository, ReceiptStatusRepository>();
 builder.Services.AddTransient<IMemberRepository, MemberRepository>();
+builder.Services.AddTransient<ITokenStoreRepository, TokenStoreRepository>();
 builder.Services.AddTransient<IProductRepository, ProductRepository>();
 builder.Services.AddTransient<IStockRepository, StockRepository>();
-builder.Services.AddTransient<ITokenStoreRepository, TokenStoreRepository>();
-builder.Services.AddTransient<IMemberService, MemberService>();
 
 // Add services to the container.
 builder.Services.AddControllersWithViews(options => {
