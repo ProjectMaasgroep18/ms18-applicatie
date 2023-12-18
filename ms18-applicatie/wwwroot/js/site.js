@@ -72,6 +72,8 @@ async function apiGet(action, _fetchData, _skipJson, _onValidLogin) {
                 try {
                     if (response.status == 401) {
                         showElement(LOGIN_FORM);
+                        LOGIN_FORM?.querySelector('.login-email')?.focus();
+                        LOGIN_FORM?.querySelector('.login-email')?.select();
                         if (typeof _onValidLogin == 'function')
                             AFTER_LOGIN = _onValidLogin;
                     }
@@ -403,6 +405,12 @@ async function apiGetInfinite(action, container, onLoadItems, perPage, page) {
     return results;
 }
 
+LOGIN_FORM?.querySelector('.login-email')?.addEventListener('keyup', event => {
+    if (event.which != 13 || !event.target.value)
+        return;
+    LOGIN_FORM?.querySelector('.login-password')?.focus();
+});
+
 LOGIN_FORM?.querySelector('.login-password')?.addEventListener('keyup', event => {
     if (event.which != 13 || !event.target.value)
         return;
@@ -415,9 +423,11 @@ LOGIN_FORM?.querySelector('.login-button')?.addEventListener('click', () => {
     let email = LOGIN_FORM.querySelector('.login-email')?.value;
     let password = LOGIN_FORM.querySelector('.login-password')?.value;
     LOGIN_FORM.querySelector('.login-password').value = null;
-
+    
     if (!email || !password)
         return;
+    
+    hideElement(LOGIN_FORM);
 
     apiPost('User/Login', { email, password }).then(result => {
         hideElement(LOGIN_FORM);
