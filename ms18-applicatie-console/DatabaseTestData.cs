@@ -11,10 +11,13 @@ namespace Maasgroep.Console
 
         internal void CreateTestData()
         {
-            try {
+            try
+            {
                 // ADMIN data
                 CreateTestDataMember();
-            } catch (Microsoft.EntityFrameworkCore.DbUpdateException e) {
+            }
+            catch (Microsoft.EntityFrameworkCore.DbUpdateException e)
+            {
                 // Waarschijnlijk duplicate keys (bestond dan al)
                 System.Console.WriteLine(e.InnerException?.Message ?? e.Message);
                 using (var db = CreateContext())
@@ -23,30 +26,39 @@ namespace Maasgroep.Console
                     Members = db.Member.ToDictionary(m => m.Name, m => m);
                 }
             }
-            try {
+            try
+            {
                 // PERMISSIONS data [naar admin als t werkt]
                 CreateTestDataPermissions();
-            } catch (Microsoft.EntityFrameworkCore.DbUpdateException e) {
+            }
+            catch (Microsoft.EntityFrameworkCore.DbUpdateException e)
+            {
                 // Waarschijnlijk duplicate keys (bestond dan al)
                 System.Console.WriteLine(e.InnerException?.Message ?? e.Message);
             }
-            try {
+            try
+            {
                 // RECEIPT data   
                 CreateTestDataCostCentre();
-            } catch (Microsoft.EntityFrameworkCore.DbUpdateException e) {
+            }
+            catch (Microsoft.EntityFrameworkCore.DbUpdateException e)
+            {
                 // Waarschijnlijk duplicate keys (bestond dan al)
                 System.Console.WriteLine(e.InnerException?.Message ?? e.Message);
             }
-            try {
+            try
+            {
                 // PRODUCT data
                 CreateTestDataProduct();
                 CreateTestDataStock();
                 CreateTestDataBill();
                 CreateTestDataLine();
-            } catch (Microsoft.EntityFrameworkCore.DbUpdateException e) {
+            }
+            catch (Microsoft.EntityFrameworkCore.DbUpdateException e)
+            {
                 // Waarschijnlijk duplicate keys (bestond dan al)
                 System.Console.WriteLine(e.InnerException?.Message ?? e.Message);
-            }    
+            }
         }
 
         private MaasgroepContext CreateContext()
@@ -74,14 +86,17 @@ namespace Maasgroep.Console
                 Members = new Dictionary<string, Member>
                 {
                     ["Admin"] = admin,
-                 
-                    // Team A
+
+                    // Team ??
                     ["Gast"] = new Member() { Name = "Gast", MemberCreated = admin, Email = "gast@example.com", Password = verySafePassword },
                     ["Product"] = new Member() { Name = "Product", MemberCreated = admin, Email = "product@example.com", Password = verySafePassword },
 
                     // Team C
                     ["Goedkeur"] = new Member() { Name = "Goedkeur", MemberCreated = admin, Email = "goedkeur@example.com", Password = verySafePassword },
                     ["Betaal"] = new Member() { Name = "Betaal", MemberCreated = admin, Email = "betaal@example.com", Password = verySafePassword },
+                    
+                    //team a
+                    ["A"] =  new Member() { Name = "A", MemberCreated = admin, Email = "A", Password = GetPasswordHash("a") },
                 };
 
                 db.Member.AddRange(Members.Select(m => m.Value));
@@ -99,7 +114,7 @@ namespace Maasgroep.Console
             {
                 // Speciale admin permission (mag alles)
                 var admin = new Permission() { Name = "admin", MemberCreatedId = 1 };
-                
+
                 // Toegang tot het order gedeelte: producten zien; bestellingen zien;
                 var order = new Permission() { Name = "order.view", MemberCreatedId = 1 };
 
@@ -115,11 +130,18 @@ namespace Maasgroep.Console
                 // Mag receipts uitbetalen
                 var receiptPay = new Permission() { Name = "receipt.pay", MemberCreatedId = 1 };
 
+                var calendarCrudWelpen = new Permission() { Name = "calendar.welpen", MemberCreatedId = 1 };
+                var calendarCrudStam = new Permission() { Name = "calendar.stam", MemberCreatedId = 1 };
+                var calendarCrudZeeverkenners = new Permission() { Name = "calendar.zeeVerkenners", MemberCreatedId = 1 };
+                var calendarCrudMatrozen = new Permission() { Name = "calendar.matrozen", MemberCreatedId = 1 };
+                var calendarCrudGlobal= new Permission() { Name = "calendar.global", MemberCreatedId = 1 };
+                
                 var permissions = new List<Permission>()
                 {
                     admin,
-                    order, orderProduct, // Team A
+                    order, orderProduct, //Team ?
                     receipt, receiptApprove, receiptPay, // Team C
+                    calendarCrudWelpen, calendarCrudStam, calendarCrudZeeverkenners, calendarCrudMatrozen, calendarCrudGlobal, // Team A
                 };
 
                 db.Permission.AddRange(permissions);
@@ -135,6 +157,11 @@ namespace Maasgroep.Console
                     new MemberPermission() { MemberId = Members["Product"]!.Id, Permission = orderProduct, MemberCreatedId = 1 },
                     new MemberPermission() { MemberId = Members["Goedkeur"]!.Id, Permission = receiptApprove, MemberCreatedId = 1 },
                     new MemberPermission() { MemberId = Members["Betaal"]!.Id, Permission = receiptPay, MemberCreatedId = 1 },
+                    new MemberPermission() { MemberId = Members["A"]!.Id, Permission = calendarCrudWelpen, MemberCreatedId = 1 },
+                    new MemberPermission() { MemberId = Members["A"]!.Id, Permission = calendarCrudStam, MemberCreatedId = 1 },
+                    new MemberPermission() { MemberId = Members["A"]!.Id, Permission = calendarCrudZeeverkenners, MemberCreatedId = 1 },
+                    new MemberPermission() { MemberId = Members["A"]!.Id, Permission = calendarCrudMatrozen, MemberCreatedId = 1 },
+                    new MemberPermission() { MemberId = Members["A"]!.Id, Permission = calendarCrudGlobal, MemberCreatedId = 1 },
                 };
 
                 db.MemberPermission.AddRange(memberPermissions);

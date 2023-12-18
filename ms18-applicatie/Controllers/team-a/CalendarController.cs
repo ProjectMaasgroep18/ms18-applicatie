@@ -1,8 +1,11 @@
 ﻿using Google.Apis.Calendar.v3;
 using Google.Apis.Calendar.v3.Data;
+using Maasgroep.Exceptions;
 using Microsoft.AspNetCore.Mvc;
 using ms18_applicatie.Models.team_a;
 using Microsoft.Extensions.Options;
+using Maasgroep.SharedKernel.ViewModels.Admin;
+using System.Linq;
 
 namespace ms18_applicatie.Controllers.team_a
 {
@@ -12,6 +15,8 @@ namespace ms18_applicatie.Controllers.team_a
         private readonly CalendarSettings _calendarSettings;
         private readonly CalendarService _calendarService;
         private readonly ILogger<CalendarController> _logger;
+        public virtual MemberModel? CurrentMember { get => HttpContext.Items["CurrentUser"] as MemberModel; }
+
         public CalendarController(ILogger<CalendarController> logger, CalendarService calendarService, IOptions<CalendarSettings> calendarSettings)
         {
             _logger = logger;
@@ -25,9 +30,16 @@ namespace ms18_applicatie.Controllers.team_a
         {
             try
             {
-                var request = _calendarService.Events.Delete(GetCalendarId(calendarName), id);
-                await request.ExecuteAsync();
-                return new OkResult();
+                if (CurrentMember?.Permissions.Contains(GetCalendarRole(calendarName)) ?? false)
+                {
+                    var request = _calendarService.Events.Delete(GetCalendarId(calendarName), id);
+                    await request.ExecuteAsync();
+                    return new OkResult();
+                }
+                else
+                {
+                    throw new MaasgroepUnauthorized();
+                }
             }
             catch (Exception ex)
             {
@@ -42,16 +54,23 @@ namespace ms18_applicatie.Controllers.team_a
         {
             try
             {
-                var request = _calendarService.Events.Get(GetCalendarId(calendarName), calendarEvent.Id);
-                var googleCalendarEvent = await request.ExecuteAsync();
-                if (googleCalendarEvent == null)
-                    return new NotFoundResult();
+                if (CurrentMember?.Permissions.Contains(GetCalendarRole(calendarName)) ?? false)
+                {
+                    var request = _calendarService.Events.Get(GetCalendarId(calendarName), calendarEvent.Id);
+                    var googleCalendarEvent = await request.ExecuteAsync();
+                    if (googleCalendarEvent == null)
+                        return new NotFoundResult();
 
-                googleCalendarEvent = calendarEvent.ToGoogleEvent(googleCalendarEvent);
+                    googleCalendarEvent = calendarEvent.ToGoogleEvent(googleCalendarEvent);
 
-                var requestUpdate = _calendarService.Events.Patch(googleCalendarEvent, GetCalendarId(calendarName), calendarEvent.Id);
-                await requestUpdate.ExecuteAsync();
-                return new OkResult();
+                    var requestUpdate = _calendarService.Events.Patch(googleCalendarEvent, GetCalendarId(calendarName), calendarEvent.Id);
+                    await requestUpdate.ExecuteAsync();
+                    return new OkResult();
+                }
+                else
+                {
+                    throw new MaasgroepUnauthorized();
+                }
             }
             catch (Exception ex)
             {
@@ -66,10 +85,17 @@ namespace ms18_applicatie.Controllers.team_a
         {
             try
             {
-                var googleEvent = calendarEvent.ToGoogleEvent();
-                EventsResource.InsertRequest request = _calendarService.Events.Insert(googleEvent, GetCalendarId(calendarName));
-                Event createdEvent = await request.ExecuteAsync();
-                return new OkResult();
+                if (CurrentMember?.Permissions.Contains(GetCalendarRole(calendarName)) ?? false)
+                {
+                    var googleEvent = calendarEvent.ToGoogleEvent();
+                    EventsResource.InsertRequest request = _calendarService.Events.Insert(googleEvent, GetCalendarId(calendarName));
+                    Event createdEvent = await request.ExecuteAsync();
+                    return new OkResult();
+                }
+                else
+                {
+                    throw new MaasgroepUnauthorized();
+                }
             }
             catch (Exception ex)
             {
@@ -221,6 +247,23 @@ namespace ms18_applicatie.Controllers.team_a
             return calenderEvents;
         }
 
+        private string GetCalendarRole(Calendars calendarName)
+        {
+            switch (calendarName)
+            {
+                case Calendars.Matrozen:
+                    return "calendar.matrozen";
+                case Calendars.Stam:
+                    return "calendar.stam";
+                case Calendars.Welpen:
+                    return "calendar.welpen";
+                case Calendars.ZeeVerkenners:
+                    return "calendar.zeeverkenners";
+                case Calendars.Global:
+                    return "calendar.global";
+            }
+            return "";
+        }
         private string GetCalendarId(Calendars calendarName)
         {
             switch (calendarName)
