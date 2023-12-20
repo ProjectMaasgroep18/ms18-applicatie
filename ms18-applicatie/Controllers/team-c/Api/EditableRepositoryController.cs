@@ -20,11 +20,11 @@ where THistory: GenericRecordHistory
     {
         var record = Repository.GetById(id);
         if (record == null || !AllowView(record))
-            throw new MaasgroepNotFound($"{ItemName} niet gevonden");
-        if (!AllowEdit(record, data))
+            NotFound();
+        if (!AllowEdit(record!, data))
             NoAccess();
-        if (Repository.Update(record, data, CurrentMember?.Id) == null)
-            throw new MaasgroepNotFound($"{ItemName} kon niet worden opgeslagen");
+        if (Repository.Update(record!, data, CurrentMember?.Id) == null)
+            throw new MaasgroepBadRequest($"{ItemName} kon niet worden opgeslagen");
         return NoContent();
     }
 }

@@ -81,7 +81,6 @@ namespace Maasgroep.Database.Orders
             return (MaasgroepContext db) => {
                 var stock = GetProductStock(record.Id);
                 var stockIsNew = stock.Id == 0;
-                Console.WriteLine($"PRODUCT: {record.Id}, STOCK: {stock.Id}");
                 saveAction.Invoke(db);
                 stock.MemberCreatedId ??= record.MemberCreatedId;
                 stock.DateTimeDeleted = record.DateTimeDeleted;
@@ -89,9 +88,7 @@ namespace Maasgroep.Database.Orders
                 {
                     // Stock did not exist before; save the record first, then add the stock with the (likely new) record id
                     var memoizedRecordId = record.Id; // Likely zero, could be non-zero if Product exists in DB without corresponding Stock
-                    Console.WriteLine($"ADD NEW STOCK FOR RECORD: {record.Id}");
                     db.SaveChanges();
-                    Console.WriteLine($"SAVED RECORD ID: {record.Id}");
                     stock.Id = record.Id;
                     db.Stock.Add(stock);
                     ProductStock.Remove(memoizedRecordId);
@@ -100,7 +97,6 @@ namespace Maasgroep.Database.Orders
                 else if (ProductQuantities.ContainsKey(stock.Id) && ProductQuantities[stock.Id] != stock.Quantity)
                 {
                     // Stock quantity has changed; update it and create a history record with the old quantity
-                    Console.WriteLine($"UPDATE STOCK FOR RECORD: {record.Id}");
                     var stockHistory = Stock.GetHistory(stock with { Quantity = ProductQuantities[record.Id] });
                     ProductQuantities[record.Id] = stock.Quantity;
                     db.StockHistory.Add(stockHistory);

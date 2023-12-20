@@ -134,6 +134,9 @@ async function requireLogin(onValidLogin) {
 
     let afterLogin = member => {
         showElement(document.querySelectorAll('.login-only'));
+        let tokenEl = document.querySelector('#login-token');
+        if (tokenEl)
+            tokenEl.innerText = localStorage.getItem("AUTH_TOKEN");
         if (typeof onValidLogin == 'function')
             onValidLogin(member);
     };
@@ -191,6 +194,12 @@ function showOutput(data, container) {
                 + '-' + date.getFullYear()
                 + ' ' + (date.getHours() < 10 ? '0' : '') + date.getHours()
                 + ':' + (date.getMinutes() < 10 ? '0' : '') + date.getMinutes();
+        },
+        commaSeparated(values) {
+            // Comma-separated array values
+            if (typeof values == 'object' && values && 'join' in values)
+                return values.join(', ');
+            return values;
         }
     };
 
@@ -207,8 +216,8 @@ function showOutput(data, container) {
             let keyData = data[splitKey.shift()] ?? null;
             while (splitKey.length > 0 && (keyData ?? null) !== null)
                 keyData = keyData[splitKey.shift()] ?? null;
-            const value = typeof keyData == 'object' && keyData !== null ? JSON.stringify(keyData) : keyData;
-            let transformedData = ((transform && typeof transforms[transform] == 'function') ? transforms[transform](value) : value) ?? null;
+            let transformedData = ((transform && typeof transforms[transform] == 'function') ? transforms[transform](keyData) : keyData) ?? null;
+            transformedData = typeof transformedData == 'object' && transformedData !== null ? JSON.stringify(transformedData) : transformedData;
             if ((transformedData ?? '') === '' && (prop ?? '') === '' && output.tagName != 'TEXTAREA')
                 transformedData = '\u2014'; // — streepje
             // console.log(key, prop, transform, '=>', transformedData);

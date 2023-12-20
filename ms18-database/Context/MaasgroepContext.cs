@@ -49,6 +49,10 @@ namespace Maasgroep.Database
         public DbSet<MemberPermission> MemberPermission { get; set; }
         #endregion
 
+        #region MemberHistory
+        public DbSet<MemberHistory> MemberHistory { get; set; }
+        #endregion
+
         #region Receipts
         public DbSet<Receipt> Receipt { get; set; }
         public DbSet<ReceiptApproval> ReceiptApproval { get; set; }
@@ -100,10 +104,14 @@ namespace Maasgroep.Database
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            #region Admin
             CreateMember(modelBuilder);
             CreatePermission(modelBuilder);
             CreateMemberPermission(modelBuilder);
             CreateTokenStore(modelBuilder);
+
+            CreateMemberHistory(modelBuilder);
+            #endregion
 
             #region PhotoAlbum
 
@@ -145,7 +153,8 @@ namespace Maasgroep.Database
             modelBuilder.Entity<Member>().Property(m => m.Id).HasDefaultValueSql("nextval('admin.\"memberSeq\"')");
             modelBuilder.Entity<Member>().Property(m => m.DateTimeCreated).HasDefaultValueSql("now()");
             modelBuilder.Entity<Member>().Property(m => m.Name).HasMaxLength(256);
-            modelBuilder.Entity<Member>().HasIndex(m => m.Name).IsUnique();
+            modelBuilder.Entity<Member>().Property(m => m.Email).HasMaxLength(256);
+            modelBuilder.Entity<Member>().HasIndex(m => m.Email).IsUnique();
 
             // Foreign keys
 
@@ -170,6 +179,17 @@ namespace Maasgroep.Database
                 .HasConstraintName("FK_member_memberDeleted")
                 .OnDelete(DeleteBehavior.NoAction);
 
+        }
+
+        private void CreateMemberHistory(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<MemberHistory>().ToTable("member", "adminHistory");
+            modelBuilder.HasSequence<long>("memberSeq", schema: "adminHistory").StartsAt(1).IncrementsBy(1);
+            modelBuilder.Entity<MemberHistory>().Property(p => p.Id).HasDefaultValueSql("nextval('\"adminHistory\".\"memberSeq\"')");
+            modelBuilder.Entity<MemberHistory>().Property(p => p.RecordCreated).HasDefaultValueSql("now()");
+            modelBuilder.Entity<MemberHistory>().Property(p => p.Name).HasMaxLength(2048);
+            modelBuilder.Entity<MemberHistory>().Property(p => p.Email).HasMaxLength(2048);
+            modelBuilder.Entity<MemberHistory>().Property(p => p.MemberPermissions).HasMaxLength(64000);
         }
 
         private void CreatePermission(ModelBuilder modelBuilder)
