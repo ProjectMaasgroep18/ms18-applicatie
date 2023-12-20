@@ -3,25 +3,44 @@ using Maasgroep.Database.Context.Tables.PhotoAlbum;
 using Maasgroep.Database.Orders;
 using Maasgroep.Database.Receipts;
 using Microsoft.EntityFrameworkCore;
+using System.Runtime.CompilerServices;
 
 namespace Maasgroep.Database
 {
     public class MaasgroepContext : DbContext
     {
-        // Used for dependency injection
-        public MaasgroepContext(DbContextOptions<MaasgroepContext> options) : base(options)
-        {
-        }
+        private static string _getFilePath(string file, [CallerFilePath] string? path = null) // Get path to a file in the "ms18-database" directory
+            => Path.Combine(new string[] { Path.GetDirectoryName(Path.GetDirectoryName(path) ?? "") ?? "", file });
 
-        public MaasgroepContext(string connectionString) : base(GetOptions(connectionString))
-        {
-        }
+        public MaasgroepContext() : base(GetOptions(GetConnectionString())) {}
+
+        public MaasgroepContext(DbContextOptions<MaasgroepContext> options) : base(options) {}
+
+        public MaasgroepContext(string connectionString) : base(GetOptions(GetConnectionString(connectionString))) {}
 
         private static DbContextOptions<MaasgroepContext> GetOptions(string connectionString)
         {
             var optionsBuilder = new DbContextOptionsBuilder<MaasgroepContext>();
             optionsBuilder.UseNpgsql(connectionString);
             return optionsBuilder.Options;
+        }
+        
+        public static string GetConnectionString(string? defaultConnection = null)
+        {
+            var connectionString = defaultConnection ?? "";
+            if (connectionString == "" && File.Exists(_getFilePath(".db.example"))) {
+                // Use the ".db.example" file as DefaultConnection
+                var envConnection = File.ReadAllText(_getFilePath(".db.example"));
+                if (envConnection != null && envConnection.Trim() != "")
+                    connectionString = envConnection.Trim();
+            }
+            if (File.Exists(_getFilePath(".db"))) {
+                // Allow a ".db" file to overwrite the DefaultConnection
+                var exampleConnection = File.ReadAllText(_getFilePath(".db"));
+                if (exampleConnection != null && exampleConnection.Trim() != "")
+                    connectionString = exampleConnection.Trim();
+            }
+            return connectionString;
         }
 
         #region Member

@@ -2,7 +2,7 @@ using Maasgroep.Database;
 using Maasgroep.Database.Admin;
 using Maasgroep.Database.Orders;
 using Maasgroep.Database.Receipts;
-using Microsoft.Extensions.Configuration;
+using Microsoft.EntityFrameworkCore;
 
 namespace Maasgroep.Console
 {
@@ -15,7 +15,7 @@ namespace Maasgroep.Console
             try {
                 // ADMIN data
                 CreateTestDataMember();
-            } catch (Microsoft.EntityFrameworkCore.DbUpdateException e) {
+            } catch (DbUpdateException e) {
                 // Waarschijnlijk duplicate keys (bestond dan al)
                 System.Console.WriteLine(e.InnerException?.Message ?? e.Message);
                 using (var db = CreateContext())
@@ -27,14 +27,14 @@ namespace Maasgroep.Console
             try {
                 // PERMISSIONS data [naar admin als t werkt]
                 CreateTestDataPermissions();
-            } catch (Microsoft.EntityFrameworkCore.DbUpdateException e) {
+            } catch (DbUpdateException e) {
                 // Waarschijnlijk duplicate keys (bestond dan al)
                 System.Console.WriteLine(e.InnerException?.Message ?? e.Message);
             }
             try {
                 // RECEIPT data   
                 CreateTestDataCostCentre();
-            } catch (Microsoft.EntityFrameworkCore.DbUpdateException e) {
+            } catch (DbUpdateException e) {
                 // Waarschijnlijk duplicate keys (bestond dan al)
                 System.Console.WriteLine(e.InnerException?.Message ?? e.Message);
             }
@@ -44,18 +44,14 @@ namespace Maasgroep.Console
                 CreateTestDataStock();
                 CreateTestDataBill();
                 CreateTestDataLine();
-            } catch (Microsoft.EntityFrameworkCore.DbUpdateException e) {
+            } catch (DbUpdateException e) {
                 // Waarschijnlijk duplicate keys (bestond dan al)
                 System.Console.WriteLine(e.InnerException?.Message ?? e.Message);
             }    
         }
 
         private MaasgroepContext CreateContext()
-        {   
-            // TODO Link this properly to a link of appSettings.development.json
-            return new MaasgroepContext("UserID=postgres;Password=postgres;Host=localhost;port=5432;Database=Maasgroep;Pooling=true");
-        }
-
+            => new();
 
         private string GetPasswordHash(string password)
         {
@@ -78,7 +74,7 @@ namespace Maasgroep.Console
                 {
                     ["Admin"] = admin,
                  
-                    // Team A
+                    // Team B
                     ["Gast"] = new Member() { Name = "Gast", MemberCreated = admin, Email = "gast@example.com", Password = verySafePassword },
                     ["Product"] = new Member() { Name = "Product", MemberCreated = admin, Email = "product@example.com", Password = verySafePassword },
 
@@ -110,7 +106,7 @@ namespace Maasgroep.Console
                 var orderProduct = new Permission() { Name = "order.product", MemberCreatedId = 1 };
 
                 // Toegang tot het "receipt" gedeelte: eigen bonnetjes inzien, indienen, wijzigen
-                var receipt = new Permission() { Name = "receipt.submit", MemberCreatedId = 1 };
+                var receipt = new Permission() { Name = "receipt", MemberCreatedId = 1 };
 
                 // Mag receipts goed/afkeuren
                 var receiptApprove = new Permission() { Name = "receipt.approve", MemberCreatedId = 1 };
@@ -121,7 +117,7 @@ namespace Maasgroep.Console
                 var permissions = new List<Permission>()
                 {
                     admin,
-                    order, orderProduct, // Team A
+                    order, orderProduct, // Team B
                     receipt, receiptApprove, receiptPay, // Team C
                 };
 

@@ -23,7 +23,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Add database context
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<MaasgroepContext>(options =>
-    options.UseNpgsql(connectionString));
+    options.UseNpgsql(MaasgroepContext.GetConnectionString(connectionString)));
 
 // Add HTTP context
 builder.Services.AddHttpContextAccessor();
