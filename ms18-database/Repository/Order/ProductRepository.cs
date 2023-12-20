@@ -20,7 +20,7 @@ namespace Maasgroep.Database.Orders
                 Icon = product.Icon,
                 Price = product.Price,
                 PriceQuantity = product.PriceQuantity,
-                Stock = Stock.GetById(product.Id)?.Quantity ?? 0,
+                Stock = Stock.GetById(product.Id, true)?.Quantity ?? 0,
             };
         }
 
@@ -55,7 +55,7 @@ namespace Maasgroep.Database.Orders
             var saveAction = base.GetSaveAction(record);
             return (MaasgroepContext db) => {
                 saveAction.Invoke(db);
-                var stock = Stock.GetById(record.Id);
+                var stock = Stock.GetById(record.Id, true);
                 if (stock == null)
                 {
                     db.SaveChanges();

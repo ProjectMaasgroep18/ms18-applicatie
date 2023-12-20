@@ -40,7 +40,7 @@ namespace Maasgroep.Database
         public virtual bool Exists(long id) => Db.Set<TRecord>().Select(item => item.Id == id).Any();
 
         /** Get record by ID */
-        public virtual TRecord? GetById(long id) => Db.Set<TRecord>().FirstOrDefault(item => item.Id == id);
+        public virtual TRecord? GetById(long id) => Db.Set<TRecord>().FirstOrDefault(item => item.Id == id && item.DateTimeDeleted == null);
 
         /** Get model by ID */
         public TViewModel? GetModel(long id)
