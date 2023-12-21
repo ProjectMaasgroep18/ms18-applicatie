@@ -73,9 +73,9 @@ namespace Maasgroep.Console
                 Members = new Dictionary<string, Member>
                 {
                     ["Admin"] = admin,
+                    ["Lid"] = new Member() { Name = "Lid", MemberCreated = admin, Email = "lid@example.com", Password = verySafePassword },
                  
                     // Team B
-                    ["Gast"] = new Member() { Name = "Gast", MemberCreated = admin, Email = "gast@example.com", Password = verySafePassword },
                     ["Product"] = new Member() { Name = "Product", MemberCreated = admin, Email = "product@example.com", Password = verySafePassword },
 
                     // Team C
@@ -129,8 +129,8 @@ namespace Maasgroep.Console
                 var memberPermissions = new List<MemberPermission>()
                 {
                     new MemberPermission() { MemberId = Members["Admin"]!.Id, Permission = admin, MemberCreatedId = 1 },
-                    new MemberPermission() { MemberId = Members["Gast"]!.Id, Permission = order, MemberCreatedId = 1 },
-                    new MemberPermission() { MemberId = Members["Gast"]!.Id, Permission = receipt, MemberCreatedId = 1 },
+                    new MemberPermission() { MemberId = Members["Lid"]!.Id, Permission = order, MemberCreatedId = 1 },
+                    new MemberPermission() { MemberId = Members["Lid"]!.Id, Permission = receipt, MemberCreatedId = 1 },
                     new MemberPermission() { MemberId = Members["Product"]!.Id, Permission = orderProduct, MemberCreatedId = 1 },
                     new MemberPermission() { MemberId = Members["Goedkeur"]!.Id, Permission = receiptApprove, MemberCreatedId = 1 },
                     new MemberPermission() { MemberId = Members["Betaal"]!.Id, Permission = receiptPay, MemberCreatedId = 1 },
@@ -241,7 +241,7 @@ namespace Maasgroep.Console
             using (var db = CreateContext())
             {
                 var member = Members["Admin"];
-                var member1 = Members["Gast"];
+                var member1 = Members["Lid"];
                 var member2 = Members["Product"];
 
                 var billToAdd = new List<Bill>()
@@ -270,7 +270,7 @@ namespace Maasgroep.Console
             using (var db = CreateContext())
             {
                 var member = Members["Admin"];
-                var member1 = Members["Gast"];
+                var member1 = Members["Lid"];
                 var member2 = Members["Product"];
 
                 var bill1 = db.Bills.Where(b => b.MemberCreatedId == member1.Id).FirstOrDefault()!;
