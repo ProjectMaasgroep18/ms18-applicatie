@@ -22,7 +22,7 @@ where TRecord: GenericRecordActive
         if (!AllowDelete(record))
             NoAccess();
         if (!Repository.Delete(record, CurrentMember?.Id))
-            throw new MaasgroepNotFound($"{ItemName} kon niet worden verwijderd");
+            throw new MaasgroepBadRequest($"{ItemName} kon niet worden verwijderd");
         return NoContent();
     }
 }

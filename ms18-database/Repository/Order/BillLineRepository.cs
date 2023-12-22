@@ -32,7 +32,7 @@ namespace Maasgroep.Database.Orders
             if (existingLine != null && existingLine.ProductId != data.ProductId)
                 return null; // Line should stay with product
 
-            var product = Products.GetById(data.ProductId);
+            var product = Products.GetById(data.ProductId, true);
             if (product == null)
                 return null; // Line should have a product
 

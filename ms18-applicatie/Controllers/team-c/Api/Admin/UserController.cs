@@ -10,10 +10,11 @@ using Microsoft.IdentityModel.Tokens;
 
 using System.Text;
 using System.IdentityModel.Tokens.Jwt;
+using System.Data.Common;
 
 namespace Maasgroep.Controllers.Api;
 
-public class UserController : DeletableRepositoryController<IMemberRepository, Member, MemberModel, MemberData>
+public class UserController : EditableRepositoryController<IMemberRepository, Member, MemberModel, MemberData, MemberHistory>
 {
     protected readonly IReceiptRepository Receipts;
     protected readonly ITokenStoreRepository TokenStore;
@@ -35,8 +36,43 @@ public class UserController : DeletableRepositoryController<IMemberRepository, M
     protected override bool AllowCreate(MemberData member)
         => HasPermission("admin");
 
-    protected override bool AllowDelete(Member? member) // +Edit
-        => HasPermission("admin");
+    protected override bool AllowDelete(Member? member)
+    {
+        if (!HasPermission("admin"))
+            return false;
+        if (member?.Id == CurrentMember!.Id)
+            throw new MaasgroepForbidden("Je kunt niet je eigen account verwijderen");
+        return true;
+    }
+
+    protected override bool AllowEdit(Member? member, MemberData newData)
+        => CurrentMember?.Id != null && (member?.Id == CurrentMember.Id || HasPermission("admin"));
+
+    [HttpPut("{id}/Credentials")]
+    public IActionResult UserChangeCredentials(long id, [FromBody] MemberCredentialsData newCredentials)
+    {
+        var member = Repository.GetById(id);
+        if (member == null || !AllowView(member))
+            NotFound();
+        if (!AllowEdit(member!, new()))
+            NoAccess();
+
+        if (member?.Id == CurrentMember!.Id && newCredentials.NewPermissions != null)
+            throw new MaasgroepForbidden("Je mag niet je eigen rechten aanpassen");
+
+        // Current user should supply their password to edit credentials
+        if (newCredentials.NewPassword != null || newCredentials.NewPermissions != null)
+        {
+            if ((newCredentials.CurrentPassword ?? "") == "")
+                throw new MaasgroepForbidden("Geef je huidige wachtwoord op om een wachtwoord of gebruikersrechten aan te passen");
+            if (!Repository.CheckPassword(newCredentials.CurrentPassword!, CurrentMember.Id))
+                throw new MaasgroepForbidden("Huidige wachtwoord is niet juist");
+        }
+        
+        if (Repository.Update(member!, newCredentials, CurrentMember?.Id) == null)
+            throw new MaasgroepBadRequest($"{ItemName} kon niet worden opgeslagen");
+        return NoContent();
+    }
 
     [HttpGet("{id}/Receipt")]
     public IActionResult UserGetReceipts(long id, [FromQuery] int offset = default, [FromQuery] int limit = default, [FromQuery] bool includeDeleted = default)

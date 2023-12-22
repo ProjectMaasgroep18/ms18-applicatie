@@ -6,7 +6,7 @@ services:
     image: postgres
     command: -c shared_buffers=256MB -c max_connections=200
     ports:
-      - 5410:5432
+      - 5432:5432
     environment:
       POSTGRES_HOST_AUTH_METHOD: trust
     volumes:

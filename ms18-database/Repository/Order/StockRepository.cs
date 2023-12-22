@@ -12,7 +12,7 @@ namespace Maasgroep.Database.Orders
         public override StockModel GetModel(Stock stock)
         {
             return new StockModel() {
-                Product = new ProductRepository(Db).GetModel(stock.Id),
+                Id = stock.Id,
                 Quantity = stock.Quantity,
             };
         }
