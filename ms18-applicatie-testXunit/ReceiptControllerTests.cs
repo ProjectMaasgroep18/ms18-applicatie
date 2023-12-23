@@ -14,15 +14,6 @@ namespace ms18_applicatie_test
 {
 	public class ReceiptControllerTests
 	{
-		/*
-		Methodes te testen;
-		- ReceiptAddPhoto		ReceiptController
-		- ReceiptGetPhotos		ReceiptController
-		- ReceiptGetApprovals	ReceiptController
-		- ReceiptApprove		ReceiptController
-		- GetPayableReceipts	ReceiptController
-		*/
-
 		Mock<IReceiptStatusRepository> receiptStatusRepository;
 		Mock<ICostCentreRepository> costCentreRepository;
 		Mock<IMemberRepository> memberRepository;
@@ -468,7 +459,7 @@ namespace ms18_applicatie_test
 		#region RepositoryDelete
 
 		[Fact]
-		public void RepositoryDelete_NotLoggedIn_ThrowsMaasgroepNotFoundException()
+		public void RepositoryDelete_NotLoggedIn__NullRecord_ThrowsMaasgroepNotFoundException()
 		{
 			SetAuthentication_Unauthenticated();
 
@@ -479,7 +470,7 @@ namespace ms18_applicatie_test
 			{
 				result = sut.RepositoryDelete(0);
 			}
-			catch (MaasgroepUnauthorized ex)
+			catch (MaasgroepNotFound ex)
 			{
 				result = ex;
 			}
@@ -494,20 +485,1099 @@ namespace ms18_applicatie_test
 			_ = result.As<MaasgroepNotFound>().Message.Should().Be($"Declaratie niet gevonden");
 		}
 
+		[Fact]
+		public void RepositoryDelete_NotLoggedIn_ValidData_ThrowsMaasgroepNotFoundException()
+		{
+			SetAuthentication_Unauthenticated();
+
+			Receipt getByIdReceipt = new()
+			{
+				Note = "test",
+				Amount = 1,
+				CostCentreId = 1
+			};
+
+			receiptRepository.Setup(r => r.GetById(It.IsAny<long>(), false)).Returns(getByIdReceipt);
+
+			var sut = new ReceiptController(receiptRepository.Object, receiptPhotoRepository.Object, receiptApprovalRepository.Object, maasgroepAuthenticationService.Object);
+
+			object result;
+			try
+			{
+				result = sut.RepositoryDelete(0);
+			}
+			catch (MaasgroepNotFound ex)
+			{
+				result = ex;
+			}
+			catch (Exception ex)
+			{
+				result = ex;
+			}
+
+			_ = result.Should().NotBeNull();
+			_ = result.Should().BeOfType<MaasgroepNotFound>();
+			_ = result.As<MaasgroepNotFound>().Message.Should().NotBeNull();
+			_ = result.As<MaasgroepNotFound>().Message.Should().Be($"Declaratie niet gevonden");
+		}
+
+		[Fact]
+		public void RepositoryDelete_InValidPermission_ValidData_ThrowsMaasgroepForbiddenException()
+		{
+			SetAuthentication_PermissionCorrect("receipt.approve");
+
+			Receipt getByIdReceipt = new()
+			{
+				Note = "test",
+				Amount = 1,
+				CostCentreId = 1
+			};
+
+			receiptRepository.Setup(r => r.GetById(It.IsAny<long>(), false)).Returns(getByIdReceipt);
+
+			var sut = new ReceiptController(receiptRepository.Object, receiptPhotoRepository.Object, receiptApprovalRepository.Object, maasgroepAuthenticationService.Object);
+
+			object result;
+			try
+			{
+				result = sut.RepositoryDelete(0);
+			}
+			catch (MaasgroepForbidden ex)
+			{
+				result = ex;
+			}
+			catch (Exception ex)
+			{
+				result = ex;
+			}
+
+			_ = result.Should().NotBeNull();
+			_ = result.Should().BeOfType<MaasgroepForbidden>();
+			_ = result.As<MaasgroepForbidden>().Message.Should().NotBeNull();
+			_ = result.As<MaasgroepForbidden>().Message.Should().Be($"Je hebt geen toegang tot dit onderdeel");
+		}
+
+		[Fact]
+		public void RepositoryDelete_ValidPermission_ValidData_RepoFalse_ThrowsMaasgroepBadRequestException()
+		{
+			SetAuthentication_PermissionCorrect("admin");
+
+			Receipt getByIdReceipt = new()
+			{
+				Note = "test",
+				Amount = 1,
+				CostCentreId = 1
+			};
+
+			receiptRepository.Setup(r => r.GetById(It.IsAny<long>(), false)).Returns(getByIdReceipt);
+			receiptRepository.Setup(r => r.Delete(getByIdReceipt, It.IsAny<long>())).Returns(false);
+
+			var sut = new ReceiptController(receiptRepository.Object, receiptPhotoRepository.Object, receiptApprovalRepository.Object, maasgroepAuthenticationService.Object);
+
+			object result;
+			try
+			{
+				result = sut.RepositoryDelete(0);
+			}
+			catch (MaasgroepBadRequest ex)
+			{
+				result = ex;
+			}
+			catch (Exception ex)
+			{
+				result = ex;
+			}
+
+			_ = result.Should().NotBeNull();
+			_ = result.Should().BeOfType<MaasgroepBadRequest>();
+			_ = result.As<MaasgroepBadRequest>().Message.Should().NotBeNull();
+			_ = result.As<MaasgroepBadRequest>().Message.Should().Be($"Declaratie kon niet worden verwijderd");
+		}
+
+		[Fact]
+		public void RepositoryDelete_ValidPermission_ValidData_RepoTrue_ReturnsNoContent()
+		{
+			SetAuthentication_PermissionCorrect("admin");
+
+			Receipt getByIdReceipt = new()
+			{
+				Note = "test",
+				Amount = 1,
+				CostCentreId = 1
+			};
+
+			receiptRepository.Setup(r => r.GetById(It.IsAny<long>(), false)).Returns(getByIdReceipt);
+			receiptRepository.Setup(r => r.Delete(getByIdReceipt, It.IsAny<long>())).Returns(true);
+
+			var sut = new ReceiptController(receiptRepository.Object, receiptPhotoRepository.Object, receiptApprovalRepository.Object, maasgroepAuthenticationService.Object);
+
+			object result;
+			try
+			{
+				result = sut.RepositoryDelete(0);
+			}
+			catch (MaasgroepBadRequest ex)
+			{
+				result = ex;
+			}
+			catch (Exception ex)
+			{
+				result = ex;
+			}
+
+			_ = result.Should().NotBeNull();
+			_ = result.Should().BeOfType<NoContentResult>();
+			_ = result.As<NoContentResult>().StatusCode.Should().Be(204);
+		}
 
 		#endregion
 
 		#region RepositoryUpdate
 
 		[Fact]
-		public void RepositoryUpdate_NotLoggedIn_ThrowsMaasgroepUnauthorizedException()
+		public void RepositoryUpdate_NotLoggedIn_NullData_ThrowsMaasgroepNotFoundException()
 		{
+			SetAuthentication_Unauthenticated();
 
+			ReceiptData repoUpdateData = new()
+			{
+				Amount = 15,
+				CostCentreId = 2,
+				Note = "updated ding"
+			};
+
+			var sut = new ReceiptController(receiptRepository.Object, receiptPhotoRepository.Object, receiptApprovalRepository.Object, maasgroepAuthenticationService.Object);
+
+			object result;
+			try
+			{
+				result = sut.RepositoryUpdate(0, repoUpdateData);
+			}
+			catch (MaasgroepNotFound ex)
+			{
+				result = ex;
+			}
+			catch (Exception ex)
+			{
+				result = ex;
+			}
+
+			_ = result.Should().NotBeNull();
+			_ = result.Should().BeOfType<MaasgroepNotFound>();
+			_ = result.As<MaasgroepNotFound>().Message.Should().NotBeNull();
+			_ = result.As<MaasgroepNotFound>().Message.Should().Be($"Declaratie niet gevonden");
 		}
 
+		[Fact]
+		public void RepositoryUpdate_NotLoggedIn_ReceiptExist_ThrowsMaasgroepUnauthorizedException()
+		{
+			SetAuthentication_Unauthenticated();
+
+			ReceiptData repoUpdateData = new()
+			{
+				Amount = 15,
+				CostCentreId = 2,
+				Note = "updated ding"
+			};
+
+			Receipt getByIdReceipt = new()
+			{
+				Note = "test",
+				Amount = 1,
+				CostCentreId = 1
+			};
+
+			receiptRepository.Setup(r => r.GetById(It.IsAny<long>(), true)).Returns(getByIdReceipt);
+
+			var sut = new ReceiptController(receiptRepository.Object, receiptPhotoRepository.Object, receiptApprovalRepository.Object, maasgroepAuthenticationService.Object);
+
+			object result;
+			try
+			{
+				result = sut.RepositoryUpdate(0, repoUpdateData);
+			}
+			catch (MaasgroepNotFound ex)
+			{
+				result = ex;
+			}
+			catch (Exception ex)
+			{
+				result = ex;
+			}
+
+			_ = result.Should().NotBeNull();
+			_ = result.Should().BeOfType<MaasgroepNotFound>();
+			_ = result.As<MaasgroepNotFound>().Message.Should().NotBeNull();
+			_ = result.As<MaasgroepNotFound>().Message.Should().Be($"Declaratie niet gevonden");
+		}
+
+		[Fact]
+		public void RepositoryUpdate_LoggedIn_WrongPermission_ThrowsMaasgroepForbiddenException()
+		{
+			SetAuthentication_PermissionCorrect("receipt.approve");
+
+			ReceiptData repoUpdateData = new()
+			{
+				Amount = 15,
+				CostCentreId = 2,
+				Note = "updated ding"
+			};
+
+			Receipt getByIdReceipt = new()
+			{
+				Note = "test",
+				Amount = 1,
+				CostCentreId = 1
+			};
+
+			receiptRepository.Setup(r => r.GetById(It.IsAny<long>(), false)).Returns(getByIdReceipt);
+
+			var sut = new ReceiptController(receiptRepository.Object, receiptPhotoRepository.Object, receiptApprovalRepository.Object, maasgroepAuthenticationService.Object);
+
+			object result;
+			try
+			{
+				result = sut.RepositoryUpdate(0, repoUpdateData);
+			}
+			catch (MaasgroepForbidden ex)
+			{
+				result = ex;
+			}
+			catch (Exception ex)
+			{
+				result = ex;
+			}
+
+			_ = result.Should().NotBeNull();
+			_ = result.Should().BeOfType<MaasgroepForbidden>();
+			_ = result.As<MaasgroepForbidden>().Message.Should().NotBeNull();
+			_ = result.As<MaasgroepForbidden>().Message.Should().Be($"Je hebt geen toegang tot dit onderdeel");
+		}
+
+		[Fact]
+		public void RepositoryUpdate_LoggedIn_CorrectPermission_DataNull_ThrowsMaasgroepBadRequestException()
+		{
+			SetAuthentication_PermissionCorrect("admin");
+
+			ReceiptData repoUpdateData = new()
+			{
+				Amount = 15,
+				CostCentreId = 2,
+				Note = "updated ding"
+			};
+
+			Receipt getByIdReceipt = new()
+			{
+				Note = "test",
+				Amount = 1,
+				CostCentreId = 1
+			};
+
+			Receipt repoDataTurn = null;
+
+			receiptRepository.Setup(r => r.GetById(It.IsAny<long>(), false)).Returns(getByIdReceipt);
+			receiptRepository.Setup(r => r.Update(It.IsAny<Receipt>(), It.IsAny<ReceiptData>(), -1)).Returns(repoDataTurn);
+
+			var sut = new ReceiptController(receiptRepository.Object, receiptPhotoRepository.Object, receiptApprovalRepository.Object, maasgroepAuthenticationService.Object);
+
+			object result;
+			try
+			{
+				result = sut.RepositoryUpdate(0, repoUpdateData);
+			}
+			catch (MaasgroepBadRequest ex)
+			{
+				result = ex;
+			}
+			catch (Exception ex)
+			{
+				result = ex;
+			}
+
+			_ = result.Should().NotBeNull();
+			_ = result.Should().BeOfType<MaasgroepBadRequest>();
+			_ = result.As<MaasgroepBadRequest>().Message.Should().NotBeNull();
+			_ = result.As<MaasgroepBadRequest>().Message.Should().Be($"Declaratie kon niet worden opgeslagen");
+		}
+
+		[Fact]
+		public void RepositoryUpdate_LoggedIn_CorrectPermission_DataCorrect_ReturnsNoContentResult()
+		{
+			SetAuthentication_PermissionCorrect("admin");
+
+			ReceiptData repoUpdateData = new()
+			{
+				Amount = 15,
+				CostCentreId = 2,
+				Note = "updated ding"
+			};
+
+			Receipt getByIdReceipt = new()
+			{
+				Note = "test",
+				Amount = 1,
+				CostCentreId = 1
+			};
+
+			Receipt repoDataTurn = new()
+			{
+				Note = "test"
+			};
+
+			receiptRepository.Setup(r => r.GetById(It.IsAny<long>(), false)).Returns(getByIdReceipt);
+			receiptRepository.Setup(r => r.Update(It.IsAny<Receipt>(), It.IsAny<ReceiptData>(), It.IsAny<long>())).Returns(repoDataTurn);
+
+			var sut = new ReceiptController(receiptRepository.Object, receiptPhotoRepository.Object, receiptApprovalRepository.Object, maasgroepAuthenticationService.Object);
+
+			object result;
+			try
+			{
+				result = sut.RepositoryUpdate(0, repoUpdateData);
+			}
+			catch (Exception ex)
+			{
+				result = ex;
+			}
+
+			_ = result.Should().NotBeNull();
+			_ = result.Should().BeOfType<NoContentResult>();
+			_ = result.As<NoContentResult>().StatusCode.Should().Be(204);
+		}
 
 		#endregion
 
+		#region ReceiptAddPhoto
+
+		[Fact]
+		public void ReceiptAddPhoto_NotLoggedIn_NullData_ThrowsMaasgroepNotFoundException()
+		{
+			SetAuthentication_Unauthenticated();
+
+			ReceiptPhotoData addPhotoData = new()
+			{
+				Base64Image = "doet er niet toe",
+				FileExtension = "kevin",
+				FileName = "hoi!",
+				ReceiptId = 1
+			};
+
+			var sut = new ReceiptController(receiptRepository.Object, receiptPhotoRepository.Object, receiptApprovalRepository.Object, maasgroepAuthenticationService.Object);
+
+			object result;
+			try
+			{
+				result = sut.ReceiptAddPhoto(0, addPhotoData);
+			}
+			catch (MaasgroepNotFound ex)
+			{
+				result = ex;
+			}
+			catch (Exception ex)
+			{
+				result = ex;
+			}
+
+			_ = result.Should().NotBeNull();
+			_ = result.Should().BeOfType<MaasgroepNotFound>();
+			_ = result.As<MaasgroepNotFound>().Message.Should().NotBeNull();
+			_ = result.As<MaasgroepNotFound>().Message.Should().Be($"Declaratie niet gevonden");
+		}
+
+		[Fact]
+		public void ReceiptAddPhoto_NotLoggedIn_ReceiptExists_ThrowsMaasgroepNotFoundException()
+		{
+			SetAuthentication_Unauthenticated();
+
+			ReceiptPhotoData addPhotoData = new()
+			{
+				Base64Image = "doet er niet toe",
+				FileExtension = "kevin",
+				FileName = "hoi!",
+				ReceiptId = 1
+			};
+
+
+			ReceiptData repoUpdateData = new()
+			{
+				Amount = 15,
+				CostCentreId = 2,
+				Note = "updated ding"
+			};
+
+			Receipt getByIdReceipt = new()
+			{
+				Note = "test",
+				Amount = 1,
+				CostCentreId = 1
+			};
+
+			receiptRepository.Setup(r => r.GetById(It.IsAny<long>(), false)).Returns(getByIdReceipt);
+
+			var sut = new ReceiptController(receiptRepository.Object, receiptPhotoRepository.Object, receiptApprovalRepository.Object, maasgroepAuthenticationService.Object);
+
+			object result;
+			try
+			{
+				result = sut.ReceiptAddPhoto(0, addPhotoData);
+			}
+			catch (MaasgroepNotFound ex)
+			{
+				result = ex;
+			}
+			catch (Exception ex)
+			{
+				result = ex;
+			}
+
+			_ = result.Should().NotBeNull();
+			_ = result.Should().BeOfType<MaasgroepNotFound>();
+			_ = result.As<MaasgroepNotFound>().Message.Should().NotBeNull();
+			_ = result.As<MaasgroepNotFound>().Message.Should().Be($"Declaratie niet gevonden");
+		}
+
+		[Fact]
+		public void ReceiptAddPhoto_LoggedIn_InvalidPermission_ThrowsMaasgroepNotFoundException()
+		{
+			SetAuthentication_PermissionWrong();
+
+			ReceiptPhotoData addPhotoData = new()
+			{
+				Base64Image = "doet er niet toe",
+				FileExtension = "kevin",
+				FileName = "hoi!",
+				ReceiptId = 1
+			};
+
+
+			ReceiptData repoUpdateData = new()
+			{
+				Amount = 15,
+				CostCentreId = 2,
+				Note = "updated ding"
+			};
+
+			Receipt getByIdReceipt = new()
+			{
+				Note = "test",
+				Amount = 1,
+				CostCentreId = 1
+			};
+
+			receiptRepository.Setup(r => r.GetById(It.IsAny<long>(), false)).Returns(getByIdReceipt);
+
+			var sut = new ReceiptController(receiptRepository.Object, receiptPhotoRepository.Object, receiptApprovalRepository.Object, maasgroepAuthenticationService.Object);
+
+			object result;
+			try
+			{
+				result = sut.ReceiptAddPhoto(0, addPhotoData);
+			}
+			catch (MaasgroepNotFound ex)
+			{
+				result = ex;
+			}
+			catch (Exception ex)
+			{
+				result = ex;
+			}
+
+			_ = result.Should().NotBeNull();
+			_ = result.Should().BeOfType<MaasgroepNotFound>();
+			_ = result.As<MaasgroepNotFound>().Message.Should().NotBeNull();
+			_ = result.As<MaasgroepNotFound>().Message.Should().Be($"Declaratie niet gevonden");
+		}
+
+		[Fact]
+		public void ReceiptAddPhoto_LoggedIn_PermissionCorrect_ThrowsMaasgroepForbiddenException()
+		{
+			SetAuthentication_PermissionCorrect("receipt.approve");
+
+			ReceiptPhotoData addPhotoData = new()
+			{
+				Base64Image = "doet er niet toe",
+				FileExtension = "kevin",
+				FileName = "hoi!",
+				ReceiptId = 1
+			};
+
+
+			ReceiptData repoUpdateData = new()
+			{
+				Amount = 15,
+				CostCentreId = 2,
+				Note = "updated ding"
+			};
+
+			Receipt getByIdReceipt = new()
+			{
+				Note = "test",
+				Amount = 1,
+				CostCentreId = 1
+			};
+
+			receiptRepository.Setup(r => r.GetById(It.IsAny<long>(), false)).Returns(getByIdReceipt);
+
+			var sut = new ReceiptController(receiptRepository.Object, receiptPhotoRepository.Object, receiptApprovalRepository.Object, maasgroepAuthenticationService.Object);
+
+			object result;
+			try
+			{
+				result = sut.ReceiptAddPhoto(0, addPhotoData);
+			}
+			catch (MaasgroepForbidden ex)
+			{
+				result = ex;
+			}
+			catch (Exception ex)
+			{
+				result = ex;
+			}
+
+			_ = result.Should().NotBeNull();
+			_ = result.Should().BeOfType<MaasgroepForbidden>();
+			_ = result.As<MaasgroepForbidden>().Message.Should().NotBeNull();
+			_ = result.As<MaasgroepForbidden>().Message.Should().Be("Je hebt geen toegang tot dit onderdeel");
+		}
+
+		[Fact]
+		public void ReceiptAddPhoto_LoggedIn_PermissionCorrect_PhotoCreateNull_ThrowMaasgroepBadRequestException()
+		{
+			SetAuthentication_PermissionCorrect("admin");
+
+			ReceiptPhotoData addPhotoData = new()
+			{
+				Base64Image = "doet er niet toe",
+				FileExtension = "kevin",
+				FileName = "hoi!",
+				ReceiptId = 1
+			};
+
+
+			ReceiptData repoUpdateData = new()
+			{
+				Amount = 15,
+				CostCentreId = 2,
+				Note = "updated ding"
+			};
+
+			Receipt getByIdReceipt = new()
+			{
+				Note = "test",
+				Amount = 1,
+				CostCentreId = 1
+			};
+
+			receiptRepository.Setup(r => r.GetById(It.IsAny<long>(), false)).Returns(getByIdReceipt);
+
+
+			var sut = new ReceiptController(receiptRepository.Object, receiptPhotoRepository.Object, receiptApprovalRepository.Object, maasgroepAuthenticationService.Object);
+
+			object result;
+			try
+			{
+				result = sut.ReceiptAddPhoto(0, addPhotoData);
+			}
+			catch (MaasgroepBadRequest ex)
+			{
+				result = ex;
+			}
+			catch (Exception ex)
+			{
+				result = ex;
+			}
+
+			_ = result.Should().NotBeNull();
+			_ = result.Should().BeOfType<MaasgroepBadRequest>();
+			_ = result.As<MaasgroepBadRequest>().Message.Should().NotBeNull();
+			_ = result.As<MaasgroepBadRequest>().Message.Should().Be("Declaratie kon niet worden aangemaakt");
+		}
+
+		[Fact]
+		public void ReceiptAddPhoto_LoggedIn_PermissionCorrect_PhotoCreate_ReturnsCreatedResult()
+		{
+			SetAuthentication_PermissionCorrect("admin");
+
+			ReceiptPhotoData addPhotoData = new()
+			{
+				Base64Image = "doet er niet toe",
+				FileExtension = "kevin",
+				FileName = "hoi!",
+				ReceiptId = 1
+			};
+
+			Receipt getByIdReceipt = new()
+			{
+				Note = "test",
+				Amount = 1,
+				CostCentreId = 1
+			};
+
+
+			ReceiptPhoto photoToReturn = new()
+			{
+				FileExtension = "test",
+				Id = 15,
+				ReceiptId = 1
+			};
+
+
+
+			receiptRepository.Setup(r => r.GetById(It.IsAny<long>(), false)).Returns(getByIdReceipt);
+			receiptPhotoRepository.Setup(p => p.Create(It.IsAny<ReceiptPhotoData>(), It.IsAny<long>())).Returns(photoToReturn);
+
+			var sut = new ReceiptController(receiptRepository.Object, receiptPhotoRepository.Object, receiptApprovalRepository.Object, maasgroepAuthenticationService.Object);
+
+			object result;
+			try
+			{
+				result = sut.ReceiptAddPhoto(0, addPhotoData);
+			}
+			catch (Exception ex)
+			{
+				result = ex;
+			}
+
+			_ = result.Should().NotBeNull();
+			_ = result.Should().BeOfType<CreatedResult>();
+			_ = result.As<CreatedResult>().Location.Should().NotBeNull();
+			_ = result.As<CreatedResult>().Location.Should().Be($"/api/v1/ReceiptPhotos/{photoToReturn.Id}");
+			_ = result.As<CreatedResult>().Value.Should().NotBeNull();
+			_ = result.As<CreatedResult>().Value.Should().BeOfType<ReceiptPhoto>();
+			_ = result.As<CreatedResult>().Value.As<ReceiptPhoto>().Id.Should().Be(photoToReturn.Id);
+		}
+
+		#endregion
+
+		#region ReceiptGetPhotos
+
+		[Fact]
+		public void ReceiptGetPhotos_NotLoggedIn_NullData_ThrowsMaasgroepNotFoundException()
+		{
+			SetAuthentication_Unauthenticated();
+
+			var sut = new ReceiptController(receiptRepository.Object, receiptPhotoRepository.Object, receiptApprovalRepository.Object, maasgroepAuthenticationService.Object);
+
+			object result;
+			try
+			{
+				result = sut.ReceiptGetPhotos(0, 0, 0, false);
+			}
+			catch (MaasgroepNotFound ex)
+			{
+				result = ex;
+			}
+			catch (Exception ex)
+			{
+				result = ex;
+			}
+
+			_ = result.Should().NotBeNull();
+			_ = result.Should().BeOfType<MaasgroepNotFound>();
+			_ = result.As<MaasgroepNotFound>().Message.Should().NotBeNull();
+			_ = result.As<MaasgroepNotFound>().Message.Should().Be($"Declaratie niet gevonden");
+		}
+
+		[Fact]
+		public void ReceiptGetPhotos_NotLoggedIn_ReceiptExists_ThrowsMaasgroepNotFoundException()
+		{
+			SetAuthentication_Unauthenticated();
+
+			Receipt receiptById = new()
+			{
+				Id = 1
+			};
+
+			receiptRepository.Setup(r => r.GetById(It.IsAny<long>(), false)).Returns(receiptById);
+
+			var sut = new ReceiptController(receiptRepository.Object, receiptPhotoRepository.Object, receiptApprovalRepository.Object, maasgroepAuthenticationService.Object);
+
+			object result;
+			try
+			{
+				result = sut.ReceiptGetPhotos(2, 2, 2, false);
+			}
+			catch (MaasgroepNotFound ex)
+			{
+				result = ex;
+			}
+			catch (Exception ex)
+			{
+				result = ex;
+			}
+
+			_ = result.Should().NotBeNull();
+			_ = result.Should().BeOfType<MaasgroepNotFound>();
+			_ = result.As<MaasgroepNotFound>().Message.Should().NotBeNull();
+			_ = result.As<MaasgroepNotFound>().Message.Should().Be($"Declaratie niet gevonden");
+		}
+
+		[Fact]
+		public void ReceiptGetPhotos_WrongPermission_ReceiptExists_ThrowsMaasgroepNotFoundException()
+		{
+			SetAuthentication_PermissionWrong();
+
+			Receipt receiptById = new()
+			{
+				Id = 1
+			};
+
+			receiptRepository.Setup(r => r.GetById(It.IsAny<long>(), false)).Returns(receiptById);
+
+			var sut = new ReceiptController(receiptRepository.Object, receiptPhotoRepository.Object, receiptApprovalRepository.Object, maasgroepAuthenticationService.Object);
+
+			object result;
+			try
+			{
+				result = sut.ReceiptGetPhotos(2, 2, 2, false);
+			}
+			catch (MaasgroepNotFound ex)
+			{
+				result = ex;
+			}
+			catch (Exception ex)
+			{
+				result = ex;
+			}
+
+			_ = result.Should().NotBeNull();
+			_ = result.Should().BeOfType<MaasgroepNotFound>();
+			_ = result.As<MaasgroepNotFound>().Message.Should().NotBeNull();
+			_ = result.As<MaasgroepNotFound>().Message.Should().Be($"Declaratie niet gevonden");
+		}
+
+		[Fact]
+		public void ReceiptGetPhotos_ValidPermission_ReceiptExists_ReturnsOkObjectResult()
+		{
+			SetAuthentication_PermissionCorrect("admin");
+
+			Receipt receiptById = new()
+			{
+				Id = 1
+			};
+
+			receiptRepository.Setup(r => r.GetById(It.IsAny<long>(), false)).Returns(receiptById);
+			receiptPhotoRepository.Setup(p => p.ListByReceipt(It.IsAny<long>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<bool>())).Returns(new List<ReceiptPhotoModel>() { new ReceiptPhotoModel() { Id = -2 } });
+
+			var sut = new ReceiptController(receiptRepository.Object, receiptPhotoRepository.Object, receiptApprovalRepository.Object, maasgroepAuthenticationService.Object);
+
+			object result;
+			try
+			{
+				result = sut.ReceiptGetPhotos(2, 2, 2, false);
+			}
+			catch (Exception ex)
+			{
+				result = ex;
+			}
+
+			_ = result.Should().NotBeNull();
+			_ = result.Should().BeOfType<OkObjectResult>();
+			_ = result.As<OkObjectResult>().Value.Should().NotBeNull();
+			_ = result.As<OkObjectResult>().Value.As<List<ReceiptPhotoModel>>().Should().NotBeNull();
+			_ = result.As<OkObjectResult>().Value.As<List<ReceiptPhotoModel>>().Count.Should().Be(1);
+		}
+
+		#endregion
+
+		#region ReceiptGetApprovals
+		[Fact]
+		public void ReceiptGetApprovals_NotLoggedIn_ReturnsOkResult()
+		{
+			SetAuthentication_Unauthenticated();
+
+			var sut = new ReceiptController(receiptRepository.Object, receiptPhotoRepository.Object, receiptApprovalRepository.Object, maasgroepAuthenticationService.Object);
+
+			object result;
+			try
+			{
+				result = sut.ReceiptGetApprovals(3, 3, 3);
+			}
+			catch (Exception ex)
+			{
+				result = ex;
+			}
+
+			_ = result.Should().NotBeNull();
+			_ = result.Should().BeOfType<OkObjectResult>();
+			_ = result.As<OkObjectResult>().Value.Should().NotBeNull();
+		}
+		#endregion
+
+		#region ReceiptApprove
+
+		[Fact]
+		public void ReceiptApprove_NotLoggedIn_NullData_ThrowsMaasgroepNotFoundException()
+		{
+			SetAuthentication_Unauthenticated();
+
+			ReceiptApprovalData dataApproved = new()
+			{
+				Approved = true,
+				Note = "Champs 4 life",
+				ReceiptId =1
+			};
+
+			var sut = new ReceiptController(receiptRepository.Object, receiptPhotoRepository.Object, receiptApprovalRepository.Object, maasgroepAuthenticationService.Object);
+
+			object result;
+			try
+			{
+				result = sut.ReceiptApprove(1, dataApproved);
+			}
+			catch (MaasgroepNotFound ex)
+			{
+				result = ex;
+			}
+			catch (Exception ex)
+			{
+				result = ex;
+			}
+
+			_ = result.Should().NotBeNull();
+			_ = result.Should().BeOfType<MaasgroepNotFound>();
+			_ = result.As<MaasgroepNotFound>().Message.Should().NotBeNull();
+			_ = result.As<MaasgroepNotFound>().Message.Should().Be($"Declaratie niet gevonden");
+		}
+
+		[Fact]
+		public void ReceiptApprove_NotLoggedIn_ReceiptExists_ThrowsMaasgroepNotFoundException()
+		{
+			SetAuthentication_Unauthenticated();
+
+			ReceiptApprovalData dataApproved = new()
+			{
+				Approved = true,
+				Note = "Champs 4 life",
+				ReceiptId = 1
+			};
+
+			Receipt getByIdReceipt = new()
+			{
+				Note = "test",
+				Amount = 1,
+				CostCentreId = 1
+			};
+
+			receiptRepository.Setup(r => r.GetById(It.IsAny<long>(), true)).Returns(getByIdReceipt);
+
+			var sut = new ReceiptController(receiptRepository.Object, receiptPhotoRepository.Object, receiptApprovalRepository.Object, maasgroepAuthenticationService.Object);
+
+			object result;
+			try
+			{
+				result = sut.ReceiptApprove(1, dataApproved);
+			}
+			catch (MaasgroepNotFound ex)
+			{
+				result = ex;
+			}
+			catch (Exception ex)
+			{
+				result = ex;
+			}
+
+			_ = result.Should().NotBeNull();
+			_ = result.Should().BeOfType<MaasgroepNotFound>();
+			_ = result.As<MaasgroepNotFound>().Message.Should().NotBeNull();
+			_ = result.As<MaasgroepNotFound>().Message.Should().Be($"Declaratie niet gevonden");
+		}
+
+		[Fact]
+		public void ReceiptApprove_LoggedIn_ReceiptExists_CreateNull_ThrowsMaasgroepBadRequestException()
+		{
+			SetAuthentication_PermissionCorrect("receipt.approve");
+
+			ReceiptApprovalData dataApproved = new()
+			{
+				Approved = true,
+				Note = "Champs 4 life",
+				ReceiptId = 1
+			};
+
+			Receipt getByIdReceipt = new()
+			{
+				Note = "test",
+				Amount = 1,
+				CostCentreId = 1
+			};
+
+
+			ReceiptApproval returnAproval = null;
+
+			receiptRepository.Setup(r => r.GetById(It.IsAny<long>(), It.IsAny<bool>())).Returns(getByIdReceipt);
+			receiptApprovalRepository.Setup(a => a.Create(dataApproved, It.IsAny<long>())).Returns(returnAproval);
+
+			var sut = new ReceiptController(receiptRepository.Object, receiptPhotoRepository.Object, receiptApprovalRepository.Object, maasgroepAuthenticationService.Object);
+
+			object result;
+			try
+			{
+				result = sut.ReceiptApprove(1, dataApproved);
+			}
+			catch (MaasgroepBadRequest ex)
+			{
+				result = ex;
+			}
+			catch (Exception ex)
+			{
+				result = ex;
+			}
+
+			_ = result.Should().NotBeNull();
+			_ = result.Should().BeOfType<MaasgroepBadRequest>();
+			_ = result.As<MaasgroepBadRequest>().Message.Should().NotBeNull();
+			_ = result.As<MaasgroepBadRequest>().Message.Should().Be($"Declaratie kon niet worden aangemaakt");
+		}
+
+		[Fact]
+		public void ReceiptApprove_LoggedIn_ReceiptExists_CreateOk_ReturnsOkResult()
+		{
+			SetAuthentication_PermissionCorrect("receipt.approve");
+
+			ReceiptApprovalData dataApproved = new()
+			{
+				Approved = true,
+				Note = "Champs 4 life",
+				ReceiptId = 1
+			};
+
+			Receipt getByIdReceipt = new()
+			{
+				Note = "test",
+				Amount = 1,
+				CostCentreId = 1
+			};
+
+
+			ReceiptApproval returnAproval = new()
+			{
+				Id = 89
+			};
+
+			ReceiptApprovalModel okModel = new()
+			{
+				Id = 9123
+			};
+
+
+			receiptRepository.Setup(r => r.GetById(It.IsAny<long>(), It.IsAny<bool>())).Returns(getByIdReceipt);
+			receiptApprovalRepository.Setup(a => a.Create(dataApproved, It.IsAny<long>())).Returns(returnAproval);
+			receiptApprovalRepository.Setup(a => a.GetModel(returnAproval)).Returns(okModel);
+
+			var sut = new ReceiptController(receiptRepository.Object, receiptPhotoRepository.Object, receiptApprovalRepository.Object, maasgroepAuthenticationService.Object);
+
+			object result;
+			try
+			{
+				result = sut.ReceiptApprove(1, dataApproved);
+			}
+			catch (Exception ex)
+			{
+				result = ex;
+			}
+
+			_ = result.Should().NotBeNull();
+			_ = result.Should().BeOfType<OkObjectResult>();
+			_ = result.As<OkObjectResult>().Value.Should().NotBeNull();
+			_ = result.As<OkObjectResult>().Value.Should().BeOfType<ReceiptApprovalModel>();
+			_ = result.As<OkObjectResult>().Value.As<ReceiptApprovalModel>().Id.Should().Be(9123);
+		}
+
+		#endregion
+
+		#region GetPayableReceipts
+
+		[Fact]
+		public void GetPayableReceipts_NotLoggedIn_ThrowsMaasgroepUnauthorizedException()
+		{
+			SetAuthentication_Unauthenticated();
+
+			var sut = new ReceiptController(receiptRepository.Object, receiptPhotoRepository.Object, receiptApprovalRepository.Object, maasgroepAuthenticationService.Object);
+
+			object result;
+			try
+			{
+				result = sut.GetPayableReceipts(1, 1, false);
+			}
+			catch (MaasgroepUnauthorized ex)
+			{
+				result = ex;
+			}
+			catch (Exception ex)
+			{
+				result = ex;
+			}
+
+			_ = result.Should().NotBeNull();
+			_ = result.Should().BeOfType<MaasgroepUnauthorized>();
+			_ = result.As<MaasgroepUnauthorized>().Message.Should().NotBeNull();
+			_ = result.As<MaasgroepUnauthorized>().Message.Should().Be($"Je bent niet ingelogd");
+		}
+
+		[Fact]
+		public void GetPayableReceipts_InvalidPermissions_ThrowsMaasgroepForbiddenException()
+		{
+			SetAuthentication_PermissionWrong();
+
+			var sut = new ReceiptController(receiptRepository.Object, receiptPhotoRepository.Object, receiptApprovalRepository.Object, maasgroepAuthenticationService.Object);
+
+			object result;
+			try
+			{
+				result = sut.GetPayableReceipts(1, 1, false);
+			}
+			catch (MaasgroepForbidden ex)
+			{
+				result = ex;
+			}
+			catch (Exception ex)
+			{
+				result = ex;
+			}
+
+			_ = result.Should().NotBeNull();
+			_ = result.Should().BeOfType<MaasgroepForbidden>();
+			_ = result.As<MaasgroepForbidden>().Message.Should().NotBeNull();
+			_ = result.As<MaasgroepForbidden>().Message.Should().Be($"Je hebt geen toegang tot dit onderdeel");
+		}
+
+		[Fact]
+		public void GetPayableReceipts_ValidPermissions_ReturnsOkResult()
+		{
+			SetAuthentication_PermissionCorrect("receipt.pay");
+
+			var okResult = new List<ReceiptModel>()
+			{ 
+				new ReceiptModel()
+				{
+					Id = 95889234
+				}
+			};
+
+			receiptRepository.Setup(r => r.ListPayable(It.IsAny<int>(), It.IsAny<int>(), false)).Returns(okResult);
+
+			var sut = new ReceiptController(receiptRepository.Object, receiptPhotoRepository.Object, receiptApprovalRepository.Object, maasgroepAuthenticationService.Object);
+
+			object result;
+			try
+			{
+				result = sut.GetPayableReceipts(1, 1, false);
+			}
+			catch (Exception ex)
+			{
+				result = ex;
+			}
+
+			_ = result.Should().NotBeNull();
+			_ = result.Should().BeOfType<OkObjectResult>();
+			_ = result.As<OkObjectResult>().Value.Should().NotBeNull();
+			_ = result.As<OkObjectResult>().Value.Should().BeOfType<List<ReceiptModel>>();
+			_ = result.As<OkObjectResult>().Value.As<List<ReceiptModel>>().Count.Should().Be(1);
+			_ = result.As<OkObjectResult>().Value.As<List<ReceiptModel>>().ElementAt(0).Should().BeOfType<ReceiptModel>();
+			_ = result.As<OkObjectResult>().Value.As<List<ReceiptModel>>().ElementAt(0).As<ReceiptModel>().Id.Should().Be(95889234);
+		}
+
+		#endregion
 
 
 		private void SetAuthentication_Unauthenticated()
