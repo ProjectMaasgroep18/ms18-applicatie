@@ -1,4 +1,4 @@
-﻿namespace ms18_applicatie.Models.team_a
+﻿namespace Maasgroep.Models.team_a
 {
     public class CalendarSettings
     {

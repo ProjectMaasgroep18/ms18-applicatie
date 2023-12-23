@@ -1,9 +1,9 @@
 ﻿using Maasgroep.Database;
 using Maasgroep.Database.Context.Tables.PhotoAlbum;
 using Microsoft.EntityFrameworkCore;
-using ms18_applicatie.Interfaces;
+using Maasgroep.Interfaces;
 
-namespace ms18_applicatie.Repository.PhotoAlbum;
+namespace Maasgroep.Repository.PhotoAlbum;
 
 public class PhotoRepository : IPhotoRepository
 {

@@ -2,13 +2,15 @@
 using Maasgroep.Database.Interfaces;
 using Maasgroep.SharedKernel.ViewModels.Receipts;
 using Maasgroep.SharedKernel.DataModels.Receipts;
+using Maasgroep.Services;
+using Maasgroep.Interfaces;
 
 namespace Maasgroep.Controllers.Api;
 
 public class ReceiptPhotoController : DeletableRepositoryController<IReceiptPhotoRepository, ReceiptPhoto, ReceiptPhotoModel, ReceiptPhotoData>
 {
     public override string ItemName { get => "Foto"; }
-    public ReceiptPhotoController(IReceiptPhotoRepository repository) : base(repository) {}
+    public ReceiptPhotoController(IReceiptPhotoRepository repository, IMaasgroepAuthenticationService maasgroepAuthenticationService) : base(repository, maasgroepAuthenticationService) {}
     
     protected override bool AllowList()
         => HasPermission("receipt.approve") || HasPermission("receipt.pay");

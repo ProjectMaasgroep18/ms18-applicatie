@@ -1,7 +1,7 @@
 ﻿using Google.Apis.Calendar.v3.Data;
-using ms18_applicatie.Controllers.team_a;
+using Maasgroep.Controllers.team_a;
 
-namespace ms18_applicatie.Models.team_a
+namespace Maasgroep.Models.team_a
 {
     public class CalendarEvent
     {

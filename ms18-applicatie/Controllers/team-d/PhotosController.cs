@@ -1,9 +1,9 @@
 ﻿using Maasgroep.Database.Context.Tables.PhotoAlbum;
 using Microsoft.AspNetCore.Mvc;
-using ms18_applicatie.Interfaces;
-using ms18_applicatie.Models.team_d;
+using Maasgroep.Interfaces;
+using Maasgroep.Models.team_d;
 
-namespace ms18_applicatie.Controllers.team_d;
+namespace Maasgroep.Controllers.team_d;
 
 [ApiController]
 [Route("api/photos")]

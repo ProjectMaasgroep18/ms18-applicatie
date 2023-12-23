@@ -2,6 +2,7 @@ using Maasgroep.Database;
 using Maasgroep.Exceptions;
 using Maasgroep.SharedKernel.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Maasgroep.Interfaces;
 
 namespace Maasgroep.Controllers.Api;
 
@@ -9,7 +10,7 @@ public abstract class WritableRepositoryController<TRepository, TRecord, TViewMo
 where TRepository : IWritableRepository<TRecord, TViewModel, TDataModel>
 where TRecord: GenericRecordActive
 {
-    public WritableRepositoryController(TRepository repository) : base(repository) {}
+    public WritableRepositoryController(TRepository repository, IMaasgroepAuthenticationService maasgroepAuthenticationService) : base(repository, maasgroepAuthenticationService) {}
     
     protected virtual bool AllowCreate(TDataModel data)
         => CurrentMember != null; // By default, all logged-in members are allowed to create items

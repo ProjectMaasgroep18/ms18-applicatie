@@ -1,6 +1,6 @@
 ﻿using Maasgroep.Database.Context.Tables.PhotoAlbum;
 
-namespace ms18_applicatie.Interfaces;
+namespace Maasgroep.Interfaces;
 
 public interface ITagsRepository
 {

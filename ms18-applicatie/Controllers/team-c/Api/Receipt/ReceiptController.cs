@@ -4,6 +4,7 @@ using Maasgroep.Database.Interfaces;
 using Maasgroep.SharedKernel.ViewModels.Receipts;
 using Maasgroep.SharedKernel.DataModels.Receipts;
 using Microsoft.AspNetCore.Mvc;
+using Maasgroep.Interfaces;
 
 namespace Maasgroep.Controllers.Api;
 
@@ -13,11 +14,11 @@ public class ReceiptController : EditableRepositoryController<IReceiptRepository
     protected readonly IReceiptApprovalRepository Approvals;
     public override string ItemName { get => "Declaratie"; }
 
-    public ReceiptController(IReceiptRepository repository, IReceiptPhotoRepository photos, IReceiptApprovalRepository approvals) : base(repository)
+    public ReceiptController(IReceiptRepository repository, IReceiptPhotoRepository photos, IReceiptApprovalRepository approvals, IMaasgroepAuthenticationService maasgroepAuthentication) : base(repository, maasgroepAuthentication)
     {
         Photos = photos;
         Approvals = approvals;
-    }
+	}
 
     protected override bool AllowList()
         => HasPermission("receipt.approve");

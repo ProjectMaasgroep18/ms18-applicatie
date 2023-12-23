@@ -2,6 +2,7 @@ using Maasgroep.Database;
 using Maasgroep.Exceptions;
 using Maasgroep.SharedKernel.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Maasgroep.Interfaces;
 
 namespace Maasgroep.Controllers.Api;
 
@@ -9,7 +10,7 @@ public abstract class DeletableRepositoryController<TRepository, TRecord, TViewM
 where TRepository : IDeletableRepository<TRecord, TViewModel, TDataModel>
 where TRecord: GenericRecordActive
 {
-    protected DeletableRepositoryController(TRepository repository) : base(repository) {}
+    protected DeletableRepositoryController(TRepository repository, IMaasgroepAuthenticationService maasgroepAuthenticationService) : base(repository, maasgroepAuthenticationService) {}
     protected virtual bool AllowDelete(TRecord? record)
         => CurrentMember != null && record?.MemberCreatedId == CurrentMember.Id; // By default, logged-in members are only allowed to delete their own items
 

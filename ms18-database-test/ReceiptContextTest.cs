@@ -5,7 +5,7 @@ using Maasgroep.Database.Test;
 using Microsoft.EntityFrameworkCore;
 using System.Text;
 
-namespace ms18_database_test
+namespace Maasgroep.Database.Test
 {
 	public class ReceiptContextTest : IClassFixture<MaasgroepTestFixture>
 	{

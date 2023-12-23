@@ -1,10 +1,10 @@
 ﻿using Google.Apis.Calendar.v3;
 using Google.Apis.Calendar.v3.Data;
 using Microsoft.AspNetCore.Mvc;
-using ms18_applicatie.Models.team_a;
+using Maasgroep.Models.team_a;
 using Microsoft.Extensions.Options;
 
-namespace ms18_applicatie.Controllers.team_a
+namespace Maasgroep.Controllers.team_a
 {
     [Route("Calendar")]
     public class CalendarController : Controller

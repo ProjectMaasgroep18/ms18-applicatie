@@ -1,5 +1,5 @@
 ﻿using Maasgroep.Database.Context.Tables.PhotoAlbum;
-using ms18_applicatie.Repository.PhotoAlbum;
+using Maasgroep.Repository.PhotoAlbum;
 
 namespace ms18_applicatie_test.team_d.Repository;
 public class AlbumRepositoryTests : BaseTestClass

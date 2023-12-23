@@ -1,5 +1,6 @@
 using Maasgroep.Database;
 using Maasgroep.Exceptions;
+using Maasgroep.Interfaces;
 using Maasgroep.SharedKernel.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -10,7 +11,7 @@ where TRepository : IEditableRepository<TRecord, TViewModel, TDataModel, THistor
 where TRecord: GenericRecordActive
 where THistory: GenericRecordHistory
 {
-    protected EditableRepositoryController(TRepository repository) : base(repository) {}
+    protected EditableRepositoryController(TRepository repository, IMaasgroepAuthenticationService maasgroepAuthenticationService) : base(repository, maasgroepAuthenticationService) {}
 
     protected virtual bool AllowEdit(TRecord record, TDataModel data)
         => AllowDelete(record); // By default, same as delete (i.e., only allowed to delete their own items)

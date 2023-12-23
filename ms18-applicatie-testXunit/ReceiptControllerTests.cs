@@ -1,646 +1,547 @@
-﻿using Maasgroep.SharedKernel.Interfaces.Receipts;
-using Moq;
-using ms18_applicatie.Services;
-using ms18_applicatie.Controllers.Api;
+﻿using Moq;
 using FluentAssertions;
-using Microsoft.AspNetCore.Mvc;
-using Maasgroep.SharedKernel.ViewModels.Receipts;
+using Maasgroep.Controllers.Api;
+using Maasgroep.Interfaces;
+using Maasgroep.Database.Interfaces;
+using Maasgroep.SharedKernel.DataModels.Receipts;
 using Maasgroep.SharedKernel.ViewModels.Admin;
+using Microsoft.AspNetCore.Mvc;
+using Maasgroep.Exceptions;
+using Maasgroep.SharedKernel.ViewModels.Receipts;
+using Maasgroep.Database.Receipts;
 
 namespace ms18_applicatie_test
 {
 	public class ReceiptControllerTests
 	{
+		/*
+		Methodes te testen;
+		- ReceiptAddPhoto		ReceiptController
+		- ReceiptGetPhotos		ReceiptController
+		- ReceiptGetApprovals	ReceiptController
+		- ReceiptApprove		ReceiptController
+		- GetPayableReceipts	ReceiptController
+		*/
 
-		#region ReceiptGet
-		[Fact]
-		public void Access_ReceiptGet_Without_Authentication_Is_ForbidResult()
+		Mock<IReceiptStatusRepository> receiptStatusRepository;
+		Mock<ICostCentreRepository> costCentreRepository;
+		Mock<IMemberRepository> memberRepository;
+		Mock<IReceiptRepository> receiptRepository;
+		Mock<IReceiptPhotoRepository> receiptPhotoRepository;
+		Mock<IReceiptApprovalRepository> receiptApprovalRepository;
+		Mock<IMaasgroepAuthenticationService> maasgroepAuthenticationService;
+
+		public ReceiptControllerTests()
 		{
-			var receiptRepository = new Mock<IReceiptRepository>();
-			var memberService = new Mock<IMemberService>();
+			receiptStatusRepository = new Mock<IReceiptStatusRepository>();
+			costCentreRepository = new Mock<ICostCentreRepository>();
+			memberRepository = new Mock<IMemberRepository>();
+			receiptRepository = new Mock<IReceiptRepository>();
+			receiptPhotoRepository = new Mock<IReceiptPhotoRepository>();
+			receiptApprovalRepository = new Mock<IReceiptApprovalRepository>();
+			maasgroepAuthenticationService = new Mock<IMaasgroepAuthenticationService>();
+		}
+		
 
-			var sut = new ReceiptController(receiptRepository.Object, memberService.Object);
+		#region RepositoryGet
 
-			var result = sut.ReceiptGet();
+		[Fact]
+		public void RepositoryGet_ValidMemberPermission_GivesOkResult()
+		{
+			SetAuthentication_PermissionCorrect("receipt.approve");
+
+			var sut = new ReceiptController(receiptRepository.Object, receiptPhotoRepository.Object, receiptApprovalRepository.Object, maasgroepAuthenticationService.Object);
+
+			var result = sut.RepositoryGet();
 
 			_ = result.Should().NotBeNull();
-			_ = result.Should().BeOfType<ForbidResult>();
-			_ = result.As<ForbidResult>().AuthenticationSchemes.Should().BeEquivalentTo("Je hebt geen toegang tot deze functie");
 		}
 
 		[Fact]
-		public void Access_ReceiptGet_With_Authentication_With_Receipts_Null_Gives_NotFoundObject()
+		public void RepositoryGet_InValidMemberPermission_ThrowsMaasgroepForbiddenError()
 		{
-			var receiptRepository = new Mock<IReceiptRepository>();
-			var memberService = new Mock<IMemberService>();
-			_ = memberService.Setup(p => p.MemberExists(It.IsAny<long>())).Returns(true);
-			_ = receiptRepository.Setup(r => r.GetReceipts(It.IsAny<int>(), It.IsAny<int>())).Returns<IEnumerable<ReceiptModel>>(null);
+			SetAuthentication_PermissionWrong();
 
-			var sut = new ReceiptController(receiptRepository.Object, memberService.Object);
+			var sut = new ReceiptController(receiptRepository.Object, receiptPhotoRepository.Object, receiptApprovalRepository.Object, maasgroepAuthenticationService.Object);
 
-			var result = sut.ReceiptGet();
+			object result;
+			try
+			{
+				result = sut.RepositoryGet();
+			}
+			catch (MaasgroepForbidden forbidden)
+			{
+				result = forbidden;
+			}
+			catch (Exception ex)
+			{
+				result = ex;
+			}
 
 			_ = result.Should().NotBeNull();
-			_ = result.Should().BeOfType<NotFoundObjectResult>();
-			_ = result.As<NotFoundObjectResult>().StatusCode.Should().Be(404);
-			_ = result.As<NotFoundObjectResult>().Value.Should().BeEquivalentTo(
-				new
-				{
-					status = 404,
-					message = "Receipt not found"
-				}
-				);
+			_ = result.Should().BeOfType<MaasgroepForbidden>();
+			_ = result.As<MaasgroepForbidden>().Message.Should().NotBeNull();
+			_ = result.As<MaasgroepForbidden>().Message.Should().Be("Je hebt geen toegang tot dit onderdeel");
 		}
 
 		[Fact]
-		public void Access_ReceiptGet_With_Authentication_With_Receipts_Zero_Gives_Ok()
+		public void RepositoryGet_NotLoggedIn_ThrowsMaasgroepUnauthorizedException()
 		{
-			var receiptRepository = new Mock<IReceiptRepository>();
-			var memberService = new Mock<IMemberService>();
-			_ = memberService.Setup(p => p.MemberExists(It.IsAny<long>())).Returns(true);
-			_ = receiptRepository.Setup(r => r.GetReceipts(It.IsAny<int>(), It.IsAny<int>())).Returns(new Mock<List<ReceiptModel>>().Object);
+			SetAuthentication_Unauthenticated();
 
-			var sut = new ReceiptController(receiptRepository.Object, memberService.Object);
+			var sut = new ReceiptController(receiptRepository.Object, receiptPhotoRepository.Object, receiptApprovalRepository.Object, maasgroepAuthenticationService.Object);
 
-			var result = sut.ReceiptGet(); //Count van de lijst is null, maar komt nu nog door.
+			object result;
+			try
+			{
+				result = sut.RepositoryGet();
+			}
+			catch (MaasgroepUnauthorized forbidden)
+			{
+				result = forbidden;
+			}
+			catch (Exception ex)
+			{
+				result = ex;
+			}
 
 			_ = result.Should().NotBeNull();
-			_ = result.Should().BeOfType<OkObjectResult>();
-			_ = result.As<OkObjectResult>().StatusCode.Should().Be(200);
-		}
-
-		[Fact]
-		public void Access_ReceiptGet_With_Authentication_With_Receipts_OneOrMore_Gives_Ok()
-		{
-			var receiptRepository = new Mock<IReceiptRepository>();
-			var memberService = new Mock<IMemberService>();
-			_ = memberService.Setup(p => p.MemberExists(It.IsAny<long>())).Returns(true);
-			_ = receiptRepository.Setup(r => r.GetReceipts(It.IsAny<int>(), It.IsAny<int>())).Returns(new List<ReceiptModel>() { new Mock<ReceiptModel>().Object, new Mock<ReceiptModel>().Object });
-
-			var sut = new ReceiptController(receiptRepository.Object, memberService.Object);
-
-			var result = sut.ReceiptGet(); //Count van de lijst is null, maar komt nu nog door.
-
-			_ = result.Should().NotBeNull();
-			_ = result.Should().BeOfType<OkObjectResult>();
-			_ = result.As<OkObjectResult>().StatusCode.Should().Be(200);
-		}
-
-		#endregion
-
-		#region ReceiptGetById
-		[Fact]
-		public void Access_ReceiptGetById_Without_Authentication_Is_ForbidResult()
-		{
-			var receiptRepository = new Mock<IReceiptRepository>();
-			var memberService = new Mock<IMemberService>();
-
-			var sut = new ReceiptController(receiptRepository.Object, memberService.Object);
-
-			var result = sut.ReceiptGetById(It.IsAny<int>());
-
-			_ = result.Should().NotBeNull();
-			_ = result.Should().BeOfType<ForbidResult>();
-			_ = result.As<ForbidResult>().AuthenticationSchemes.Should().BeEquivalentTo("Je hebt geen toegang tot deze functie");
-		}
-
-		[Fact]
-		public void Access_ReceiptGetById_With_Authentication_With_Receipt_Null_Gives_NotFoundObject()
-		{
-			var receiptRepository = new Mock<IReceiptRepository>();
-			var memberService = new Mock<IMemberService>();
-			_ = memberService.Setup(p => p.MemberExists(It.IsAny<long>())).Returns(true);
-			_ = receiptRepository.Setup(r => r.GetReceipt(It.IsAny<int>())).Returns<ReceiptModel>(null);
-
-			var sut = new ReceiptController(receiptRepository.Object, memberService.Object);
-
-			var result = sut.ReceiptGetById(It.IsAny<int>());
-
-			_ = result.Should().NotBeNull();
-			_ = result.Should().BeOfType<NotFoundObjectResult>();
-			_ = result.As<NotFoundObjectResult>().StatusCode.Should().Be(404);
-			_ = result.As<NotFoundObjectResult>().Value.Should().BeEquivalentTo(
-				new
-				{
-					status = 404,
-					message = "Receipt not found"
-				}
-				);
-		}
-
-		[Fact]
-		public void Access_ReceiptGetById_With_Authentication_With_Receipt_Found_Gives_Ok()
-		{
-			var receiptRepository = new Mock<IReceiptRepository>();
-			var memberService = new Mock<IMemberService>();
-			_ = memberService.Setup(p => p.MemberExists(It.IsAny<long>())).Returns(true);
-			_ = receiptRepository.Setup(r => r.GetReceipt(It.IsAny<long>())).Returns(new ReceiptModel());
-
-			var sut = new ReceiptController(receiptRepository.Object, memberService.Object);
-
-			var result = sut.ReceiptGetById(It.IsAny<int>()); //Count van de lijst is null, maar komt nu nog door.
-
-			_ = result.Should().NotBeNull();
-			_ = result.Should().BeOfType<OkObjectResult>();
-		}
-		#endregion
-
-		#region ReceiptCreate
-
-		[Fact]
-		public void Access_ReceiptCreate_Without_Authentication_Is_ForbidResult()
-		{
-			var receiptRepository = new Mock<IReceiptRepository>();
-			var memberService = new Mock<IMemberService>();
-
-			var sut = new ReceiptController(receiptRepository.Object, memberService.Object);
-
-			var result = sut.ReceiptCreate(new Mock<ReceiptModelCreate>().Object);
-
-			_ = result.Should().NotBeNull();
-			_ = result.Should().BeOfType<ForbidResult>();
-			_ = result.As<ForbidResult>().AuthenticationSchemes.Should().BeEquivalentTo("Je hebt geen toegang tot deze functie");
-		}
-
-		[Fact]
-		public void Access_ReceiptCreate_With_Authentication_Invalid_Model_Is_BadRequest()
-		{
-			var receiptRepository = new Mock<IReceiptRepository>();
-			var memberService = new Mock<IMemberService>();
-			_ = memberService.Setup(p => p.MemberExists(It.IsAny<long>())).Returns(true);
-
-
-			var sut = new ReceiptController(receiptRepository.Object, memberService.Object);
-			sut.ModelState.AddModelError("blaat", "kapot!");
-
-			var result = sut.ReceiptCreate(new Mock<ReceiptModelCreate>().Object);
-
-			_ = result.Should().NotBeNull();
-			_ = result.Should().BeOfType<BadRequestObjectResult>();
-			_ = result.As<BadRequestObjectResult>().Value.Should().BeEquivalentTo(
-				new
-				{
-					status = 400,
-					message = "Invalid request body"
-				}
-				);
-		}
-
-		[Fact]
-		public void Access_ReceiptCreate_With_Authentication_Valid_Model_Add_Returns_Ok()
-		{
-			var receiptRepository = new Mock<IReceiptRepository>();
-			var memberService = new Mock<IMemberService>();
-			_ = memberService.Setup(p => p.MemberExists(It.IsAny<long>())).Returns(true);
-			_ = memberService.Setup(p => p.GetMember(It.IsAny<long>())).Returns(new Mock<MemberModel>().Object);
-			_ = receiptRepository.Setup(p => p.Add(new Mock<ReceiptModelCreateDb>().Object)).Returns(-1L);
-
-			var sut = new ReceiptController(receiptRepository.Object, memberService.Object);
-
-			var result = sut.ReceiptCreate(new Mock<ReceiptModelCreate>().Object);
-
-			_ = result.Should().NotBeNull();
-			_ = result.Should().BeOfType<OkObjectResult>();
-			_ = result.As<OkObjectResult>().StatusCode.Should().Be(200);
-		}
-		#endregion
-
-		#region ReceiptUpdate
-		[Fact]
-		public void Access_ReceiptUpdate_Without_Authentication_Is_ForbidResult()
-		{
-			var receiptRepository = new Mock<IReceiptRepository>();
-			var memberService = new Mock<IMemberService>();
-
-			var sut = new ReceiptController(receiptRepository.Object, memberService.Object);
-
-			var result = sut.ReceiptUpdate(new Mock<ReceiptModel>().Object);
-
-			_ = result.Should().NotBeNull();
-			_ = result.Should().BeOfType<ForbidResult>();
-			_ = result.As<ForbidResult>().AuthenticationSchemes.Should().BeEquivalentTo("Je hebt geen toegang tot deze functie");
-		}
-
-		[Fact]
-		public void Access_ReceiptUpdate_With_Authentication_Invalid_Model_Is_BadRequest()
-		{
-			var receiptRepository = new Mock<IReceiptRepository>();
-			var memberService = new Mock<IMemberService>();
-			_ = memberService.Setup(p => p.MemberExists(It.IsAny<long>())).Returns(true);
-
-			var sut = new ReceiptController(receiptRepository.Object, memberService.Object);
-			sut.ModelState.AddModelError("blaat", "kapot!");
-
-			var result = sut.ReceiptUpdate(new Mock<ReceiptModel>().Object);
-
-			_ = result.Should().NotBeNull();
-			_ = result.Should().BeOfType<BadRequestObjectResult>();
-			_ = result.As<BadRequestObjectResult>().Value.Should().BeEquivalentTo(
-				new
-				{
-					status = 400,
-					message = "Invalid request body"
-				}
-				);
-		}
-
-		[Fact]
-		public void Access_ReceiptUpdate_With_Authentication_Valid_Model_Add_Returns_Ok()
-		{
-			var receiptRepository = new Mock<IReceiptRepository>();
-			var memberService = new Mock<IMemberService>();
-			_ = memberService.Setup(p => p.MemberExists(It.IsAny<long>())).Returns(true);
-			_ = memberService.Setup(p => p.GetMember(It.IsAny<long>())).Returns(new Mock<MemberModel>().Object);
-			_ = receiptRepository.Setup(p => p.Modify(new Mock<ReceiptModelUpdateDb>().Object)).Returns(false);
-
-			var sut = new ReceiptController(receiptRepository.Object, memberService.Object);
-
-			var result = sut.ReceiptUpdate(new Mock<ReceiptModel>().Object);
-
-			_ = result.Should().NotBeNull();
-			_ = result.Should().BeOfType<OkObjectResult>();
-			_ = result.As<OkObjectResult>().StatusCode.Should().Be(200);
+			_ = result.Should().BeOfType<MaasgroepUnauthorized>();
+			_ = result.As<MaasgroepUnauthorized>().Message.Should().Be("Je bent niet ingelogd");
 		}
 
 		#endregion
 
-		#region ReceiptDelete
+		#region RepositoryGetById
 
 		[Fact]
-		public void Access_ReceiptDelete_Without_Authentication_Is_ForbidResult()
+		public void RepositoryGetById_ValidMemberPermission_ExistingReceipt_GivesOkResult()
 		{
-			var receiptRepository = new Mock<IReceiptRepository>();
-			var memberService = new Mock<IMemberService>();
+			SetAuthentication_PermissionCorrect("receipt.approve");
 
-			var sut = new ReceiptController(receiptRepository.Object, memberService.Object);
+			var receipt = new Receipt()
+			{ 
+				Amount = 1,
+				Id = 1,
+				CostCentreId = 1,
+				DateTimeCreated = DateTime.Now,
+				MemberCreatedId = 1,
+				Note = "empty note, or is it"
+			};
 
-			var result = sut.ReceiptGet();
+			receiptRepository.Setup(r => r.GetById(It.IsAny<long>(), false)).Returns(receipt);
+
+			var sut = new ReceiptController(receiptRepository.Object, receiptPhotoRepository.Object, receiptApprovalRepository.Object, maasgroepAuthenticationService.Object);
+
+			var result = sut.RepositoryGetById(1);
 
 			_ = result.Should().NotBeNull();
-			_ = result.Should().BeOfType<ForbidResult>();
-			_ = result.As<ForbidResult>().AuthenticationSchemes.Should().BeEquivalentTo("Je hebt geen toegang tot deze functie");
+			_ = result.Should().BeOfType<OkObjectResult>();
 		}
 
 		[Fact]
-		public void Access_ReceiptDelete_With_Authentication_Receipt_NotFound_Returns_NotFound()
+		public void RepositoryGetById_InvalidMemberPermission_ExistingReceipt_ThrowsMaasgroepForbiddenError()
 		{
-			var receiptRepository = new Mock<IReceiptRepository>();
-			var memberService = new Mock<IMemberService>();
-			_ = memberService.Setup(p => p.MemberExists(It.IsAny<long>())).Returns(true);
-			_ = receiptRepository.Setup(r => r.GetReceipt(It.IsAny<int>())).Returns<ReceiptModel>(null);
+			SetAuthentication_PermissionWrong();
 
-			var sut = new ReceiptController(receiptRepository.Object, memberService.Object);
+			var receipt = new Receipt()
+			{
+				Amount = 1,
+				Id = 1,
+				CostCentreId = 1,
+				DateTimeCreated = DateTime.Now,
+				MemberCreatedId = 3,
+				Note = "empty note, or is it"
+			};
 
-			var result = sut.ReceiptDelete(It.IsAny<long>());
+			receiptRepository.Setup(r => r.GetById(It.IsAny<long>(), false)).Returns(receipt);
+
+			var sut = new ReceiptController(receiptRepository.Object, receiptPhotoRepository.Object, receiptApprovalRepository.Object, maasgroepAuthenticationService.Object);
+
+			object result;
+			try
+			{
+				result = sut.RepositoryGetById(1);
+			}
+			catch (MaasgroepForbidden ex)
+			{
+				result = ex;
+			}
+			catch (Exception ex)
+			{
+				result = ex;
+			}
 
 			_ = result.Should().NotBeNull();
-			_ = result.Should().BeOfType<NotFoundObjectResult>();
-			_ = result.As<NotFoundObjectResult>().StatusCode.Should().Be(404);
-			_ = result.As<NotFoundObjectResult>().Value.Should().BeEquivalentTo(
-				new
-				{
-					status = 404,
-					message = "Receipt not found"
-				}
-				);
+			_ = result.Should().BeOfType<MaasgroepForbidden>();
+			_ = result.As<MaasgroepForbidden>().Message.Should().NotBeNull();
+			_ = result.As<MaasgroepForbidden>().Message.Should().Be("Je hebt geen toegang tot dit onderdeel");
 		}
 
 		[Fact]
-		public void Access_ReceiptDelete_With_Authentication_Delete_Attempt_False_Returns_Ok()
+		public void RepositoryGetById_InvalidMemberPermission_OwnsReceipt_GivesOkResult()
 		{
-			var receiptRepository = new Mock<IReceiptRepository>();
-			var memberService = new Mock<IMemberService>();
-			_ = memberService.Setup(p => p.MemberExists(It.IsAny<long>())).Returns(true);
-			_ = receiptRepository.Setup(r => r.GetReceipt(It.IsAny<long>())).Returns(new Mock<ReceiptModel>().Object);
-			_ = receiptRepository.Setup(r => r.Delete(It.IsAny<ReceiptModelDeleteDb>())).Returns(false);
+			SetAuthentication_PermissionWrong();
 
-			var sut = new ReceiptController(receiptRepository.Object, memberService.Object);
+			var receipt = new Receipt()
+			{
+				Amount = 1,
+				Id = 1,
+				CostCentreId = 1,
+				DateTimeCreated = DateTime.Now,
+				MemberCreatedId = 1,
+				Note = "MemberCreated = Member Authenticated"
+			};
 
-			var result = sut.ReceiptDelete(It.IsAny<long>());
+			var receiptModel = new ReceiptModel()
+			{
+				Amount = 1,
+				Id = 1,
+				DateTimeCreated = DateTime.Now,
+				MemberCreated = null,
+				CostCentre = null,
+				Note = "Test geslaagd :)"
+			};
+
+			receiptRepository.Setup(r => r.GetById(It.IsAny<long>(), false)).Returns(receipt);
+			receiptRepository.Setup(r => r.GetModel(receipt)).Returns(receiptModel);
+
+			var sut = new ReceiptController(receiptRepository.Object, receiptPhotoRepository.Object, receiptApprovalRepository.Object, maasgroepAuthenticationService.Object);
+
+			object result;
+			try
+			{
+				result = sut.RepositoryGetById(1);
+			}
+			catch (Exception ex)
+			{
+				result = ex;
+			}
 
 			_ = result.Should().NotBeNull();
-			_ = result.Should().BeOfType<NoContentResult>();
-			_ = result.As<NoContentResult>().StatusCode.Should().Be(204);
+			_ = result.Should().BeOfType<OkObjectResult>();
+			_ = result.As<OkObjectResult>().Value.Should().NotBeNull();
+			_ = result.As<OkObjectResult>().Value.Should().BeOfType<ReceiptModel>();
+			_ = result.As<OkObjectResult>().Value.As<ReceiptModel>().Note.Should().Be("Test geslaagd :)");
 		}
 
 		[Fact]
-		public void Access_ReceiptDelete_With_Authentication_Delete_Attempt_Exception_Returns_Conflict()
+		public void RepositoryGetById_InvalidMemberPermission_NullReceipt_ThrowsMaasgroepForbiddenError()
 		{
-			var receiptRepository = new Mock<IReceiptRepository>();
-			var memberService = new Mock<IMemberService>();
-			_ = memberService.Setup(p => p.MemberExists(It.IsAny<long>())).Returns(true);
-			_ = receiptRepository.Setup(r => r.GetReceipt(It.IsAny<long>())).Returns(new Mock<ReceiptModel>().Object);
-			_ = receiptRepository.Setup(r => r.Delete(It.IsAny<ReceiptModelDeleteDb>())).Throws(new Exception());
+			SetAuthentication_PermissionWrong();
 
-			var sut = new ReceiptController(receiptRepository.Object, memberService.Object);
+			Receipt receipt = null;
 
-			var result = sut.ReceiptDelete(It.IsAny<long>());
+			receiptRepository.Setup(r => r.GetById(It.IsAny<long>(), false)).Returns(receipt);
+
+			var sut = new ReceiptController(receiptRepository.Object, receiptPhotoRepository.Object, receiptApprovalRepository.Object, maasgroepAuthenticationService.Object);
+
+			object result;
+			try
+			{
+				result = sut.RepositoryGetById(1);
+			}
+			catch (MaasgroepForbidden ex)
+			{
+				result = ex;
+			}
+			catch (Exception ex)
+			{
+				result = ex;
+			}
 
 			_ = result.Should().NotBeNull();
-			_ = result.Should().BeOfType<ConflictObjectResult>();
-			_ = result.As<ConflictObjectResult>().StatusCode.Should().Be(409);
-			_ = result.As<ConflictObjectResult>().Value.Should().BeEquivalentTo(
-				new
-				{
-					status = 409,
-					message = "Declaratie kon niet worden verwijderd" // TODO Check which dependency is causing the conflict
-				}
-				);
+			_ = result.Should().BeOfType<MaasgroepForbidden>();
+			_ = result.As<MaasgroepForbidden>().Message.Should().NotBeNull();
+			_ = result.As<MaasgroepForbidden>().Message.Should().Be("Je hebt geen toegang tot dit onderdeel");
 		}
 
 		[Fact]
-		public void Access_ReceiptDelete_With_Authentication_Delete_Attempt_Successful_Return_NoContent()
+		public void RepositoryGetById_ValidMemberPermission_NullReceipt_ThrowsMaasgroepNotFoundException()
 		{
-			var receiptRepository = new Mock<IReceiptRepository>();
-			var memberService = new Mock<IMemberService>();
-			_ = memberService.Setup(p => p.MemberExists(It.IsAny<long>())).Returns(true);
-			_ = receiptRepository.Setup(r => r.GetReceipt(It.IsAny<long>())).Returns(new Mock<ReceiptModel>().Object);
-			_ = receiptRepository.Setup(r => r.Delete(It.IsAny<ReceiptModelDeleteDb>())).Returns(true);
+			SetAuthentication_PermissionCorrect("receipt.approve");
 
-			var sut = new ReceiptController(receiptRepository.Object, memberService.Object);
+			Receipt receipt = null;
 
-			var result = sut.ReceiptDelete(It.IsAny<long>());
+			receiptRepository.Setup(r => r.GetById(It.IsAny<long>(), false)).Returns(receipt);
+
+			var sut = new ReceiptController(receiptRepository.Object, receiptPhotoRepository.Object, receiptApprovalRepository.Object, maasgroepAuthenticationService.Object);
+
+			object result;
+			try
+			{
+				result = sut.RepositoryGetById(1);
+			}
+			catch (MaasgroepNotFound ex)
+			{
+				result = ex;
+			}
+			catch (Exception ex)
+			{
+				result = ex;
+			}
 
 			_ = result.Should().NotBeNull();
-			_ = result.Should().BeOfType<NoContentResult>();
+			_ = result.Should().BeOfType<MaasgroepNotFound>();
+			_ = result.As<MaasgroepNotFound>().Message.Should().NotBeNull();
+			_ = result.As<MaasgroepNotFound>().Message.Should().Be($"Declaratie niet gevonden");
+		}
+
+		[Fact]
+		public void RepositoryGetById_NotLoggedIn_ExistingReceipt_ThrowsMaasgroepUnauthorizedException()
+		{
+			SetAuthentication_Unauthenticated();
+
+			var receipt = new Receipt()
+			{
+				Amount = 1,
+				Id = 1,
+				CostCentreId = 1,
+				DateTimeCreated = DateTime.Now,
+				MemberCreatedId = 3,
+				Note = "empty note, or is it"
+			};
+
+			receiptRepository.Setup(r => r.GetById(It.IsAny<long>(), false)).Returns(receipt);
+
+			var sut = new ReceiptController(receiptRepository.Object, receiptPhotoRepository.Object, receiptApprovalRepository.Object, maasgroepAuthenticationService.Object);
+
+			object result;
+			try
+			{
+				result = sut.RepositoryGetById(1);
+			}
+			catch (MaasgroepUnauthorized ex)
+			{
+				result = ex;
+			}
+			catch (Exception ex)
+			{
+				result = ex;
+			}
+
+			_ = result.Should().NotBeNull();
+			_ = result.Should().BeOfType<MaasgroepUnauthorized>();
+			_ = result.As<MaasgroepUnauthorized>().Message.Should().NotBeNull();
+			_ = result.As<MaasgroepUnauthorized>().Message.Should().Be("Je bent niet ingelogd");
 		}
 
 		#endregion
 
-		#region ReceiptAddPhoto
+		#region RepositoryCreate
 
 		[Fact]
-		public void Access_ReceiptAddPhoto_Without_Authentication_Is_ForbidResult()
+		public void RepositoryCreate_NotLoggedIn_ThrowsMaasgroepUnauthorizedException()
 		{
-			var receiptRepository = new Mock<IReceiptRepository>();
-			var memberService = new Mock<IMemberService>();
+			SetAuthentication_Unauthenticated();
 
-			var sut = new ReceiptController(receiptRepository.Object, memberService.Object);
+			ReceiptData receipt = null;
 
-			var result = sut.ReceiptGet();
+			var sut = new ReceiptController(receiptRepository.Object, receiptPhotoRepository.Object, receiptApprovalRepository.Object, maasgroepAuthenticationService.Object);
+
+			object result;
+			try
+			{
+				result = sut.RepositoryCreate(receipt);
+			}
+			catch (MaasgroepUnauthorized ex)
+			{
+				result = ex;
+			}
+			catch (Exception ex)
+			{
+				result = ex;
+			}
 
 			_ = result.Should().NotBeNull();
-			_ = result.Should().BeOfType<ForbidResult>();
-			_ = result.As<ForbidResult>().AuthenticationSchemes.Should().BeEquivalentTo("Je hebt geen toegang tot deze functie");
+			_ = result.Should().BeOfType<MaasgroepUnauthorized>();
+			_ = result.As<MaasgroepUnauthorized>().Message.Should().NotBeNull();
+			_ = result.As<MaasgroepUnauthorized>().Message.Should().Be("Je bent niet ingelogd");
 		}
 
 		[Fact]
-		public void Access_ReceiptAddPhoto_With_Authentication_Invalid_Model_Is_BadRequest()
+		public void RepositoryCreate_InvalidMemberPermission_ThrowsMaasgroepForbiddenException()
 		{
-			var receiptRepository = new Mock<IReceiptRepository>();
-			var memberService = new Mock<IMemberService>();
-			_ = memberService.Setup(p => p.MemberExists(It.IsAny<long>())).Returns(true);
+			SetAuthentication_PermissionWrong();
 
-			var sut = new ReceiptController(receiptRepository.Object, memberService.Object);
-			sut.ModelState.AddModelError("blaat", "kapot!");
+			ReceiptData receipt = null;
 
-			var result = sut.ReceiptAddPhoto(It.IsAny<long>(), new Mock<PhotoModelCreate>().Object);
+			var sut = new ReceiptController(receiptRepository.Object, receiptPhotoRepository.Object, receiptApprovalRepository.Object, maasgroepAuthenticationService.Object);
+
+			object result;
+			try
+			{
+				result = sut.RepositoryCreate(receipt);
+			}
+			catch (MaasgroepForbidden ex)
+			{
+				result = ex;
+			}
+			catch (Exception ex)
+			{
+				result = ex;
+			}
 
 			_ = result.Should().NotBeNull();
-			_ = result.Should().BeOfType<BadRequestObjectResult>();
-			_ = result.As<BadRequestObjectResult>().Value.Should().BeEquivalentTo(
-				new
-				{
-					status = 400,
-					message = "Invalid request body"
-				}
-				);
+			_ = result.Should().BeOfType<MaasgroepForbidden>();
+			_ = result.As<MaasgroepForbidden>().Message.Should().NotBeNull();
+			_ = result.As<MaasgroepForbidden>().Message.Should().Be("Je hebt geen toegang tot dit onderdeel");
 		}
 
 		[Fact]
-		public void Access_ReceiptAddPhoto_With_Authentication_GetReceipt_Null_Is_NotFound()
+		public void RepositoryCreate_ValidMemberPermission_NoData_ThrowsMaasgroepBadRequestException()
 		{
-			var receiptRepository = new Mock<IReceiptRepository>();
-			var memberService = new Mock<IMemberService>();
-			_ = memberService.Setup(p => p.MemberExists(It.IsAny<long>())).Returns(true);
-			_ = receiptRepository.Setup(p => p.GetReceipt(It.IsAny<long>())).Returns<ReceiptModel>(null);
+			SetAuthentication_PermissionCorrect("receipt");
 
-			var sut = new ReceiptController(receiptRepository.Object, memberService.Object);
+			ReceiptData receipt = null;
 
-			var result = sut.ReceiptAddPhoto(It.IsAny<long>(), new Mock<PhotoModelCreate>().Object);
+			var sut = new ReceiptController(receiptRepository.Object, receiptPhotoRepository.Object, receiptApprovalRepository.Object, maasgroepAuthenticationService.Object);
+
+			object result;
+			try
+			{
+				result = sut.RepositoryCreate(receipt);
+			}
+			catch (MaasgroepBadRequest ex)
+			{
+				result = ex;
+			}
+			catch (Exception ex)
+			{
+				result = ex;
+			}
 
 			_ = result.Should().NotBeNull();
-			_ = result.Should().BeOfType<NotFoundObjectResult>();
-			_ = result.As<NotFoundObjectResult>().StatusCode.Should().Be(404);
-			_ = result.As<NotFoundObjectResult>().Value.Should().BeEquivalentTo(
-				new
-				{
-					status = 404,
-					message = "Receipt not found"
-				});
+			_ = result.Should().BeOfType<MaasgroepBadRequest>();
+			_ = result.As<MaasgroepBadRequest>().Message.Should().NotBeNull();
+			_ = result.As<MaasgroepBadRequest>().Message.Should().Be("Declaratie kon niet worden aangemaakt");
 		}
 
 		[Fact]
-		public void Access_ReceiptAddPhoto_With_Authentication_GetReceipt_Found_Is_CreatedResult()
+		public void RepositoryCreate_ValidMemberPermission_ValidData_ThrowsMaasgroepBadRequestException()
 		{
-			var receiptRepository = new Mock<IReceiptRepository>();
-			var memberService = new Mock<IMemberService>();
-			var photoExpected = It.IsAny<PhotoModel>();
-			_ = memberService.Setup(p => p.MemberExists(It.IsAny<long>())).Returns(true);
-			_ = receiptRepository.Setup(p => p.GetReceipt(It.IsAny<long>())).Returns(new Mock<ReceiptModel>().Object);
-			_ = receiptRepository.Setup(p => p.Add(new Mock<PhotoModelCreateDb>().Object)).Returns(It.IsAny<long>());
-			_ = receiptRepository.Setup(p => p.GetPhoto(It.IsAny<long>())).Returns(photoExpected);
+			SetAuthentication_PermissionCorrect("receipt");
 
-			var sut = new ReceiptController(receiptRepository.Object, memberService.Object);
+			Receipt returnedData = new()
+			{
+				Amount = 1,
+				Id = 20
+			};
 
-			var result = sut.ReceiptAddPhoto(It.IsAny<long>(), new Mock<PhotoModelCreate>().Object);
+			ReceiptModel returnedView = new()
+			{ 
+				Amount = 1,
+				Id = 20,
+				Note = "Test geslaagd"
+			};
+
+			receiptRepository.Setup(r => r.Create(It.IsAny<ReceiptData>(), 1)).Returns(returnedData);
+			receiptRepository.Setup(r => r.GetModel(It.IsAny<Receipt>())).Returns(returnedView);
+
+			ReceiptData receipt = new()
+			{
+				Amount = 1,
+				CostCentreId = 1
+			};
+
+			var sut = new ReceiptController(receiptRepository.Object, receiptPhotoRepository.Object, receiptApprovalRepository.Object, maasgroepAuthenticationService.Object);
+
+			object result;
+			try
+			{
+				result = sut.RepositoryCreate(receipt);
+			}
+			catch (Exception ex)
+			{
+				result = ex;
+			}
 
 			_ = result.Should().NotBeNull();
+			// Routedata kan niet benaderd
 			_ = result.Should().BeOfType<CreatedResult>();
-			_ = result.As<CreatedResult>().StatusCode.Should().Be(201);
-			_ = result.As<CreatedResult>().Value.Should().BeEquivalentTo(
-				new
-				{
-					status = 201,
-					message = "Photo created",
-					photo = photoExpected
-				}
-				);
+			_ = result.As<CreatedResult>().Value.Should().NotBeNull();
+			_ = result.As<CreatedResult>().Value.Should().Be("Test geslaagd");
 		}
 
 		#endregion
 
-		#region ReceiptGetPhotos
+		#region RepositoryDelete
 
 		[Fact]
-		public void Access_ReceiptGetPhotos_Without_Authentication_Is_ForbidResult()
+		public void RepositoryDelete_NotLoggedIn_ThrowsMaasgroepNotFoundException()
 		{
-			var receiptRepository = new Mock<IReceiptRepository>();
-			var memberService = new Mock<IMemberService>();
+			SetAuthentication_Unauthenticated();
 
-			var sut = new ReceiptController(receiptRepository.Object, memberService.Object);
+			var sut = new ReceiptController(receiptRepository.Object, receiptPhotoRepository.Object, receiptApprovalRepository.Object, maasgroepAuthenticationService.Object);
 
-			var result = sut.ReceiptGetPhotos(It.IsAny<long>());
+			object result;
+			try
+			{
+				result = sut.RepositoryDelete(0);
+			}
+			catch (MaasgroepUnauthorized ex)
+			{
+				result = ex;
+			}
+			catch (Exception ex)
+			{
+				result = ex;
+			}
 
 			_ = result.Should().NotBeNull();
-			_ = result.Should().BeOfType<ForbidResult>();
-			_ = result.As<ForbidResult>().AuthenticationSchemes.Should().BeEquivalentTo("Je hebt geen toegang tot deze functie");
+			_ = result.Should().BeOfType<MaasgroepNotFound>();
+			_ = result.As<MaasgroepNotFound>().Message.Should().NotBeNull();
+			_ = result.As<MaasgroepNotFound>().Message.Should().Be($"Declaratie niet gevonden");
 		}
 
-		[Fact]
-		public void Access_ReceiptGetPhotos_With_Authentication_Receipt_NotFound_Returns_NotFound()
-		{
-			var receiptRepository = new Mock<IReceiptRepository>();
-			var memberService = new Mock<IMemberService>();
-			_ = memberService.Setup(p => p.MemberExists(It.IsAny<long>())).Returns(true);
-			_ = receiptRepository.Setup(r => r.GetReceipt(It.IsAny<long>())).Returns((ReceiptModel)null);
-
-			var sut = new ReceiptController(receiptRepository.Object, memberService.Object);
-
-			var result = sut.ReceiptGetPhotos(It.IsAny<long>());
-
-			_ = result.Should().NotBeNull();
-			_ = result.Should().BeOfType<NotFoundObjectResult>();
-			_ = result.As<NotFoundObjectResult>().StatusCode.Should().Be(404);
-			_ = result.As<NotFoundObjectResult>().Value.Should().BeEquivalentTo(
-				new
-				{
-					status = 404,
-					message = "Receipt not found"
-				}
-				);
-
-		}
-
-		[Fact]
-		public void Access_ReceiptGetPhotos_With_Authentication_Receipt_Found_Returns_EmptyPhotos_Ok()
-		{
-			var receiptRepository = new Mock<IReceiptRepository>();
-			var memberService = new Mock<IMemberService>();
-			_ = memberService.Setup(p => p.MemberExists(It.IsAny<long>())).Returns(true);
-			_ = receiptRepository.Setup(r => r.GetReceipt(It.IsAny<long>())).Returns(new Mock<ReceiptModel>().Object);
-			_ = receiptRepository.Setup(r => r.GetPhotosByReceipt(It.IsAny<long>(), It.IsAny<int>(), It.IsAny<int>())).Returns<IEnumerable<PhotoModel>>(null);
-
-			var sut = new ReceiptController(receiptRepository.Object, memberService.Object);
-
-			var result = sut.ReceiptGetPhotos(It.IsAny<long>());
-
-			_ = result.Should().NotBeNull();
-			_ = result.Should().BeOfType<OkObjectResult>();
-			_ = result.As<OkObjectResult>().StatusCode.Should().Be(200);
-		}
-
-		[Fact]
-		public void Access_ReceiptGetPhotos_With_Authentication_Receipt_Found_Returns_0Photos_Ok()
-		{
-			var receiptRepository = new Mock<IReceiptRepository>();
-			var memberService = new Mock<IMemberService>();
-			_ = memberService.Setup(p => p.MemberExists(It.IsAny<long>())).Returns(true);
-			_ = receiptRepository.Setup(r => r.GetReceipt(It.IsAny<long>())).Returns(new Mock<ReceiptModel>().Object);
-			_ = receiptRepository.Setup(r => r.GetPhotosByReceipt(It.IsAny<long>(), It.IsAny<int>(), It.IsAny<int>())).Returns(new List<PhotoModel>());
-
-			var sut = new ReceiptController(receiptRepository.Object, memberService.Object);
-
-			var result = sut.ReceiptGetPhotos(It.IsAny<long>());
-
-			_ = result.Should().NotBeNull();
-			_ = result.Should().BeOfType<OkObjectResult>();
-			_ = result.As<OkObjectResult>().StatusCode.Should().Be(200);
-		}
-
-		[Fact]
-		public void Access_ReceiptGetPhotos_With_Authentication_Receipt_Found_Returns_1orMorePhotos_Ok()
-		{
-			var receiptRepository = new Mock<IReceiptRepository>();
-			var memberService = new Mock<IMemberService>();
-			_ = memberService.Setup(p => p.MemberExists(It.IsAny<long>())).Returns(true);
-			_ = receiptRepository.Setup(r => r.GetReceipt(It.IsAny<long>())).Returns(new Mock<ReceiptModel>().Object);
-			_ = receiptRepository.Setup(r => r.GetPhotosByReceipt(It.IsAny<long>(), It.IsAny<int>(), It.IsAny<int>())).Returns(new List<PhotoModel>() { new Mock<PhotoModel>().Object });
-
-			var sut = new ReceiptController(receiptRepository.Object, memberService.Object);
-
-			var result = sut.ReceiptGetPhotos(It.IsAny<long>());
-
-			_ = result.Should().NotBeNull();
-			_ = result.Should().BeOfType<OkObjectResult>();
-			_ = result.As<OkObjectResult>().StatusCode.Should().Be(200);
-		}
 
 		#endregion
 
-		#region ApproveReceipt
+		#region RepositoryUpdate
 
 		[Fact]
-		public void Access_ApproveReceipt_Without_Authentication_Is_ForbidResult()
+		public void RepositoryUpdate_NotLoggedIn_ThrowsMaasgroepUnauthorizedException()
 		{
-			var receiptRepository = new Mock<IReceiptRepository>();
-			var memberService = new Mock<IMemberService>();
-
-			var sut = new ReceiptController(receiptRepository.Object, memberService.Object);
-
-			var result = sut.ApproveReceipt(It.IsAny<long>(), new Mock<ReceiptApprovalModelCreate>().Object);
-
-			_ = result.Should().NotBeNull();
-			_ = result.Should().BeOfType<ForbidResult>();
-			_ = result.As<ForbidResult>().AuthenticationSchemes.Should().BeEquivalentTo("Je hebt geen toegang tot deze functie");
-		}
-
-		[Fact]
-		public void Access_ApproveReceipt_With_Authentication_And_Invalid_Model_Is_BadRequest()
-		{
-			var receiptRepository = new Mock<IReceiptRepository>();
-			var memberService = new Mock<IMemberService>();
-			_ = memberService.Setup(p => p.MemberExists(It.IsAny<long>())).Returns(true);
-
-			var sut = new ReceiptController(receiptRepository.Object, memberService.Object);
-			sut.ModelState.AddModelError("blaat", "kapot!");
-
-			var result = sut.ApproveReceipt(It.IsAny<long>(), new Mock<ReceiptApprovalModelCreate>().Object);
-
-			_ = result.Should().NotBeNull();
-			_ = result.Should().BeOfType<BadRequestObjectResult>();
-			_ = result.As<BadRequestObjectResult>().Value.Should().BeEquivalentTo(
-				new
-				{
-					status = 400,
-					message = "Invalid request body"
-				}
-				);
 
 		}
 
-		[Fact]
-		public void Access_ApproveReceipt_With_Authentication_Receipt_Not_Found_Results_NotFound()
-		{
-			var receiptRepository = new Mock<IReceiptRepository>();
-			var memberService = new Mock<IMemberService>();
-			_ = memberService.Setup(p => p.MemberExists(It.IsAny<long>())).Returns(true);
-			_ = receiptRepository.Setup(p => p.GetReceipt(It.IsAny<long>())).Returns<ReceiptModel>(null);
 
-			var sut = new ReceiptController(receiptRepository.Object, memberService.Object);
-
-			var result = sut.ApproveReceipt(It.IsAny<long>(), new Mock<ReceiptApprovalModelCreate>().Object);
-
-			_ = result.Should().NotBeNull();
-			_ = result.Should().BeOfType<NotFoundObjectResult>();
-			_ = result.As<NotFoundObjectResult>().StatusCode.Should().Be(404);
-			_ = result.As<NotFoundObjectResult>().Value.Should().BeEquivalentTo(
-				new
-				{
-					status = 404,
-					message = "Receipt not found"
-				}
-				);
-		}
-
-		[Fact]
-		public void Access_ApproveReceipt_With_Authentication_Receipt_Found_Results_Created()
-		{
-			var receiptRepository = new Mock<IReceiptRepository>();
-			var memberService = new Mock<IMemberService>();
-			_ = memberService.Setup(p => p.MemberExists(It.IsAny<long>())).Returns(true);
-			_ = receiptRepository.Setup(p => p.GetReceipt(It.IsAny<long>())).Returns(new Mock<ReceiptModel>().Object);
-			_ = receiptRepository.Setup(p => p.AddApproval(new Mock<ReceiptApprovalModelCreateDb>().Object));
-
-			var sut = new ReceiptController(receiptRepository.Object, memberService.Object);
-
-			var result = sut.ApproveReceipt(It.IsAny<long>(), new Mock<ReceiptApprovalModelCreate>().Object);
-
-			_ = result.Should().NotBeNull();
-			_ = result.Should().BeOfType<CreatedResult>();
-			_ = result.As<CreatedResult>().StatusCode.Should().Be(201);
-		}
 		#endregion
+
+
+
+		private void SetAuthentication_Unauthenticated()
+		{
+			MemberModel fakeMaasgroepMember = null;
+			maasgroepAuthenticationService.Setup(m => m.GetCurrentMember(null)).Returns(fakeMaasgroepMember);
+		}
+
+		private void SetAuthentication_PermissionWrong()
+		{
+			var fakeMaasgroepMember = new MemberModel()
+			{
+				Id = 1,
+				Email = "mockEmail@mockMember.com",
+				Name = "mockMember",
+				Permissions = new List<string>() { "wrong.permission" }
+			};
+
+			maasgroepAuthenticationService.Setup(m => m.GetCurrentMember(null)).Returns(fakeMaasgroepMember);
+		}
+
+		private void SetAuthentication_PermissionCorrect(string permission) 
+		{
+			var fakeMaasgroepMember = new MemberModel()
+			{
+				Id = 1,
+				Email = "mockEmail@mockMember.com",
+				Name = "mockMember",
+				Permissions = new List<string>() { permission }
+			};
+
+			maasgroepAuthenticationService.Setup(m => m.GetCurrentMember(null)).Returns(fakeMaasgroepMember);
+		}
+
 
 	}
 }

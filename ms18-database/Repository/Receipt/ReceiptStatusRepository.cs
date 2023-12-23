@@ -10,7 +10,7 @@ namespace Maasgroep.Database.Receipts
         public bool Exists(long id)
             => Enum.IsDefined(typeof(ReceiptStatus), id);
 
-        public string? GetById(long id)
+        public string? GetById(long id, bool includeDeleted = default)
             => GetModel(id).ToString();
 
         public ReceiptStatus GetModel(long id)

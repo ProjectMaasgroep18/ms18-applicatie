@@ -1,4 +1,4 @@
-﻿namespace ms18_applicatie.Models.team_d;
+﻿namespace Maasgroep.Models.team_d;
 
 public class PhotoViewModel
 {

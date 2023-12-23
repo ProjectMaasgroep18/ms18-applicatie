@@ -2,7 +2,7 @@ using Google.Apis.Auth.OAuth2;
 using Google.Apis.Calendar.v3;
 using Google.Apis.Services;
 using Microsoft.OpenApi.Models;
-using ms18_applicatie.Models.team_a;
+using Maasgroep.Models.team_a;
 using Maasgroep.Database;
 using Maasgroep.Database.Interfaces;
 using Maasgroep.Database.Receipts;
@@ -15,8 +15,9 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.EntityFrameworkCore;
-using ms18_applicatie.Repository.PhotoAlbum;
-using ms18_applicatie.Interfaces;
+using Maasgroep.Repository.PhotoAlbum;
+using Maasgroep.Interfaces;
+using Maasgroep.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -27,6 +28,9 @@ builder.Services.AddDbContext<MaasgroepContext>(options =>
 
 // Add HTTP context
 builder.Services.AddHttpContextAccessor();
+
+// Authentication
+builder.Services.AddTransient<IMaasgroepAuthenticationService, MaasgroepAuthenticationService>();
 
 // Add repositories
 builder.Services.AddTransient<ICostCentreRepository, CostCentreRepository>();

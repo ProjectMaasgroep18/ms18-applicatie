@@ -11,6 +11,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using System.IdentityModel.Tokens.Jwt;
 using System.Data.Common;
+using Maasgroep.Interfaces;
 
 namespace Maasgroep.Controllers.Api;
 
@@ -20,7 +21,7 @@ public class UserController : EditableRepositoryController<IMemberRepository, Me
     protected readonly ITokenStoreRepository TokenStore;
     protected readonly IConfiguration Config;
 
-    public UserController(IMemberRepository repository, IReceiptRepository receipts, ITokenStoreRepository tokenStore, IConfiguration config) : base(repository)
+    public UserController(IMemberRepository repository, IReceiptRepository receipts, ITokenStoreRepository tokenStore, IConfiguration config, IMaasgroepAuthenticationService maasgroepAuthenticationService) : base(repository, maasgroepAuthenticationService)
     {
         Receipts = receipts;
         TokenStore = tokenStore;
