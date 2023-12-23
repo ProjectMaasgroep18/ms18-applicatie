@@ -28,7 +28,7 @@ public class PhotosController : ControllerBase
 
         try
         {
-            var photoModel = await CreatePhotoModel(uploadModel);
+            var photoModel = CreatePhotoModel(uploadModel);
             await _photoRepository.AddPhoto(photoModel);
             return Ok("Photo uploaded successfully.");
         }
@@ -39,7 +39,7 @@ public class PhotosController : ControllerBase
         }
     }
 
-    private async Task<Photo> CreatePhotoModel(PhotoUploadModel uploadModel)
+    private static Photo CreatePhotoModel(PhotoUploadModel uploadModel)
     {
         var imageBytes = Convert.FromBase64String(uploadModel.ImageBase64);
 

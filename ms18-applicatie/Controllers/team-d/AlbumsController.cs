@@ -1,6 +1,6 @@
-﻿using Maasgroep.Database.Context.Tables.PhotoAlbum;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using ms18_applicatie.Interfaces;
+using ms18_applicatie.Models.team_d;
 
 namespace ms18_applicatie.Controllers.team_d;
 
@@ -18,25 +18,35 @@ public class AlbumsController : ControllerBase
     }
 
     [HttpPost("create-album")]
-    public async Task<ActionResult<Album>> CreateAlbum ([FromBody] Album? album)
+    [ProducesResponseType(typeof(Guid), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<Guid>> CreateAlbum ([FromBody] AlbumCreateModel albumCreateModel)
     {
-        if (album == null) return BadRequest("Album data is null.");
-        if (album.Id == Guid.Empty) album.Id = Guid.NewGuid();
+        if (!ModelState.IsValid) return BadRequest(ModelState);
 
         try
         {
-            var exists = await _albumRepository.AlbumExists(album.Name, album.ParentAlbumId);
-            if (exists) return BadRequest($"An album with the name '{album.Name}' already exists in the specified parent album.");
+            var exists = await _albumRepository.AlbumExists(albumCreateModel.Name, albumCreateModel.ParentAlbumId);
+            if (exists) return BadRequest($"An album with the name '{albumCreateModel.Name}' already exists in the specified parent album.");
 
-            await _albumRepository.AddAlbum(album);
+            var albumId = await _albumRepository.AddAlbum(albumCreateModel);
 
-            var albumUrl = Url.Action("GetAlbum", new { id = album.Id });
-            if (string.IsNullOrEmpty(albumUrl))
+            if (albumId == null || albumId == Guid.Empty)
             {
-                _logger.LogError($"Failed to generate URL for newly created album with ID {album.Id}");
+                _logger.LogError($"Failed to create album with Name {albumCreateModel.Name}");
                 return StatusCode(500, "An error occurred while creating the album.");
             }
-            return Created(albumUrl, album);
+
+            var albumUrl = Url.Action(nameof(GetAlbum), new { id = albumId });
+
+            if (albumUrl == null)
+            {
+                _logger.LogError($"Failed to generate URL for album with ID {albumId}");
+                return StatusCode(500, "An error occurred while generating the URL for the created album.");
+            }
+
+            return Created(albumUrl, albumId);
         }
         catch (Exception ex)
         {
@@ -46,18 +56,21 @@ public class AlbumsController : ControllerBase
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<Album>> GetAlbum(Guid id)
+    [ProducesResponseType(typeof(AlbumViewModel), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<AlbumViewModel>> GetAlbum(Guid id)
     {
         // This doesn't get the photos for the album that is in the PhotosController since it has to be paginated.
         try
         {
-            var album = await _albumRepository.GetAlbumById(id);
-            if (album == null)
+            var albumViewModel = await _albumRepository.GetAlbumViewModelById(id);
+            if (albumViewModel == null)
             {
                 return NotFound($"Album with ID {id} not found.");
             }
 
-            return Ok(album);
+            return Ok(albumViewModel);
         }
         catch (Exception ex)
         {
@@ -67,7 +80,9 @@ public class AlbumsController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Album>>> GetAllAlbums()
+    [ProducesResponseType(typeof(IEnumerable<AlbumSummaryViewModel>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<IEnumerable<AlbumSummaryViewModel>>> GetAllAlbums()
     {
         try
         {
@@ -82,12 +97,13 @@ public class AlbumsController : ControllerBase
     }
 
     [HttpPut("{id}")]
-    public async Task<ActionResult> UpdateAlbum(Guid id, [FromBody] Album? updatedAlbum)
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult> UpdateAlbum(Guid id, [FromBody] AlbumUpdateModel updatedAlbum)
     {
-        if (updatedAlbum == null)
-        {
-            return BadRequest("Album data is null.");
-        }
+        if (!ModelState.IsValid) return BadRequest(ModelState);
 
         try
         {
@@ -98,7 +114,9 @@ public class AlbumsController : ControllerBase
             }
 
             album.Name = updatedAlbum.Name;
+            album.Year = updatedAlbum.Year;
             album.ParentAlbumId = updatedAlbum.ParentAlbumId;
+            album.CoverPhotoId = updatedAlbum.CoverPhotoId;
 
             await _albumRepository.UpdateAlbum(album);
 
@@ -112,17 +130,16 @@ public class AlbumsController : ControllerBase
     }
 
     [HttpDelete("{id}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult> DeleteAlbum(Guid id)
     {
         try
         {
-            var album = await _albumRepository.GetAlbumById(id);
-            if (album == null)
-            {
-                return NotFound($"Album with ID {id} not found.");
-            }
+            var deleteSuccess = await _albumRepository.DeleteAlbum(id);
 
-            await _albumRepository.DeleteAlbum(id);
+            if (!deleteSuccess) return NotFound($"Album with ID {id} not found.");
             return NoContent();
         }
         catch (Exception ex)

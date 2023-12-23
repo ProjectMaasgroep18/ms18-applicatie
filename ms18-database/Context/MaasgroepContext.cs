@@ -65,8 +65,6 @@ namespace Maasgroep.Database
         public DbSet<Album> Albums { get; set; } = null!;
         public DbSet<Photo> Photos { get; set; } = null!;
         public DbSet<Like> Likes { get; set; } = null!;
-        public DbSet<Tag> Tags { get; set; } = null!;
-        public DbSet<AlbumTag> AlbumTags { get; set; } = null!;
 
         #endregion
 
@@ -90,9 +88,7 @@ namespace Maasgroep.Database
 
             CreateAlbums(modelBuilder);
             CreatePhotos(modelBuilder);
-            CreateTags(modelBuilder);
             CreateLikes(modelBuilder);
-            CreateAlbumTags(modelBuilder);
 
             #endregion
 
@@ -470,9 +466,10 @@ namespace Maasgroep.Database
                     .WithOne(p => p.AlbumLocation)
                     .HasForeignKey(p => p.AlbumLocationId);
 
-                entity.HasMany(p => p.AlbumTags)
-                    .WithOne(pt => pt.Album)
-                    .HasForeignKey(pt => pt.AlbumId);
+                entity.HasOne(a => a.CoverPhoto)
+                    .WithMany()
+                    .HasForeignKey(a => a.CoverPhotoId)
+                    .OnDelete(DeleteBehavior.SetNull);
             });
 
         }
@@ -512,40 +509,6 @@ namespace Maasgroep.Database
                 entity.HasMany(p => p.Likes)
                     .WithOne(l => l.Photo)
                     .HasForeignKey(l => l.PhotoId);
-            });
-        }
-
-        private void CreateAlbumTags(ModelBuilder modelBuilder)
-        {
-            modelBuilder.Entity<AlbumTag>(entity =>
-            {
-                entity.ToTable("albumTags", "photoAlbum");
-                entity.HasKey(pt => new { pt.AlbumId, pt.TagId });
-
-                entity.HasOne(pt => pt.Album)
-                    .WithMany(p => p.AlbumTags)
-                    .HasForeignKey(pt => pt.AlbumId);
-
-                entity.HasOne(pt => pt.Tag)
-                    .WithMany(t => t.AlbumTags)
-                    .HasForeignKey(pt => pt.TagId);
-            });
-        }
-
-        private void CreateTags(ModelBuilder modelBuilder)
-        {
-            modelBuilder.Entity<Tag>(entity =>
-            {
-                entity.ToTable("tags", "photoAlbum");
-                entity.HasKey(t => t.Id);
-
-                entity.Property(t => t.Name).HasMaxLength(255).IsRequired();
-
-                entity.HasIndex(t => t.Name).IsUnique();
-
-                entity.HasMany(t => t.AlbumTags)
-                    .WithOne(pt => pt.Tag)
-                    .HasForeignKey(pt => pt.TagId);
             });
         }
 
