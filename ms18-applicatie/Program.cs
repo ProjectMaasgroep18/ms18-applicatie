@@ -43,7 +43,6 @@ builder.Services.AddTransient<IBillRepository, BillRepository>();
 builder.Services.AddScoped<IAlbumRepository, AlbumRepository>();
 builder.Services.AddScoped<IPhotoRepository, PhotoRepository>();
 builder.Services.AddScoped<ILikesRepository, LikesRepository>();
-builder.Services.AddScoped<ITagsRepository, TagsRepository>();
 
 // Add services to the container.
 builder.Services.AddControllersWithViews(options => {

@@ -2,6 +2,7 @@
 using Maasgroep.Database.Context.Tables.PhotoAlbum;
 using Microsoft.EntityFrameworkCore;
 using ms18_applicatie.Interfaces;
+using ms18_applicatie.Models.team_d;
 
 namespace ms18_applicatie.Repository.PhotoAlbum;
 
@@ -19,23 +20,62 @@ public class AlbumRepository : IAlbumRepository
         return await _context.Albums.AnyAsync(a => a.Name == albumName && a.ParentAlbumId == parentAlbumId);
     }
 
-    public async Task AddAlbum(Album album)
+    public async Task<Guid?> AddAlbum(AlbumCreateModel albumCreateModel)
     {
+        var album = new Album(albumCreateModel.Name)
+        {
+            ParentAlbumId = albumCreateModel.ParentAlbumId,
+            Year = albumCreateModel.Year
+        };
+
         _context.Albums.Add(album);
-        await _context.SaveChangesAsync();
+        var affectedRows = await _context.SaveChangesAsync();
+
+        if (affectedRows > 0 && album.Id != Guid.Empty) return album.Id;
+
+        return null;
+    }
+
+    public async Task<AlbumViewModel?> GetAlbumViewModelById(Guid id)
+    {
+        return await _context.Albums
+            .Where(a => a.Id == id)
+            .Include(a => a.ChildAlbums)
+            .ThenInclude(ca => ca.CoverPhoto)
+            .Select(a => new AlbumViewModel
+            {
+                Id = a.Id,
+                Name = a.Name,
+                Year = a.Year,
+                CoverPhotoId = a.CoverPhotoId,
+                ParentAlbumId = a.ParentAlbumId,
+                ChildAlbums = a.ChildAlbums.Select(ca => new ChildAlbumViewModel
+                {
+                    Id = ca.Id,
+                    Name = ca.Name,
+                    CoverPhotoId = ca.CoverPhotoId
+                }).ToList()
+            })
+            .FirstOrDefaultAsync();
     }
 
     public async Task<Album?> GetAlbumById(Guid id)
     {
         return await _context.Albums
-            .Include(a => a.ChildAlbums)
-            .Include(a => a.AlbumTags)
             .FirstOrDefaultAsync(a => a.Id == id);
     }
 
-    public async Task<IEnumerable<Album>> GetAllAlbums()
+    public async Task<List<AlbumSummaryViewModel>> GetAllAlbums()
     {
-        return await _context.Albums.ToListAsync();
+        return await _context.Albums
+            .Select(a => new AlbumSummaryViewModel
+            {
+                Id = a.Id,
+                Name = a.Name,
+                Year = a.Year,
+                CoverPhotoId = a.CoverPhotoId
+            })
+            .ToListAsync();
     }
 
     public async Task UpdateAlbum(Album album)
@@ -44,15 +84,15 @@ public class AlbumRepository : IAlbumRepository
         await _context.SaveChangesAsync();
     }
 
-    public async Task DeleteAlbum(Guid albumId)
+    public async Task<bool> DeleteAlbum(Guid albumId)
     {
         var album = await _context.Albums.FindAsync(albumId);
 
-        if (album != null)
-        {
-            _context.Albums.Remove(album);
-            await _context.SaveChangesAsync();
-        }
+        if (album == null) return false;
+
+        _context.Albums.Remove(album);
+        await _context.SaveChangesAsync();
+        return true;
     }
 }
 
