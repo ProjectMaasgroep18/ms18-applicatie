@@ -73,5 +73,15 @@ namespace Maasgroep.Database.Orders
             bill.TotalAmount = bill.Lines.Sum(line => line.Amount);
             return bill;
         }
+
+        /** Ensure IsGuest is set correctly when saving bill */
+        public override Action<MaasgroepContext> GetSaveAction(Bill record)
+        {
+            var saveAction = base.GetSaveAction(record);
+            return (MaasgroepContext db) => {
+                record.IsGuest = record.MemberCreatedId == null;
+                saveAction.Invoke(db);
+            };
+        }
     }
 }

@@ -14,11 +14,16 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using Microsoft.EntityFrameworkCore;
+using ms18_applicatie.Repository.PhotoAlbum;
+using ms18_applicatie.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add database context
-builder.Services.AddDbContext<MaasgroepContext>();
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+builder.Services.AddDbContext<MaasgroepContext>(options =>
+    options.UseNpgsql(MaasgroepContext.GetConnectionString(connectionString)));
 
 // Add HTTP context
 builder.Services.AddHttpContextAccessor();
@@ -34,6 +39,11 @@ builder.Services.AddTransient<ITokenStoreRepository, TokenStoreRepository>();
 builder.Services.AddTransient<IProductRepository, ProductRepository>();
 builder.Services.AddTransient<IStockRepository, StockRepository>();
 builder.Services.AddTransient<IBillRepository, BillRepository>();
+
+builder.Services.AddScoped<IAlbumRepository, AlbumRepository>();
+builder.Services.AddScoped<IPhotoRepository, PhotoRepository>();
+builder.Services.AddScoped<ILikesRepository, LikesRepository>();
+builder.Services.AddScoped<ITagsRepository, TagsRepository>();
 
 // Add services to the container.
 builder.Services.AddControllersWithViews(options => {

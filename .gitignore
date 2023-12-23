@@ -375,3 +375,5 @@ FodyWeavers.xsd
 /ms18-database/bin
 /ms18-sharedKernel/obj
 /ms18-sharedKernel/bin
+
+.db

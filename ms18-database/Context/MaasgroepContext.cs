@@ -1,19 +1,56 @@
 ﻿using Maasgroep.Database.Admin;
+using Maasgroep.Database.Context.Tables.PhotoAlbum;
 using Maasgroep.Database.Orders;
 using Maasgroep.Database.Receipts;
-using Maasgroep.Database.Services;
 using Microsoft.EntityFrameworkCore;
+using System.Runtime.CompilerServices;
 
 namespace Maasgroep.Database
 {
     public class MaasgroepContext : DbContext
     {
-        private string _connectionString = "UserID=postgres;Password=postgres;Host=localhost;port=5410;Database=Maasgroep;Pooling=true;Include Error Detail=true";
+        private static string _getFilePath(string file, [CallerFilePath] string? path = null) // Get path to a file in the "ms18-database" directory
+            => Path.Combine(new string[] { Path.GetDirectoryName(Path.GetDirectoryName(path) ?? "") ?? "", file });
+
+        public MaasgroepContext() : base(GetOptions(GetConnectionString())) {}
+
+        public MaasgroepContext(DbContextOptions<MaasgroepContext> options) : base(options) {}
+
+        public MaasgroepContext(string connectionString) : base(GetOptions(GetConnectionString(connectionString))) {}
+
+        private static DbContextOptions<MaasgroepContext> GetOptions(string connectionString)
+        {
+            var optionsBuilder = new DbContextOptionsBuilder<MaasgroepContext>();
+            optionsBuilder.UseNpgsql(connectionString);
+            return optionsBuilder.Options;
+        }
+        
+        public static string GetConnectionString(string? defaultConnection = null)
+        {
+            var connectionString = defaultConnection ?? "";
+            if (connectionString == "" && File.Exists(_getFilePath(".db.example"))) {
+                // Use the ".db.example" file as DefaultConnection
+                var envConnection = File.ReadAllText(_getFilePath(".db.example"));
+                if (envConnection != null && envConnection.Trim() != "")
+                    connectionString = envConnection.Trim();
+            }
+            if (File.Exists(_getFilePath(".db"))) {
+                // Allow a ".db" file to overwrite the DefaultConnection
+                var exampleConnection = File.ReadAllText(_getFilePath(".db"));
+                if (exampleConnection != null && exampleConnection.Trim() != "")
+                    connectionString = exampleConnection.Trim();
+            }
+            return connectionString;
+        }
 
         #region Member
         public DbSet<Member> Member { get; set; }
         public DbSet<Permission> Permission { get; set; }
         public DbSet<MemberPermission> MemberPermission { get; set; }
+        #endregion
+
+        #region MemberHistory
+        public DbSet<MemberHistory> MemberHistory { get; set; }
         #endregion
 
         #region Receipts
@@ -46,32 +83,45 @@ namespace Maasgroep.Database
 
         #endregion
 
+        #region PhotoAlbum
+
+        public DbSet<Album> Albums { get; set; } = null!;
+        public DbSet<Photo> Photos { get; set; } = null!;
+        public DbSet<Like> Likes { get; set; } = null!;
+        public DbSet<Tag> Tags { get; set; } = null!;
+        public DbSet<AlbumTag> AlbumTags { get; set; } = null!;
+
+        #endregion
+
         #region TokenStore
 
         public DbSet<TokenStore> TokenStore { get; set; }
 
         #endregion
 
-        public MaasgroepContext()
-        {
-        }
 
-        public MaasgroepContext(string connectionString)
-        {
-            _connectionString = connectionString;
-        }
 
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            optionsBuilder.UseNpgsql(_connectionString);
-        }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            #region Admin
             CreateMember(modelBuilder);
             CreatePermission(modelBuilder);
             CreateMemberPermission(modelBuilder);
             CreateTokenStore(modelBuilder);
+
+            CreateMemberHistory(modelBuilder);
+            #endregion
+
+            #region PhotoAlbum
+
+            CreateAlbums(modelBuilder);
+            CreatePhotos(modelBuilder);
+            CreateTags(modelBuilder);
+            CreateLikes(modelBuilder);
+            CreateAlbumTags(modelBuilder);
+
+            #endregion
 
             #region Receipt
             CreateReceipt(modelBuilder);
@@ -103,7 +153,8 @@ namespace Maasgroep.Database
             modelBuilder.Entity<Member>().Property(m => m.Id).HasDefaultValueSql("nextval('admin.\"memberSeq\"')");
             modelBuilder.Entity<Member>().Property(m => m.DateTimeCreated).HasDefaultValueSql("now()");
             modelBuilder.Entity<Member>().Property(m => m.Name).HasMaxLength(256);
-            modelBuilder.Entity<Member>().HasIndex(m => m.Name).IsUnique();
+            modelBuilder.Entity<Member>().Property(m => m.Email).HasMaxLength(256);
+            modelBuilder.Entity<Member>().HasIndex(m => m.Email).IsUnique();
 
             // Foreign keys
 
@@ -128,6 +179,17 @@ namespace Maasgroep.Database
                 .HasConstraintName("FK_member_memberDeleted")
                 .OnDelete(DeleteBehavior.NoAction);
 
+        }
+
+        private void CreateMemberHistory(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<MemberHistory>().ToTable("member", "adminHistory");
+            modelBuilder.HasSequence<long>("memberSeq", schema: "adminHistory").StartsAt(1).IncrementsBy(1);
+            modelBuilder.Entity<MemberHistory>().Property(p => p.Id).HasDefaultValueSql("nextval('\"adminHistory\".\"memberSeq\"')");
+            modelBuilder.Entity<MemberHistory>().Property(p => p.RecordCreated).HasDefaultValueSql("now()");
+            modelBuilder.Entity<MemberHistory>().Property(p => p.Name).HasMaxLength(2048);
+            modelBuilder.Entity<MemberHistory>().Property(p => p.Email).HasMaxLength(2048);
+            modelBuilder.Entity<MemberHistory>().Property(p => p.MemberPermissions).HasMaxLength(64000);
         }
 
         private void CreatePermission(ModelBuilder modelBuilder)
@@ -422,6 +484,108 @@ namespace Maasgroep.Database
             modelBuilder.Entity<CostCentreHistory>().Property(cc => cc.Id).HasDefaultValueSql("nextval('\"receiptHistory\".\"costCentreSeq\"')");
             modelBuilder.Entity<CostCentreHistory>().Property(cc => cc.Name).HasMaxLength(256);
             modelBuilder.Entity<CostCentreHistory>().Property(cc => cc.RecordCreated).HasDefaultValueSql("now()");
+        }
+
+        #endregion
+
+        #region  PhotoAlbum
+
+        private void CreateAlbums(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Album>(entity =>
+            {
+                entity.ToTable("albums", "photoAlbum");
+
+                entity.HasKey(f => f.Id);
+
+                entity.HasIndex(f => new { f.ParentAlbumId, f.Name }).IsUnique();
+
+                entity.HasMany(f => f.ChildAlbums)
+                    .WithOne(f => f.ParentAlbum)
+                    .HasForeignKey(f => f.ParentAlbumId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasMany(f => f.Photos)
+                    .WithOne(p => p.AlbumLocation)
+                    .HasForeignKey(p => p.AlbumLocationId);
+
+                entity.HasMany(p => p.AlbumTags)
+                    .WithOne(pt => pt.Album)
+                    .HasForeignKey(pt => pt.AlbumId);
+            });
+
+        }
+
+        private void CreateLikes(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Like>(entity =>
+            {
+                entity.ToTable("likes", "photoAlbum");
+                entity.HasKey(l => l.Id);
+
+                entity.HasOne(l => l.Member)
+                    .WithMany()
+                    .HasForeignKey(l => l.MemberId);
+
+                entity.HasOne(l => l.Photo)
+                    .WithMany(p => p.Likes)
+                    .HasForeignKey(l => l.PhotoId);
+            });
+        }
+
+        private void CreatePhotos(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Photo>(entity =>
+            {
+                entity.ToTable("photos", "photoAlbum");
+                entity.HasKey(p => p.Id);
+
+                entity.HasOne(p => p.Uploader)
+                    .WithMany()
+                    .HasForeignKey(p => p.UploaderId);
+
+                entity.HasOne(p => p.AlbumLocation)
+                    .WithMany(f => f.Photos)
+                    .HasForeignKey(p => p.AlbumLocationId);
+
+                entity.HasMany(p => p.Likes)
+                    .WithOne(l => l.Photo)
+                    .HasForeignKey(l => l.PhotoId);
+            });
+        }
+
+        private void CreateAlbumTags(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<AlbumTag>(entity =>
+            {
+                entity.ToTable("albumTags", "photoAlbum");
+                entity.HasKey(pt => new { pt.AlbumId, pt.TagId });
+
+                entity.HasOne(pt => pt.Album)
+                    .WithMany(p => p.AlbumTags)
+                    .HasForeignKey(pt => pt.AlbumId);
+
+                entity.HasOne(pt => pt.Tag)
+                    .WithMany(t => t.AlbumTags)
+                    .HasForeignKey(pt => pt.TagId);
+            });
+        }
+
+        private void CreateTags(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Tag>(entity =>
+            {
+                entity.ToTable("tags", "photoAlbum");
+                entity.HasKey(t => t.Id);
+
+                entity.Property(t => t.Name).HasMaxLength(255).IsRequired();
+
+                entity.HasIndex(t => t.Name).IsUnique();
+
+                entity.HasMany(t => t.AlbumTags)
+                    .WithOne(pt => pt.Tag)
+                    .HasForeignKey(pt => pt.TagId);
+            });
         }
 
         #endregion
