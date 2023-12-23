@@ -27,4 +27,9 @@
     </PackageReference>
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\ms18-applicatie\ms18-applicatie.csproj" />
+    <ProjectReference Include="..\ms18-sharedKernel\ms18-sharedKernel.csproj" />
+  </ItemGroup>
+
 </Project>
