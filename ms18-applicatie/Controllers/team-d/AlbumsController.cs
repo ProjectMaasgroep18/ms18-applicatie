@@ -17,7 +17,7 @@ public class AlbumsController : ControllerBase
         _logger = logger;
     }
 
-    [HttpPost("create-album")]
+    [HttpPost]
     [ProducesResponseType(typeof(Guid), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(string), StatusCodes.Status500InternalServerError)]
@@ -59,7 +59,7 @@ public class AlbumsController : ControllerBase
     [ProducesResponseType(typeof(AlbumViewModel), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<AlbumViewModel>> GetAlbum(Guid id)
+    public async Task<ActionResult<AlbumViewModel>> GetAlbum([FromRoute]Guid id)
     {
         // This doesn't get the photos for the album that is in the PhotosController since it has to be paginated.
         try
@@ -101,7 +101,7 @@ public class AlbumsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult> UpdateAlbum(Guid id, [FromBody] AlbumUpdateModel updatedAlbum)
+    public async Task<ActionResult> UpdateAlbum([FromRoute]Guid id, [FromBody] AlbumUpdateModel updatedAlbum)
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
 
@@ -133,7 +133,7 @@ public class AlbumsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult> DeleteAlbum(Guid id)
+    public async Task<ActionResult> DeleteAlbum([FromRoute] Guid id)
     {
         try
         {

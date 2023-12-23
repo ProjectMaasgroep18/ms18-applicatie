@@ -10,6 +10,8 @@ public class AlbumViewModel
     public int? Year { get; set; }
     public Guid? CoverPhotoId { get; set; }
     public Guid? ParentAlbumId { get; set; }
+    [Required]
+    public int PhotoCount { get; set; }
     public IEnumerable<ChildAlbumViewModel>? ChildAlbums { get; set; }
 }
 

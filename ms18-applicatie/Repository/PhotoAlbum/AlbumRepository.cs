@@ -42,6 +42,7 @@ public class AlbumRepository : IAlbumRepository
             .Where(a => a.Id == id)
             .Include(a => a.ChildAlbums)
             .ThenInclude(ca => ca.CoverPhoto)
+            .Include(a => a.Photos)
             .Select(a => new AlbumViewModel
             {
                 Id = a.Id,
@@ -49,6 +50,7 @@ public class AlbumRepository : IAlbumRepository
                 Year = a.Year,
                 CoverPhotoId = a.CoverPhotoId,
                 ParentAlbumId = a.ParentAlbumId,
+                PhotoCount = a.Photos.Count(),
                 ChildAlbums = a.ChildAlbums.Select(ca => new ChildAlbumViewModel
                 {
                     Id = ca.Id,
@@ -84,9 +86,9 @@ public class AlbumRepository : IAlbumRepository
         await _context.SaveChangesAsync();
     }
 
-    public async Task<bool> DeleteAlbum(Guid albumId)
+    public async Task<bool> DeleteAlbum(Guid id)
     {
-        var album = await _context.Albums.FindAsync(albumId);
+        var album = await _context.Albums.FindAsync(id);
 
         if (album == null) return false;
 
