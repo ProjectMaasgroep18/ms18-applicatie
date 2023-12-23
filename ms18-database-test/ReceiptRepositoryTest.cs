@@ -1,9 +1,9 @@
 ﻿using FluentAssertions;
 using Maasgroep.Database.Receipts;
 using Maasgroep.SharedKernel.ViewModels.Receipts;
-using Maasgroep.SharedKernel.ViewModels.Admin;
 using Moq;
 using Maasgroep.Database.Interfaces;
+using Maasgroep.SharedKernel.DataModels.Receipts;
 
 namespace Maasgroep.Database.Test
 {
@@ -13,35 +13,301 @@ namespace Maasgroep.Database.Test
 
 	public class ReceiptRepositoryTest : IClassFixture<MaasgroepTestFixture>
 	{
-		public ReceiptRepositoryTest(MaasgroepTestFixture fixture) => Fixture = fixture;
+		public ReceiptRepositoryTest(MaasgroepTestFixture fixture)
+		{
+			Fixture = fixture;
+			receiptStatusRepository = new Mock<IReceiptStatusRepository>();
+			costCentreRepository = new Mock<ICostCentreRepository>();
+			memberRepository = new Mock<IMemberRepository>();
+		}
 
 		public MaasgroepTestFixture Fixture { get; }
 
+		private readonly Mock<IReceiptStatusRepository> receiptStatusRepository;
+		private readonly Mock<ICostCentreRepository> costCentreRepository;
+		private readonly Mock<IMemberRepository> memberRepository;
 
+		/*
+		GetModel (int)		ReadRepository				Done
+		GetModel (model)	ReadRepository
+		Exists				ReadRepository				Done
+		GetById				ReadRepository				Done
+		ListAll				ReadRepository				Done
+		GetRecord			WriteableRepository
+		ListByMember		WriteableRepository			Done
+		Create				WriteableRepository
+		GetSaveAction		WriteableRepository
+		GetAfterSaveAction	WriteableRepository
+		Delete				DeletableRepository
+		GetList				DeletableRepository
+		GetList (bool)		DeletableRepository
+		ListAll				DeletableRepository
+		ListByMember		DeletableRepository
+		GetHistory			EditableRepository
+		Update				EditableRepository
+		ListByCostCentre	ReceiptRepository
+		ListPayable			ReceiptRepository
+		*/
 
-		#region GetReceipt
+		#region GetById
 
 		[Fact]
-		public void GetReceipt_With_Valid_Id_Returns_Data()
+		public void GetById_With_Valid_Id_Returns_Data()
 		{
 			using var context = Fixture.CreateContext();
-
-			var receiptStatusRepository = new Mock<IReceiptStatusRepository>();
-			var costCentreRepository = new Mock<ICostCentreRepository>();
-			var memberRepository = new Mock<IMemberRepository>();
 
 			var sut = new ReceiptRepository(context
 				, receiptStatusRepository.Object
 				, costCentreRepository.Object
 				, memberRepository.Object);
 
-			//var receipt = sut.GetReceipt(1);
+			var result = sut.GetModel(1);
 
-			//_ = receipt.Note.Should().Be("Schroeven voor kapotte sloep");
-			//_ = receipt.Amount.Should().Be(1.11M);
+			_ = result.Should().NotBeNull();
+			_ = result.Should().BeOfType<ReceiptModel>();
+			_ = result.As<ReceiptModel>().Id = 1;
+			_ = result.As<ReceiptModel>().Note.Should().Be("Schroeven voor kapotte sloep");
+			_ = result.As<ReceiptModel>().Amount.Should().Be(1.11M);
+		}
+
+		[Fact]
+		public void GetById_With_InValid_Id_Returns_Null()
+		{
+			using var context = Fixture.CreateContext();
+
+			var sut = new ReceiptRepository(context
+				, receiptStatusRepository.Object
+				, costCentreRepository.Object
+				, memberRepository.Object);
+
+			var result = sut.GetModel(-1);
+
+			_ = result.Should().BeNull();
 		}
 
 		#endregion
+
+		#region GetModelInt
+
+		[Fact]
+		public void GetModelInt_With_Invalid_Id_Returns_Null()
+		{
+			using var context = Fixture.CreateContext();
+
+			var sut = new ReceiptRepository(context
+				, receiptStatusRepository.Object
+				, costCentreRepository.Object
+				, memberRepository.Object);
+
+			var result = sut.GetModel(-1);
+
+			_ = result.Should().BeNull();
+		}
+
+		[Fact]
+		public void GetModelInt_With_Valid_Id_Returns_ViewModel()
+		{
+			using var context = Fixture.CreateContext();
+
+			var sut = new ReceiptRepository(context
+				, receiptStatusRepository.Object
+				, costCentreRepository.Object
+				, memberRepository.Object);
+
+			var expected = sut.GetModel(1)!;
+
+			var result = sut.GetModel(1);
+
+			_ = result.Should().NotBeNull();
+			_ = result.Should().BeOfType<ReceiptModel>();
+			_ = result.As<ReceiptModel>().Id.Should().Be(expected.Id);
+			_ = result.As<ReceiptModel>().Note.Should().Be("Schroeven voor kapotte sloep");
+			_ = result.As<ReceiptModel>().Amount.Should().Be(1.11M);
+		}
+
+		#endregion
+
+		//TODO: KH deze region later, is veel werk
+		#region GetModelModel
+
+		[Fact]
+		public void GetModelModel_With_Valid_Id_Returns_ViewModel()
+		{
+			using var context = Fixture.CreateContext();
+
+			var sut = new ReceiptRepository(context
+				, receiptStatusRepository.Object
+				, costCentreRepository.Object
+				, memberRepository.Object);
+
+			var expected = sut.GetModel(1)!;
+
+			var result = sut.GetModel(1);
+
+			_ = result.Should().NotBeNull();
+			_ = result.Should().BeOfType<ReceiptModel>();
+			_ = result.As<ReceiptModel>().Id.Should().Be(expected.Id);
+			_ = result.As<ReceiptModel>().Note.Should().Be("Schroeven voor kapotte sloep");
+			_ = result.As<ReceiptModel>().Amount.Should().Be(1.11M);
+		}
+
+		#endregion
+
+		#region ListAll
+
+		[Fact]
+		public void ListAll_GreatLimitThanImplementationIsPossible_NoHistoryResult3()
+		{
+			using var context = Fixture.CreateContext();
+
+			var sut = new ReceiptRepository(context
+				, receiptStatusRepository.Object
+				, costCentreRepository.Object
+				, memberRepository.Object);
+
+			var result = sut.ListAll(0, 5000, false);
+
+			_ = result.Should().NotBeNull();
+			result.Count().Should().Be(3);
+		}
+
+		[Fact]
+		public void ListAll_GreatLimitThanImplementationIsPossible_WithHistoryResult4()
+		{
+			using var context = Fixture.CreateContext();
+
+			var sut = new ReceiptRepository(context
+				, receiptStatusRepository.Object
+				, costCentreRepository.Object
+				, memberRepository.Object);
+
+			var result = sut.ListAll(0, 5000, true);
+
+			_ = result.Should().NotBeNull();
+			result.Count().Should().Be(4);
+		}
+
+		#endregion
+
+		#region Exists
+
+		[Fact]
+		public void Exists_WithValidId_ReturnsTrue()
+		{
+			using var context = Fixture.CreateContext();
+
+			var sut = new ReceiptRepository(context
+				, receiptStatusRepository.Object
+				, costCentreRepository.Object
+				, memberRepository.Object);
+
+			var result = sut.Exists(1L);
+
+			_ = result.Should().Be(true);
+		}
+
+		[Fact]
+		public void Exists_WithInvalidId_ReturnsFalse()
+		{
+			using var context = Fixture.CreateContext();
+
+			var sut = new ReceiptRepository(context
+				, receiptStatusRepository.Object
+				, costCentreRepository.Object
+				, memberRepository.Object);
+
+			var result = sut.Exists(343499);
+
+			_ = result.Should().Be(false);
+		}
+
+		#endregion
+
+		//TODO: KH deze region later, is veel werk
+		#region GetRecord
+
+		[Fact]
+		public void GetRecord_WithValidId_ReturnsValue()
+		{
+			using var context = Fixture.CreateContext();
+
+			var sut = new ReceiptRepository(context
+				, receiptStatusRepository.Object
+				, costCentreRepository.Object
+				, memberRepository.Object);
+
+			ReceiptData receiptToGet = new ReceiptData();
+
+			var result = sut.GetRecord(receiptToGet);
+
+			_ = result.Should().NotBeNull();
+		}
+
+		#endregion
+
+		#region ListByMember
+
+		[Fact]
+		public void ListByMember_WithValidId_NoDeleted_OverLimit_ReturnsValue3()
+		{
+			using var context = Fixture.CreateContext();
+
+			var sut = new ReceiptRepository(context
+				, receiptStatusRepository.Object
+				, costCentreRepository.Object
+				, memberRepository.Object);
+
+			var memberId = 1L;
+
+			var result = sut.ListByMember(memberId, 0, 5000, false);
+
+			_ = result.Should().NotBeNull();
+			result.Count().Should().Be(3);
+		}
+
+		[Fact]
+		public void ListByMember_WithInvalidId_NoDeleted_OverLimit_ReturnsValue0()
+		{
+			using var context = Fixture.CreateContext();
+
+			var sut = new ReceiptRepository(context
+				, receiptStatusRepository.Object
+				, costCentreRepository.Object
+				, memberRepository.Object);
+
+			var memberId = 77785671L;
+
+			var result = sut.ListByMember(memberId, 0, 5000, false);
+
+			_ = result.Should().NotBeNull();
+			result.Count().Should().Be(0);
+		}
+
+		[Fact]
+		public void ListByMember_WithValidId_WithDeleted_OverLimit_ReturnsValue4()
+		{
+			using var context = Fixture.CreateContext();
+
+			var sut = new ReceiptRepository(context
+				, receiptStatusRepository.Object
+				, costCentreRepository.Object
+				, memberRepository.Object);
+
+			var memberId = 1L;
+
+			var result = sut.ListByMember(memberId, 0, 5000, true);
+
+			_ = result.Should().NotBeNull();
+			result.Count().Should().Be(4);
+		}
+
+		#endregion
+
+
+
+
+
+
 
 		//[Fact]
 		//public void GetReceipt_With_InValid_Id_ThrowsError()

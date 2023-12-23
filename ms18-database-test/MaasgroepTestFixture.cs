@@ -28,6 +28,7 @@ namespace Maasgroep.Database.Test
 					CreateTestDataCostCentre();
 					CreateTestDataReceipt();
 					CreateTestDataReceiptApproval();
+					CreateTestDataReceiptHistory();
 
 					// Order
 					//CreateTestDataProduct();
@@ -169,6 +170,10 @@ namespace Maasgroep.Database.Test
 						,   new Receipt()   { MemberCreated = member, ReceiptStatus = "Afgekeurd"
 											, CostCentre = costCentre1, Amount = 3.33M, Note = "Handboek Woudlopers"
 											}
+						,   new Receipt()   { MemberCreated = member, ReceiptStatus = "Uitbetaald"
+											, CostCentre = costCentre1, Amount = 4.44M, Note = "Losgeld voor piraten van de zeven zeeen"
+											, DateTimeDeleted = DateTime.UtcNow, MemberDeleted = member
+											}
 						};
 
 				db.Receipt.AddRange(receipts);
@@ -192,6 +197,32 @@ namespace Maasgroep.Database.Test
 				};
 
 				db.ReceiptApproval.AddRange(receiptApprovals);
+
+				db.SaveChanges();
+			}
+		}
+
+		private void CreateTestDataReceiptHistory()
+		{
+			using (var db = CreateContext())
+			{
+				var member = db.Member.Where(m => m.Name == "Borgia").FirstOrDefault()!;
+				var costCentre1 = db.CostCentre.Where(cc => cc.Name == "Moeder van Joopie").FirstOrDefault()!;
+				var costCentre2 = db.CostCentre.Where(cc => cc.Name == "Penningmeester").FirstOrDefault()!;
+
+				var receipts = new List<ReceiptHistory>()
+						{
+							new ReceiptHistory()   { ReceiptId = 1, MemberCreatedId = member.Id, ReceiptStatus = "Ingediend"
+											, CostCentreId = costCentre1.Id, Amount = 1.11M, Note = "Schroeven voor kapotte sloep histo-rietje"
+											}
+						,   new ReceiptHistory()   { ReceiptId = 2, MemberCreatedId = member.Id, ReceiptStatus = "Goedgekeurd"
+											, CostCentreId = costCentre2.Id, Amount = 2.22M, Note = "Knakworstjes in de bonus gisteren"
+											}
+						,   new ReceiptHistory()   { ReceiptId = 3, MemberCreatedId = member.Id, ReceiptStatus = "Afgekeurd"
+											, CostCentreId = costCentre1.Id, Amount = 3.33M, Note = "Handboek Woudlopers van vorig jaar"
+											}
+						};
+				db.ReceiptHistory.AddRange(receipts);
 
 				db.SaveChanges();
 			}

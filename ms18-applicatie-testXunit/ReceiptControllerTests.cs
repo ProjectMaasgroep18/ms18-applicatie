@@ -14,13 +14,13 @@ namespace ms18_applicatie_test
 {
 	public class ReceiptControllerTests
 	{
-		Mock<IReceiptStatusRepository> receiptStatusRepository;
-		Mock<ICostCentreRepository> costCentreRepository;
-		Mock<IMemberRepository> memberRepository;
-		Mock<IReceiptRepository> receiptRepository;
-		Mock<IReceiptPhotoRepository> receiptPhotoRepository;
-		Mock<IReceiptApprovalRepository> receiptApprovalRepository;
-		Mock<IMaasgroepAuthenticationService> maasgroepAuthenticationService;
+		private readonly Mock<IReceiptStatusRepository> receiptStatusRepository;
+		private readonly Mock<ICostCentreRepository> costCentreRepository;
+		private readonly Mock<IMemberRepository> memberRepository;
+		private readonly Mock<IReceiptRepository> receiptRepository;
+		private readonly Mock<IReceiptPhotoRepository> receiptPhotoRepository;
+		private readonly Mock<IReceiptApprovalRepository> receiptApprovalRepository;
+		private readonly Mock<IMaasgroepAuthenticationService> maasgroepAuthenticationService;
 
 		public ReceiptControllerTests()
 		{
