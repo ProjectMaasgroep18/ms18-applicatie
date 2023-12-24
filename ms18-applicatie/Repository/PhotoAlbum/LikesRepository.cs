@@ -2,6 +2,7 @@
 using Maasgroep.Database.Context.Tables.PhotoAlbum;
 using Microsoft.EntityFrameworkCore;
 using ms18_applicatie.Interfaces;
+using ms18_applicatie.Models.team_d;
 
 namespace ms18_applicatie.Repository.PhotoAlbum;
 
@@ -13,10 +14,13 @@ public class LikesRepository : ILikesRepository
     {
         _context = context;
     }
-    public async Task AddLike(Like like)
+    public async Task<Guid?> AddLike(Like like)
     {
         _context.Likes.Add(like);
-        await _context.SaveChangesAsync();
+        var affectedRows = await _context.SaveChangesAsync();
+
+        if (affectedRows > 0 && like.Id != Guid.Empty) return like.Id;
+        return null;
     }
 
     public async Task DeleteLike(Guid likeId)
@@ -29,19 +33,28 @@ public class LikesRepository : ILikesRepository
         }
     }
 
-    public async Task<IEnumerable<Like>> GetAllLikesForPhoto(Guid photoId)
+    public async Task<IEnumerable<LikeViewModel>> GetAllLikesForPhoto(Guid photoId)
     {
         return await _context.Likes
             .Where(like => like.PhotoId == photoId)
+            .Select(l => new LikeViewModel
+            {
+                Id = l.Id,
+                MemberId = l.MemberId,
+                PhotoId = l.PhotoId,
+                LikedOn = l.LikedOn,
+            })
             .ToListAsync();
     }
 
     public async Task<Like?> GetLike(Guid photoId, long userId)
     {
-        return await _context.Likes.Where(l => l.PhotoId == photoId && l.MemberId == userId).FirstOrDefaultAsync();
+        return await _context.Likes
+            .Where(l => l.PhotoId == photoId && l.MemberId == userId)
+            .FirstOrDefaultAsync();
     }
 
-    public async Task<IEnumerable<Photo>> GetTopLikedPhotos(DateTime startDate, DateTime endDate, int topCount)
+    public async Task<IEnumerable<PhotoViewModel>> GetTopLikedPhotos(DateTime startDate, DateTime endDate, int topCount)
     {
         return await _context.Likes
             .Where(like => like.LikedOn >= startDate && like.LikedOn <= endDate)
@@ -50,6 +63,19 @@ public class LikesRepository : ILikesRepository
             .Take(topCount)
             .Select(g => g.Key)
             .Join(_context.Photos, photoId => photoId, photo => photo.Id, (photoId, photo) => photo)
+            .Select(p => new PhotoViewModel
+            {
+                Id = p.Id,
+                UploaderId = p.UploaderId,
+                UploadDate = p.UploadDate,
+                Title = p.Title,
+                ImageBase64 = Convert.ToBase64String(p.ImageData),
+                ContentType = p.ContentType,
+                TakenOn = p.TakenOn,
+                Location = p.Location,
+                AlbumLocationId = p.AlbumLocationId,
+                LikesCount = p.Likes.Count()
+            })
             .ToListAsync();
     }
 }

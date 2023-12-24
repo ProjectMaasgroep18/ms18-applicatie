@@ -17,7 +17,7 @@ public class PhotosController : ControllerBase
         _logger = logger;
     }
     [HttpPost]
-    [ProducesResponseType(typeof(Guid), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(CreateResponseModel), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(string), StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult> UploadPhoto([FromBody] PhotoUploadModel uploadModel)
@@ -37,15 +37,7 @@ public class PhotosController : ControllerBase
                 return StatusCode(500, "An error occured while uploading the photo,");
             }
 
-            var photoUrl = Url.Action(nameof(GetPhoto), new { id = photoId });
-
-            if (photoUrl == null)
-            {
-                _logger.LogError($"Failed to generate Url for photo with ID {photoId}");
-                return StatusCode(500, "An error occured while generating the URL for the created album");
-            }
-
-            return Created(photoUrl, photoId);
+            return CreatedAtRoute("GetPhoto", new { id = photoId }, new CreateResponseModel { Id = (Guid)photoId });
         }
         catch (Exception ex)
         {
@@ -54,7 +46,7 @@ public class PhotosController : ControllerBase
         }
     }
 
-    [HttpGet("{id}")]
+    [HttpGet("{id}", Name = "GetPhoto")]
     [ProducesResponseType(typeof(PhotoViewModel), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]

@@ -18,7 +18,7 @@ public class AlbumsController : ControllerBase
     }
 
     [HttpPost]
-    [ProducesResponseType(typeof(Guid), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(CreateResponseModel), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(string), StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<Guid>> CreateAlbum ([FromBody] AlbumCreateModel albumCreateModel)
@@ -38,15 +38,7 @@ public class AlbumsController : ControllerBase
                 return StatusCode(500, "An error occurred while creating the album.");
             }
 
-            var albumUrl = Url.Action(nameof(GetAlbum), new { id = albumId });
-
-            if (albumUrl == null)
-            {
-                _logger.LogError($"Failed to generate URL for album with ID {albumId}");
-                return StatusCode(500, "An error occurred while generating the URL for the created album.");
-            }
-
-            return Created(albumUrl, albumId);
+            return CreatedAtRoute("GetAlbum", new { id = albumId }, new CreateResponseModel {Id = (Guid)albumId });
         }
         catch (Exception ex)
         {
@@ -55,7 +47,7 @@ public class AlbumsController : ControllerBase
         }
     }
 
-    [HttpGet("{id}")]
+    [HttpGet("{id}", Name = "GetAlbum")]
     [ProducesResponseType(typeof(AlbumViewModel), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
