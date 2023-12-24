@@ -69,18 +69,18 @@ namespace Maasgroep.Console
             using (var db = CreateContext())
             {
                 var verySafePassword = GetPasswordHash("123456");
-                var admin = Members.ContainsKey("Admin") ? Members["Admin"] : new Member() { Name = "Admin", Email = "admin@example.com", Password = verySafePassword };
+                var admin = Members.ContainsKey("Admin") ? Members["Admin"] : new Member() { Name = "Admin", Email = "admin@example.com", Color = "#3366FF", Password = verySafePassword };
                 Members = new Dictionary<string, Member>
                 {
                     ["Admin"] = admin,
-                    ["Lid"] = new Member() { Name = "Lid", MemberCreated = admin, Email = "lid@example.com", Password = verySafePassword },
+                    ["Lid"] = new Member() { Name = "Lid", MemberCreated = admin, Email = "lid@example.com", Color = "#FF2222", Password = verySafePassword },
                  
                     // Team B
-                    ["Product"] = new Member() { Name = "Product", MemberCreated = admin, Email = "product@example.com", Password = verySafePassword },
+                    ["Product"] = new Member() { Name = "Product", MemberCreated = admin, Email = "product@example.com", Color = "#FFCC00", Password = verySafePassword },
 
                     // Team C
-                    ["Goedkeur"] = new Member() { Name = "Goedkeur", MemberCreated = admin, Email = "goedkeur@example.com", Password = verySafePassword },
-                    ["Betaal"] = new Member() { Name = "Betaal", MemberCreated = admin, Email = "betaal@example.com", Password = verySafePassword },
+                    ["Goedkeur"] = new Member() { Name = "Goedkeur", MemberCreated = admin, Email = "goedkeur@example.com", Color = "#00CC00", Password = verySafePassword },
+                    ["Betaal"] = new Member() { Name = "Betaal", MemberCreated = admin, Email = "betaal@example.com", Color = "#CC00FF", Password = verySafePassword },
                 };
 
                 db.Member.AddRange(Members.Select(m => m.Value));

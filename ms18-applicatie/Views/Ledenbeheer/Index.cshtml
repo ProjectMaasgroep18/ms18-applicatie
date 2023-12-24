@@ -12,6 +12,7 @@
             <tr>
                 <th>Naam</th>
                 <th>E-mailadres</th>
+                <th>Kleur</th>
                 <th>Rechten</th>
                 <th></th>
             </tr>
@@ -27,6 +28,7 @@
                     <input rel="name:value" class="member-input hidden">
                 </td>
                 <td rel="email"></td>
+                <td><div rel="color:data-color"></div> <span rel="color"></span></td>
                 <td rel="permissions::commaSeparated"></td>
                 <td class="user-actions hidden">
                     Voorlopig niet aanpasbaar
@@ -141,6 +143,13 @@
                     });
                 });
             }
+            memberTable.querySelectorAll('[data-color]').forEach(color => {
+                color.style.backgroundColor = color.dataset.color;
+                color.style.width = '16px';
+                color.style.height = '16px';
+                color.style.borderRadius = '16px';
+                color.style.display = 'inline-block';
+            });
         });
 
         document.querySelector('#members-add')?.addEventListener('click', event => {

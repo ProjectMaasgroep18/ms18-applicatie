@@ -3,5 +3,6 @@
     public record MemberData
     {
         public string Name { get; set; }
+        public string? Color { get; set; }
     }
 }

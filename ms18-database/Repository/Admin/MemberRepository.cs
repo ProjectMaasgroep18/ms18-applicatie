@@ -25,7 +25,8 @@ namespace Maasgroep.Database.Admin
             return new MemberModel() {
                 Id = member.Id,
                 Name = member.Name,
-                Email = member.Email,
+                Email = member.Email ?? "",
+                Color = member.Color,
                 Permissions = GetPermissions(member.Id),
             };
         }
@@ -35,6 +36,7 @@ namespace Maasgroep.Database.Admin
         {
             var member = existingMember ?? new();
             member.Name = data.Name;
+            member.Color = data.Color;
             var credentials = data as MemberCredentialsData;
             if (credentials?.NewEmail != null)
                 member.Email = credentials.NewEmail;
@@ -49,7 +51,7 @@ namespace Maasgroep.Database.Admin
         public MemberModel? GetByEmail(string email, string password)
         {
             var member = Db.Member.FirstOrDefault(item => item.Email == email && item.DateTimeDeleted == null);
-            if (member == null || !CheckPassword(password, member.Password))
+            if (member == null || member.Password == null || !CheckPassword(password, member.Password))
                 return null;
             return GetModel(member);
         }
@@ -115,6 +117,7 @@ namespace Maasgroep.Database.Admin
             return new MemberHistory() {
                 MemberId = member.Id,
                 Name = member.Name,
+                Color = member.Color,
                 Email = member.Email,
                 MemberPermissions = String.Join('|', MemberPermissions[member.Id]),
             };
