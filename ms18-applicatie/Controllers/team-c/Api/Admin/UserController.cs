@@ -17,12 +17,14 @@ namespace Maasgroep.Controllers.Api;
 public class UserController : EditableRepositoryController<IMemberRepository, Member, MemberModel, MemberData, MemberHistory>
 {
     protected readonly IReceiptRepository Receipts;
+    protected readonly IBillRepository Bills;
     protected readonly ITokenStoreRepository TokenStore;
     protected readonly IConfiguration Config;
 
-    public UserController(IMemberRepository repository, IReceiptRepository receipts, ITokenStoreRepository tokenStore, IConfiguration config) : base(repository)
+    public UserController(IMemberRepository repository, IReceiptRepository receipts, IBillRepository bills, ITokenStoreRepository tokenStore, IConfiguration config) : base(repository)
     {
         Receipts = receipts;
+        Bills = bills;
         TokenStore = tokenStore;
         Config = config;
     }
@@ -81,6 +83,22 @@ public class UserController : EditableRepositoryController<IMemberRepository, Me
         if (!HasPermission(requiredPermission))
             NoAccess();
         return Ok(Receipts.ListByMember(id, offset, limit, includeDeleted));
+    }
+
+    [HttpGet("{id}/Bill")]
+    public IActionResult UserGetBills(long id, [FromQuery] int offset = default, [FromQuery] int limit = default, [FromQuery] bool includeDeleted = default)
+    {   
+        if (id != CurrentMember?.Id && !HasPermission("order.view"))
+            NoAccess();
+        return Ok(Bills.ListByMember(id, offset, limit, includeDeleted));
+    }
+
+    [HttpGet("{id}/BillTotal")]
+    public IActionResult UserGetBillTotal(long id)
+    {   
+        if (id != CurrentMember?.Id && !HasPermission("order.view"))
+            NoAccess();
+        return Ok(Bills.GetTotal(id));
     }
 
     [HttpGet("Current")]

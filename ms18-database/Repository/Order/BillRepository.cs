@@ -83,5 +83,23 @@ namespace Maasgroep.Database.Orders
                 saveAction.Invoke(db);
             };
         }
+
+        /** Get total number and value of bills, for all users or for a specific member */
+        public BillTotalModel GetTotal(long? MemberId = null)
+        {
+            var billData = Db.Bills
+                .Where(b => b.DateTimeDeleted == null && (MemberId == null || b.MemberCreatedId == MemberId))
+                .Select(b => new { Quantity = b.Lines.Sum(l => l.Quantity), Amount = b.TotalAmount })
+                .ToList();
+
+            var totals = new BillTotalModel()
+            {
+                BillCount = billData.Count,
+                ProductQuantity = billData.Sum(bd => bd.Quantity),
+                TotalAmount = billData.Sum(bd => bd.Amount),
+            };
+
+            return totals;
+        }
     }
 }

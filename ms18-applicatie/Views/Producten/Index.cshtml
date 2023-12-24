@@ -1,68 +1,60 @@
 <h1>@ViewData["Title"]</h1>
 
-<div id="login-user" class="hidden">
-    <p id="login-info">Hallo <span rel="name"></span>!</p>    
 
-    <p>Hier kan je de producten beheren:</p>
+<div id="products" class="hidden">
+    <p><i>Dit zijn alle beschikbare producten:</i></p>
 
-    <div id="products" class="hidden">
-        <p><i>Dit zijn alle producten in de database:</i></p>
-
-        <table class="data-table">
-            <tr>
-                <th>Naam</th>
-                <th>Prijs</th>
-                <th>Icoon</th>
-                <th>Kleur</th>
-                <th>Aantal per prijs</th>
-                <th>Aantal op voorraad</th>
-                <th></th>
-            </tr>
-            
-            <tr class="result-empty hidden">
-                <td colspan="999">Er zijn geen producten.</td>
-            </tr>
-            
-            <tr class="result-item hidden">
-                <td rel="name"></td>
-                <td rel="price::euro"></td>
-                <td rel="icon"></td>
-                <td><div rel="color:data-color"></div> <span rel="color"></span></td>
-                <td rel="priceQuantity"></td>
-                <td rel="stock"></td>
-                <td class="user-actions hidden">
-                    Hier geen User Actions
-                    <a rel="id:href:productUrl">Aanpassen</a>
-                    <a class="delete-link" href="#">Verwijderen</a>
-                </td>
-            </tr>
-
-            <tr class="result-has-more hidden">
-                <td colspan="999"><a href="#" class="result-show-more">Toon meer</a></td>
-            </tr>
-        </table>
+    <table class="data-table">
+        <tr>
+            <th>Naam</th>
+            <th>Prijs</th>
+            <th>Icoon</th>
+            <th>Kleur</th>
+            <th>Aantal per prijs</th>
+            <th>Aantal op voorraad</th>
+            <th></th>
+        </tr>
         
-    </div>
+        <tr class="result-empty hidden">
+            <td colspan="999">Er zijn geen producten.</td>
+        </tr>
+        
+        <tr class="result-item hidden">
+            <td rel="name"></td>
+            <td rel="price::euro"></td>
+            <td rel="icon"></td>
+            <td><div rel="color:data-color"></div> <span rel="color"></span></td>
+            <td rel="priceQuantity"></td>
+            <td rel="stock"></td>
+            <td class="user-actions hidden">
+                Hier geen User Actions
+                <a rel="id:href:productUrl">Aanpassen</a>
+                <a class="delete-link" href="#">Verwijderen</a>
+            </td>
+        </tr>
+
+        <tr class="result-has-more hidden">
+            <td colspan="999"><a href="#" class="result-show-more">Toon meer</a></td>
+        </tr>
+    </table>
+
+    &nbsp;
+
+    <p><a href="/">Terug naar Home</a></p>
+    
 </div>
 
 @section scripts {
 <script>
-    requireLogin(async member => {
-        // User session loaded
-     
-        const userId = member.id;
-        showElement(document.querySelector('#login-user'));
-        showOutput(member, document.querySelector('#login-info'));
-        
-        const productsDiv = document.querySelector('#products');
-        apiGetInfinite('Product', productsDiv, () => {
-            productsDiv.querySelectorAll('[data-color]').forEach(color => {
-                color.style.backgroundColor = color.dataset.color;
-                color.style.width = '16px';
-                color.style.height = '16px';
-                color.style.borderRadius = '16px';
-                color.style.display = 'inline-block';
-            });
+    const productsDiv = document.querySelector('#products');
+    
+    apiGetInfinite('Product', productsDiv, () => {
+        productsDiv.querySelectorAll('[data-color]').forEach(color => {
+            color.style.backgroundColor = color.dataset.color;
+            color.style.width = '16px';
+            color.style.height = '16px';
+            color.style.borderRadius = '16px';
+            color.style.display = 'inline-block';
         });
     });
 </script>

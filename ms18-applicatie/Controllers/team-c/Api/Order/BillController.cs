@@ -22,4 +22,12 @@ public class BillController : DeletableRepositoryController<IBillRepository, Bil
 
     protected override bool AllowDelete(Bill? Bill)
         => HasPermission("admin") || (CurrentMember != null && Bill?.MemberCreatedId == CurrentMember.Id);
+
+    [HttpGet("Total")]
+    public IActionResult BillGetTotal()
+    {   
+        if (!HasPermission("order.view"))
+            NoAccess();
+        return Ok(Repository.GetTotal());
+    }
 }
