@@ -24,7 +24,7 @@
             <tr class="result-item hidden">
                 <td rel="name"></td>
                 <td rel="email"></td>
-                <td class="is-guest"></td>
+                <td class="is-guest" rel="isGuest:data-guest"></td>
                 <td rel="note"></td>
                 <td rel="totalAmount::euro"></td>
                 <td rel="dateTimeCreated::dateTime"></td>
@@ -80,6 +80,7 @@
         
         apiGetInfinite('Bill', billsDiv, elements => {
             elements.forEach(el => {
+                el.querySelector('.is-guest').innerText = el.querySelector('.is-guest').dataset.guest && el.querySelector('.is-guest').dataset.guest != 'false' ? "Ja" : "Nee";
                 el.querySelector('.item-details')?.addEventListener('click', event => {
                     event.preventDefault();
                     let id = event.target.dataset.id;
@@ -106,6 +107,7 @@
                         showOutput(lines[n], line);
                     }
                     showElement(details);
+                    openDetails = id;
                 });
             });
         });
