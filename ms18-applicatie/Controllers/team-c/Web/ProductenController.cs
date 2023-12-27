@@ -19,6 +19,17 @@ public class ProductenController : Controller
         return View();
     }
 
+    public IActionResult Nieuw()
+    {
+        return View();
+    }
+
+    public IActionResult Aanpassen(long id)
+    {
+        ViewData["id"] = id;
+        return View();
+    }
+
     public IActionResult Bestellingen()
     {
         return View();

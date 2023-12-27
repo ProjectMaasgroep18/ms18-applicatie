@@ -53,6 +53,10 @@ namespace Maasgroep.Database.Orders
             product.Icon = data.Icon ?? "";
             product.Price = data.Price;
             product.PriceQuantity = data.PriceQuantity;
+            if (product.PriceQuantity < 0)
+                product.PriceQuantity = 0;
+            if (product.Price < 0)
+                product.Price = 0;
             if (data.Stock != null)
             {
                 var stock = GetProductStock(id);

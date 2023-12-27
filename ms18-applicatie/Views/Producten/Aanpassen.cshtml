@@ -1,0 +1,105 @@
+<h1>Product aanpassen</h1>
+
+<div id="login-user" class="hidden">
+    <p id="login-info">Hallo <span rel="name"></span>!</p>
+
+    <p>Pas hier de productgegevens aan:</p>
+
+    <form method="post" id="product-form" class="hidden">
+
+        <table class="data-table">
+            <tr>
+                <td>Naam: </td>
+                <td><input type="text" name="Name" rel="name:value"></td>
+            </tr>
+            <tr>
+                <td>Prijs: </td>
+                <td><input type="number" name="Price" step="0.01" value="0" rel="price:value"></td>
+            </tr>
+            <tr>
+                <td>Icoon: </td>
+                <td><input type="text" name="Icon" rel="icon:value"></td>
+            </tr>
+            <tr>
+                <td>Kleur:</td>
+                <td style="position:relative"><input type="text" name="Color" rel="color:value"> <div id="color" rel="color:data-color"></div></td>
+            </tr>
+            <tr>
+                <td>Aantal per prijs: </td>
+                <td><input type="number" name="PriceQuantity" value="1" rel="priceQuantity:value"></td>
+            </tr>
+            <tr>
+                <td>Aantal op voorraad: </td>
+                <td><input type="number" name="Stock" value="0" rel="stock:value"></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td><input type="submit" value="Product opslaan" class="btn btn-primary"></td>
+            </tr>
+        </table>
+    </form>
+</div>
+
+
+@section scripts {
+<script>
+    requireLogin(member => {
+        // User session loaded
+     
+        showElement(document.querySelector('#login-user'));
+        showOutput(member, document.querySelector('#login-info'));
+
+        const productId = @ViewData["id"];
+        const productForm = document.querySelector('#product-form');
+
+        productForm.querySelector('input[name="Color"]').addEventListener('change', event => {
+            let color = document.querySelector('#color');
+            color.dataset.color = event.target.value;
+            color.style.position = 'absolute';
+            color.style.right = '22px';
+            color.style.top = '8px';
+            color.style.backgroundColor = color.dataset.color;
+            color.style.width = '16px';
+            color.style.height = '16px';
+            color.style.borderRadius = '16px';
+            color.style.display = 'inline-block';
+        });
+
+        apiGet('Product/' + productId).then(result => {
+            // Existing product loaded
+            
+            showOutput(result, productForm);
+            let color = document.querySelector('#color');
+            color.style.position = 'absolute';
+            color.style.right = '22px';
+            color.style.top = '8px';
+            color.style.backgroundColor = color.dataset.color;
+            color.style.width = '16px';
+            color.style.height = '16px';
+            color.style.borderRadius = '16px';
+            color.style.display = 'inline-block';
+        });
+
+        productForm.addEventListener('submit', event => {
+            // Submit form
+
+            event.preventDefault();
+            
+            let formData = {};
+            productForm.querySelectorAll('input[name],textarea[name],select[name]').forEach(input => {
+                formData[input.name] = input.value;
+                if (input.type == "number" || input.name.match(/Id$/))
+                    formData[input.name] = isNaN(+formData[input.name]) ? 0 : +formData[input.name];
+            });
+            hideElement(productForm);
+
+            setLoadMessage('Bezig met opslaan...');
+
+            apiPut('Product/' + productId, formData).then(result => {
+                if (result)
+                    window.location.href = '/Producten/Producten';
+            });
+        });
+    });
+</script>
+}

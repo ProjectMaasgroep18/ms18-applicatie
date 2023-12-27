@@ -177,7 +177,7 @@ function showOutput(data, container) {
         },
         productUrl(id) {
             // Return Product url of Product id
-            return '/Producten/' + id;
+            return '/Producten/Aanpassen/' + id;
         },
         zero(val) {
             // Default to zero instead of "", null, undefined, etc.

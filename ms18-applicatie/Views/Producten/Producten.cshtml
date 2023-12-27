@@ -4,6 +4,10 @@
     <p id="login-info">Hallo <span rel="name"></span>!</p>
 
     <div id="products" class="hidden">
+        <p>Hier kan je de producten beheren:</p>
+
+        <p><a asp-action="Nieuw"><button class="btn btn-primary">Nieuw product</button></a></p>
+
         <p><i>Dit zijn alle beschikbare producten:</i></p>
 
         <table class="data-table">
@@ -30,7 +34,6 @@
                 <td rel="stock"></td>
                 <td class="user-actions">
                     <a rel="id:href:productUrl">Aanpassen</a>
-                    (TODO)
                     <a href="#" class="delete-link" rel="id:data-id">Verwijderen</a>
                 </td>
             </tr>

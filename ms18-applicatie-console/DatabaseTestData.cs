@@ -67,7 +67,7 @@ namespace Maasgroep.Console
                     ["Lid"] = new Member() { Name = "Lid", MemberCreated = admin, Email = "lid@example.com", Color = "#FF2222", Password = verySafePassword },
                  
                     // Team B
-                    ["Gast"] = new Member() { Name = "Gast", MemberCreated = admin, Email = "gast@example.com", Color = "#EEEEEE", IsGuest = true, Password = emptyPassword },
+                    ["Gast"] = new Member() { Name = "Gast", MemberCreated = admin, Email = "gast@example.com", Color = "#ABCDEF", IsGuest = true, Password = emptyPassword },
                     ["Bar"] = new Member() { Name = "Bar", MemberCreated = admin, Email = "bar@example.com", Color = "#00CCFF", Password = verySafePassword },
                     ["Product"] = new Member() { Name = "Product", MemberCreated = admin, Email = "product@example.com", Color = "#FFCC00", Password = verySafePassword },
 
