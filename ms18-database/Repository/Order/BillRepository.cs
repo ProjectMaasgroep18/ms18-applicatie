@@ -33,6 +33,7 @@ namespace Maasgroep.Database.Orders
                 MemberCreated = member,
                 Lines = Lines.ListByBill(bill.Id, 0, Int32.MaxValue).Where(line => line.Quantity > 0).ToList(),
                 TotalAmount = bill.TotalAmount,
+                DateTimeCreated = bill.DateTimeCreated,
             };
         }
         

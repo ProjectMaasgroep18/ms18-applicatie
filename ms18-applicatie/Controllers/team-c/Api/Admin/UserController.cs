@@ -20,6 +20,7 @@ public class UserController : EditableRepositoryController<IMemberRepository, Me
     protected readonly IBillRepository Bills;
     protected readonly ITokenStoreRepository TokenStore;
     protected readonly IConfiguration Config;
+    public override string ItemName { get => "Gebruiker"; }
 
     public UserController(IMemberRepository repository, IReceiptRepository receipts, IBillRepository bills, ITokenStoreRepository tokenStore, IConfiguration config) : base(repository)
     {

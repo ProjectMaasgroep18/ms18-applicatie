@@ -1,0 +1,137 @@
+<h1>Producten bestellen</h1>
+
+<div id="login-user" class="hidden">
+    <p id="login-info">Hallo <span rel="name"></span>!</p>
+
+    <div id="products" class="hidden">
+        <p><i>Dit zijn alle beschikbare producten:</i></p>
+
+        <table class="data-table">
+            <tr>
+                <th>Naam</th>
+                <th>Prijs</th>
+                <th>Icoon</th>
+                <th>Kleur</th>
+                <th>Aantal per prijs</th>
+                <th>Aantal op voorraad</th>
+                <th>Hoeveel wil je er?</th>
+            </tr>
+            
+            <tr class="result-empty hidden">
+                <td colspan="999">Er zijn geen producten.</td>
+            </tr>
+            
+            <tr class="result-item hidden">
+                <td rel="name"></td>
+                <td rel="price::euro"></td>
+                <td rel="icon"></td>
+                <td><div rel="color:data-color"></div> <span rel="color"></span></td>
+                <td rel="priceQuantity"></td>
+                <td rel="stock"></td>
+                <td><input type="number" class="cart-item" rel="id:data-product"></td>
+            </tr>
+
+            <tr class="result-has-more hidden">
+                <td colspan="999"><a href="#" class="result-show-more">Toon meer</a></td>
+            </tr>
+        </table>
+
+
+        <p><i>Maak hier je bestelling af:</i></p>
+
+        <form id="cart-form">
+
+            <table class="data-table">
+                <tr>
+                    <td>Naam</td>
+                    <td><input id="cart-name"></td>
+                </tr>
+                <tr>
+                    <td>E-mailadres</th>
+                    <td><input id="cart-email"></td>
+                </tr>
+                <tr>
+                    <td>Opmerkingen</td>
+                    <td><textarea id="cart-note"></textarea></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td>
+                        <button type="submit" id="cart-submit" class="btn btn-primary">Bestelling plaatsen</button>
+                    </td>
+                </tr>
+            </table>
+
+        </form>
+
+        &nbsp;
+
+        <p><a href="/">Terug naar Home</a></p>
+        
+    </div>
+</div>
+
+@section scripts {
+<script>
+    requireLogin(member => {
+        // User session loaded
+     
+        const userId = member.id;
+        showElement(document.querySelector('#login-user'));
+        showOutput(member, document.querySelector('#login-info'));
+
+        const productsDiv = document.querySelector('#products');
+        const cartForm = document.querySelector('#cart-form');
+        const cartName = document.querySelector('#cart-name');
+        const cartEmail = document.querySelector('#cart-email');
+        const cartNote = document.querySelector('#cart-note');
+        const cartSubmit = document.querySelector('#cart-submit');
+        
+        cartName.placeholder = member.name;
+        cartEmail.placeholder = member.email;
+        
+        apiGetInfinite('Product', productsDiv, () => {
+            productsDiv.querySelectorAll('[data-color]').forEach(color => {
+                color.style.backgroundColor = color.dataset.color;
+                color.style.width = '16px';
+                color.style.height = '16px';
+                color.style.borderRadius = '16px';
+                color.style.display = 'inline-block';
+            });
+        });
+
+        cartSubmit.addEventListener('click', event => {
+            event.preventDefault();
+
+            hideElement(cartForm);
+
+            let products = {};
+            
+            productsDiv.querySelectorAll('.cart-item').forEach(qty => {
+                if (!qty.value || qty.value < 0)
+                    return;
+                let productId = qty.dataset.product;
+                if (!(productId in products))
+                    products[productId] = 0;
+                products[productId] += qty.value;
+            });
+            
+            let lines = [];
+            
+            for (productId in products)
+                lines.push({ productId, quantity: products[productId] });
+            
+            let data = {
+                name: cartName.value,
+                email: cartEmail.value,
+                note: cartNote.value,
+                lines,
+            };
+
+            apiPost('Bill', data).then(result => {
+                window.location.href = 'Producten/Bestellingen';
+            });
+        });
+    });
+</script>
+}
