@@ -15,7 +15,7 @@
             </tr>
             
             <tr class="result-empty hidden">
-                <td colspan="999">Je hebt geen bestellingen.</td>
+                <td colspan="999">Je hebt nog geen bestellingen geplaatst. <a asp-controller="Producten" asp-action="Bestellen">Waarom bestel je niet iets?</a></td>
             </tr>
             
             <tr class="result-item hidden">
@@ -53,6 +53,14 @@
 
         &nbsp;
 
+        <div id="order-totals" class="hidden">
+            Je hebt <b rel="billCount"></b> bestellingen geplaatst
+            met daarin <b rel="productQuantity"></b> producten
+            met een totale waarde van <b rel="totalAmount::euro"></b>.
+        </div>
+
+        &nbsp;
+
         <p><a href="/">Terug naar Home</a></p>
         
     </div>
@@ -74,6 +82,8 @@
         apiGetInfinite('User/' + userId + '/Bill', billsDiv, elements => {
             elements.forEach(el => {
                 el.querySelector('.item-details')?.addEventListener('click', event => {
+                    // Click "Toon producten"
+
                     event.preventDefault();
                     let id = event.target.dataset.id;
                     let details = billsDiv.querySelector('.result-details[data-id="' + id +'"]');
@@ -103,6 +113,8 @@
                 });
             });
         });
+
+        apiGet('User/' + userId + '/BillTotal').then(result => showOutput(result, document.querySelector('#order-totals')));
     });
 </script>
 }

@@ -1,4 +1,4 @@
-<h1>Producten bestellen</h1>
+<h1>Producten beheren</h1>
 
 <div id="login-user" class="hidden">
     <p id="login-info">Hallo <span rel="name"></span>!</p>
@@ -30,8 +30,8 @@
                 <td rel="stock"></td>
                 <td class="user-actions">
                     <a rel="id:href:productUrl">Aanpassen</a>
-                    <a href="#" class="delete-link" rel="id:data-id">Verwijderen</a>
                     (TODO)
+                    <a href="#" class="delete-link" rel="id:data-id">Verwijderen</a>
                 </td>
             </tr>
 
@@ -59,13 +59,33 @@
         
         const productsDiv = document.querySelector('#products');
         
-        apiGetInfinite('Product', productsDiv, () => {
+        apiGetInfinite('Product', productsDiv, elements => {
             productsDiv.querySelectorAll('[data-color]').forEach(color => {
                 color.style.backgroundColor = color.dataset.color;
                 color.style.width = '16px';
                 color.style.height = '16px';
                 color.style.borderRadius = '16px';
                 color.style.display = 'inline-block';
+            });
+            elements.forEach(el => {
+                el.querySelector('.delete-link')?.addEventListener('click', event => {
+                    // Click Delete link
+                    
+                    event.preventDefault();
+
+                    if (!window.confirm('Weet je zeker dat je dit product wilt verwijderen?'))
+                        return;
+
+                    const deleteId = event.target.dataset.id;
+                    hideElement(el.querySelector('.user-actions'));
+
+                    apiDelete('Product/' + deleteId).then(result => {
+                        if (!result)
+                            return;
+
+                        window.location.href = window.location.href.toString().replace(/#.*$/, '');
+                    });
+                });
             });
         });
     });

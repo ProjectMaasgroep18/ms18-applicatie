@@ -47,6 +47,9 @@ namespace Maasgroep.Database.Orders
 
             foreach (var line in data.Lines) {
                 // Build lines from data model
+                
+                if (line.Quantity <= 0)
+                    continue;
 
                 if (!lines.ContainsKey(line.ProductId)) {
                     // There is no line for this product yet
