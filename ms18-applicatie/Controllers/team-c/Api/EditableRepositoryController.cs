@@ -13,7 +13,7 @@ where THistory: GenericRecordHistory
     protected EditableRepositoryController(TRepository repository) : base(repository) {}
 
     protected virtual bool AllowEdit(TRecord record, TDataModel data)
-        => AllowDelete(record); // By default, same as delete (i.e., only allowed to delete their own items)
+        => AllowDelete(record) && AllowCreate(data); // By default, same as delete + create (i.e., only allowed to edit/delete their own items)
 
     [HttpPut("{id}")]
     public IActionResult RepositoryUpdate(long id, [FromBody] TDataModel data)

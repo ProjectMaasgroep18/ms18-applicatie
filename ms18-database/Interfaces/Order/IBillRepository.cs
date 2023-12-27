@@ -9,5 +9,6 @@ namespace Maasgroep.Database.Interfaces
     public interface IBillRepository : IDeletableRepository<Bill, BillModel, BillData>
     {
         BillTotalModel GetTotal(long? MemberId = null);
+        IEnumerable<BillModel> ListByEmail(string email, int offset = default, int limit = default, bool includeDeleted = default);
     }
 }

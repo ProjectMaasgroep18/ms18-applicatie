@@ -110,5 +110,9 @@ namespace Maasgroep.Database.Orders
 
             return totals;
         }
+
+        // List bills by e-mail
+        public IEnumerable<BillModel> ListByEmail(string email, int offset = 0, int limit = 0, bool includeDeleted = false)
+            => GetList(item => item.Email == email, null, offset, limit, includeDeleted).Select(item => GetModel(item)!);
     }
 }
