@@ -14,7 +14,7 @@ public class ProductenController : Controller
         return View();
     }
 
-    public IActionResult Producten()
+    public IActionResult Beheren()
     {
         return View();
     }

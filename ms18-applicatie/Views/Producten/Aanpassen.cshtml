@@ -67,7 +67,7 @@
 
         apiGet('Product/' + productId).then(result => {
             // Existing product loaded
-            
+
             showOutput(result, productForm);
             let color = document.querySelector('#color');
             color.style.position = 'absolute';
@@ -97,7 +97,7 @@
 
             apiPut('Product/' + productId, formData).then(result => {
                 if (result)
-                    window.location.href = '/Producten/Producten';
+                    window.location.href = '/Producten/Beheren';
             });
         });
     });
