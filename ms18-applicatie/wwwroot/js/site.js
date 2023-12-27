@@ -448,18 +448,10 @@ LOGIN_FORM?.querySelector('.login-button')?.addEventListener('click', () => {
 
     let email = LOGIN_FORM.querySelector('.login-email')?.value;
     let password = LOGIN_FORM.querySelector('.login-password')?.value;
-    let guestCheckbox = LOGIN_FORM.querySelector('.login-guest');
     LOGIN_FORM.querySelector('.login-password').value = null;
-
-    console.log(email, password, guestCheckbox);
     
     if (!email)
         return;
-
-    if (!password && guestCheckbox)
-        guestCheckbox.checked = true;
-    if (guestCheckbox?.checked)
-        password = '';
     
     hideElement(LOGIN_FORM);
 

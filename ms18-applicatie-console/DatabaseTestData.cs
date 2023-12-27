@@ -60,20 +60,20 @@ namespace Maasgroep.Console
                 CurrentMembers = db.Member.ToDictionary(m => m.Name, m => m);
                 var verySafePassword = GetPasswordHash("123456");
                 var emptyPassword = GetPasswordHash("");
-                var admin = CurrentMembers.ContainsKey("Admin") ? CurrentMembers["Admin"] : new Member() { Id = 1, Name = "Admin", Email = "admin@example.com", Color = "#3366FF", Password = verySafePassword };
+                var admin = CurrentMembers.ContainsKey("Admin") ? CurrentMembers["Admin"] : new Member() { Name = "Admin", Email = "admin@example.com", Color = "#3366FF", Password = verySafePassword };
                 var members = new Dictionary<string, Member>
                 {
                     ["Admin"] = admin,
-                    ["Lid"] = new Member() { Name = "Lid", MemberCreated = admin, Email = "lid@example.com", Color = "#FF2222", Password = verySafePassword },
+                    ["Lid"] = new Member() { Name = "Lid", Email = "lid@example.com", Color = "#FF2222", Password = verySafePassword },
                  
                     // Team B
-                    ["Gast"] = new Member() { Name = "Gast", MemberCreated = admin, Email = "gast@example.com", Color = "#ABCDEF", IsGuest = true, Password = emptyPassword },
-                    ["Bar"] = new Member() { Name = "Bar", MemberCreated = admin, Email = "bar@example.com", Color = "#00CCFF", Password = verySafePassword },
-                    ["Product"] = new Member() { Name = "Product", MemberCreated = admin, Email = "product@example.com", Color = "#FFCC00", Password = verySafePassword },
+                    ["Gast"] = new Member() { Name = "Gast", Email = "gast@example.com", Color = "#ABCDEF", IsGuest = true, Password = emptyPassword },
+                    ["Bar"] = new Member() { Name = "Bar", Email = "bar@example.com", Color = "#00CCFF", Password = verySafePassword },
+                    ["Product"] = new Member() { Name = "Product", Email = "product@example.com", Color = "#FFCC00", Password = verySafePassword },
 
                     // Team C
-                    ["Goedkeur"] = new Member() { Name = "Goedkeur", MemberCreated = admin, Email = "goedkeur@example.com", Color = "#00CC00", Password = verySafePassword },
-                    ["Betaal"] = new Member() { Name = "Betaal", MemberCreated = admin, Email = "betaal@example.com", Color = "#CC00FF", Password = verySafePassword },
+                    ["Goedkeur"] = new Member() { Name = "Goedkeur", Email = "goedkeur@example.com", Color = "#00CC00", Password = verySafePassword },
+                    ["Betaal"] = new Member() { Name = "Betaal", Email = "betaal@example.com", Color = "#CC00FF", Password = verySafePassword },
                 };
 
                 foreach (var member in members) {
@@ -104,7 +104,7 @@ namespace Maasgroep.Console
                     "receipt", // Toegang tot het "receipt" gedeelte: eigen bonnetjes inzien, indienen, wijzigen
                     "receipt.approve", // Mag receipts zien en goed/afkeuren
                     "receipt.pay", // Mag receipts zien en uitbetalen
-                }.ToDictionary(name => name, name => new Permission() { Name = name, MemberCreatedId = 1 });
+                }.ToDictionary(name => name, name => new Permission() { Name = name });
 
                 foreach (var permission in permissions) {
                     if (!currentPermissions.ContainsKey(permission.Key)) {
@@ -119,14 +119,14 @@ namespace Maasgroep.Console
                 var currentMemberPermissions = db.MemberPermission.ToDictionary(mp => $"{mp.MemberId}/{mp.PermissionId}", mp => mp);
                 var memberPermissions = new List<MemberPermission>()
                 {
-                    new MemberPermission() { MemberId = CurrentMembers["Admin"]!.Id, Permission = currentPermissions["admin"], MemberCreatedId = 1 },
-                    new MemberPermission() { MemberId = CurrentMembers["Lid"]!.Id, Permission = currentPermissions["order"], MemberCreatedId = 1 },
-                    new MemberPermission() { MemberId = CurrentMembers["Lid"]!.Id, Permission = currentPermissions["receipt"], MemberCreatedId = 1 },
-                    new MemberPermission() { MemberId = CurrentMembers["Gast"]!.Id, Permission = currentPermissions["order"], MemberCreatedId = 1 },
-                    new MemberPermission() { MemberId = CurrentMembers["Bar"]!.Id, Permission = currentPermissions["order.view"], MemberCreatedId = 1 },
-                    new MemberPermission() { MemberId = CurrentMembers["Product"]!.Id, Permission = currentPermissions["order.product"], MemberCreatedId = 1 },
-                    new MemberPermission() { MemberId = CurrentMembers["Goedkeur"]!.Id, Permission = currentPermissions["receipt.approve"], MemberCreatedId = 1 },
-                    new MemberPermission() { MemberId = CurrentMembers["Betaal"]!.Id, Permission = currentPermissions["receipt.pay"], MemberCreatedId = 1 },
+                    new MemberPermission() { MemberId = CurrentMembers["Admin"]!.Id, Permission = currentPermissions["admin"] },
+                    new MemberPermission() { MemberId = CurrentMembers["Lid"]!.Id, Permission = currentPermissions["order"] },
+                    new MemberPermission() { MemberId = CurrentMembers["Lid"]!.Id, Permission = currentPermissions["receipt"] },
+                    new MemberPermission() { MemberId = CurrentMembers["Gast"]!.Id, Permission = currentPermissions["order"] },
+                    new MemberPermission() { MemberId = CurrentMembers["Bar"]!.Id, Permission = currentPermissions["order.view"] },
+                    new MemberPermission() { MemberId = CurrentMembers["Product"]!.Id, Permission = currentPermissions["order.product"] },
+                    new MemberPermission() { MemberId = CurrentMembers["Goedkeur"]!.Id, Permission = currentPermissions["receipt.approve"] },
+                    new MemberPermission() { MemberId = CurrentMembers["Betaal"]!.Id, Permission = currentPermissions["receipt.pay"] },
                 };
 
                 foreach (var memberPermission in memberPermissions) {
@@ -154,7 +154,7 @@ namespace Maasgroep.Console
             {
                 if (!db.CostCentre.Any())
                 {
-                    var costCentre = new CostCentre() { Name = "Algemene middelen", MemberCreatedId = 1 };
+                    var costCentre = new CostCentre() { Name = "Algemene middelen" };
                     db.CostCentre.Add(costCentre);
                     var rows = db.SaveChanges();
                     System.Console.WriteLine($"Number of cost centres: {rows}");
@@ -178,7 +178,6 @@ namespace Maasgroep.Console
             {
                 if (!db.Product.Any())
                 {
-                    var member = db.Member.Where(m => m.Name == "admin").FirstOrDefault()!;
 
                     var products = new List<Product>()
                     {
@@ -189,12 +188,10 @@ namespace Maasgroep.Console
                             Icon = "fas fa-bowl",
                             Price = 3.45,
                             PriceQuantity = 1,
-                            MemberCreated = member,
                         },
                         new Product()
                         {
                             Name = "Vorta Cola",
-                            MemberCreated = member,
                             Color = "#FFF000",
                             Icon = "fas fa-bottle",
                             Price = 3.45,
@@ -206,7 +203,6 @@ namespace Maasgroep.Console
                             Icon = "fas fa-cup",
                             Price = 3.45,
                             PriceQuantity = 1,
-                            MemberCreated = member,
                         }
                     };
                     db.Product.AddRange(products);
@@ -229,7 +225,6 @@ namespace Maasgroep.Console
             {
                 if (!db.Stock.Any())
                 {
-                    var member = CurrentMembers["Admin"];
 
                     var product1 = db.Product.Take(1).FirstOrDefault();
                     var product2 = db.Product.Skip(1).Take(1).FirstOrDefault();
@@ -238,8 +233,8 @@ namespace Maasgroep.Console
                     {
                         var stockToAdd = new List<Stock>()
                         {
-                            new Stock() { MemberCreated = member, Product = product1, Quantity = 5 },
-                            new Stock() { MemberCreated = member, Product = product2, Quantity = 10 }
+                            new Stock() { Product = product1, Quantity = 5 },
+                            new Stock() { Product = product2, Quantity = 10 }
                         };
                         db.Stock.AddRange(stockToAdd);
                     }
@@ -319,10 +314,10 @@ namespace Maasgroep.Console
 
                         var linesToAdd = new List<Line>()
                         {
-                            new Line() { Bill = bill1, Product = product1!, Name = product1!.Name, Price = product1!.Price, Quantity = 1, Amount = product1!.Price * 1, MemberCreatedId = 1 },
-                            new Line() { Bill = bill2, Product = product2!, Name = product2!.Name, Price = product2!.Price, Quantity = 2, Amount = product2!.Price * 2, MemberCreatedId = 1 },
-                            new Line() { Bill = bill3, Product = product1!, Name = product1!.Name, Price = product1!.Price, Quantity = 3, Amount = product1!.Price * 3, MemberCreatedId = 1 },
-                            new Line() { Bill = bill3, Product = product2!, Name = product2!.Name, Price = product2!.Price, Quantity = 4, Amount = product2!.Price * 4, MemberCreatedId = 1 },
+                            new Line() { Bill = bill1, Product = product1!, Name = product1!.Name, Price = product1!.Price, Quantity = 1, Amount = product1!.Price * 1 },
+                            new Line() { Bill = bill2, Product = product2!, Name = product2!.Name, Price = product2!.Price, Quantity = 2, Amount = product2!.Price * 2 },
+                            new Line() { Bill = bill3, Product = product1!, Name = product1!.Name, Price = product1!.Price, Quantity = 3, Amount = product1!.Price * 3 },
+                            new Line() { Bill = bill3, Product = product2!, Name = product2!.Name, Price = product2!.Price, Quantity = 4, Amount = product2!.Price * 4 },
                         };
 
                         db.OrderLines.AddRange(linesToAdd);
