@@ -1,11 +1,11 @@
-<h1>Nieuw product</h1>
+<h1>Gebruiker aanmaken</h1>
 
 <div id="login-user" class="hidden">
     <p id="login-info">Hallo <span rel="name"></span>!</p>
 
-    <p>Maak hier een nieuw product aan:</p>
+    <p>Maak hier een nieuwe (gast)gebruiker aan:</p>
 
-    <form method="post" id="product-form">
+    <form method="post" id="user-form">
 
         <table class="data-table">
             <tr>
@@ -13,33 +13,21 @@
                 <td><input type="text" name="Name" rel="name:value"></td>
             </tr>
             <tr>
-                <td>Prijs: </td>
-                <td><input type="number" name="Price" step="0.01" value="0" rel="price:value"></td>
-            </tr>
-            <tr>
-                <td>Icoon: </td>
-                <td><input type="text" name="Icon" rel="icon:value"></td>
+                <td>E-mailadres: </td>
+                <td><input type="text" name="Email" rel="email:value"></td>
             </tr>
             <tr>
                 <td>Kleur:</td>
                 <td><input type="text" name="Color" rel="color:value"> <div id="color" rel="color:data-color"></div></td>
             </tr>
             <tr>
-                <td>Aantal per prijs: </td>
-                <td><input type="number" name="PriceQuantity" value="1" rel="priceQuantity:value"></td>
-            </tr>
-            <tr>
-                <td>Aantal op voorraad: </td>
-                <td><input type="number" name="Stock" value="0" rel="stock:value"></td>
-            </tr>
-            <tr>
                 <td></td>
-                <td><input type="submit" value="Product opslaan" class="btn btn-primary"></td>
+                <td><input type="submit" value="Gebruiker aanmaken" class="btn btn-primary"></td>
             </tr>
         </table>
     </form>
-    
-    <p><a href="/Producten/Beheren">Terug naar Producten</a></p>
+
+    <p><a href="/Ledenbeheer">Terug naar Ledenbeheer</a></p>
 </div>
 
 
@@ -51,9 +39,9 @@
         showElement(document.querySelector('#login-user'));
         showOutput(member, document.querySelector('#login-info'));
 
-        const productForm = document.querySelector('#product-form');
+        const userForm = document.querySelector('#user-form');
 
-        productForm.querySelector('input[name="Color"]').addEventListener('change', event => {
+        userForm.querySelector('input[name="Color"]').addEventListener('change', event => {
             let color = document.querySelector('#color');
             color.dataset.color = event.target.value;
             color.style.backgroundColor = color.dataset.color;
@@ -63,24 +51,24 @@
             color.style.display = 'inline-block';
         });
 
-        productForm.addEventListener('submit', event => {
+        userForm.addEventListener('submit', event => {
             // Submit form
 
             event.preventDefault();
             
             let formData = {};
-            productForm.querySelectorAll('input[name],textarea[name],select[name]').forEach(input => {
+            userForm.querySelectorAll('input[name],textarea[name],select[name]').forEach(input => {
                 formData[input.name] = input.value;
                 if (input.type == "number" || input.name.match(/Id$/))
                     formData[input.name] = isNaN(+formData[input.name]) ? 0 : +formData[input.name];
             });
-            hideElement(productForm);
+            hideElement(userForm);
 
             setLoadMessage('Bezig met opslaan...');
 
-            apiPost('Product', formData).then(result => {
+            apiPost('User', formData).then(result => {
                 if (result)
-                    window.location.href = '/Producten/Beheren';
+                    window.location.href = '/Ledenbeheer';
             });
         });
     });

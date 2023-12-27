@@ -22,7 +22,7 @@
             </tr>
             <tr>
                 <td>Kleur:</td>
-                <td style="position:relative"><input type="text" name="Color" rel="color:value"> <div id="color" rel="color:data-color"></div></td>
+                <td><input type="text" name="Color" rel="color:value"> <div id="color" rel="color:data-color"></div></td>
             </tr>
             <tr>
                 <td>Aantal per prijs: </td>
@@ -38,6 +38,8 @@
             </tr>
         </table>
     </form>
+
+    <p><a href="/Producten/Beheren">Terug naar Producten</a></p>
 </div>
 
 
@@ -55,9 +57,6 @@
         productForm.querySelector('input[name="Color"]').addEventListener('change', event => {
             let color = document.querySelector('#color');
             color.dataset.color = event.target.value;
-            color.style.position = 'absolute';
-            color.style.right = '22px';
-            color.style.top = '8px';
             color.style.backgroundColor = color.dataset.color;
             color.style.width = '16px';
             color.style.height = '16px';
@@ -70,9 +69,6 @@
 
             showOutput(result, productForm);
             let color = document.querySelector('#color');
-            color.style.position = 'absolute';
-            color.style.right = '22px';
-            color.style.top = '8px';
             color.style.backgroundColor = color.dataset.color;
             color.style.width = '16px';
             color.style.height = '16px';

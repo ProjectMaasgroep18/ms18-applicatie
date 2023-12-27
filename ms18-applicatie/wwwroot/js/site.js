@@ -179,6 +179,10 @@ function showOutput(data, container) {
             // Return Product url of Product id
             return '/Producten/Aanpassen/' + id;
         },
+        userUrl(id) {
+            // Return User url of User id
+            return '/Ledenbeheer/Aanpassen/' + id;
+        },
         zero(val) {
             // Default to zero instead of "", null, undefined, etc.
             return !val ? 0 : val;

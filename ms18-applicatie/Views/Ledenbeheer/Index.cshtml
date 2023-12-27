@@ -6,6 +6,9 @@
     <p>Hier kun je de accounts van leden beheren.</p>
 
     <div id="members" class="hidden">
+
+        <p><a asp-action="Nieuw"><button class="btn btn-primary">Nieuw account aanmaken</button></a></p>
+
         <p><i>Dit zijn de leden die momenteel in de database staan:</i></p>
 
         <table class="data-table">
@@ -13,6 +16,7 @@
                 <th>Naam</th>
                 <th>E-mailadres</th>
                 <th>Kleur</th>
+                <th>Gast?</th>
                 <th>Rechten</th>
                 <th></th>
             </tr>
@@ -29,12 +33,11 @@
                 </td>
                 <td rel="email"></td>
                 <td><div rel="color:data-color"></div> <span rel="color"></span></td>
+                <td class="is-guest" rel="isGuest:data-guest"></td>
                 <td rel="permissions::commaSeparated"></td>
-                <td class="user-actions hidden">
-                    Voorlopig niet aanpasbaar
-                    <a href="#" class="edit-link">Aanpassen</a>
-                    <a href="#" class="save-link hidden">Opslaan</a>
-                    <a href="#" class="delete-link">Verwijderen</a>
+                <td class="user-actions">
+                    <a rel="id:href:userUrl">Aanpassen</a>
+                    <a href="#" class="delete-link" rel="id:data-id">Verwijderen</a>
                 </td>
             </tr>
             <tr class="result-has-more">
@@ -61,69 +64,10 @@
 
         apiGetInfinite('User', memberTable, (elements, members) => {
             for (i in members) {
-                // Newly loaded member
 
                 let element = elements[i];
-
-                //// LEDEN NIET AANPASBAAR
-                hideElement(memberTable.querySelectorAll('.edit-link'));
-                
-                element.querySelector('.member-input')?.addEventListener('keyup', event => {
-                    // Save on enter key
-
-                    if (event.which != 13)
-                        return
-
-                    element.querySelector('.save-link')?.dispatchEvent(new Event('click'));
-                });
-                
-                element.querySelector('.edit-link')?.addEventListener('click', event => {
-                    // Click Edit link
-                    
-                    event.preventDefault();
-
-                    const editId = element.dataset.id;
-                    const memberInput = element.querySelector('.member-input');
-
-                    hideElement(element.querySelector('.member-name'));
-                    hideElement(element.querySelector('.edit-link'));
-                    
-                    showElement(element.querySelector('.save-link'));
-                    showElement(memberInput);
-                    memberInput.focus();
-                });
-
-                element.querySelector('.save-link')?.addEventListener('click', event => {
-                    // Click Save link
-                    
-                    event.preventDefault();
-
-                    const editId = element.dataset.id;
-                    const memberInput = element.querySelector('.member-input');
-                    const newName = memberInput.value;
-
-                    memberInput.disabled = true;
-                    hideElement(element.querySelector('.user-actions'));
-
-                    apiPut('User/' + editId, { id: editId, name: newName }).then(result => {
-                        // Saved the updated member: apply it here too
-
-                        if (!result)
-                            return;
-
-                        const memberName = element.querySelector('.member-name');
-                        showOutput({ id: editId, name: newName }, element);
-                        memberInput.disabled = false;
-
-                        showElement(memberName);
-                        showElement(element.querySelector('.edit-link'));
-                        showElement(element.querySelector('.user-actions'));
-
-                        hideElement(element.querySelector('.save-link'));
-                        hideElement(memberInput);
-                    });
-                });
-                
+                element.querySelector('.is-guest').innerText = element.querySelector('.is-guest').dataset.guest && element.querySelector('.is-guest').dataset.guest != 'false' ? "Ja" : "Nee";
+            
                 element.querySelector('.delete-link')?.addEventListener('click', event => {
                     // Click Delete link
 
@@ -149,76 +93,6 @@
                 color.style.height = '16px';
                 color.style.borderRadius = '16px';
                 color.style.display = 'inline-block';
-            });
-        });
-
-        document.querySelector('#members-add')?.addEventListener('click', event => {
-            // Add member link
-
-            event.preventDefault();
-
-            const baseRow = document.querySelector('#members .result-item');
-            const memberRow = baseRow.cloneNode(true);
-            showElement(memberRow);
-            baseRow.insertAdjacentElement('beforebegin', memberRow);
-            
-            hideElement(document.querySelector('#members .result-add'));
-
-            const memberInput = memberRow.querySelector('.member-input');
-            const saveLink = memberRow.querySelector('.save-link');
-            const deleteLink = memberRow.querySelector('.delete-link');
-
-            hideElement(memberRow.querySelector('.member-name'));
-            hideElement(memberRow.querySelector('.edit-link'));
-            
-            showElement(saveLink);
-            showElement(memberInput);
-            memberInput.focus();
-
-            memberInput.addEventListener('keyup', event => {
-                // Save on enter key
-
-                if (event.which != 13)
-                    return
-
-                saveLink.dispatchEvent(new Event('click'));
-            })
-
-            saveLink.addEventListener('click', event => {
-                // Click Save link of newly added member
-                
-                event.preventDefault();
-                const newName = memberInput.value;
-
-                memberInput.disabled = true;
-                hideElement(memberRow.querySelector('.user-actions'));
-
-                // This newly added member was never saved before, so create it in the database
-
-                apiPost('User/', { name: newName }).then(result => {    
-                    // Saved new member
-
-                    if (!result)
-                        return;
-                    
-                    window.location.href = window.location.href.toString().replace(/#.*$/, '');
-                });
-                return;
-            });
-
-            deleteLink.addEventListener('click', event => {
-                // Click Delete link of newly added member
-                
-                event.preventDefault();
-
-                if (!window.confirm('Weet je zeker dat je deze post wilt verwijderen?'))
-                    return;
-
-                // This newly added member was never saved, just remove it here
-                memberRow.remove();
-                if (memberTable.querySelectorAll('tr:not(.hidden)').length <= 0)
-                    showElement(document.querySelector('#members-empty'));
-                return;
             });
         });
     });

@@ -1,0 +1,141 @@
+<h1>Gebruiker aanpassen</h1>
+
+<div id="login-user" class="hidden">
+    <p id="login-info">Hallo <span rel="name"></span>!</p>
+
+
+    <form method="post" id="user-form">
+
+        <p>Pas hier de gegevens aan van <b rel="name"></b>:</p>
+
+        <p class="is-guest"><b>Dit is een gastaccount. Inloggen is mogelijk zonder wachtwoord.</b></p>
+
+        <table class="data-table">
+            <tr>
+                <td>Naam: </td>
+                <td><input type="text" name="Name" rel="name:value"></td>
+            </tr>
+            <tr>
+                <td>Kleur:</td>
+                <td><input type="text" name="Color" rel="color:value"> <div id="color" rel="color:data-color"></div></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td><input type="submit" value="Gebruiker opslaan" class="btn btn-primary"></td>
+            </tr>
+            <tr>
+                <td colspan="99">
+                    &nbsp;
+                    <p class="not-guest"><i>Vul onderstaande alleen in als je iets wilt aanpassen:</i></p>
+                    <p class="is-guest"><i>Maak deze gast volwaardig lid door hier een wachtwoord in te stellen:</i></p>
+                </td>
+            </tr>
+            <tr>
+                <td>Je huidige wachtwoord: </td>
+                <td><input type="password" class="credentials-input" name="CurrentPassword"></td>
+            </tr>
+            <tr>
+                <td>Nieuw e-mailadres: </td>
+                <td><input type="text" class="credentials-input" name="NewEmail" rel="email:placeholder"></td>
+            </tr>
+            <tr>
+                <td>Nieuw wachtwoord: </td>
+                <td><input type="password" id="new-password" class="credentials-input" name="NewPassword" placeholder="••••••••••"></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td><input type="button" id="credentials-button" value="Gegevens opslaan" class="btn btn-primary"></td>
+            </tr>
+        </table>
+    </form>
+
+    <p><a href="/Ledenbeheer">Terug naar Ledenbeheer</a></p>
+</div>
+
+
+@section scripts {
+<script>
+    requireLogin(member => {
+        // User session loaded
+     
+        showElement(document.querySelector('#login-user'));
+        showOutput(member, document.querySelector('#login-info'));
+
+        const userId = @ViewData["id"];
+        const userForm = document.querySelector('#user-form');
+
+        userForm.querySelector('input[name="Color"]').addEventListener('change', event => {
+            let color = document.querySelector('#color');
+            color.dataset.color = event.target.value;
+            color.style.backgroundColor = color.dataset.color;
+            color.style.width = '16px';
+            color.style.height = '16px';
+            color.style.borderRadius = '16px';
+            color.style.display = 'inline-block';
+        });
+
+        apiGet('User/' + userId).then(result => {
+            // Existing user loaded
+
+            showOutput(result, userForm);
+            let color = document.querySelector('#color');
+            color.style.backgroundColor = color.dataset.color;
+            color.style.width = '16px';
+            color.style.height = '16px';
+            color.style.borderRadius = '16px';
+            color.style.display = 'inline-block';
+
+            if (result.isGuest) {
+                showElement(userForm.querySelectorAll('.is-guest'));
+                hideElement(userForm.querySelectorAll('.not-guest'));
+                userForm.querySelector('#new-password').placeholder = '';
+            } else {
+                hideElement(userForm.querySelectorAll('.is-guest'));
+                showElement(userForm.querySelectorAll('.not-guest'));
+            }
+        });
+
+        userForm.addEventListener('submit', event => {
+            // Submit form
+
+            event.preventDefault();
+            
+            let formData = {};
+            userForm.querySelectorAll('input[name]:not(.credentials-input),textarea[name]:not(.credentials-input),select[name]:not(.credentials-input)').forEach(input => {
+                formData[input.name] = input.value;
+                if (input.type == "number" || input.name.match(/Id$/))
+                    formData[input.name] = isNaN(+formData[input.name]) ? 0 : +formData[input.name];
+            });
+            hideElement(userForm);
+
+            setLoadMessage('Bezig met opslaan...');
+
+            apiPut('User/' + userId, formData).then(result => {
+                if (result)
+                    window.location.href = '/Ledenbeheer';
+            });
+        });
+
+        userForm.querySelector('#credentials-button').addEventListener('click', event => {
+            // Submit credentials form
+
+            event.preventDefault();
+            
+            let formData = {};
+            userForm.querySelectorAll('input[name],textarea[name],select[name]').forEach(input => {
+                formData[input.name] = input.value;
+                if (input.type == "number" || input.name.match(/Id$/))
+                    formData[input.name] = isNaN(+formData[input.name]) ? 0 : +formData[input.name];
+            });
+            hideElement(userForm);
+
+            setLoadMessage('Bezig met opslaan...');
+
+            apiPut('User/' + userId + '/Credentials', formData).then(result => {
+                if (result)
+                    window.location.href = '/Ledenbeheer';
+            });
+        });
+    });
+</script>
+}

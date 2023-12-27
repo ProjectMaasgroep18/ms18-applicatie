@@ -8,4 +8,15 @@ public class LedenbeheerController : Controller
     {
         return View();
     }
+
+    public IActionResult Nieuw()
+    {
+        return View();
+    }
+
+    public IActionResult Aanpassen(long id)
+    {
+        ViewData["id"] = id;
+        return View();
+    }
 }
