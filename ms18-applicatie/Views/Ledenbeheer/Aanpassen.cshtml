@@ -21,7 +21,7 @@
             </tr>
             <tr>
                 <td></td>
-                <td><input type="submit" value="Gebruiker opslaan" class="btn btn-primary"></td>
+                <td><input type="submit" value="Gegevens opslaan" class="btn btn-primary"></td>
             </tr>
             <tr>
                 <td colspan="99">
@@ -41,6 +41,12 @@
             <tr>
                 <td>Nieuw wachtwoord: </td>
                 <td><input type="password" id="new-password" class="credentials-input" name="NewPassword" placeholder="••••••••••"></td>
+            </tr>
+            <tr>
+                <td>Rechten: </td>
+                <td id="user-permissions">
+                    <label id="user-permission" class="hidden" style="display:block"><input type="checkbox" class="credentials-input"> <span></span></label>
+                </td>
             </tr>
             <tr>
                 <td></td>
@@ -64,17 +70,7 @@
         const userId = @ViewData["id"];
         const userForm = document.querySelector('#user-form');
 
-        userForm.querySelector('input[name="Color"]').addEventListener('change', event => {
-            let color = document.querySelector('#color');
-            color.dataset.color = event.target.value;
-            color.style.backgroundColor = color.dataset.color;
-            color.style.width = '16px';
-            color.style.height = '16px';
-            color.style.borderRadius = '16px';
-            color.style.display = 'inline-block';
-        });
-
-        apiGet('User/' + userId).then(result => {
+        apiGet('User/' + userId).then(async result => {
             // Existing user loaded
 
             showOutput(result, userForm);
@@ -93,6 +89,44 @@
                 hideElement(userForm.querySelectorAll('.is-guest'));
                 showElement(userForm.querySelectorAll('.not-guest'));
             }
+
+            // Load all permissions
+            let permissionPage = 1;
+            let permissions = [];
+            let newPermissions;
+            do {
+                newPermissions = await apiGetInfinite('User/Permissions', null, null, null, permissionPage);
+                newPermissions.forEach(c => permissions.push(c.name));
+                permissionPage++;
+            } while (newPermissions && newPermissions.length > 0);
+
+            permissions.sort();
+
+            let permissionsContainer = userForm.querySelector('#user-permissions');
+            for (i in permissions) {
+                // Generate permissions checkboxes
+
+                let permission = userForm.querySelector('#user-permission').cloneNode(true);
+                permission.id = permission.id + '-' + permissions[i].replace(/\W/g, '-');
+                permission.querySelector('span').innerText = permissions[i];
+                permission.querySelector('input').value = permissions[i];
+                permission.querySelector('input').checked = result.permissions.indexOf(permissions[i]) > -1;
+                if (result.id == member.id) // You can't edit your own permissions
+                    permission.querySelector('input').disabled = true;
+                permissionsContainer.appendChild(permission);
+                showElement(permission);
+            }
+            userForm.querySelector('#user-permission').remove();
+
+            userForm.querySelector('input[name="Color"]').addEventListener('change', event => {
+                let color = document.querySelector('#color');
+                color.dataset.color = event.target.value;
+                color.style.backgroundColor = color.dataset.color;
+                color.style.width = '16px';
+                color.style.height = '16px';
+                color.style.borderRadius = '16px';
+                color.style.display = 'inline-block';
+            });
         });
 
         userForm.addEventListener('submit', event => {
@@ -128,6 +162,21 @@
                     formData[input.name] = isNaN(+formData[input.name]) ? 0 : +formData[input.name];
             });
             hideElement(userForm);
+
+            formData.newPermissions = null;
+
+            console.log(userId, member.id);
+
+            if (userId != member.id) {
+                // Don't even try to submit permissions for current user
+
+                let newPermissions = [];
+                userForm.querySelectorAll('#user-permissions input[type="checkbox"]').forEach(el => {
+                    if (el.checked)
+                        newPermissions.push(el.value);
+                });
+                formData.newPermissions = newPermissions;
+            }
 
             setLoadMessage('Bezig met opslaan...');
 

@@ -32,6 +32,7 @@ builder.Services.AddHttpContextAccessor();
 // - Admin/login
 builder.Services.AddScoped<IMemberRepository, MemberRepository>();
 builder.Services.AddScoped<ITokenStoreRepository, TokenStoreRepository>();
+builder.Services.AddScoped<IPermissionRepository, PermissionRepository>();
 
 // - Receipt
 builder.Services.AddScoped<ICostCentreRepository, CostCentreRepository>();

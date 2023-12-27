@@ -134,6 +134,19 @@ async function requireLogin(onValidLogin) {
 
     let afterLogin = member => {
         showElement(document.querySelectorAll('.login-only'));
+        let userCircle = document.querySelector('#user-circle');
+        if (userCircle) {
+            userCircle.style.width = '24px';
+            userCircle.style.height = '24px';
+            userCircle.style.borderRadius = '24px';
+            userCircle.style.fontSize = '15px';
+            userCircle.style.fontWeight = '700';
+            userCircle.style.textAlign = 'center';
+            userCircle.style.color = '#FFF';
+            userCircle.style.textShadow = '#000 0 0 3px';
+            userCircle.style.backgroundColor = member.color;
+            userCircle.innerText = member.name.length > 0 ? member.name[0] : "";
+        }
         let tokenEl = document.querySelector('#login-token');
         if (tokenEl)
             tokenEl.innerText = localStorage.getItem("AUTH_TOKEN");

@@ -19,14 +19,16 @@ public class UserController : EditableRepositoryController<IMemberRepository, Me
     protected readonly IReceiptRepository Receipts;
     protected readonly IBillRepository Bills;
     protected readonly ITokenStoreRepository TokenStore;
+    protected readonly IPermissionRepository Permissions;
     protected readonly IConfiguration Config;
     public override string ItemName { get => "Gebruiker"; }
 
-    public UserController(IMemberRepository repository, IReceiptRepository receipts, IBillRepository bills, ITokenStoreRepository tokenStore, IConfiguration config) : base(repository)
+    public UserController(IMemberRepository repository, IReceiptRepository receipts, IBillRepository bills, ITokenStoreRepository tokenStore, IPermissionRepository permissions, IConfiguration config) : base(repository)
     {
         Receipts = receipts;
         Bills = bills;
         TokenStore = tokenStore;
+        Permissions = permissions;
         Config = config;
     }
 
@@ -109,6 +111,14 @@ public class UserController : EditableRepositoryController<IMemberRepository, Me
         if (!HasPermission("order.view"))
             NoAccess();
         return Ok(Bills.ListByEmail(email, offset, limit, includeDeleted));
+    }
+
+    [HttpGet("Permissions")]
+    public IActionResult GetAllPermissions([FromQuery] int offset = default, [FromQuery] int limit = default)
+    {   
+        if (CurrentMember == null)
+            NoAccess();
+        return Ok(Permissions.ListAll(offset, limit));
     }
 
     [HttpGet("{id}/BillTotal")]
