@@ -12,7 +12,7 @@ public class BillController : DeletableRepositoryController<IBillRepository, Bil
     public BillController(IBillRepository repository) : base(repository) {}
     
     protected override bool AllowCreate(BillData Bill)
-        => true; // Everyone can place orders, even not logged in (= guest)
+        => HasPermission("order");
 
     protected override bool AllowList()
         => HasPermission("order.view");

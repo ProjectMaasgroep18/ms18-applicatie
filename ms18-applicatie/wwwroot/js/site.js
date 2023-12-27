@@ -421,7 +421,7 @@ LOGIN_FORM?.querySelector('.login-email')?.addEventListener('keyup', event => {
 });
 
 LOGIN_FORM?.querySelector('.login-password')?.addEventListener('keyup', event => {
-    if (event.which != 13 || !event.target.value)
+    if (event.which != 13)
         return;
     LOGIN_FORM?.querySelector('.login-button')?.dispatchEvent(new Event('click'));
 });
@@ -431,10 +431,18 @@ LOGIN_FORM?.querySelector('.login-button')?.addEventListener('click', () => {
 
     let email = LOGIN_FORM.querySelector('.login-email')?.value;
     let password = LOGIN_FORM.querySelector('.login-password')?.value;
+    let guestCheckbox = LOGIN_FORM.querySelector('.login-guest');
     LOGIN_FORM.querySelector('.login-password').value = null;
+
+    console.log(email, password, guestCheckbox);
     
-    if (!email || !password)
+    if (!email)
         return;
+
+    if (!password && guestCheckbox)
+        guestCheckbox.checked = true;
+    if (guestCheckbox?.checked)
+        password = '';
     
     hideElement(LOGIN_FORM);
 

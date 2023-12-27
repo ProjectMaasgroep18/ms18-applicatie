@@ -27,6 +27,7 @@ namespace Maasgroep.Database.Orders
             return new BillModel() {
                 Id = bill.Id,
                 Name = bill.Name,
+                Email = bill.Email,
                 Note = bill.Note,
                 IsGuest = bill.IsGuest,
                 MemberCreated = member,
@@ -62,6 +63,7 @@ namespace Maasgroep.Database.Orders
             var bill = new Bill
             {
                 Name = data.Name,
+                Email = data.Email,
                 Note = data.Note,
                 Lines = lines.ToList()
                     .Select(line => Lines.GetRecord(line.Value))
@@ -79,7 +81,14 @@ namespace Maasgroep.Database.Orders
         {
             var saveAction = base.GetSaveAction(record);
             return (MaasgroepContext db) => {
-                record.IsGuest = record.MemberCreatedId == null;
+                var member = record.MemberCreated;
+                if (member == null && record.MemberCreatedId != null)
+                    member = db.Member.Where(m => m.Id == record.MemberCreatedId).FirstOrDefault();
+                if (record.Name == null || record.Name == "")
+                    record.Name = member?.Name;
+                if (record.Email == null || record.Email == "")
+                    record.Email = member?.Email;
+                record.IsGuest = record.MemberCreatedId == null || (member?.IsGuest ?? true);
                 saveAction.Invoke(db);
             };
         }

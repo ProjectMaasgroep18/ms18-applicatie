@@ -47,8 +47,14 @@ public class UserController : EditableRepositoryController<IMemberRepository, Me
         return true;
     }
 
-    protected override bool AllowEdit(Member? member, MemberData newData)
-        => CurrentMember?.Id != null && (member?.Id == CurrentMember.Id || HasPermission("admin"));
+    protected override bool AllowEdit(Member? member, MemberData? newData)
+    {
+        if (CurrentMember?.Id == null || (member?.Id != CurrentMember.Id && !HasPermission("admin")))
+            return false;
+        if (newData?.Email != null && newData.Email != "" && newData.Email != member?.Email)
+            throw new MaasgroepForbidden("E-mailadres wijzigen kan alleen via Credentials");
+        return true;
+    }
 
     [HttpPut("{id}/Credentials")]
     public IActionResult UserChangeCredentials(long id, [FromBody] MemberCredentialsData newCredentials)
@@ -56,11 +62,14 @@ public class UserController : EditableRepositoryController<IMemberRepository, Me
         var member = Repository.GetById(id);
         if (member == null || !AllowView(member))
             NotFound();
-        if (!AllowEdit(member!, new()))
+        if (!AllowEdit(member, null))
             NoAccess();
 
         if (member?.Id == CurrentMember!.Id && newCredentials.NewPermissions != null)
             throw new MaasgroepForbidden("Je mag niet je eigen rechten aanpassen");
+
+        if (member?.Id == CurrentMember!.Id && member.IsGuest)
+            throw new MaasgroepForbidden("Als gast heb je geen toegang tot deze functie");
 
         // Current user should supply their password to edit credentials
         if (newCredentials.NewPassword != null || newCredentials.NewPermissions != null)
@@ -108,6 +117,7 @@ public class UserController : EditableRepositoryController<IMemberRepository, Me
     [HttpPost("Login")]
     public IActionResult Login([FromBody] LoginData data)
     {
+        data.Password ??= "";
         var user = Repository.GetByEmail(data.Email, data.Password) ?? throw new MaasgroepUnauthorized("E-mailadres of wachtwoord is niet juist");
         
         var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Config["Jwt:Key"] ?? ""));

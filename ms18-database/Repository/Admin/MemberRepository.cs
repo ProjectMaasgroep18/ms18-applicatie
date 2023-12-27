@@ -27,6 +27,7 @@ namespace Maasgroep.Database.Admin
                 Name = member.Name,
                 Email = member.Email ?? "",
                 Color = member.Color,
+                IsGuest = member.IsGuest,
                 Permissions = GetPermissions(member.Id),
             };
         }
@@ -37,11 +38,16 @@ namespace Maasgroep.Database.Admin
             var member = existingMember ?? new();
             member.Name = data.Name;
             member.Color = data.Color;
+            if (existingMember == null)
+                member.Email = data.Email;
             var credentials = data as MemberCredentialsData;
-            if (credentials?.NewEmail != null)
+            if (credentials?.NewEmail != null && credentials.NewEmail != "")
                 member.Email = credentials.NewEmail;
-            if (credentials?.NewPassword != null && credentials?.NewPassword != "")
-                member.Password = GetPasswordHash(credentials!.NewPassword);
+            if (credentials?.NewPassword != null && credentials.NewPassword != "")
+            {
+                member.Password = GetPasswordHash(credentials.NewPassword);
+                member.IsGuest = false;
+            }
             if (credentials?.NewPermissions != null)
                 ChangePermissions(member.Id, credentials!.NewPermissions);
             return member;
@@ -119,6 +125,7 @@ namespace Maasgroep.Database.Admin
                 Name = member.Name,
                 Color = member.Color,
                 Email = member.Email,
+                IsGuest = member.IsGuest,
                 MemberPermissions = String.Join('|', MemberPermissions[member.Id]),
             };
         }
@@ -130,8 +137,20 @@ namespace Maasgroep.Database.Admin
             return (MaasgroepContext db) => {
                 saveAction.Invoke(db);
                 var memoizedId = record.Id; // Zero for new member
-                if (record.Id == 0)
-                    db.SaveChanges(); // Member did not exist yet; save it first so it gets an ID
+                if (memoizedId == 0)
+                {
+                    if (record.Password == null || record.Password == "")
+                    {
+                        // Mark new member without a password as Guest
+                        record.IsGuest = true;
+                        record.Password = GetPasswordHash("");
+                    }
+                    // Give new member the "order" permission by default
+                    if (!AddedMemberPermissions.ContainsKey(0))
+                        AddedMemberPermissions[0] = new string[] { "order" };
+                    // Member did not exist yet; save it so it gets an ID
+                    db.SaveChanges();
+                }
                 if (AddedMemberPermissions.ContainsKey(memoizedId))
                 {
                     // Permissions were added: find their IDs in the database 
