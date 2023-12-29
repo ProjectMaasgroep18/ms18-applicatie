@@ -7,7 +7,7 @@ public class PhotoViewModel
     [Required]
     public Guid Id { get; set; }
     [Required]
-    public long UploaderId { get; set; }
+    public long? UploaderId { get; set; }
     [Required]
     public DateTime UploadDate { get; set; }
     public string? Title { get; set; }
@@ -18,7 +18,7 @@ public class PhotoViewModel
     public DateTime? TakenOn { get; set; }
     public string? Location { get; set; }
     [Required]
-    public Guid AlbumLocationId { get; set; }
+    public Guid? AlbumLocationId { get; set; }
     [Required]
     public int LikesCount { get; set; }
 }

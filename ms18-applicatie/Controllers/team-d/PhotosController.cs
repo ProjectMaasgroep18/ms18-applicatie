@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Maasgroep.SharedKernel.ViewModels.Admin;
+using Microsoft.AspNetCore.Mvc;
+using ms18_applicatie.Attributes;
 using ms18_applicatie.Interfaces;
 using ms18_applicatie.Models.team_d;
 
@@ -24,8 +26,9 @@ public class PhotosController : ControllerBase
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
 
-        var uploaderId = 1L; // TODO Get from authentication
-        var needsApproval = false; // TODO Get from authentication
+        var currentUser = HttpContext.Items["CurrentUser"] as MemberModel;
+        var needsApproval = currentUser == null || (!currentUser.Permissions.Contains("admin") && !currentUser.Permissions.Contains("photoAlbum"));
+        var uploaderId = currentUser?.Id;
 
         try
         {
@@ -47,6 +50,7 @@ public class PhotosController : ControllerBase
     }
 
     [HttpGet("{id}", Name = "GetPhoto")]
+    [PhotoAlbumAuthorization("photoAlbum")]
     [ProducesResponseType(typeof(PhotoViewModel), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -70,6 +74,7 @@ public class PhotosController : ControllerBase
     }
 
     [HttpPut("{id}")]
+    [PhotoAlbumAuthorization("photoAlbum")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -81,9 +86,18 @@ public class PhotosController : ControllerBase
         try
         {
             var photo = await _photoRepository.GetPhotoById(id);
+
             if (photo == null)
             {
                 return NotFound($"Photo with ID {id} not found.");
+            }
+
+            var currentUser = HttpContext.Items["CurrentUser"] as MemberModel;
+            var isCreator = photo.UploaderId == currentUser!.Id;
+            var hasPermission = currentUser.Permissions.Contains("admin") || currentUser.Permissions.Contains("photoAlbum.edit");
+            if (!isCreator && !hasPermission)
+            {
+                return Forbid("You do not have permission to edit this photo.");
             }
 
             photo.Title = updateModel.Title;
@@ -104,6 +118,7 @@ public class PhotosController : ControllerBase
     }
 
     [HttpDelete("{id}")]
+    [PhotoAlbumAuthorization("photoAlbum.edit")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -124,6 +139,7 @@ public class PhotosController : ControllerBase
     }
 
     [HttpGet("{id}/download")]
+    [PhotoAlbumAuthorization("photoAlbum")]
     [ProducesResponseType(typeof(FileContentResult), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(string), StatusCodes.Status500InternalServerError)]
@@ -148,6 +164,7 @@ public class PhotosController : ControllerBase
     }
 
     [HttpGet("album/{albumId}")]
+    [PhotoAlbumAuthorization("photoAlbum")]
     [ProducesResponseType(typeof(PaginatedResponseModel<PhotoViewModel>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(string), StatusCodes.Status500InternalServerError)]

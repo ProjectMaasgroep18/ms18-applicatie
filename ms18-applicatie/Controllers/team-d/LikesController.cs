@@ -1,5 +1,6 @@
 ﻿using Maasgroep.Database.Context.Tables.PhotoAlbum;
 using Microsoft.AspNetCore.Mvc;
+using ms18_applicatie.Attributes;
 using ms18_applicatie.Interfaces;
 using ms18_applicatie.Models.team_d;
 
@@ -20,6 +21,7 @@ public class LikesController : ControllerBase
 
 
     [HttpPost("{photoId}/{userId}")]
+    [PhotoAlbumAuthorization("photoAlbum")]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)] 
     [ProducesResponseType(StatusCodes.Status409Conflict)] 
@@ -59,6 +61,7 @@ public class LikesController : ControllerBase
     }
 
     [HttpDelete("{photoId}/{userId}")]
+    [PhotoAlbumAuthorization("photoAlbum")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(string), StatusCodes.Status500InternalServerError)]
@@ -84,6 +87,7 @@ public class LikesController : ControllerBase
     }
 
     [HttpGet("photo/{photoId}")]
+    [PhotoAlbumAuthorization("photoAlbum")]
     [ProducesResponseType(typeof(IEnumerable<LikeViewModel>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(string), StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> GetAllLikesForPhoto([FromRoute] Guid photoId)
@@ -102,6 +106,7 @@ public class LikesController : ControllerBase
     }
 
     [HttpGet("most-liked")]
+    [PhotoAlbumAuthorization("photoAlbum")]
     [ProducesResponseType(typeof(IEnumerable<PhotoViewModel>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(string), StatusCodes.Status500InternalServerError)]

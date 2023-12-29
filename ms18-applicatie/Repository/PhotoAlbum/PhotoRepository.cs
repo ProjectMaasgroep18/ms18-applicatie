@@ -15,7 +15,7 @@ public class PhotoRepository : IPhotoRepository
         _context = context;
     }
 
-    public async Task<Guid?> AddPhoto(long uploaderId, bool needsApproval, PhotoUploadModel photoUploadModel)
+    public async Task<Guid?> AddPhoto(long? uploaderId, bool needsApproval, PhotoUploadModel photoUploadModel)
     {
         var imageBytes = Convert.FromBase64String(photoUploadModel.ImageData);
 

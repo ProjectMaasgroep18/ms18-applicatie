@@ -5,7 +5,7 @@ namespace ms18_applicatie.Interfaces;
 
 public interface IPhotoRepository
 {
-    Task<Guid?> AddPhoto(long uploaderId, bool needsApproval, PhotoUploadModel photoUploadModel);
+    Task<Guid?> AddPhoto(long? uploaderId, bool needsApproval, PhotoUploadModel photoUploadModel);
     Task<PhotoViewModel?> GetPhotoViewModelById(Guid id);
     Task<Photo?> GetPhotoById(Guid id);
     Task UpdatePhoto(Photo photo);

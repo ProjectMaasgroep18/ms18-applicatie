@@ -11,8 +11,7 @@ namespace ms18_applicatie.Models.team_d
         public string ContentType { get; set; } = null!;
         public string? Location { get; set; }
         public DateTime? TakenOn { get; set; }
-        [Required]
-        public Guid AlbumId { get; set; }
+        public Guid? AlbumId { get; set; }
     }
 
 }
