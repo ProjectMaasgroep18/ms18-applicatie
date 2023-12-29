@@ -1,0 +1,120 @@
+<h1>Je bestellingen</h1>
+
+<div id="login-user" class="hidden">
+    <p id="login-info">Hallo <span rel="name"></span>!</p>
+
+    <div id="bills" class="hidden">
+        <p><i>Dit zijn alle bestellingen die je geplaatst hebt:</i></p>
+
+        <table class="data-table">
+            <tr>
+                <th>Datum</th>
+                <th>Totaalbedrag</th>
+                <th>Opmerkingen</th>
+                <th></th>
+            </tr>
+            
+            <tr class="result-empty hidden">
+                <td colspan="999">Je hebt nog geen bestellingen geplaatst. <a asp-controller="Producten" asp-action="Bestellen">Waarom bestel je niet iets?</a></td>
+            </tr>
+            
+            <tr class="result-item hidden">
+                <td rel="dateTimeCreated::dateTime"></td>
+                <td rel="totalAmount::euro"></td>
+                <td rel="note"></td>
+                <td class="user-actions">
+                    <a href="#" class="item-details" rel="id:data-id,lines:data-lines">Toon producten</a>
+                </td>
+            </tr>
+
+            <tr class="result-has-more hidden">
+                <td colspan="999"><a href="#" class="result-show-more">Toon meer</a></td>
+            </tr>
+
+            <tr class="result-details hidden">
+                <td colspan="99">
+                    <table class="data-table">
+                        <tr>
+                            <td><i>Aantal</i></td>
+                            <td><i>Product</i></td>
+                            <td><i>Prijs</i></td>
+                            <td><i>Bedrag</i></td>
+                        </tr>
+                        <tr class="result-detail-row">
+                            <td rel="quantity"></td>
+                            <td rel="name"></td>
+                            <td rel="price::euro"></td>
+                            <td rel="amount::euro"></td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+
+        &nbsp;
+
+        <div id="order-totals" class="hidden">
+            Je hebt <b rel="billCount"></b> bestellingen geplaatst
+            met daarin <b rel="productQuantity"></b> producten
+            met een totale waarde van <b rel="totalAmount::euro"></b>.
+        </div>
+
+        &nbsp;
+
+        <p><a href="/">Terug naar Home</a></p>
+        
+    </div>
+</div>
+
+@section scripts {
+<script>
+    requireLogin(member => {
+        // User session loaded
+     
+        const userId = member.id;
+        showElement(document.querySelector('#login-user'));
+        showOutput(member, document.querySelector('#login-info'));
+
+        let openDetails = null;
+        
+        const billsDiv = document.querySelector('#bills');
+        
+        apiGetInfinite('User/' + userId + '/Bill', billsDiv, elements => {
+            elements.forEach(el => {
+                el.querySelector('.item-details')?.addEventListener('click', event => {
+                    // Click "Toon producten"
+
+                    event.preventDefault();
+                    let id = event.target.dataset.id;
+                    let details = billsDiv.querySelector('.result-details[data-id="' + id +'"]');
+                    if (details) {
+                        hideElement(billsDiv.querySelectorAll('.result-details'));
+                        if (openDetails == id) {
+                            openDetails = null;
+                        } else {
+                            showElement(details);
+                            openDetails = id;
+                        }
+                        return;
+                    }
+                    hideElement(billsDiv.querySelectorAll('.result-details'));
+                    details = billsDiv.querySelector('.result-details:not([data-id])').cloneNode(true);
+                    details.dataset.id = id;
+                    billsDiv.querySelector('.result-item[data-id="' + id + '"]').insertAdjacentElement('afterend', details);
+                    let emptyLine = details.querySelector('.result-detail-row');
+                    let lines = JSON.parse(event.target.dataset.lines);
+                    for (n in lines) {
+                        let line = emptyLine.cloneNode(true);
+                        details.querySelector('.data-table').appendChild(line);
+                        showOutput(lines[n], line);
+                    }
+                    showElement(details);
+                    openDetails = id;
+                });
+            });
+        });
+
+        apiGet('User/' + userId + '/BillTotal').then(result => showOutput(result, document.querySelector('#order-totals')));
+    });
+</script>
+}

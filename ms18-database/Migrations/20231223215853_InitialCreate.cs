@@ -28,6 +28,9 @@ namespace Maasgroep.Database.Migrations
                 name: "admin");
 
             migrationBuilder.EnsureSchema(
+                name: "adminHistory");
+
+            migrationBuilder.EnsureSchema(
                 name: "orderHistory");
 
             migrationBuilder.CreateSequence(
@@ -41,6 +44,10 @@ namespace Maasgroep.Database.Migrations
             migrationBuilder.CreateSequence(
                 name: "memberSeq",
                 schema: "admin");
+
+            migrationBuilder.CreateSequence(
+                name: "memberSeq",
+                schema: "adminHistory");
 
             migrationBuilder.CreateSequence(
                 name: "permissionSeq",
@@ -71,27 +78,6 @@ namespace Maasgroep.Database.Migrations
                 schema: "orderHistory");
 
             migrationBuilder.CreateTable(
-                name: "albums",
-                schema: "photoAlbum",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    Name = table.Column<string>(type: "text", nullable: false),
-                    ParentAlbumId = table.Column<Guid>(type: "uuid", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_albums", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_albums_albums_ParentAlbumId",
-                        column: x => x.ParentAlbumId,
-                        principalSchema: "photoAlbum",
-                        principalTable: "albums",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "costCentre",
                 schema: "receiptHistory",
                 columns: table => new
@@ -119,8 +105,8 @@ namespace Maasgroep.Database.Migrations
                 {
                     Id = table.Column<long>(type: "bigint", nullable: false, defaultValueSql: "nextval('admin.\"memberSeq\"')"),
                     Name = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: false),
-                    Email = table.Column<string>(type: "text", nullable: false),
-                    Password = table.Column<string>(type: "text", nullable: false),
+                    Email = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
+                    Password = table.Column<string>(type: "text", nullable: true),
                     MemberCreatedId = table.Column<long>(type: "bigint", nullable: true),
                     MemberModifiedId = table.Column<long>(type: "bigint", nullable: true),
                     MemberDeletedId = table.Column<long>(type: "bigint", nullable: true),
@@ -149,6 +135,29 @@ namespace Maasgroep.Database.Migrations
                         principalSchema: "admin",
                         principalTable: "member",
                         principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "member",
+                schema: "adminHistory",
+                columns: table => new
+                {
+                    Id = table.Column<long>(type: "bigint", nullable: false, defaultValueSql: "nextval('\"adminHistory\".\"memberSeq\"')"),
+                    MemberId = table.Column<long>(type: "bigint", nullable: false),
+                    Name = table.Column<string>(type: "character varying(2048)", maxLength: 2048, nullable: false),
+                    Email = table.Column<string>(type: "character varying(2048)", maxLength: 2048, nullable: true),
+                    MemberPermissions = table.Column<string>(type: "character varying(64000)", maxLength: 64000, nullable: false),
+                    RecordCreated = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "now()"),
+                    MemberCreatedId = table.Column<long>(type: "bigint", nullable: true),
+                    MemberModifiedId = table.Column<long>(type: "bigint", nullable: true),
+                    MemberDeletedId = table.Column<long>(type: "bigint", nullable: true),
+                    DateTimeCreated = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    DateTimeModified = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    DateTimeDeleted = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_member", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -220,19 +229,6 @@ namespace Maasgroep.Database.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_stock", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "tags",
-                schema: "photoAlbum",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    Name = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_tags", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -358,40 +354,6 @@ namespace Maasgroep.Database.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "photos",
-                schema: "photoAlbum",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    UploaderId = table.Column<long>(type: "bigint", nullable: false),
-                    UploadDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    Title = table.Column<string>(type: "text", nullable: true),
-                    ImageData = table.Column<byte[]>(type: "bytea", nullable: false),
-                    ContentType = table.Column<string>(type: "text", nullable: false),
-                    TakenOn = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    Location = table.Column<string>(type: "text", nullable: true),
-                    AlbumLocationId = table.Column<Guid>(type: "uuid", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_photos", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_photos_albums_AlbumLocationId",
-                        column: x => x.AlbumLocationId,
-                        principalSchema: "photoAlbum",
-                        principalTable: "albums",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_photos_member_UploaderId",
-                        column: x => x.UploaderId,
-                        principalSchema: "admin",
-                        principalTable: "member",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "product",
                 schema: "order",
                 columns: table => new
@@ -477,33 +439,6 @@ namespace Maasgroep.Database.Migrations
                         principalSchema: "admin",
                         principalTable: "member",
                         principalColumn: "Id");
-                });
-
-            migrationBuilder.CreateTable(
-                name: "albumTags",
-                schema: "photoAlbum",
-                columns: table => new
-                {
-                    AlbumId = table.Column<Guid>(type: "uuid", nullable: false),
-                    TagId = table.Column<Guid>(type: "uuid", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_albumTags", x => new { x.AlbumId, x.TagId });
-                    table.ForeignKey(
-                        name: "FK_albumTags_albums_AlbumId",
-                        column: x => x.AlbumId,
-                        principalSchema: "photoAlbum",
-                        principalTable: "albums",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_albumTags_tags_TagId",
-                        column: x => x.TagId,
-                        principalSchema: "photoAlbum",
-                        principalTable: "tags",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -602,35 +537,6 @@ namespace Maasgroep.Database.Migrations
                         principalSchema: "admin",
                         principalTable: "permission",
                         principalColumn: "Id");
-                });
-
-            migrationBuilder.CreateTable(
-                name: "likes",
-                schema: "photoAlbum",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    MemberId = table.Column<long>(type: "bigint", nullable: false),
-                    PhotoId = table.Column<Guid>(type: "uuid", nullable: false),
-                    LikedOn = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_likes", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_likes_member_MemberId",
-                        column: x => x.MemberId,
-                        principalSchema: "admin",
-                        principalTable: "member",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_likes_photos_PhotoId",
-                        column: x => x.PhotoId,
-                        principalSchema: "photoAlbum",
-                        principalTable: "photos",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -826,18 +732,105 @@ namespace Maasgroep.Database.Migrations
                         principalColumn: "Id");
                 });
 
+            migrationBuilder.CreateTable(
+                name: "albums",
+                schema: "photoAlbum",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Name = table.Column<string>(type: "text", nullable: false),
+                    Year = table.Column<int>(type: "integer", nullable: true),
+                    ParentAlbumId = table.Column<Guid>(type: "uuid", nullable: true),
+                    CoverPhotoId = table.Column<Guid>(type: "uuid", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_albums", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_albums_albums_ParentAlbumId",
+                        column: x => x.ParentAlbumId,
+                        principalSchema: "photoAlbum",
+                        principalTable: "albums",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "photos",
+                schema: "photoAlbum",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    UploaderId = table.Column<long>(type: "bigint", nullable: false),
+                    UploadDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    Title = table.Column<string>(type: "text", nullable: true),
+                    ImageData = table.Column<byte[]>(type: "bytea", nullable: false),
+                    ContentType = table.Column<string>(type: "text", nullable: false),
+                    TakenOn = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    Location = table.Column<string>(type: "text", nullable: true),
+                    NeedsApproval = table.Column<bool>(type: "boolean", nullable: false),
+                    AlbumLocationId = table.Column<Guid>(type: "uuid", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_photos", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_photos_albums_AlbumLocationId",
+                        column: x => x.AlbumLocationId,
+                        principalSchema: "photoAlbum",
+                        principalTable: "albums",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_photos_member_UploaderId",
+                        column: x => x.UploaderId,
+                        principalSchema: "admin",
+                        principalTable: "member",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "likes",
+                schema: "photoAlbum",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    MemberId = table.Column<long>(type: "bigint", nullable: false),
+                    PhotoId = table.Column<Guid>(type: "uuid", nullable: false),
+                    LikedOn = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_likes", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_likes_member_MemberId",
+                        column: x => x.MemberId,
+                        principalSchema: "admin",
+                        principalTable: "member",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_likes_photos_PhotoId",
+                        column: x => x.PhotoId,
+                        principalSchema: "photoAlbum",
+                        principalTable: "photos",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_albums_CoverPhotoId",
+                schema: "photoAlbum",
+                table: "albums",
+                column: "CoverPhotoId");
+
             migrationBuilder.CreateIndex(
                 name: "IX_albums_ParentAlbumId_Name",
                 schema: "photoAlbum",
                 table: "albums",
                 columns: new[] { "ParentAlbumId", "Name" },
                 unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_albumTags_TagId",
-                schema: "photoAlbum",
-                table: "albumTags",
-                column: "TagId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_approval_MemberCreatedId",
@@ -948,6 +941,13 @@ namespace Maasgroep.Database.Migrations
                 column: "ProductId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_member_Email",
+                schema: "admin",
+                table: "member",
+                column: "Email",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_member_MemberCreatedId",
                 schema: "admin",
                 table: "member",
@@ -964,13 +964,6 @@ namespace Maasgroep.Database.Migrations
                 schema: "admin",
                 table: "member",
                 column: "MemberModifiedId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_member_Name",
-                schema: "admin",
-                table: "member",
-                column: "Name",
-                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_memberPermission_MemberCreatedId",
@@ -1118,13 +1111,6 @@ namespace Maasgroep.Database.Migrations
                 column: "MemberModifiedId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_tags_Name",
-                schema: "photoAlbum",
-                table: "tags",
-                column: "Name",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
                 name: "IX_tokenStore_MemberCreatedId",
                 schema: "admin",
                 table: "tokenStore",
@@ -1147,14 +1133,25 @@ namespace Maasgroep.Database.Migrations
                 schema: "admin",
                 table: "tokenStore",
                 column: "MemberModifiedId");
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_albums_photos_CoverPhotoId",
+                schema: "photoAlbum",
+                table: "albums",
+                column: "CoverPhotoId",
+                principalSchema: "photoAlbum",
+                principalTable: "photos",
+                principalColumn: "Id",
+                onDelete: ReferentialAction.SetNull);
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(
-                name: "albumTags",
-                schema: "photoAlbum");
+            migrationBuilder.DropForeignKey(
+                name: "FK_albums_photos_CoverPhotoId",
+                schema: "photoAlbum",
+                table: "albums");
 
             migrationBuilder.DropTable(
                 name: "approval",
@@ -1171,6 +1168,10 @@ namespace Maasgroep.Database.Migrations
             migrationBuilder.DropTable(
                 name: "line",
                 schema: "order");
+
+            migrationBuilder.DropTable(
+                name: "member",
+                schema: "adminHistory");
 
             migrationBuilder.DropTable(
                 name: "memberPermission",
@@ -1201,14 +1202,6 @@ namespace Maasgroep.Database.Migrations
                 schema: "admin");
 
             migrationBuilder.DropTable(
-                name: "tags",
-                schema: "photoAlbum");
-
-            migrationBuilder.DropTable(
-                name: "photos",
-                schema: "photoAlbum");
-
-            migrationBuilder.DropTable(
                 name: "bill",
                 schema: "order");
 
@@ -1225,12 +1218,16 @@ namespace Maasgroep.Database.Migrations
                 schema: "order");
 
             migrationBuilder.DropTable(
-                name: "albums",
+                name: "costCentre",
+                schema: "receipt");
+
+            migrationBuilder.DropTable(
+                name: "photos",
                 schema: "photoAlbum");
 
             migrationBuilder.DropTable(
-                name: "costCentre",
-                schema: "receipt");
+                name: "albums",
+                schema: "photoAlbum");
 
             migrationBuilder.DropTable(
                 name: "member",
@@ -1247,6 +1244,10 @@ namespace Maasgroep.Database.Migrations
             migrationBuilder.DropSequence(
                 name: "memberSeq",
                 schema: "admin");
+
+            migrationBuilder.DropSequence(
+                name: "memberSeq",
+                schema: "adminHistory");
 
             migrationBuilder.DropSequence(
                 name: "permissionSeq",

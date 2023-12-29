@@ -1,13 +1,18 @@
-﻿namespace ms18_applicatie.Models.team_d
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace ms18_applicatie.Models.team_d
 {
     public class PhotoUploadModel
     {
         public string? Title { get; set; }
-        public string ImageBase64 { get; set; } = null!;
+        [Required]
+        public string ImageData { get; set; } = null!;
+        [Required]
         public string ContentType { get; set; } = null!;
-        public Guid AlbumId { get; set; }
         public string? Location { get; set; }
         public DateTime? TakenOn { get; set; }
+        [Required]
+        public Guid AlbumId { get; set; }
     }
 
 }

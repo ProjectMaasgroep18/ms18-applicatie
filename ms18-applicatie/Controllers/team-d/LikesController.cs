@@ -1,6 +1,7 @@
 ﻿using Maasgroep.Database.Context.Tables.PhotoAlbum;
 using Microsoft.AspNetCore.Mvc;
 using ms18_applicatie.Interfaces;
+using ms18_applicatie.Models.team_d;
 
 namespace ms18_applicatie.Controllers.team_d;
 
@@ -19,10 +20,20 @@ public class LikesController : ControllerBase
 
 
     [HttpPost("{photoId}/{userId}")]
+    [ProducesResponseType(StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)] 
+    [ProducesResponseType(StatusCodes.Status409Conflict)] 
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)] 
     public async Task<IActionResult> AddLike([FromRoute] Guid photoId, [FromRoute] long userId)
     {
         try
         {
+            var existingLike = await _likesRepository.GetLike(photoId, userId);
+            if (existingLike != null)
+            {
+                return StatusCode(409, "Like already exists.");
+            }
+
             var newLike = new Like
             {
                 PhotoId = photoId,
@@ -30,9 +41,15 @@ public class LikesController : ControllerBase
                 LikedOn = DateTime.UtcNow
             };
 
-            await _likesRepository.AddLike(newLike);
+            var likeId = await _likesRepository.AddLike(newLike);
 
-            return Ok("Like added successfully.");
+            if (likeId == null || likeId == Guid.Empty)
+            {
+                _logger.LogError("Failed to create like");
+                return StatusCode(500, "An error occurred while adding the like.");
+            }
+
+            return StatusCode(201, "Like added successfully.");
         }
         catch (Exception ex)
         {
@@ -42,6 +59,9 @@ public class LikesController : ControllerBase
     }
 
     [HttpDelete("{photoId}/{userId}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> DeleteLike([FromRoute] Guid photoId, [FromRoute] long userId)
     {
         try
@@ -54,7 +74,7 @@ public class LikesController : ControllerBase
 
             await _likesRepository.DeleteLike(likeToDelete.Id);
 
-            return Ok("Like deleted successfully.");
+            return NoContent();
         }
         catch (Exception ex)
         {
@@ -64,15 +84,13 @@ public class LikesController : ControllerBase
     }
 
     [HttpGet("photo/{photoId}")]
+    [ProducesResponseType(typeof(IEnumerable<LikeViewModel>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> GetAllLikesForPhoto([FromRoute] Guid photoId)
     {
         try
         {
             var likes = await _likesRepository.GetAllLikesForPhoto(photoId);
-            if (likes == null || !likes.Any())
-            {
-                return NotFound("No likes found for this photo.");
-            }
 
             return Ok(likes);
         }
@@ -84,6 +102,9 @@ public class LikesController : ControllerBase
     }
 
     [HttpGet("most-liked")]
+    [ProducesResponseType(typeof(IEnumerable<PhotoViewModel>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> GetTopLikedPhotos([FromQuery] DateTime startDate, [FromQuery] DateTime endDate, [FromQuery] int topCount)
     {
         try

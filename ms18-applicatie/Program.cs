@@ -29,21 +29,27 @@ builder.Services.AddDbContext<MaasgroepContext>(options =>
 builder.Services.AddHttpContextAccessor();
 
 // Add repositories
-builder.Services.AddTransient<ICostCentreRepository, CostCentreRepository>();
-builder.Services.AddTransient<IReceiptRepository, ReceiptRepository>();
-builder.Services.AddTransient<IReceiptApprovalRepository, ReceiptApprovalRepository>();
-builder.Services.AddTransient<IReceiptPhotoRepository, ReceiptPhotoRepository>();
-builder.Services.AddTransient<IReceiptStatusRepository, ReceiptStatusRepository>();
-builder.Services.AddTransient<IMemberRepository, MemberRepository>();
-builder.Services.AddTransient<ITokenStoreRepository, TokenStoreRepository>();
-builder.Services.AddTransient<IProductRepository, ProductRepository>();
-builder.Services.AddTransient<IStockRepository, StockRepository>();
-builder.Services.AddTransient<IBillRepository, BillRepository>();
+// - Admin/login
+builder.Services.AddScoped<IMemberRepository, MemberRepository>();
+builder.Services.AddScoped<ITokenStoreRepository, TokenStoreRepository>();
+builder.Services.AddScoped<IPermissionRepository, PermissionRepository>();
 
+// - Receipt
+builder.Services.AddScoped<ICostCentreRepository, CostCentreRepository>();
+builder.Services.AddScoped<IReceiptRepository, ReceiptRepository>();
+builder.Services.AddScoped<IReceiptApprovalRepository, ReceiptApprovalRepository>();
+builder.Services.AddScoped<IReceiptPhotoRepository, ReceiptPhotoRepository>();
+builder.Services.AddScoped<IReceiptStatusRepository, ReceiptStatusRepository>();
+
+// - Order
+builder.Services.AddScoped<IProductRepository, ProductRepository>();
+builder.Services.AddScoped<IStockRepository, StockRepository>();
+builder.Services.AddScoped<IBillRepository, BillRepository>();
+
+// - PhotoAlbum
 builder.Services.AddScoped<IAlbumRepository, AlbumRepository>();
 builder.Services.AddScoped<IPhotoRepository, PhotoRepository>();
 builder.Services.AddScoped<ILikesRepository, LikesRepository>();
-builder.Services.AddScoped<ITagsRepository, TagsRepository>();
 
 // Add services to the container.
 builder.Services.AddControllersWithViews(options => {

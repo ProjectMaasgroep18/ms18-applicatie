@@ -1,5 +1,4 @@
-﻿using Maasgroep.Database.Context.Tables.PhotoAlbum;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using ms18_applicatie.Interfaces;
 using ms18_applicatie.Models.team_d;
 
@@ -18,137 +17,124 @@ public class PhotosController : ControllerBase
         _logger = logger;
     }
     [HttpPost]
-    [Route("upload")]
-    public async Task<IActionResult> UploadPhoto([FromBody] PhotoUploadModel uploadModel)
+    [ProducesResponseType(typeof(CreateResponseModel), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult> UploadPhoto([FromBody] PhotoUploadModel uploadModel)
     {
-        if (string.IsNullOrEmpty(uploadModel.ImageBase64) || uploadModel.AlbumId == Guid.Empty || string.IsNullOrEmpty(uploadModel.ContentType))
-        {
-            return BadRequest("Photo, content type and album ID are required.");
-        }
+        if (!ModelState.IsValid) return BadRequest(ModelState);
+
+        var uploaderId = 1L; // TODO Get from authentication
+        var needsApproval = false; // TODO Get from authentication
 
         try
         {
-            var photoModel = await CreatePhotoModel(uploadModel);
-            await _photoRepository.AddPhoto(photoModel);
-            return Ok("Photo uploaded successfully.");
+            var photoId = await _photoRepository.AddPhoto(uploaderId, needsApproval, uploadModel);
+
+            if (photoId == null || photoId == Guid.Empty)
+            {
+                _logger.LogError("Failed to upload photo");
+                return StatusCode(500, "An error occured while uploading the photo,");
+            }
+
+            return CreatedAtRoute("GetPhoto", new { id = photoId }, new CreateResponseModel { Id = (Guid)photoId });
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error occurred while uploading the photo.");
-            return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while uploading the photo.");
+            return StatusCode(500, "An error occurred while uploading the photo.");
         }
     }
 
-    private async Task<Photo> CreatePhotoModel(PhotoUploadModel uploadModel)
-    {
-        var imageBytes = Convert.FromBase64String(uploadModel.ImageBase64);
-
-        var photoModel = new Photo
-        {
-            Id = Guid.NewGuid(),
-            UploaderId = 1, // TODO: Replace with actual authenticated user ID
-            UploadDate = DateTime.UtcNow,
-            Title = uploadModel.Title,
-            ImageData = imageBytes,
-            AlbumLocationId = uploadModel.AlbumId,
-            TakenOn = uploadModel.TakenOn,
-            Location = uploadModel.Location,
-            ContentType = uploadModel.ContentType
-        };
-
-        return photoModel;
-    }
-
-    [HttpGet("{photoId}")]
-    public async Task<ActionResult<PhotoViewModel>> GetPhotoById(Guid photoId)
+    [HttpGet("{id}", Name = "GetPhoto")]
+    [ProducesResponseType(typeof(PhotoViewModel), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<PhotoViewModel>> GetPhoto([FromRoute] Guid id)
     {
         try
         {
-            var photo = await _photoRepository.GetPhotoById(photoId);
-            if (photo == null)
+            var photoViewModel = await _photoRepository.GetPhotoViewModelById(id);
+            if (photoViewModel == null)
             {
-                return NotFound($"Photo with ID {photoId} not found.");
+                return NotFound($"Photo with ID {id} not found.");
             }
-
-            var photoViewModel = new PhotoViewModel
-            {
-                Id = photo.Id,
-                UploaderId = photo.UploaderId,
-                UploadDate = photo.UploadDate,
-                Title = photo.Title,
-                ImageBase64 = Convert.ToBase64String(photo.ImageData),
-                ContentType = photo.ContentType,
-                AlbumLocationId = photo.AlbumLocationId,
-                TakenOn = photo.TakenOn,
-                Location = photo.Location,
-                LikesCount = photo.Likes?.Count() ?? 0
-            };
 
             return Ok(photoViewModel);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, $"Error occurred while retrieving photo with ID {photoId}.");
-            return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while retrieving the photo.");
+            _logger.LogError(ex, $"Error occurred while retrieving photo with ID {id}.");
+            return StatusCode(500, "An error occurred while retrieving the photo.");
         }
     }
 
-    [HttpPut("{photoId}")]
-    public async Task<IActionResult> UpdatePhoto(Guid photoId, [FromBody] PhotoUpdateModel updateModel)
+    [HttpPut("{id}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> UpdatePhoto([FromRoute] Guid id, [FromBody] PhotoUpdateModel updateModel)
     {
+        if (!ModelState.IsValid) return BadRequest(ModelState);
+
         try
         {
-            var existingPhoto = await _photoRepository.GetPhotoById(photoId);
-            if (existingPhoto == null)
+            var photo = await _photoRepository.GetPhotoById(id);
+            if (photo == null)
             {
-                return NotFound($"Photo with ID {photoId} not found.");
+                return NotFound($"Photo with ID {id} not found.");
             }
-            existingPhoto.Title = updateModel.Title;
-            existingPhoto.TakenOn = updateModel.TakenOn;
-            existingPhoto.Location = updateModel.Location;
-            existingPhoto.AlbumLocationId = updateModel.AlbumLocationId;
 
+            photo.Title = updateModel.Title;
+            photo.ContentType = updateModel.ContentType;
+            photo.TakenOn = updateModel.TakenOn;
+            photo.Location = updateModel.Location;
+            photo.AlbumLocationId = updateModel.AlbumLocationId;
+            photo.NeedsApproval = updateModel.NeedsApproval;
 
-            await _photoRepository.UpdatePhoto(existingPhoto);
-            return Ok("Photo updated successfully.");
+            await _photoRepository.UpdatePhoto(photo);
+            return NoContent();
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, $"Error occurred while updating photo with ID {photoId}.");
+            _logger.LogError(ex, $"Error occurred while updating photo with ID {id}.");
             return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while updating the photo.");
         }
     }
 
-    [HttpDelete("{photoId}")]
-    public async Task<IActionResult> DeletePhoto(Guid photoId)
+    [HttpDelete("{id}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> DeletePhoto([FromRoute] Guid id)
     {
         try
         {
-            var photo = await _photoRepository.GetPhotoById(photoId);
-            if (photo == null)
-            {
-                return NotFound($"Photo with ID {photoId} not found.");
-            }
+            var deleteSuccess = await _photoRepository.DeletePhoto(id);
 
-            await _photoRepository.DeletePhoto(photoId);
-            return Ok($"Photo with ID {photoId} deleted successfully.");
+            if (!deleteSuccess) return NotFound($"Photo with ID {id} not found");
+            return NoContent();
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, $"Error occurred while deleting photo with ID {photoId}.");
-            return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while deleting the photo.");
+            _logger.LogError(ex, $"Error occurred while deleting photo with ID {id}.");
+            return StatusCode(500, "An error occurred while deleting the photo.");
         }
     }
 
-    [HttpGet("{photoId}/download")]
-    public async Task<IActionResult> DownloadPhoto(Guid photoId)
+    [HttpGet("{id}/download")]
+    [ProducesResponseType(typeof(FileContentResult), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> DownloadPhoto([FromRoute] Guid id)
     {
         try
         {
-            var photo = await _photoRepository.GetPhotoById(photoId);
+            var photo = await _photoRepository.GetPhotoById(id);
             if (photo == null)
             {
-                return NotFound($"Photo with ID {photoId} not found.");
+                return NotFound($"Photo with ID {id} not found.");
             }
 
             var imageStream = new MemoryStream(photo.ImageData);
@@ -156,13 +142,19 @@ public class PhotosController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, $"Error occurred while downloading photo with ID {photoId}.");
+            _logger.LogError(ex, $"Error occurred while downloading photo with ID {id}.");
             return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while downloading the photo.");
         }
     }
 
-    [HttpGet("album/{albumId}/photos")]
-    public async Task<ActionResult<PaginatedResponseModel<PhotoViewModel>>> ListPhotosInAlbum(Guid albumId, int pageNumber = 1, int pageSize = 10)
+    [HttpGet("album/{albumId}")]
+    [ProducesResponseType(typeof(PaginatedResponseModel<PhotoViewModel>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<PaginatedResponseModel<PhotoViewModel>>> ListPhotosInAlbum(
+        [FromRoute] Guid albumId,
+        [FromQuery] int pageNumber = 1,
+        [FromQuery] int pageSize = 10)
     {
         if (pageNumber < 1 || pageSize < 1)
         {

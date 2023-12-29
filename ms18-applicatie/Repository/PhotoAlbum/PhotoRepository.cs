@@ -2,6 +2,7 @@
 using Maasgroep.Database.Context.Tables.PhotoAlbum;
 using Microsoft.EntityFrameworkCore;
 using ms18_applicatie.Interfaces;
+using ms18_applicatie.Models.team_d;
 
 namespace ms18_applicatie.Repository.PhotoAlbum;
 
@@ -14,28 +15,60 @@ public class PhotoRepository : IPhotoRepository
         _context = context;
     }
 
-    public async Task AddPhoto(Photo photo)
+    public async Task<Guid?> AddPhoto(long uploaderId, bool needsApproval, PhotoUploadModel photoUploadModel)
     {
-        _context.Photos.Add(photo);
-        await _context.SaveChangesAsync();
-    }
+        var imageBytes = Convert.FromBase64String(photoUploadModel.ImageData);
 
-    public async Task DeletePhoto(Guid photoId)
-    {
-        var photo = await _context.Photos.FindAsync(photoId);
-        if (photo != null)
+        var photo = new Photo(
+            uploaderId: uploaderId,
+            imageData: imageBytes,
+            contentType: photoUploadModel.ContentType,
+            needsApproval: needsApproval,
+            albumLocationId: photoUploadModel.AlbumId
+            )
         {
-            _context.Photos.Remove(photo);
-            await _context.SaveChangesAsync();
-        }
+            Title = photoUploadModel.Title,
+            TakenOn = photoUploadModel.TakenOn,
+            Location = photoUploadModel.Location,
+        };
+
+        _context.Photos.Add(photo);
+        var affectedRows = await _context.SaveChangesAsync();
+
+        if (affectedRows > 0 && photo.Id != Guid.Empty) return photo.Id;
+
+        return null;
     }
 
-    public async Task<Photo?> GetPhotoById(Guid photoId)
+    public async Task<bool> DeletePhoto(Guid id)
+    {
+        var photo = await _context.Photos.FindAsync(id);
+        if (photo == null) return false;
+
+        _context.Photos.Remove(photo);
+        await _context.SaveChangesAsync();
+        return true;
+    }
+
+    public async Task<PhotoViewModel?> GetPhotoViewModelById(Guid id)
     {
         return await _context.Photos
-            .Include(p => p.AlbumLocation)
-            .Include(p => p.Likes)         
-            .FirstOrDefaultAsync(p => p.Id == photoId);
+            .Where(p => p.Id == id)
+            .Include(p => p.Likes)
+            .Select(p => new PhotoViewModel
+            {
+                Id = p.Id,
+                UploaderId = p.UploaderId,
+                UploadDate = p.UploadDate,
+                Title = p.Title,
+                ImageBase64 = Convert.ToBase64String(p.ImageData),
+                ContentType = p.ContentType,
+                TakenOn = p.TakenOn,
+                Location = p.Location,
+                AlbumLocationId = p.AlbumLocationId,
+                LikesCount = p.Likes.Count()
+            })
+            .FirstOrDefaultAsync();
     }
 
     public async Task<(IEnumerable<Photo> Photos, int TotalCount)> GetPhotosByAlbumId(Guid albumId, int pageNumber, int pageSize)
@@ -55,6 +88,12 @@ public class PhotoRepository : IPhotoRepository
     {
         _context.Entry(photo).State = EntityState.Modified;
         await _context.SaveChangesAsync();
+    }
+
+    public async Task<Photo?> GetPhotoById(Guid id)
+    {
+        return await _context.Photos
+            .FirstOrDefaultAsync(p => p.Id == id);
     }
 }
 

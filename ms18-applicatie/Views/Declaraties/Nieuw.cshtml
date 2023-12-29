@@ -53,8 +53,9 @@
         setLoadMessage('Declaratie aanmaken...')
 
         const receiptData = {
-            Amount: 0,
-            Note: '',
+            amount: null,
+            costCentre: null,
+            note: null,
         };
 
         apiPost('Receipt', receiptData).then(async result => {
