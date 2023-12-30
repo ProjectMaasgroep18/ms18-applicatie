@@ -1,5 +1,6 @@
 using Maasgroep.Database;
 using Maasgroep.Exceptions;
+using Maasgroep.Interfaces;
 using Maasgroep.SharedKernel.Interfaces;
 using Maasgroep.SharedKernel.ViewModels.Admin;
 using Microsoft.AspNetCore.Mvc;
@@ -13,9 +14,11 @@ where TRepository : IReadableRepository<TRecord, TViewModel>
 where TRecord: GenericRecordActive
 {
     protected readonly TRepository Repository;
-    public virtual MemberModel? CurrentMember { get => HttpContext.Items["CurrentUser"] as MemberModel; }
-        
-    protected virtual bool AllowList()
+
+	protected readonly IMaasgroepAuthenticationService MaasgroepAuthenticationService;
+	public virtual MemberModel? CurrentMember { get => MaasgroepAuthenticationService.GetCurrentMember(HttpContext); }
+
+	protected virtual bool AllowList()
         => CurrentMember != null; // By default, all logged-in members are allowed to view items
     
     protected virtual bool AllowView(TRecord? record)
@@ -23,10 +26,13 @@ where TRecord: GenericRecordActive
 
     public virtual string ItemName { get => "Item"; }
 
-    public ReadableRepositoryController(TRepository repository) 
-        => Repository = repository;
+	public ReadableRepositoryController(TRepository repository, IMaasgroepAuthenticationService maasgroepAuthenticationService)
+	{
+		Repository = repository;
+		MaasgroepAuthenticationService = maasgroepAuthenticationService;
+	}
 
-    [HttpGet]
+	[HttpGet]
     public IActionResult RepositoryGet([FromQuery] int offset = default, [FromQuery] int limit = default)
     {
         if (!AllowList())

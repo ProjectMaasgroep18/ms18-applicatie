@@ -17,6 +17,8 @@ using System.Text;
 using Microsoft.EntityFrameworkCore;
 using ms18_applicatie.Repository.PhotoAlbum;
 using ms18_applicatie.Interfaces;
+using Maasgroep.Interfaces;
+using Maasgroep.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -50,6 +52,9 @@ builder.Services.AddScoped<IBillRepository, BillRepository>();
 builder.Services.AddScoped<IAlbumRepository, AlbumRepository>();
 builder.Services.AddScoped<IPhotoRepository, PhotoRepository>();
 builder.Services.AddScoped<ILikesRepository, LikesRepository>();
+
+// Authentication
+builder.Services.AddTransient<IMaasgroepAuthenticationService, MaasgroepAuthenticationService>();
 
 // Add services to the container.
 builder.Services.AddControllersWithViews(options => {
