@@ -16,10 +16,10 @@ where TRecord: GenericRecordActive
     public virtual MemberModel? CurrentMember { get => HttpContext.Items["CurrentUser"] as MemberModel; }
         
     protected virtual bool AllowList()
-        => true; // By default, everyone is allowed to list all items
+        => CurrentMember != null; // By default, all logged-in members are allowed to view items
     
     protected virtual bool AllowView(TRecord? record)
-        => true; // By default, everyone can view every single item
+        => AllowList();
 
     public virtual string ItemName { get => "Item"; }
 

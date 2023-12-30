@@ -51,6 +51,9 @@ namespace Maasgroep.Database.Migrations
                         .HasColumnType("bigint")
                         .HasDefaultValueSql("nextval('admin.\"memberSeq\"')");
 
+                    b.Property<string>("Color")
+                        .HasColumnType("text");
+
                     b.Property<DateTime>("DateTimeCreated")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
@@ -65,6 +68,9 @@ namespace Maasgroep.Database.Migrations
                     b.Property<string>("Email")
                         .HasMaxLength(256)
                         .HasColumnType("character varying(256)");
+
+                    b.Property<bool>("IsGuest")
+                        .HasColumnType("boolean");
 
                     b.Property<long?>("MemberCreatedId")
                         .HasColumnType("bigint");
@@ -104,6 +110,9 @@ namespace Maasgroep.Database.Migrations
                         .HasColumnType("bigint")
                         .HasDefaultValueSql("nextval('\"adminHistory\".\"memberSeq\"')");
 
+                    b.Property<string>("Color")
+                        .HasColumnType("text");
+
                     b.Property<DateTime>("DateTimeCreated")
                         .HasColumnType("timestamp with time zone");
 
@@ -116,6 +125,9 @@ namespace Maasgroep.Database.Migrations
                     b.Property<string>("Email")
                         .HasMaxLength(2048)
                         .HasColumnType("character varying(2048)");
+
+                    b.Property<bool>("IsGuest")
+                        .HasColumnType("boolean");
 
                     b.Property<long?>("MemberCreatedId")
                         .HasColumnType("bigint");
@@ -294,6 +306,9 @@ namespace Maasgroep.Database.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<Guid?>("CoverPhotoId")
+                        .HasColumnType("uuid");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text");
@@ -301,27 +316,17 @@ namespace Maasgroep.Database.Migrations
                     b.Property<Guid?>("ParentAlbumId")
                         .HasColumnType("uuid");
 
+                    b.Property<int?>("Year")
+                        .HasColumnType("integer");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("CoverPhotoId");
 
                     b.HasIndex("ParentAlbumId", "Name")
                         .IsUnique();
 
                     b.ToTable("albums", "photoAlbum");
-                });
-
-            modelBuilder.Entity("Maasgroep.Database.Context.Tables.PhotoAlbum.AlbumTag", b =>
-                {
-                    b.Property<Guid>("AlbumId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("TagId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("AlbumId", "TagId");
-
-                    b.HasIndex("TagId");
-
-                    b.ToTable("albumTags", "photoAlbum");
                 });
 
             modelBuilder.Entity("Maasgroep.Database.Context.Tables.PhotoAlbum.Like", b =>
@@ -368,6 +373,9 @@ namespace Maasgroep.Database.Migrations
                     b.Property<string>("Location")
                         .HasColumnType("text");
 
+                    b.Property<bool>("NeedsApproval")
+                        .HasColumnType("boolean");
+
                     b.Property<DateTime?>("TakenOn")
                         .HasColumnType("timestamp with time zone");
 
@@ -389,25 +397,6 @@ namespace Maasgroep.Database.Migrations
                     b.ToTable("photos", "photoAlbum");
                 });
 
-            modelBuilder.Entity("Maasgroep.Database.Context.Tables.PhotoAlbum.Tag", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Name")
-                        .IsUnique();
-
-                    b.ToTable("tags", "photoAlbum");
-                });
-
             modelBuilder.Entity("Maasgroep.Database.Orders.Bill", b =>
                 {
                     b.Property<long>("Id")
@@ -426,6 +415,9 @@ namespace Maasgroep.Database.Migrations
 
                     b.Property<DateTime?>("DateTimeModified")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Email")
+                        .HasColumnType("text");
 
                     b.Property<bool>("IsGuest")
                         .HasColumnType("boolean");
@@ -1179,31 +1171,19 @@ namespace Maasgroep.Database.Migrations
 
             modelBuilder.Entity("Maasgroep.Database.Context.Tables.PhotoAlbum.Album", b =>
                 {
+                    b.HasOne("Maasgroep.Database.Context.Tables.PhotoAlbum.Photo", "CoverPhoto")
+                        .WithMany()
+                        .HasForeignKey("CoverPhotoId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
                     b.HasOne("Maasgroep.Database.Context.Tables.PhotoAlbum.Album", "ParentAlbum")
                         .WithMany("ChildAlbums")
                         .HasForeignKey("ParentAlbumId")
                         .OnDelete(DeleteBehavior.Restrict);
 
+                    b.Navigation("CoverPhoto");
+
                     b.Navigation("ParentAlbum");
-                });
-
-            modelBuilder.Entity("Maasgroep.Database.Context.Tables.PhotoAlbum.AlbumTag", b =>
-                {
-                    b.HasOne("Maasgroep.Database.Context.Tables.PhotoAlbum.Album", "Album")
-                        .WithMany("AlbumTags")
-                        .HasForeignKey("AlbumId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Maasgroep.Database.Context.Tables.PhotoAlbum.Tag", "Tag")
-                        .WithMany("AlbumTags")
-                        .HasForeignKey("TagId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Album");
-
-                    b.Navigation("Tag");
                 });
 
             modelBuilder.Entity("Maasgroep.Database.Context.Tables.PhotoAlbum.Like", b =>
@@ -1605,8 +1585,6 @@ namespace Maasgroep.Database.Migrations
 
             modelBuilder.Entity("Maasgroep.Database.Context.Tables.PhotoAlbum.Album", b =>
                 {
-                    b.Navigation("AlbumTags");
-
                     b.Navigation("ChildAlbums");
 
                     b.Navigation("Photos");
@@ -1615,11 +1593,6 @@ namespace Maasgroep.Database.Migrations
             modelBuilder.Entity("Maasgroep.Database.Context.Tables.PhotoAlbum.Photo", b =>
                 {
                     b.Navigation("Likes");
-                });
-
-            modelBuilder.Entity("Maasgroep.Database.Context.Tables.PhotoAlbum.Tag", b =>
-                {
-                    b.Navigation("AlbumTags");
                 });
 
             modelBuilder.Entity("Maasgroep.Database.Orders.Bill", b =>

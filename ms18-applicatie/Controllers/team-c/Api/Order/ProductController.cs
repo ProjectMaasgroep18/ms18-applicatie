@@ -16,6 +16,12 @@ public class ProductController : EditableRepositoryController<IProductRepository
     protected override bool AllowCreate(ProductData product)
         => HasPermission("order.product");
 
+    protected override bool AllowList()
+        => HasPermission("order");
+
+    protected override bool AllowView(Product? Product)
+        => HasPermission("order");
+
     protected override bool AllowDelete(Product? product) // +Edit
         => HasPermission("order.product");
 

@@ -134,6 +134,19 @@ async function requireLogin(onValidLogin) {
 
     let afterLogin = member => {
         showElement(document.querySelectorAll('.login-only'));
+        let userCircle = document.querySelector('#user-circle');
+        if (userCircle) {
+            userCircle.style.width = '24px';
+            userCircle.style.height = '24px';
+            userCircle.style.borderRadius = '24px';
+            userCircle.style.fontSize = '15px';
+            userCircle.style.fontWeight = '700';
+            userCircle.style.textAlign = 'center';
+            userCircle.style.color = '#FFF';
+            userCircle.style.textShadow = '#000 0 0 3px';
+            userCircle.style.backgroundColor = member.color;
+            userCircle.innerText = member.name.length > 0 ? member.name[0] : "";
+        }
         let tokenEl = document.querySelector('#login-token');
         if (tokenEl)
             tokenEl.innerText = localStorage.getItem("AUTH_TOKEN");
@@ -177,7 +190,11 @@ function showOutput(data, container) {
         },
         productUrl(id) {
             // Return Product url of Product id
-            return '/Producten/' + id;
+            return '/Producten/Aanpassen/' + id;
+        },
+        userUrl(id) {
+            // Return User url of User id
+            return '/Ledenbeheer/Aanpassen/' + id;
         },
         zero(val) {
             // Default to zero instead of "", null, undefined, etc.
@@ -421,7 +438,7 @@ LOGIN_FORM?.querySelector('.login-email')?.addEventListener('keyup', event => {
 });
 
 LOGIN_FORM?.querySelector('.login-password')?.addEventListener('keyup', event => {
-    if (event.which != 13 || !event.target.value)
+    if (event.which != 13)
         return;
     LOGIN_FORM?.querySelector('.login-button')?.dispatchEvent(new Event('click'));
 });
@@ -433,7 +450,7 @@ LOGIN_FORM?.querySelector('.login-button')?.addEventListener('click', () => {
     let password = LOGIN_FORM.querySelector('.login-password')?.value;
     LOGIN_FORM.querySelector('.login-password').value = null;
     
-    if (!email || !password)
+    if (!email)
         return;
     
     hideElement(LOGIN_FORM);

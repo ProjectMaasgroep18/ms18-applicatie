@@ -12,7 +12,7 @@ where TRecord: GenericRecordActive
     public WritableRepositoryController(TRepository repository) : base(repository) {}
     
     protected virtual bool AllowCreate(TDataModel data)
-        => CurrentMember != null; // By default, all logged-in members are allowed to create items
+        => AllowList();
     
     [HttpPost]
     public IActionResult RepositoryCreate([FromBody] TDataModel data)

@@ -10,6 +10,8 @@ namespace Maasgroep.SharedKernel.ViewModels.Orders
         public bool IsGuest { get; set; }
         public string? Note { get; set; }
         public string? Name { get; set; }
+        public string? Email { get; set; }
         public double TotalAmount { get; set; }
+        public DateTime? DateTimeCreated { get; set; }
     }
 }

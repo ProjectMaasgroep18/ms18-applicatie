@@ -27,11 +27,13 @@ namespace Maasgroep.Database.Orders
             return new BillModel() {
                 Id = bill.Id,
                 Name = bill.Name,
+                Email = bill.Email,
                 Note = bill.Note,
                 IsGuest = bill.IsGuest,
                 MemberCreated = member,
                 Lines = Lines.ListByBill(bill.Id, 0, Int32.MaxValue).Where(line => line.Quantity > 0).ToList(),
                 TotalAmount = bill.TotalAmount,
+                DateTimeCreated = bill.DateTimeCreated,
             };
         }
         
@@ -45,6 +47,9 @@ namespace Maasgroep.Database.Orders
 
             foreach (var line in data.Lines) {
                 // Build lines from data model
+                
+                if (line.Quantity <= 0)
+                    continue;
 
                 if (!lines.ContainsKey(line.ProductId)) {
                     // There is no line for this product yet
@@ -62,6 +67,7 @@ namespace Maasgroep.Database.Orders
             var bill = new Bill
             {
                 Name = data.Name,
+                Email = data.Email,
                 Note = data.Note,
                 Lines = lines.ToList()
                     .Select(line => Lines.GetRecord(line.Value))
@@ -79,9 +85,38 @@ namespace Maasgroep.Database.Orders
         {
             var saveAction = base.GetSaveAction(record);
             return (MaasgroepContext db) => {
-                record.IsGuest = record.MemberCreatedId == null;
+                var member = record.MemberCreated;
+                if (member == null && record.MemberCreatedId != null)
+                    member = db.Member.Where(m => m.Id == record.MemberCreatedId).FirstOrDefault();
+                if (record.Name == null || record.Name == "")
+                    record.Name = member?.Name;
+                if (record.Email == null || record.Email == "")
+                    record.Email = member?.Email;
+                record.IsGuest = record.MemberCreatedId == null || (member?.IsGuest ?? true);
                 saveAction.Invoke(db);
             };
         }
+
+        /** Get total number and value of bills, for all users or for a specific member */
+        public BillTotalModel GetTotal(long? MemberId = null)
+        {
+            var billData = Db.Bills
+                .Where(b => b.DateTimeDeleted == null && (MemberId == null || b.MemberCreatedId == MemberId))
+                .Select(b => new { Quantity = b.Lines.Sum(l => l.Quantity), Amount = b.TotalAmount })
+                .ToList();
+
+            var totals = new BillTotalModel()
+            {
+                BillCount = billData.Count,
+                ProductQuantity = billData.Sum(bd => bd.Quantity),
+                TotalAmount = billData.Sum(bd => bd.Amount),
+            };
+
+            return totals;
+        }
+
+        // List bills by e-mail
+        public IEnumerable<BillModel> ListByEmail(string email, int offset = 0, int limit = 0, bool includeDeleted = false)
+            => GetList(item => item.Email == email, null, offset, limit, includeDeleted).Select(item => GetModel(item)!);
     }
 }
