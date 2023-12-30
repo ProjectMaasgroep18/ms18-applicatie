@@ -4,6 +4,7 @@ using Maasgroep.SharedKernel.ViewModels.Receipts;
 using Moq;
 using Maasgroep.Database.Interfaces;
 using Maasgroep.SharedKernel.DataModels.Receipts;
+using Maasgroep.SharedKernel.ViewModels.Admin;
 
 namespace Maasgroep.Database.Test
 {
@@ -29,24 +30,22 @@ namespace Maasgroep.Database.Test
 
 		/*
 		GetModel (int)		ReadRepository				Done
-		GetModel (model)	ReadRepository
+		GetModel (model)	ReadRepository				Done
 		Exists				ReadRepository				Done
 		GetById				ReadRepository				Done
 		ListAll				ReadRepository				Done
-		GetRecord			WriteableRepository
+		GetRecord			WriteableRepository			Done
 		ListByMember		WriteableRepository			Done
-		Create				WriteableRepository
+		Create				WriteableRepository			Partial, much cant be mocked
 		GetSaveAction		WriteableRepository
-		GetAfterSaveAction	WriteableRepository
+		GetAfterSaveAction	WriteableRepository			Not necessary
 		Delete				DeletableRepository
-		GetList				DeletableRepository
-		GetList (bool)		DeletableRepository
-		ListAll				DeletableRepository
-		ListByMember		DeletableRepository
-		GetHistory			EditableRepository
-		Update				EditableRepository
-		ListByCostCentre	ReceiptRepository
-		ListPayable			ReceiptRepository
+		ListAll				DeletableRepository			Done with read
+		ListByMember		DeletableRepository			Done with write
+		GetHistory			EditableRepository			Done
+		Update				EditableRepository			Done
+		ListByCostCentre	ReceiptRepository			Done
+		ListPayable			ReceiptRepository			Done
 		*/
 
 		#region GetById
@@ -127,11 +126,10 @@ namespace Maasgroep.Database.Test
 
 		#endregion
 
-		//TODO: KH deze region later, is veel werk
 		#region GetModelModel
 
 		[Fact]
-		public void GetModelModel_With_Valid_Id_Returns_ViewModel()
+		public void GetModelModel_With_Valid_Id_AllPropsFilled_Ingediend_Returns_ViewModel()
 		{
 			using var context = Fixture.CreateContext();
 
@@ -140,20 +138,418 @@ namespace Maasgroep.Database.Test
 				, costCentreRepository.Object
 				, memberRepository.Object);
 
-			var expected = sut.GetModel(1)!;
+			var expected = new ReceiptModel()
+			{
+				Id = -1,
+				Note = "TestReceipt",
+				Amount = 20.50m,
+				Status = ReceiptStatus.Ingediend,
+				StatusString = ReceiptStatus.Ingediend.ToString(),
+				CostCentre = new CostCentreModel() { Id = -50, Name = "TestCostCentre" },
+				IsEditable = true,
+				IsApprovable = true,
+				IsPayable = false,
+				MemberCreated = new MemberModel() { Id = - 100, Name = "TestName" },
+				DateTimeCreated = DateTime.Parse("12/30/2023 09:00:00"),
+				DateTimeModified = DateTime.Parse("12/30/2023 09:10:00") //"20231230T09:10:00Z"
+			};
 
-			var result = sut.GetModel(1);
+			var costCentreToReturn = new CostCentreModel()
+			{
+				Id = -50,
+				Name = "TestCostCentre"
+			};
+
+			var receiptStatusToReturn = ReceiptStatus.Ingediend;
+
+			var memberToReturn = new MemberModel() { Id = -100, Name = "TestName" };
+
+			var receiptToGet = new Receipt() {
+				Id = -1,
+				Note = "TestReceipt",
+				Amount = 20.50m,
+				CostCentreId = -50,
+				MemberCreatedId = -100,
+				DateTimeCreated = new DateTime(2023, 12, 30, 9, 0, 0),
+				DateTimeModified = new DateTime(2023, 12, 30, 9, 10, 0),
+			};
+
+			receiptStatusRepository.Setup(r => r.GetModel(It.IsAny<string>())).Returns(receiptStatusToReturn);
+			costCentreRepository.Setup(c => c.GetModel(It.IsAny<long>())).Returns(costCentreToReturn);
+			memberRepository.Setup(m => m.GetModel(It.IsAny<long>())).Returns(memberToReturn);
+
+			var result = sut.GetModel(receiptToGet);
 
 			_ = result.Should().NotBeNull();
 			_ = result.Should().BeOfType<ReceiptModel>();
 			_ = result.As<ReceiptModel>().Id.Should().Be(expected.Id);
-			_ = result.As<ReceiptModel>().Note.Should().Be("Schroeven voor kapotte sloep");
-			_ = result.As<ReceiptModel>().Amount.Should().Be(1.11M);
+			_ = result.As<ReceiptModel>().Note.Should().Be(expected.Note);
+			_ = result.As<ReceiptModel>().Amount.Should().Be(expected.Amount);
+			_ = result.As<ReceiptModel>().Status.Should().Be(expected.Status);
+			_ = result.As<ReceiptModel>().StatusString.Should().Be(expected.StatusString);
+			_ = result.As<ReceiptModel>().CostCentre.Should().NotBeNull();
+			_ = result.As<ReceiptModel>().CostCentre.Should().BeOfType<CostCentreModel>();
+			_ = result.As<ReceiptModel>().CostCentre.As<CostCentreModel>().Id.Should().Be(expected.CostCentre.Id);
+			_ = result.As<ReceiptModel>().CostCentre.As<CostCentreModel>().Name.Should().Be(expected.CostCentre.Name);
+			_ = result.As<ReceiptModel>().IsPayable.Should().Be(expected.IsPayable);
+			_ = result.As<ReceiptModel>().IsApprovable.Should().Be(expected.IsApprovable);
+			_ = result.As<ReceiptModel>().IsEditable.Should().Be(expected.IsEditable);
+			_ = result.As<ReceiptModel>().MemberCreated.Should().NotBeNull();
+			_ = result.As<ReceiptModel>().MemberCreated.Should().BeOfType<MemberModel>();
+			_ = result.As<ReceiptModel>().MemberCreated.As<MemberModel>().Id.Should().Be(expected.MemberCreated.Id);
+			_ = result.As<ReceiptModel>().MemberCreated.As<MemberModel>().Name.Should().Be(expected.MemberCreated.Name);
+			_ = result.As<ReceiptModel>().DateTimeCreated.Should().Be(expected.DateTimeCreated);
+			_ = result.As<ReceiptModel>().DateTimeModified.Should().Be(expected.DateTimeModified);
+		}
+
+		[Fact]
+		public void GetModelModel_With_Valid_Id_AllPropsFilled_Onbekend_Returns_ViewModel()
+		{
+			using var context = Fixture.CreateContext();
+
+			var sut = new ReceiptRepository(context
+				, receiptStatusRepository.Object
+				, costCentreRepository.Object
+				, memberRepository.Object);
+
+			var expected = new ReceiptModel()
+			{
+				Id = -1,
+				Note = "TestReceipt",
+				Amount = 20.50m,
+				Status = ReceiptStatus.Onbekend,
+				StatusString = ReceiptStatus.Onbekend.ToString(),
+				CostCentre = new CostCentreModel() { Id = -50, Name = "TestCostCentre" },
+				IsEditable = true,
+				IsApprovable = false,
+				IsPayable = false,
+				MemberCreated = new MemberModel() { Id = -100, Name = "TestName" },
+				DateTimeCreated = DateTime.Parse("12/30/2023 09:00:00"),
+				DateTimeModified = DateTime.Parse("12/30/2023 09:10:00") //"20231230T09:10:00Z"
+			};
+
+			var costCentreToReturn = new CostCentreModel()
+			{
+				Id = -50,
+				Name = "TestCostCentre"
+			};
+
+			var receiptStatusToReturn = ReceiptStatus.Onbekend;
+
+			var memberToReturn = new MemberModel() { Id = -100, Name = "TestName" };
+
+			var receiptToGet = new Receipt()
+			{
+				Id = -1,
+				Note = "TestReceipt",
+				Amount = 20.50m,
+				CostCentreId = -50,
+				MemberCreatedId = -100,
+				DateTimeCreated = new DateTime(2023, 12, 30, 9, 0, 0),
+				DateTimeModified = new DateTime(2023, 12, 30, 9, 10, 0),
+			};
+
+			receiptStatusRepository.Setup(r => r.GetModel(It.IsAny<string>())).Returns(receiptStatusToReturn);
+			costCentreRepository.Setup(c => c.GetModel(It.IsAny<long>())).Returns(costCentreToReturn);
+			memberRepository.Setup(m => m.GetModel(It.IsAny<long>())).Returns(memberToReturn);
+
+			var result = sut.GetModel(receiptToGet);
+
+			_ = result.Should().NotBeNull();
+			_ = result.Should().BeOfType<ReceiptModel>();
+			_ = result.As<ReceiptModel>().Id.Should().Be(expected.Id);
+			_ = result.As<ReceiptModel>().Note.Should().Be(expected.Note);
+			_ = result.As<ReceiptModel>().Amount.Should().Be(expected.Amount);
+			_ = result.As<ReceiptModel>().Status.Should().Be(expected.Status);
+			_ = result.As<ReceiptModel>().StatusString.Should().Be(expected.StatusString);
+			_ = result.As<ReceiptModel>().CostCentre.Should().NotBeNull();
+			_ = result.As<ReceiptModel>().CostCentre.Should().BeOfType<CostCentreModel>();
+			_ = result.As<ReceiptModel>().CostCentre.As<CostCentreModel>().Id.Should().Be(expected.CostCentre.Id);
+			_ = result.As<ReceiptModel>().CostCentre.As<CostCentreModel>().Name.Should().Be(expected.CostCentre.Name);
+			_ = result.As<ReceiptModel>().IsPayable.Should().Be(expected.IsPayable);
+			_ = result.As<ReceiptModel>().IsApprovable.Should().Be(expected.IsApprovable);
+			_ = result.As<ReceiptModel>().IsEditable.Should().Be(expected.IsEditable);
+			_ = result.As<ReceiptModel>().MemberCreated.Should().NotBeNull();
+			_ = result.As<ReceiptModel>().MemberCreated.Should().BeOfType<MemberModel>();
+			_ = result.As<ReceiptModel>().MemberCreated.As<MemberModel>().Id.Should().Be(expected.MemberCreated.Id);
+			_ = result.As<ReceiptModel>().MemberCreated.As<MemberModel>().Name.Should().Be(expected.MemberCreated.Name);
+			_ = result.As<ReceiptModel>().DateTimeCreated.Should().Be(expected.DateTimeCreated);
+			_ = result.As<ReceiptModel>().DateTimeModified.Should().Be(expected.DateTimeModified);
+		}
+
+		[Fact]
+		public void GetModelModel_With_Valid_Id_AllPropsFilled_Concept_Returns_ViewModel()
+		{
+			using var context = Fixture.CreateContext();
+
+			var sut = new ReceiptRepository(context
+				, receiptStatusRepository.Object
+				, costCentreRepository.Object
+				, memberRepository.Object);
+
+			var expected = new ReceiptModel()
+			{
+				Id = -1,
+				Note = "TestReceipt",
+				Amount = 20.50m,
+				Status = ReceiptStatus.Concept,
+				StatusString = ReceiptStatus.Concept.ToString(),
+				CostCentre = new CostCentreModel() { Id = -50, Name = "TestCostCentre" },
+				IsEditable = true,
+				IsApprovable = false,
+				IsPayable = false,
+				MemberCreated = new MemberModel() { Id = -100, Name = "TestName" },
+				DateTimeCreated = DateTime.Parse("12/30/2023 09:00:00"),
+				DateTimeModified = DateTime.Parse("12/30/2023 09:10:00") //"20231230T09:10:00Z"
+			};
+
+			var costCentreToReturn = new CostCentreModel()
+			{
+				Id = -50,
+				Name = "TestCostCentre"
+			};
+
+			var receiptStatusToReturn = ReceiptStatus.Concept;
+
+			var memberToReturn = new MemberModel() { Id = -100, Name = "TestName" };
+
+			var receiptToGet = new Receipt()
+			{
+				Id = -1,
+				Note = "TestReceipt",
+				Amount = 20.50m,
+				CostCentreId = -50,
+				MemberCreatedId = -100,
+				DateTimeCreated = new DateTime(2023, 12, 30, 9, 0, 0),
+				DateTimeModified = new DateTime(2023, 12, 30, 9, 10, 0),
+			};
+
+			receiptStatusRepository.Setup(r => r.GetModel(It.IsAny<string>())).Returns(receiptStatusToReturn);
+			costCentreRepository.Setup(c => c.GetModel(It.IsAny<long>())).Returns(costCentreToReturn);
+			memberRepository.Setup(m => m.GetModel(It.IsAny<long>())).Returns(memberToReturn);
+
+			var result = sut.GetModel(receiptToGet);
+
+			_ = result.Should().NotBeNull();
+			_ = result.Should().BeOfType<ReceiptModel>();
+			_ = result.As<ReceiptModel>().Id.Should().Be(expected.Id);
+			_ = result.As<ReceiptModel>().Note.Should().Be(expected.Note);
+			_ = result.As<ReceiptModel>().Amount.Should().Be(expected.Amount);
+			_ = result.As<ReceiptModel>().Status.Should().Be(expected.Status);
+			_ = result.As<ReceiptModel>().StatusString.Should().Be(expected.StatusString);
+			_ = result.As<ReceiptModel>().CostCentre.Should().NotBeNull();
+			_ = result.As<ReceiptModel>().CostCentre.Should().BeOfType<CostCentreModel>();
+			_ = result.As<ReceiptModel>().CostCentre.As<CostCentreModel>().Id.Should().Be(expected.CostCentre.Id);
+			_ = result.As<ReceiptModel>().CostCentre.As<CostCentreModel>().Name.Should().Be(expected.CostCentre.Name);
+			_ = result.As<ReceiptModel>().IsPayable.Should().Be(expected.IsPayable);
+			_ = result.As<ReceiptModel>().IsApprovable.Should().Be(expected.IsApprovable);
+			_ = result.As<ReceiptModel>().IsEditable.Should().Be(expected.IsEditable);
+			_ = result.As<ReceiptModel>().MemberCreated.Should().NotBeNull();
+			_ = result.As<ReceiptModel>().MemberCreated.Should().BeOfType<MemberModel>();
+			_ = result.As<ReceiptModel>().MemberCreated.As<MemberModel>().Id.Should().Be(expected.MemberCreated.Id);
+			_ = result.As<ReceiptModel>().MemberCreated.As<MemberModel>().Name.Should().Be(expected.MemberCreated.Name);
+			_ = result.As<ReceiptModel>().DateTimeCreated.Should().Be(expected.DateTimeCreated);
+			_ = result.As<ReceiptModel>().DateTimeModified.Should().Be(expected.DateTimeModified);
+		}
+
+		[Fact]
+		public void GetModelModel_With_Valid_Id_MemberNull_Ingediend_Returns_ViewModel()
+		{
+			using var context = Fixture.CreateContext();
+
+			var sut = new ReceiptRepository(context
+				, receiptStatusRepository.Object
+				, costCentreRepository.Object
+				, memberRepository.Object);
+
+			var expected = new ReceiptModel()
+			{
+				Id = -1,
+				Note = "TestReceipt",
+				Amount = 20.50m,
+				Status = ReceiptStatus.Ingediend,
+				StatusString = ReceiptStatus.Ingediend.ToString(),
+				CostCentre = new CostCentreModel() { Id = -50, Name = "TestCostCentre" },
+				IsEditable = true,
+				IsApprovable = true,
+				IsPayable = false,
+				MemberCreated = null,
+				DateTimeCreated = DateTime.Parse("12/30/2023 09:00:00"),
+				DateTimeModified = DateTime.Parse("12/30/2023 09:10:00") //"20231230T09:10:00Z"
+			};
+
+			var costCentreToReturn = new CostCentreModel()
+			{
+				Id = -50,
+				Name = "TestCostCentre"
+			};
+
+			var receiptStatusToReturn = ReceiptStatus.Ingediend;
+
+			MemberModel memberToReturn = null;
+
+			var receiptToGet = new Receipt()
+			{
+				Id = -1,
+				Note = "TestReceipt",
+				Amount = 20.50m,
+				CostCentreId = -50,
+				DateTimeCreated = new DateTime(2023, 12, 30, 9, 0, 0),
+				DateTimeModified = new DateTime(2023, 12, 30, 9, 10, 0),
+			};
+
+			receiptStatusRepository.Setup(r => r.GetModel(It.IsAny<string>())).Returns(receiptStatusToReturn);
+			costCentreRepository.Setup(c => c.GetModel(It.IsAny<long>())).Returns(costCentreToReturn);
+			memberRepository.Setup(m => m.GetModel(It.IsAny<long>())).Returns(memberToReturn);
+
+			var result = sut.GetModel(receiptToGet);
+
+			_ = result.Should().NotBeNull();
+			_ = result.Should().BeOfType<ReceiptModel>();
+			_ = result.As<ReceiptModel>().Id.Should().Be(expected.Id);
+			_ = result.As<ReceiptModel>().Note.Should().Be(expected.Note);
+			_ = result.As<ReceiptModel>().Amount.Should().Be(expected.Amount);
+			_ = result.As<ReceiptModel>().Status.Should().Be(expected.Status);
+			_ = result.As<ReceiptModel>().StatusString.Should().Be(expected.StatusString);
+			_ = result.As<ReceiptModel>().CostCentre.Should().NotBeNull();
+			_ = result.As<ReceiptModel>().CostCentre.Should().BeOfType<CostCentreModel>();
+			_ = result.As<ReceiptModel>().CostCentre.As<CostCentreModel>().Id.Should().Be(expected.CostCentre.Id);
+			_ = result.As<ReceiptModel>().CostCentre.As<CostCentreModel>().Name.Should().Be(expected.CostCentre.Name);
+			_ = result.As<ReceiptModel>().IsPayable.Should().Be(expected.IsPayable);
+			_ = result.As<ReceiptModel>().IsApprovable.Should().Be(expected.IsApprovable);
+			_ = result.As<ReceiptModel>().IsEditable.Should().Be(expected.IsEditable);
+			_ = result.As<ReceiptModel>().MemberCreated.Should().BeNull();
+			_ = result.As<ReceiptModel>().DateTimeCreated.Should().Be(expected.DateTimeCreated);
+			_ = result.As<ReceiptModel>().DateTimeModified.Should().Be(expected.DateTimeModified);
+		}
+
+		[Fact]
+		public void GetModelModel_With_Valid_Id_CostCentreNull_Ingediend_Returns_ViewModel()
+		{
+			using var context = Fixture.CreateContext();
+
+			var sut = new ReceiptRepository(context
+				, receiptStatusRepository.Object
+				, costCentreRepository.Object
+				, memberRepository.Object);
+
+			var expected = new ReceiptModel()
+			{
+				Id = -1,
+				Note = "TestReceipt",
+				Amount = 20.50m,
+				Status = ReceiptStatus.Ingediend,
+				StatusString = ReceiptStatus.Ingediend.ToString(),
+				CostCentre = null,
+				IsEditable = true,
+				IsApprovable = true,
+				IsPayable = false,
+				MemberCreated = new MemberModel() { Id = -100, Name = "TestName" },
+				DateTimeCreated = DateTime.Parse("12/30/2023 09:00:00"),
+				DateTimeModified = DateTime.Parse("12/30/2023 09:10:00") //"20231230T09:10:00Z"
+			};
+
+			CostCentreModel costCentreToReturn = null;
+
+			var receiptStatusToReturn = ReceiptStatus.Ingediend;
+
+			var memberToReturn = new MemberModel() { Id = -100, Name = "TestName" };
+
+			var receiptToGet = new Receipt()
+			{
+				Id = -1,
+				Note = "TestReceipt",
+				Amount = 20.50m,
+				CostCentreId = -50,
+				MemberCreatedId = -100,
+				DateTimeCreated = new DateTime(2023, 12, 30, 9, 0, 0),
+				DateTimeModified = new DateTime(2023, 12, 30, 9, 10, 0),
+			};
+
+			receiptStatusRepository.Setup(r => r.GetModel(It.IsAny<string>())).Returns(receiptStatusToReturn);
+			costCentreRepository.Setup(c => c.GetModel(It.IsAny<long>())).Returns(costCentreToReturn);
+			memberRepository.Setup(m => m.GetModel(It.IsAny<long>())).Returns(memberToReturn);
+
+			var result = sut.GetModel(receiptToGet);
+
+			_ = result.Should().NotBeNull();
+			_ = result.Should().BeOfType<ReceiptModel>();
+			_ = result.As<ReceiptModel>().Id.Should().Be(expected.Id);
+			_ = result.As<ReceiptModel>().Note.Should().Be(expected.Note);
+			_ = result.As<ReceiptModel>().Amount.Should().Be(expected.Amount);
+			_ = result.As<ReceiptModel>().Status.Should().Be(expected.Status);
+			_ = result.As<ReceiptModel>().StatusString.Should().Be(expected.StatusString);
+			_ = result.As<ReceiptModel>().CostCentre.Should().BeNull();
+			_ = result.As<ReceiptModel>().IsPayable.Should().Be(expected.IsPayable);
+			_ = result.As<ReceiptModel>().IsApprovable.Should().Be(expected.IsApprovable);
+			_ = result.As<ReceiptModel>().IsEditable.Should().Be(expected.IsEditable);
+			_ = result.As<ReceiptModel>().MemberCreated.Should().NotBeNull();
+			_ = result.As<ReceiptModel>().MemberCreated.Should().BeOfType<MemberModel>();
+			_ = result.As<ReceiptModel>().MemberCreated.As<MemberModel>().Id.Should().Be(expected.MemberCreated.Id);
+			_ = result.As<ReceiptModel>().MemberCreated.As<MemberModel>().Name.Should().Be(expected.MemberCreated.Name);
+			_ = result.As<ReceiptModel>().DateTimeCreated.Should().Be(expected.DateTimeCreated);
+			_ = result.As<ReceiptModel>().DateTimeModified.Should().Be(expected.DateTimeModified);
+		}
+
+		[Fact]
+		public void GetModelModel_With_NullModel_Returns_ViewModel()
+		{
+			using var context = Fixture.CreateContext();
+
+			var sut = new ReceiptRepository(context
+				, receiptStatusRepository.Object
+				, costCentreRepository.Object
+				, memberRepository.Object);
+
+			var expected = new ReceiptModel()
+			{
+				Id = 0,
+				Note = "TestReceipt",
+				Amount = null,
+				Status = ReceiptStatus.Onbekend,
+				StatusString = ReceiptStatus.Onbekend.ToString(),
+				CostCentre = null,
+				IsEditable = true,
+				IsApprovable = false,
+				IsPayable = false,
+				MemberCreated = null,
+				DateTimeCreated = DateTime.Parse("01/01/0001 00:00:00"),
+				DateTimeModified = null
+			};
+
+			CostCentreModel costCentreToReturn = null;
+
+			var receiptStatusToReturn = ReceiptStatus.Onbekend;
+
+			MemberModel memberToReturn = null;
+
+			var receiptToGet = new Receipt();
+
+			receiptStatusRepository.Setup(r => r.GetModel(It.IsAny<string>())).Returns(receiptStatusToReturn);
+			costCentreRepository.Setup(c => c.GetModel(It.IsAny<long>())).Returns(costCentreToReturn);
+			memberRepository.Setup(m => m.GetModel(It.IsAny<long>())).Returns(memberToReturn);
+
+			var result = sut.GetModel(receiptToGet);
+
+			_ = result.Should().NotBeNull();
+			_ = result.Should().BeOfType<ReceiptModel>();
+			_ = result.As<ReceiptModel>().Id.Should().Be(expected.Id);
+			_ = result.As<ReceiptModel>().Note.Should().BeNull();
+			_ = result.As<ReceiptModel>().Amount.Should().BeNull();
+			_ = result.As<ReceiptModel>().Status.Should().Be(expected.Status);
+			_ = result.As<ReceiptModel>().StatusString.Should().Be(expected.StatusString);
+			_ = result.As<ReceiptModel>().CostCentre.Should().BeNull();
+			_ = result.As<ReceiptModel>().IsPayable.Should().Be(expected.IsPayable);
+			_ = result.As<ReceiptModel>().IsApprovable.Should().Be(expected.IsApprovable);
+			_ = result.As<ReceiptModel>().IsEditable.Should().Be(expected.IsEditable);
+			_ = result.As<ReceiptModel>().MemberCreated.Should().BeNull();
+			_ = result.As<ReceiptModel>().DateTimeCreated.Should().Be(expected.DateTimeCreated);
+			_ = result.As<ReceiptModel>().DateTimeModified.Should().BeNull();
 		}
 
 		#endregion
 
-		#region ListAll
+		#region ListAllReadRepository
 
 		[Fact]
 		public void ListAll_GreatLimitThanImplementationIsPossible_NoHistoryResult3()
@@ -223,11 +619,10 @@ namespace Maasgroep.Database.Test
 
 		#endregion
 
-		//TODO: KH deze region later, is veel werk
 		#region GetRecord
 
 		[Fact]
-		public void GetRecord_WithValidId_ReturnsValue()
+		public void GetRecord_WithDefaultModels_ReturnsValue()
 		{
 			using var context = Fixture.CreateContext();
 
@@ -236,12 +631,326 @@ namespace Maasgroep.Database.Test
 				, costCentreRepository.Object
 				, memberRepository.Object);
 
-			ReceiptData receiptToGet = new ReceiptData();
+			ReceiptData receiptDataToGet = new ReceiptData();
+			Receipt receiptToGet = new Receipt();
 
-			var result = sut.GetRecord(receiptToGet);
+			var expected = new Receipt()
+			{
+				Id = 0,
+				Amount = null,
+				CostCentre = null,
+				CostCentreId = null,
+				DateTimeCreated = new DateTime(),
+				DateTimeDeleted = null,
+				DateTimeModified = null,
+				Location = null,
+				MemberCreated = null,
+				MemberCreatedId = null,
+				MemberDeleted = null,
+				MemberDeletedId = null,
+				MemberModified = null,
+				MemberModifiedId = null,
+				Note = null,
+				Photos = null,
+				ReceiptApprovals = null,
+				ReceiptStatus = ReceiptStatus.Concept.ToString()
+			};
+
+			var result = sut.GetRecord(receiptDataToGet, receiptToGet);
 
 			_ = result.Should().NotBeNull();
+			_ = result.Should().BeOfType<Receipt>();
+			_ = result.As<Receipt>().Id.Should().Be(expected.Id);
+			_ = result.As<Receipt>().Amount.Should().Be(expected.Amount);
+			_ = result.As<Receipt>().CostCentre.Should().Be(expected.CostCentre);
+			_ = result.As<Receipt>().CostCentreId.Should().Be(expected.CostCentreId);
+			_ = result.As<Receipt>().DateTimeCreated.Should().Be(expected.DateTimeCreated);
+			_ = result.As<Receipt>().DateTimeDeleted.Should().Be(expected.DateTimeDeleted);
+			_ = result.As<Receipt>().DateTimeModified.Should().Be(expected.DateTimeModified);
+			_ = result.As<Receipt>().Location.Should().Be(expected.Location);
+			_ = result.As<Receipt>().MemberCreated.Should().Be(expected.MemberCreated);
+			_ = result.As<Receipt>().MemberCreatedId.Should().Be(expected.MemberCreatedId);
+			_ = result.As<Receipt>().MemberDeleted.Should().Be(expected.MemberDeleted);
+			_ = result.As<Receipt>().MemberDeletedId.Should().Be(expected.MemberDeletedId);
+			_ = result.As<Receipt>().MemberModified.Should().Be(expected.MemberModified);
+			_ = result.As<Receipt>().MemberModifiedId.Should().Be(expected.MemberModifiedId);
+			_ = result.As<Receipt>().Note.Should().Be(expected.Note);
+			_ = result.As<Receipt>().Photos.Should().BeNull();
+			_ = result.As<Receipt>().ReceiptApprovals.Should().BeNull();
+			_ = result.As<Receipt>().ReceiptStatus.Should().Be(expected.ReceiptStatus);
 		}
+
+		[Fact]
+		public void GetRecord_WithDefaultModelsNotEditable_ReturnsNull()
+		{
+			using var context = Fixture.CreateContext();
+
+			var sut = new ReceiptRepository(context
+				, receiptStatusRepository.Object
+				, costCentreRepository.Object
+				, memberRepository.Object);
+
+			// Setting up data for GetModel(T) - START
+
+			var costCentreToReturnFirst = new CostCentreModel()
+			{
+				Id = -50,
+				Name = "TestCostCentre"
+			};
+
+			var receiptStatusToReturnFirst = ReceiptStatus.Uitbetaald;
+
+			var memberToReturnFirst = new MemberModel() { Id = -100, Name = "TestName" };
+
+			var receiptToGetFirst = new Receipt()
+			{
+				Id = -1,
+				Note = "TestReceipt",
+				Amount = 20.50m,
+				CostCentreId = -50,
+				MemberCreatedId = -100,
+				DateTimeCreated = new DateTime(2023, 12, 30, 9, 0, 0),
+				DateTimeModified = new DateTime(2023, 12, 30, 9, 10, 0),
+			};
+
+			receiptStatusRepository.Setup(r => r.GetModel(It.IsAny<string>())).Returns(receiptStatusToReturnFirst);
+			costCentreRepository.Setup(c => c.GetModel(It.IsAny<long>())).Returns(costCentreToReturnFirst);
+			memberRepository.Setup(m => m.GetModel(It.IsAny<long>())).Returns(memberToReturnFirst);
+
+			// Setting up data for GetModel(T) - END
+
+			ReceiptData receiptDataToGet = new ReceiptData();
+			Receipt receiptToGet = new Receipt();
+
+			var expected = new Receipt()
+			{
+				Id = 0,
+				Amount = null,
+				CostCentre = null,
+				CostCentreId = null,
+				DateTimeCreated = new DateTime(),
+				DateTimeDeleted = null,
+				DateTimeModified = null,
+				Location = null,
+				MemberCreated = null,
+				MemberCreatedId = null,
+				MemberDeleted = null,
+				MemberDeletedId = null,
+				MemberModified = null,
+				MemberModifiedId = null,
+				Note = null,
+				Photos = null,
+				ReceiptApprovals = null,
+				ReceiptStatus = ReceiptStatus.Concept.ToString()
+			};
+
+			var result = sut.GetRecord(receiptDataToGet, receiptToGet);
+
+			_ = result.Should().BeNull();
+		}
+
+		[Fact]
+		public void GetRecord_WithMinimalData_StatusConcept_ReturnsIngediend()
+		{
+			using var context = Fixture.CreateContext();
+
+			var sut = new ReceiptRepository(context
+				, receiptStatusRepository.Object
+				, costCentreRepository.Object
+				, memberRepository.Object);
+
+			ReceiptData receiptDataToGet = new ReceiptData()
+			{
+				Amount = 99.99m,
+				Note = "test",
+				CostCentreId = 1
+			};
+			Receipt receiptToGet = new Receipt() { Id = 1 };
+
+			var expected = new Receipt()
+			{
+				Id = 1,
+				Amount = 99.99m,
+				CostCentre = null,
+				CostCentreId = 1,
+				DateTimeCreated = new DateTime(),
+				DateTimeDeleted = null,
+				DateTimeModified = null,
+				Location = null,
+				MemberCreated = null,
+				MemberCreatedId = null,
+				MemberDeleted = null,
+				MemberDeletedId = null,
+				MemberModified = null,
+				MemberModifiedId = null,
+				Note = "test",
+				Photos = null,
+				ReceiptApprovals = null,
+				ReceiptStatus = ReceiptStatus.Ingediend.ToString()
+			};
+
+			var result = sut.GetRecord(receiptDataToGet, receiptToGet);
+
+			_ = result.Should().NotBeNull();
+			_ = result.Should().BeOfType<Receipt>();
+			_ = result.As<Receipt>().Id.Should().Be(expected.Id);
+			_ = result.As<Receipt>().Amount.Should().Be(expected.Amount);
+			_ = result.As<Receipt>().CostCentre.Should().Be(expected.CostCentre);
+			_ = result.As<Receipt>().CostCentreId.Should().Be(expected.CostCentreId);
+			_ = result.As<Receipt>().DateTimeCreated.Should().Be(expected.DateTimeCreated);
+			_ = result.As<Receipt>().DateTimeDeleted.Should().Be(expected.DateTimeDeleted);
+			_ = result.As<Receipt>().DateTimeModified.Should().Be(expected.DateTimeModified);
+			_ = result.As<Receipt>().Location.Should().Be(expected.Location);
+			_ = result.As<Receipt>().MemberCreated.Should().Be(expected.MemberCreated);
+			_ = result.As<Receipt>().MemberCreatedId.Should().Be(expected.MemberCreatedId);
+			_ = result.As<Receipt>().MemberDeleted.Should().Be(expected.MemberDeleted);
+			_ = result.As<Receipt>().MemberDeletedId.Should().Be(expected.MemberDeletedId);
+			_ = result.As<Receipt>().MemberModified.Should().Be(expected.MemberModified);
+			_ = result.As<Receipt>().MemberModifiedId.Should().Be(expected.MemberModifiedId);
+			_ = result.As<Receipt>().Note.Should().Be(expected.Note);
+			_ = result.As<Receipt>().Photos.Should().BeNull();
+			_ = result.As<Receipt>().ReceiptApprovals.Should().BeNull();
+			_ = result.As<Receipt>().ReceiptStatus.Should().Be(expected.ReceiptStatus);
+		}
+
+		[Fact]
+		public void GetRecord_WithDefaultModelsNoPhotos_StatusConcept_ReturnsConcept()
+		{
+			using var context = Fixture.CreateContext();
+
+			var sut = new ReceiptRepository(context
+				, receiptStatusRepository.Object
+				, costCentreRepository.Object
+				, memberRepository.Object);
+
+			ReceiptData receiptDataToGet = new ReceiptData()
+			{
+				Amount = 99.99m,
+				Note = "test",
+				CostCentreId = 1
+			};
+			Receipt receiptToGet = new Receipt() { Id = 2 };
+
+			var expected = new Receipt()
+			{
+				Id = 2,
+				Amount = 99.99m,
+				CostCentre = null,
+				CostCentreId = 1,
+				DateTimeCreated = new DateTime(),
+				DateTimeDeleted = null,
+				DateTimeModified = null,
+				Location = null,
+				MemberCreated = null,
+				MemberCreatedId = null,
+				MemberDeleted = null,
+				MemberDeletedId = null,
+				MemberModified = null,
+				MemberModifiedId = null,
+				Note = "test",
+				Photos = null,
+				ReceiptApprovals = null,
+				ReceiptStatus = ReceiptStatus.Concept.ToString()
+			};
+
+			var result = sut.GetRecord(receiptDataToGet, receiptToGet);
+
+			_ = result.Should().NotBeNull();
+			_ = result.Should().BeOfType<Receipt>();
+			_ = result.As<Receipt>().Id.Should().Be(expected.Id);
+			_ = result.As<Receipt>().Amount.Should().Be(expected.Amount);
+			_ = result.As<Receipt>().CostCentre.Should().Be(expected.CostCentre);
+			_ = result.As<Receipt>().CostCentreId.Should().Be(expected.CostCentreId);
+			_ = result.As<Receipt>().DateTimeCreated.Should().Be(expected.DateTimeCreated);
+			_ = result.As<Receipt>().DateTimeDeleted.Should().Be(expected.DateTimeDeleted);
+			_ = result.As<Receipt>().DateTimeModified.Should().Be(expected.DateTimeModified);
+			_ = result.As<Receipt>().Location.Should().Be(expected.Location);
+			_ = result.As<Receipt>().MemberCreated.Should().Be(expected.MemberCreated);
+			_ = result.As<Receipt>().MemberCreatedId.Should().Be(expected.MemberCreatedId);
+			_ = result.As<Receipt>().MemberDeleted.Should().Be(expected.MemberDeleted);
+			_ = result.As<Receipt>().MemberDeletedId.Should().Be(expected.MemberDeletedId);
+			_ = result.As<Receipt>().MemberModified.Should().Be(expected.MemberModified);
+			_ = result.As<Receipt>().MemberModifiedId.Should().Be(expected.MemberModifiedId);
+			_ = result.As<Receipt>().Note.Should().Be(expected.Note);
+			_ = result.As<Receipt>().Photos.Should().BeNull();
+			_ = result.As<Receipt>().ReceiptApprovals.Should().BeNull();
+			_ = result.As<Receipt>().ReceiptStatus.Should().Be(expected.ReceiptStatus);
+		}
+
+		#endregion
+
+		#region Create
+
+		[Fact]
+		public void Create_WithDefaultModels_ReturnsNull()
+		{
+			using var context = Fixture.CreateContext();
+
+			var sut = new ReceiptRepository(context
+				, receiptStatusRepository.Object
+				, costCentreRepository.Object
+				, memberRepository.Object);
+
+			ReceiptData receiptDataToGet = new ReceiptData();
+			Receipt receiptToGet = new Receipt();
+
+			// Setting up data for GetModel(T) - START
+
+			var costCentreToReturnFirst = new CostCentreModel()
+			{
+				Id = -50,
+				Name = "TestCostCentre"
+			};
+
+			var receiptStatusToReturnFirst = ReceiptStatus.Uitbetaald;
+
+			var memberToReturnFirst = new MemberModel() { Id = -100, Name = "TestName" };
+
+			var receiptToGetFirst = new Receipt()
+			{
+				Id = -1,
+				Note = "TestReceipt",
+				Amount = 20.50m,
+				CostCentreId = -50,
+				MemberCreatedId = -100,
+				DateTimeCreated = new DateTime(2023, 12, 30, 9, 0, 0),
+				DateTimeModified = new DateTime(2023, 12, 30, 9, 10, 0),
+			};
+
+			receiptStatusRepository.Setup(r => r.GetModel(It.IsAny<string>())).Returns(receiptStatusToReturnFirst);
+			costCentreRepository.Setup(c => c.GetModel(It.IsAny<long>())).Returns(costCentreToReturnFirst);
+			memberRepository.Setup(m => m.GetModel(It.IsAny<long>())).Returns(memberToReturnFirst);
+
+			// Setting up data for GetModel(T) - END
+
+			var expected = new Receipt()
+			{
+				Id = 0,
+				Amount = null,
+				CostCentre = null,
+				CostCentreId = null,
+				DateTimeCreated = new DateTime(),
+				DateTimeDeleted = null,
+				DateTimeModified = null,
+				Location = null,
+				MemberCreated = null,
+				MemberCreatedId = null,
+				MemberDeleted = null,
+				MemberDeletedId = null,
+				MemberModified = null,
+				MemberModifiedId = null,
+				Note = null,
+				Photos = null,
+				ReceiptApprovals = null,
+				ReceiptStatus = ReceiptStatus.Concept.ToString()
+			};
+
+			var result = sut.Create(receiptDataToGet, null);
+
+			_ = result.Should().BeNull();
+		}
+
+	
 
 		#endregion
 
@@ -303,371 +1012,221 @@ namespace Maasgroep.Database.Test
 
 		#endregion
 
+		#region GetHistory
 
+		[Fact]
+		public void GetHistory_WithDefaultModels_ReturnsValue()
+		{
+			using var context = Fixture.CreateContext();
 
+			var sut = new ReceiptRepository(context
+				, receiptStatusRepository.Object
+				, costCentreRepository.Object
+				, memberRepository.Object);
 
+			var expected = new ReceiptHistory()
+			{
+				Id = 0,
+				ReceiptId = -1,
+				Amount = 12.34m,
+				Note = "test",
+				Location = null,
+				ReceiptStatus = ReceiptStatus.Onbekend.ToString(),
+				CostCentreId = -1
+			};
 
+			var receiptToGetHistoryOf = new Receipt()
+			{
+				Id = -1,
+				Amount = 12.34m,
+				Note = "test",
+				Location = null,
+				ReceiptStatus = ReceiptStatus.Onbekend.ToString(),
+				CostCentreId = -1
+			};
 
+			var result = sut.GetHistory(receiptToGetHistoryOf);
 
-		//[Fact]
-		//public void GetReceipt_With_InValid_Id_ThrowsError()
-		//{
-		//	using var context = Fixture.CreateContext();
-		//	var sut = new ReceiptRepository(context);
+			_ = result.Should().NotBeNull();
+			_ = result.Should().BeOfType<ReceiptHistory>();
+			_ = result.As<ReceiptHistory>();
+			_ = result.As<ReceiptHistory>().Id.Should().Be(expected.Id);
+			_ = result.As<ReceiptHistory>().ReceiptId.Should().Be(expected.ReceiptId);
+			_ = result.As<ReceiptHistory>().Amount.Should().Be(expected.Amount);
+			_ = result.As<ReceiptHistory>().Note.Should().Be(expected.Note);
+			_ = result.As<ReceiptHistory>().Location.Should().Be(expected.Location);
+			_ = result.As<ReceiptHistory>().ReceiptStatus.Should().Be(expected.ReceiptStatus);
+			_ = result.As<ReceiptHistory>().CostCentreId.Should().Be(expected.CostCentreId);
+		}
 
-		//	var expected = new InvalidOperationException();
-		//	object actual = new object();
+		#endregion
 
-		//	try
-		//	{
-		//		actual = sut.GetReceipt(-1);
-		//	}
-		//	catch (Exception ex)
-		//	{
-		//		actual = ex;
-		//	}
+		#region Update
 
-		//	actual.Should().BeOfType<InvalidOperationException>();
-		//}
+		[Fact]
+		public void Update_WithMinimalData_newRecordNull_ReturnsNull()
+		{
+			using var context = Fixture.CreateContext();
 
-		//#endregion
+			var sut = new ReceiptRepository(context
+				, receiptStatusRepository.Object
+				, costCentreRepository.Object
+				, memberRepository.Object);
 
-		//#region GetReceipts
+			ReceiptData receiptDataToGet = new ReceiptData()
+			{
+				Amount = 99.99m,
+				Note = "test",
+				CostCentreId = 1
+			};
+			Receipt receiptToGet = new Receipt() { Id = 1 };
 
-		//[Fact]
-		//public void GetReceipts_With_Valid_Range_Returns_CountGreaterThanZero()
-		//{
-		//	using var context = Fixture.CreateContext();
-		//	var sut = new ReceiptRepository(context);
+			// Setting up data for GetModel(T) - START
 
-		//	var actual = sut.GetReceipts(0, 0);
+			var costCentreToReturnFirst = new CostCentreModel()
+			{
+				Id = -50,
+				Name = "TestCostCentre"
+			};
 
-		//	_ = actual.Should().BeOfType<List<ReceiptModel>>();
-		//	_ = actual.Count().Should().BeGreaterThan(0);
+			var receiptStatusToReturnFirst = ReceiptStatus.Uitbetaald;
 
-		//}
+			var memberToReturnFirst = new MemberModel() { Id = -100, Name = "TestName" };
 
-		//#endregion
+			var receiptToGetFirst = new Receipt()
+			{
+				Id = -1,
+				Note = "TestReceipt",
+				Amount = 20.50m,
+				CostCentreId = -50,
+				MemberCreatedId = -100,
+				DateTimeCreated = new DateTime(2023, 12, 30, 9, 0, 0),
+				DateTimeModified = new DateTime(2023, 12, 30, 9, 10, 0),
+			};
 
-		//#region GetReceiptsByMember
+			receiptStatusRepository.Setup(r => r.GetModel(It.IsAny<string>())).Returns(receiptStatusToReturnFirst);
+			costCentreRepository.Setup(c => c.GetModel(It.IsAny<long>())).Returns(costCentreToReturnFirst);
+			memberRepository.Setup(m => m.GetModel(It.IsAny<long>())).Returns(memberToReturnFirst);
 
-		//[Fact]
-		//public void GetReceiptsByMember_With_Valid_Range_Returns_CountGreaterThanZero()
-		//{
-		//	using var context = Fixture.CreateContext();
-		//	var sut = new ReceiptRepository(context);
+			// Setting up data for GetModel(T) - END
 
-		//	var actual = sut.GetReceiptsByMember(1, 0, 0);
+			var result = sut.Update(receiptToGetFirst, receiptDataToGet, null);
 
-		//	_ = actual.Should().BeOfType<List<ReceiptModel>>();
-		//	_ = actual.Count().Should().BeGreaterThan(0);
-		//}
+			_ = result.Should().BeNull();
+			
+		}
 
-		//[Fact]
-		//public void GetReceiptsByMember_With_InvalidMember_Returns_ZeroList()
-		//{
-		//	using var context = Fixture.CreateContext();
-		//	var sut = new ReceiptRepository(context);
+		#endregion
 
-		//	var actual = sut.GetReceiptsByMember(0, 0, 0);
+		#region ListByCostCentre
 
-		//	_ = actual.Should().BeOfType<List<ReceiptModel>>();
-		//	_ = actual.Count().Should().Be(0);
-		//}
+		[Fact]
+		public void ListByCostCentre_With_InValid_Id_Returns_Data()
+		{
+			using var context = Fixture.CreateContext();
 
-		//#endregion
+			var sut = new ReceiptRepository(context
+				, receiptStatusRepository.Object
+				, costCentreRepository.Object
+				, memberRepository.Object);
 
-		//#region Add
+			var result = sut.ListByCostCentre(-5);
 
-		//[Fact]
-		//public void Add_With_CostCentreNull_ThrowsError()
-		//{
-		//	using var context = Fixture.CreateContext();
-		//	var sut = new ReceiptRepository(context);
-		//	var receiptModelMock = new Mock<ReceiptModelCreateDb>().Object;
-		//	receiptModelMock.ReceiptModel = new Mock<ReceiptModelCreate>().Object;
-		//	receiptModelMock.ReceiptModel.CostCentre = "pietje";
-		//	object actual = new object();
+			_ = result.Should().NotBeNull();
+			_ = result.As<IEnumerable<ReceiptModel>>().Count().Should().Be(0);
+		}
 
-		//	//kh, door een lege costcentre komt je niet eens door de where van linq (regel 97)) (ergo mock)
-		//	try
-		//	{
-		//		actual = sut.Add(receiptModelMock);
-		//	}
-		//	catch (Exception ex)
-		//	{
-		//		actual = ex;
-		//	}
+		[Fact]
+		public void ListByCostCentre_With_Valid_Id_Returns_TwoRecords()
+		{
+			using var context = Fixture.CreateContext();
 
-		//	_ = actual.Should().BeOfType<Exception>();
-		//	_ = actual.As<Exception>().Message.Should().Be("kapot!");
-		//}
+			var sut = new ReceiptRepository(context
+				, receiptStatusRepository.Object
+				, costCentreRepository.Object
+				, memberRepository.Object);
 
-		//[Fact]
-		//public void Add_With_ValidObject_GivesCorrectId()
-		//{
-		//	using var context = Fixture.CreateContext();
-		//	var sut = new ReceiptRepository(context);
+			var result = sut.ListByCostCentre(3);
 
-		//	var modelToAdd = new ReceiptModelCreateDb()
-		//	{
-		//		Member = new MemberModel()
-		//		{
-		//			Id = 1,
-		//			Name = "kandit?",
-		//			Permissions = new List<PermissionModel>()
-		//		},
-		//		ReceiptModel = new ReceiptModelCreate()
-		//		{
-		//			Amount = 44.44M,
-		//			CostCentre = "Bestuur Maasgroep",
-		//			Note = "lekkere test dit",
-		//			Photos = new List<PhotoModelCreate>()
-		//					{
-		//						new PhotoModelCreate()
-		//						{
-		//							FileExtension = "nb",
-		//							FileName = "Foto van gras",
-		//							Base64Image = "doemaargewoonatteskt"
-		//						}
-		//					}
-		//		}
-		//	};
+			_ = result.Should().NotBeNull();
+			_ = result.As<IEnumerable<ReceiptModel>>().Count().Should().Be(2);
+		}
 
-		//	var expected = context.Receipt.Max(r => r.Id) + 1;
-		//	object actual = new object();
+		[Fact]
+		public void ListByCostCentre_With_Valid_Id_AndHist_Returns_ThreeRecords()
+		{
+			using var context = Fixture.CreateContext();
 
-		//	//kh, door een lege costcentre komt je niet eens door de where van linq (regel 97)) (ergo mock)
-		//	try
-		//	{
-		//		actual = sut.Add(modelToAdd);
-		//	}
-		//	catch (Exception ex)
-		//	{
-		//		actual = ex;
-		//	}
+			var sut = new ReceiptRepository(context
+				, receiptStatusRepository.Object
+				, costCentreRepository.Object
+				, memberRepository.Object);
 
-		//	_ = actual.Should().BeOfType<long>();
-		//	_ = actual.Should().Be(expected);
-		//}
+			var result = sut.ListByCostCentre(3, includeDeleted: true);
 
-		//#endregion
+			_ = result.Should().NotBeNull();
+			_ = result.As<IEnumerable<ReceiptModel>>().Count().Should().Be(3);
+		}
 
-		//#region Modify
-		//[Fact]
-		//public void Modify_With_ReceiptNull_ThrowsError()
-		//{
-		//	using var context = Fixture.CreateContext();
-		//	var sut = new ReceiptRepository(context);
-		//	var receiptModelMock = new Mock<ReceiptModelUpdateDb>().Object;
-		//	receiptModelMock.ReceiptModel = new Mock<ReceiptModel>().Object;
-		//	receiptModelMock.ReceiptModel.Id = -1;
-		//	object actual = new object();
+		[Fact]
+		public void ListByCostCentre_With_Valid_Id_AndHist_TakeOneOffsetOne_Returns_OneRecords()
+		{
+			using var context = Fixture.CreateContext();
 
-		//	//kh, door een lege costcentre komt je niet eens door de where van linq (regel 97)) (ergo mock)
-		//	try
-		//	{
-		//		actual = sut.Modify(receiptModelMock);
-		//	}
-		//	catch (Exception ex)
-		//	{
-		//		actual = ex;
-		//	}
+			var sut = new ReceiptRepository(context
+				, receiptStatusRepository.Object
+				, costCentreRepository.Object
+				, memberRepository.Object);
 
-		//	_ = actual.Should().BeOfType<Exception>();
-		//	_ = actual.As<Exception>().Message.Should().Be("kapot!");
-		//}
+			var result = sut.ListByCostCentre(3, 1, 1, false);
 
-		//[Fact]
-		//public void Modify_With_ValidObject_ReturnsTrue()
-		//{
-		//	using var context = Fixture.CreateContext();
-		//	var sut = new ReceiptRepository(context);
+			_ = result.Should().NotBeNull();
+			_ = result.As<IEnumerable<ReceiptModel>>().Count().Should().Be(1);
+			_ = result.As<IEnumerable<ReceiptModel>>().ElementAt(0).Should().NotBeNull();
+			_ = result.As<IEnumerable<ReceiptModel>>().ElementAt(0).Amount.Should().Be(3.33m);
+			_ = result.As<IEnumerable<ReceiptModel>>().ElementAt(0).Id.Should().Be(3);
+			_ = result.As<IEnumerable<ReceiptModel>>().ElementAt(0).Note.Should().Be("Handboek Woudlopers");
+		}
 
-		//	var modelToAdd = new ReceiptModelCreateDb()
-		//	{
-		//		Member = new MemberModel()
-		//		{
-		//			Id = 1,
-		//			Name = "kandit?",
-		//			Permissions = new List<PermissionModel>()
-		//		},
-		//		ReceiptModel = new ReceiptModelCreate()
-		//		{
-		//			Amount = 44.44M,
-		//			CostCentre = "Bestuur Maasgroep",
-		//			Note = "lekkere test dit",
-		//			Photos = new List<PhotoModelCreate>()
-		//					{
-		//						new PhotoModelCreate()
-		//						{
-		//							FileExtension = "nb",
-		//							FileName = "Foto van gras",
-		//							Base64Image = "doemaargewoonatteskt"
-		//						}
-		//					}
-		//		}
-		//	};
+		#endregion
 
-		//	var modelToUpdate = new ReceiptModelUpdateDb()
-		//	{
-		//		Member = new MemberModel()
-		//		{
-		//			Id = 2,
-		//			Name = "kandit?",
-		//			Permissions = new List<PermissionModel>()
-		//		},
-		//		ReceiptModel = new ReceiptModel()
-		//		{
-		//			Id = 4,
-		//			Amount = 44.55M,
-		//			Note = "Dees is de modify van ditte" + DateTime.Now.ToString(),
-		//			CostCentre = new CostCentreModel()
-		//			{
-		//				Name = "Bestuur Maasgroep",
-		//				Id = 1
-		//			},
+		#region ListPayable
 
-		//			Photos = new List<PhotoModel>()
-		//					{
-		//						new PhotoModel()
-		//						{
-		//							Id = 1,
-		//							fileExtension = "nb",
-		//							fileName = "Foto van gras",
-		//							Base64Image = "gaatdiefotoookmee?"
-		//						}
-		//					}
-		//		}
-		//	};
+		[Fact]
+		public void ListPayable_WithDefaultValues_ReturnsResult()
+		{
+			using var context = Fixture.CreateContext();
 
-		//	var expected = true;
-		//	object actual = new object();
+			var sut = new ReceiptRepository(context
+				, receiptStatusRepository.Object
+				, costCentreRepository.Object
+				, memberRepository.Object);
 
-		//	//kh, door een lege costcentre komt je niet eens door de where van linq (regel 97)) (ergo mock)
-		//	try
-		//	{
-		//		var id = sut.Add(modelToAdd);
-		//		modelToUpdate.ReceiptModel.Id = id;
-		//		actual = sut.Modify(modelToUpdate);
-		//	}
-		//	catch (Exception ex)
-		//	{
-		//		actual = ex;
-		//	}
+			var result = sut.ListPayable();
 
-		//	_ = actual.Should().BeOfType<bool>();
-		//	_ = actual.Should().Be(expected);
-		//}
-		//#endregion
+			_ = result.Should().NotBeNull();
+			_ = result.As<IEnumerable<ReceiptModel>>().Count().Should().Be(1);
+			_ = result.As<IEnumerable<ReceiptModel>>().ElementAt(0).Should().NotBeNull();
+			_ = result.As<IEnumerable<ReceiptModel>>().ElementAt(0).Id.Should().Be(2);
+			_ = result.As<IEnumerable<ReceiptModel>>().ElementAt(0).Note.Should().Be("Knakworstjes in de bonus");
+		}
 
-		//#region Delete
+		[Fact]
+		public void ListPayable_WithOffsetValues_ReturnsResult()
+		{
+			using var context = Fixture.CreateContext();
 
-		//[Fact]
-		//public void Delete_With_ReceiptNull_ThrowsError()
-		//{
-		//	using var context = Fixture.CreateContext();
-		//	var sut = new ReceiptRepository(context);
-		//	var receiptModelMock = new Mock<ReceiptModelDeleteDb>().Object;
-		//	receiptModelMock.Receipt = new Mock<ReceiptModel>().Object;
-		//	receiptModelMock.Receipt.Id = -1;
-		//	object actual = new object();
+			var sut = new ReceiptRepository(context
+				, receiptStatusRepository.Object
+				, costCentreRepository.Object
+				, memberRepository.Object);
 
-		//	//kh, door een lege costcentre komt je niet eens door de where van linq (regel 97)) (ergo mock)
-		//	try
-		//	{
-		//		actual = sut.Delete(receiptModelMock);
-		//	}
-		//	catch (Exception ex)
-		//	{
-		//		actual = ex;
-		//	}
+			var result = sut.ListPayable(1);
 
-		//	_ = actual.Should().BeOfType<bool>();
-		//	_ = actual.Should().Be(false);
-		//}
+			_ = result.Should().NotBeNull();
+			_ = result.As<IEnumerable<ReceiptModel>>().Count().Should().Be(0);
+		}
 
-		//[Fact]
-		//public void Delete_With_ValidObject_ReturnsTrue()
-		//{
-		//	using var context = Fixture.CreateContext();
-		//	var sut = new ReceiptRepository(context);
-
-		//	var modelToAdd = new ReceiptModelCreateDb()
-		//	{
-		//		Member = new MemberModel()
-		//		{
-		//			Id = 1,
-		//			Name = "kandit?",
-		//			Permissions = new List<PermissionModel>()
-		//		},
-		//		ReceiptModel = new ReceiptModelCreate()
-		//		{
-		//			Amount = 44.44M,
-		//			CostCentre = "Bestuur Maasgroep",
-		//			Note = "lekkere test dit",
-		//			Photos = new List<PhotoModelCreate>()
-		//					{
-		//						new PhotoModelCreate()
-		//						{
-		//							FileExtension = "nb",
-		//							FileName = "Foto van gras",
-		//							Base64Image = "doemaargewoonatteskt"
-		//						}
-		//					}
-		//		}
-		//	};
-
-		//	var modelToDelete = new ReceiptModelDeleteDb()
-		//	{
-		//		Member = new MemberModel()
-		//		{
-		//			Id = 2,
-		//			Name = "kandit?",
-		//			Permissions = new List<PermissionModel>()
-		//		},
-		//		Receipt = new ReceiptModel()
-		//		{
-		//			Id = 4,
-		//			Amount = 44.55M,
-		//			Note = "Dees is de modify van ditte" + DateTime.Now.ToString(),
-		//			CostCentre = new CostCentreModel()
-		//			{
-		//				Name = "Bestuur Maasgroep",
-		//				Id = 1
-		//			},
-
-		//			Photos = new List<PhotoModel>()
-		//					{
-		//						new PhotoModel()
-		//						{
-		//							Id = 1,
-		//							fileExtension = "nb",
-		//							fileName = "Foto van gras",
-		//							Base64Image = "gaatdiefotoookmee?"
-		//						}
-		//					}
-		//		}
-		//	};
-
-		//	var expected = true;
-		//	object actual = new object();
-
-		//	//kh, door een lege costcentre komt je niet eens door de where van linq (regel 97)) (ergo mock)
-		//	try
-		//	{
-		//		var id = sut.Add(modelToAdd);
-		//		modelToDelete.Receipt.Id = id;
-		//		actual = sut.Delete(modelToDelete);
-		//	}
-		//	catch (Exception ex)
-		//	{
-		//		actual = ex;
-		//	}
-
-		//	_ = actual.Should().BeOfType<bool>();
-		//	_ = actual.Should().Be(expected);
-		//}
-		//#endregion
+		#endregion
 	}
 }

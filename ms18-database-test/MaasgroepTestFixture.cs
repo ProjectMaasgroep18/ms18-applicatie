@@ -29,6 +29,7 @@ namespace Maasgroep.Database.Test
 					CreateTestDataReceipt();
 					CreateTestDataReceiptApproval();
 					CreateTestDataReceiptHistory();
+					CreateTestDataReceiptPhoto();
 
 					// Order
 					//CreateTestDataProduct();
@@ -201,6 +202,44 @@ namespace Maasgroep.Database.Test
 				db.SaveChanges();
 			}
 		}
+		private void CreateTestDataReceiptPhoto()
+		{
+			using (var db = CreateContext())
+			{
+				var member = db.Member.Where(m => m.Name == "Borgia").FirstOrDefault()!;
+				var costCentre1 = db.CostCentre.Where(cc => cc.Name == "Moeder van Joopie").FirstOrDefault()!;
+				var costCentre2 = db.CostCentre.Where(cc => cc.Name == "Penningmeester").FirstOrDefault()!;
+
+				var receipt = db.Receipt.Where(r => r.Note == "Schroeven voor kapotte sloep").FirstOrDefault();
+
+				var receiptPhotos = new List<ReceiptPhoto>()
+						{
+							new ReceiptPhoto() { 
+								Receipt = receipt
+							,   ReceiptId = receipt.Id 
+							,	Base64Image = "fake data"
+							,	FileExtension = "png"
+							,	FileName = "Bootje"
+							,	MemberCreated = member
+							,	MemberCreatedId = member.Id
+							},
+							new ReceiptPhoto() {
+								Receipt = receipt
+							,   ReceiptId = receipt.Id
+							,   Base64Image = "fake data"
+							,   FileExtension = "png"
+							,   FileName = "Kraaiennest"
+							,   MemberCreated = member
+							,   MemberCreatedId = member.Id
+							}
+						};
+
+				db.ReceiptPhoto.AddRange(receiptPhotos);
+
+				db.SaveChanges();
+			}
+		}
+
 
 		private void CreateTestDataReceiptHistory()
 		{

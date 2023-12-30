@@ -2,6 +2,7 @@
 using Maasgroep.Database.Interfaces;
 using Maasgroep.SharedKernel.ViewModels.Receipts;
 using Maasgroep.SharedKernel.DataModels.Receipts;
+using System.Data.SqlTypes;
 
 namespace Maasgroep.Database.Receipts
 {

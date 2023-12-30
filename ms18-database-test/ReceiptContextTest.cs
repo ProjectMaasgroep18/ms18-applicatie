@@ -359,7 +359,7 @@ namespace Maasgroep.Database.Test
 			try
 			{
 				var approval = GetValidApproval();
-				approval.Note = GetLongString(2049);
+				approval.Note = GetLongString(64001);
 
 				sut.Database.BeginTransaction();
 
@@ -382,7 +382,7 @@ namespace Maasgroep.Database.Test
 			_ = actual.Should().NotBeNull();
 			_ = actual.Should().BeOfType<DbUpdateException>();
 			_ = actual.As<DbUpdateException>().InnerException.Should().NotBeNull();
-			_ = actual.As<DbUpdateException>().InnerException!.Message.Should().Be("22001: value too long for type character varying(2048)");
+			_ = actual.As<DbUpdateException>().InnerException!.Message.Should().Be("22001: value too long for type character varying(64000)");
 		}
 
 		[Fact]
@@ -496,7 +496,7 @@ namespace Maasgroep.Database.Test
 			try
 			{
 				var photo = GetValidPhoto();
-				//photo.fileExtension = GetLongString(257); //TODO: Gevolg van aanpassing RH
+				photo.FileExtension = GetLongString(257);
 
 				sut.Database.BeginTransaction();
 
@@ -532,7 +532,7 @@ namespace Maasgroep.Database.Test
 			try
 			{
 				var photo = GetValidPhoto();
-				//photo.fileName = GetLongString(2049); //TODO: Gevolg van aanpassing RH
+				photo.FileName = GetLongString(2049);
 
 				sut.Database.BeginTransaction();
 
@@ -695,12 +695,10 @@ namespace Maasgroep.Database.Test
 		{
 			return new ReceiptPhoto()
 			{
-				////TODO: Gevolg van aanpassing RH
 				ReceiptId = 1,
-				//fileExtension = "png",
-				//fileName = "kijk die serieuze extensie",
+				FileExtension = "png",
+				FileName = "kijk die serieuze extensie",
 				Base64Image = "bliep bloep",
-				//Location = "digitaal",
 				MemberCreatedId = 1
 			};
 		}
