@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.Extensions.Logging;
 using ms18_applicatie.Controllers.team_d;
 using ms18_applicatie.Interfaces;
@@ -7,6 +6,7 @@ using ms18_applicatie.Models.team_d;
 
 namespace ms18_applicatie_test.team_d.Controllers;
 
+[TestFixture]
 public class AlbumsControllerTests
 {
     private Mock<IAlbumRepository> _mockAlbumRepository;

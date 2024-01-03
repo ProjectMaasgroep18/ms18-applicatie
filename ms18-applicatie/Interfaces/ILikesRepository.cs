@@ -8,7 +8,7 @@ public interface ILikesRepository
     Task<Guid?> AddLike(Like like);
     Task<Like?> GetLike(Guid photoId, long userId);
     Task DeleteLike(Guid likeId);
-    Task<IEnumerable<LikeViewModel>> GetAllLikesForPhoto(Guid photoId);
-    Task<IEnumerable<PhotoViewModel>> GetTopLikedPhotos(DateTime startDate, DateTime endDate, int topCount);
+    Task<List<LikeViewModel>> GetAllLikesForPhoto(Guid photoId);
+    Task<List<PhotoViewModel>> GetTopLikedPhotos(DateTime startDate, DateTime endDate, int topCount);
 }
 
