@@ -4,6 +4,6 @@ namespace Maasgroep.Interfaces
 {
 	public interface IMaasgroepAuthenticationService
 	{
-		MemberModel GetCurrentMember(HttpContext httpContext);
+		MemberModel? GetCurrentMember(HttpContext httpContext);
 	}
 }
