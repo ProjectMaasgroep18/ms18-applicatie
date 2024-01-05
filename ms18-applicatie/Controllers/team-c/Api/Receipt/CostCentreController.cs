@@ -3,6 +3,7 @@ using Maasgroep.Database.Interfaces;
 using Maasgroep.SharedKernel.ViewModels.Receipts;
 using Maasgroep.SharedKernel.DataModels.Receipts;
 using Microsoft.AspNetCore.Mvc;
+using Maasgroep.Interfaces;
 
 namespace Maasgroep.Controllers.Api;
 
@@ -11,7 +12,7 @@ public class CostCentreController : EditableRepositoryController<ICostCentreRepo
     protected readonly IReceiptRepository Receipts;
     public override string ItemName { get => "Kostencentrum"; }
 
-    public CostCentreController(ICostCentreRepository repository, IReceiptRepository receipts) : base(repository)
+    public CostCentreController(ICostCentreRepository repository, IReceiptRepository receipts, IMaasgroepAuthenticationService maasgroepAuthenticationService) : base(repository, maasgroepAuthenticationService)
         => Receipts = receipts;
 
     protected override bool AllowList()

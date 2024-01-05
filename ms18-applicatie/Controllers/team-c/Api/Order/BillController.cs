@@ -3,13 +3,14 @@ using Maasgroep.Database.Interfaces;
 using Maasgroep.SharedKernel.ViewModels.Orders;
 using Maasgroep.SharedKernel.DataModels.Orders;
 using Microsoft.AspNetCore.Mvc;
+using Maasgroep.Interfaces;
 
 namespace Maasgroep.Controllers.Api;
 
 public class BillController : DeletableRepositoryController<IBillRepository, Bill, BillModel, BillData>
 {
     public override string ItemName { get => "Bestelling"; }
-    public BillController(IBillRepository repository) : base(repository) {}
+    public BillController(IBillRepository repository, IMaasgroepAuthenticationService maasgroepAuthenticationService) : base(repository, maasgroepAuthenticationService) {}
     
     protected override bool AllowCreate(BillData Bill)
         => HasPermission("order");

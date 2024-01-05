@@ -1,5 +1,6 @@
 using Maasgroep.Database;
 using Maasgroep.Exceptions;
+using Maasgroep.Interfaces;
 using Maasgroep.SharedKernel.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,9 +10,9 @@ public abstract class WritableRepositoryController<TRepository, TRecord, TViewMo
 where TRepository : IWritableRepository<TRecord, TViewModel, TDataModel>
 where TRecord: GenericRecordActive
 {
-    public WritableRepositoryController(TRepository repository) : base(repository) {}
-    
-    protected virtual bool AllowCreate(TDataModel data)
+	public WritableRepositoryController(TRepository repository, IMaasgroepAuthenticationService maasgroepAuthenticationService) : base(repository, maasgroepAuthenticationService) { }
+
+	protected virtual bool AllowCreate(TDataModel data)
         => AllowList();
     
     [HttpPost]

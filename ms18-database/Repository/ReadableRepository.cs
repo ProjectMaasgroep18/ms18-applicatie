@@ -39,13 +39,13 @@ namespace Maasgroep.Database
         /** See if record with ID exists */
         public virtual bool Exists(long id) => Db.Set<TRecord>().Select(item => item.Id == id).Any();
 
-        /** Get record by ID */
-        public virtual TRecord? GetById(long id) => Db.Set<TRecord>().FirstOrDefault(item => item.Id == id && item.DateTimeDeleted == null);
+		/** Get record by ID, allow for finding deleted items */
+		public virtual TRecord? GetById(long id, bool includeDeleted = default) => Db.Set<TRecord>().FirstOrDefault(item => item.Id == id && (includeDeleted == true || item.DateTimeDeleted == null));
 
         /** Get model by ID */
         public TViewModel? GetModel(long id)
         {
-            var record = GetById(id);
+            var record = GetById(id, false);
 
             if (record == null) 
                 return default;

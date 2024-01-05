@@ -21,9 +21,6 @@ namespace Maasgroep.Database
             return SaveToDb(record) != null;
         }
 
-        /** Get record by ID, allow for finding deleted items */
-        public virtual TRecord? GetById(long id, bool includeDeleted = default) => Db.Set<TRecord>().FirstOrDefault(item => item.Id == id && (includeDeleted == true || item.DateTimeDeleted == null));
-
         /** Get list of records based on parameters (hide deleted records by default) */
         protected override IEnumerable<TRecord> GetList(Func<TRecord, bool>? filter = default, Func<TRecord, int>? priority = default, int offset = default, int limit = default)
             => GetList(filter, priority, offset, limit, false);
