@@ -21,4 +21,6 @@ public class PhotoViewModel
     public Guid? AlbumLocationId { get; set; }
     [Required]
     public int LikesCount { get; set; }
+    [Required]
+    public bool NeedsApproval { get; set; }
 }

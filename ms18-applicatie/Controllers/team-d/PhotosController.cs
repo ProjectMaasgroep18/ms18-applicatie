@@ -171,7 +171,8 @@ public class PhotosController : ControllerBase
     public async Task<ActionResult<PaginatedResponseModel<PhotoViewModel>>> ListPhotosInAlbum(
         [FromRoute] Guid albumId,
         [FromQuery] int pageNumber = 1,
-        [FromQuery] int pageSize = 10)
+        [FromQuery] int pageSize = 10,
+        [FromQuery] bool showUnapproved = false)
     {
         if (pageNumber < 1 || pageSize < 1)
         {
@@ -180,7 +181,7 @@ public class PhotosController : ControllerBase
 
         try
         {
-            var (photos, totalCount) = await _photoRepository.GetPhotosByAlbumId(albumId, pageNumber, pageSize);
+            var (photos, totalCount) = await _photoRepository.GetPhotosByAlbumId(albumId, pageNumber, pageSize, showUnapproved);
 
             var photoViewModels = photos.Select(p => new PhotoViewModel
             {
@@ -193,7 +194,8 @@ public class PhotosController : ControllerBase
                 TakenOn = p.TakenOn,
                 Location = p.Location,
                 AlbumLocationId = p.AlbumLocationId,
-                LikesCount = p.Likes?.Count() ?? 0
+                LikesCount = p.Likes?.Count() ?? 0,
+                NeedsApproval = p.NeedsApproval
             }).ToList();
 
             var response = new PaginatedResponseModel<PhotoViewModel>
@@ -211,6 +213,55 @@ public class PhotosController : ControllerBase
         {
             _logger.LogError(ex, $"Error occurred while retrieving photos for album ID {albumId}.");
             return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while retrieving photos.");
+        }
+    }
+
+    [HttpGet("unapproved")]
+    [ProducesResponseType(typeof(IEnumerable<PhotoViewModel>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<IEnumerable<PhotoViewModel>>> ListUnapprovedPhotos(
+        [FromQuery] int pageNumber = 1,
+        [FromQuery] int pageSize = 10)
+    {
+        if (pageNumber < 1 || pageSize < 1)
+        {
+            return BadRequest("Invalid page number or page size.");
+        }
+
+        try
+        {
+            var (photos, totalCount) = await _photoRepository.GetUnapprovedPhotos(pageNumber, pageSize);
+
+            var photoViewModels = photos.Select(p => new PhotoViewModel
+            {
+                Id = p.Id,
+                UploaderId = p.UploaderId,
+                UploadDate = p.UploadDate,
+                Title = p.Title,
+                ImageBase64 = Convert.ToBase64String(p.ImageData),
+                ContentType = p.ContentType,
+                TakenOn = p.TakenOn,
+                Location = p.Location,
+                AlbumLocationId = p.AlbumLocationId,
+                LikesCount = p.Likes?.Count() ?? 0,
+                NeedsApproval = p.NeedsApproval
+            }).ToList();
+
+            var response = new PaginatedResponseModel<PhotoViewModel>
+            {
+                Items = photoViewModels,
+                TotalItems = totalCount,
+                TotalPages = (int)Math.Ceiling((double)totalCount / pageSize),
+                CurrentPage = pageNumber,
+                PageSize = pageSize
+            };
+
+            return Ok(response);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error occurred while retrieving unapproved photos.");
+            return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while retrieving unapproved photos.");
         }
     }
 }
