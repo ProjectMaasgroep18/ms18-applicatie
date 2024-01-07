@@ -206,8 +206,7 @@ public class PhotosController : ControllerBase
                 CurrentPage = pageNumber,
                 PageSize = pageSize
             };
-
-            return Ok(response);
+            return new OkObjectResult(response);
         }
         catch (Exception ex)
         {
