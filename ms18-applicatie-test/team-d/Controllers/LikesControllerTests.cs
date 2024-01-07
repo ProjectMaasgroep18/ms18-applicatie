@@ -125,7 +125,7 @@ public class LikesControllerTests
     {
         var photoId = Guid.NewGuid();
         var userId = 123L;
-        _mockLikesRepository.Setup(repo => repo.GetLike(photoId, userId)).ReturnsAsync((Like)null);
+        _mockLikesRepository.Setup(repo => repo.GetLike(photoId, userId)).ReturnsAsync((Like)null!);
 
         var result = await _controller.DeleteLike(photoId, userId);
 
