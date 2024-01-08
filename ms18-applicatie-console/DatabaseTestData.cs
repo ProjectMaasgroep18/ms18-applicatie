@@ -109,6 +109,7 @@ namespace Maasgroep.Console
                     "receipt.pay", // Mag receipts zien en uitbetalen
                     "photoAlbum", // Toegang tot het photoalbum
                     "photoAlbum.edit", // Mag het fotoalbum beheren
+                    "calendar.editor", // kan de calendar bewerken
                 }.ToDictionary(name => name, name => new Permission() { Name = name });
 
                 foreach (var permission in permissions) {
