@@ -7,12 +7,12 @@ namespace Maasgroep.Database.Receipts
 {
     public class ReceiptPhotoRepository : DeletableRepository<ReceiptPhoto, ReceiptPhotoModel, ReceiptPhotoData>, IReceiptPhotoRepository
     {
-        protected ReceiptRepository Receipts;
-        protected MemberRepository Members;
-        public ReceiptPhotoRepository(MaasgroepContext db) : base(db)
+        protected IReceiptRepository Receipts;
+        protected IMemberRepository Members;
+        public ReceiptPhotoRepository(MaasgroepContext db, IReceiptRepository receiptRepository, IMemberRepository memberRepository) : base(db)
         {
-            Receipts = new(db);
-            Members = new(db);
+            Receipts = receiptRepository;
+            Members = memberRepository;
         }
 
         /** Create ReceiptPhotoModel from ReceiptPhoto record */

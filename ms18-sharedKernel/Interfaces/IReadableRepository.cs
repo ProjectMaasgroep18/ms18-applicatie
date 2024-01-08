@@ -9,7 +9,7 @@ namespace Maasgroep.SharedKernel.Interfaces
 
         // Methods to query items
         bool Exists(long id);
-        TRecord? GetById(long id);
+        TRecord? GetById(long id, bool includeDeleted = default);
         IEnumerable<TViewModel> ListAll(int offset = default, int limit = default);
     }
 }
