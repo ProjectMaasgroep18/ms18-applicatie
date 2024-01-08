@@ -104,6 +104,7 @@ namespace Maasgroep.Console
                     "receipt", // Toegang tot het "receipt" gedeelte: eigen bonnetjes inzien, indienen, wijzigen
                     "receipt.approve", // Mag receipts zien en goed/afkeuren
                     "receipt.pay", // Mag receipts zien en uitbetalen
+                    "calendar.editor", // kan de calendar bewerken
                 }.ToDictionary(name => name, name => new Permission() { Name = name });
 
                 foreach (var permission in permissions) {

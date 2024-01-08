@@ -68,7 +68,7 @@ namespace ms18_applicatie.Controllers.team_a
             {
                 var googleEvent = calendarEvent.ToGoogleEvent();
                 EventsResource.InsertRequest request = _calendarService.Events.Insert(googleEvent, GetCalendarId(calendarName));
-                Event createdEvent = await request.ExecuteAsync();
+                _ = await request.ExecuteAsync();
                 return new OkResult();
             }
             catch (Exception ex)
