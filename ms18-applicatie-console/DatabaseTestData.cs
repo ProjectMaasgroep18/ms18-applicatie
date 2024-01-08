@@ -74,6 +74,9 @@ namespace Maasgroep.Console
                     // Team C
                     ["Goedkeur"] = new Member() { Name = "Goedkeur", Email = "goedkeur@example.com", Color = "#00CC00", Password = verySafePassword },
                     ["Betaal"] = new Member() { Name = "Betaal", Email = "betaal@example.com", Color = "#CC00FF", Password = verySafePassword },
+
+                    // Team D
+                    ["PhotoAlbum"] = new Member() { Name = "Fotos", Email = "fotos@example.com", Color = "#FF6600", Password = verySafePassword },
                 };
 
                 foreach (var member in members) {
@@ -104,6 +107,8 @@ namespace Maasgroep.Console
                     "receipt", // Toegang tot het "receipt" gedeelte: eigen bonnetjes inzien, indienen, wijzigen
                     "receipt.approve", // Mag receipts zien en goed/afkeuren
                     "receipt.pay", // Mag receipts zien en uitbetalen
+                    "photoAlbum", // Toegang tot het photoalbum
+                    "photoAlbum.edit", // Mag het fotoalbum beheren
                     "calendar.editor", // kan de calendar bewerken
                 }.ToDictionary(name => name, name => new Permission() { Name = name });
 
@@ -123,11 +128,13 @@ namespace Maasgroep.Console
                     new MemberPermission() { MemberId = CurrentMembers["Admin"]!.Id, Permission = currentPermissions["admin"] },
                     new MemberPermission() { MemberId = CurrentMembers["Lid"]!.Id, Permission = currentPermissions["order"] },
                     new MemberPermission() { MemberId = CurrentMembers["Lid"]!.Id, Permission = currentPermissions["receipt"] },
+                    new MemberPermission() { MemberId = CurrentMembers["Lid"]!.Id, Permission = currentPermissions["photoAlbum"] },
                     new MemberPermission() { MemberId = CurrentMembers["Gast"]!.Id, Permission = currentPermissions["order"] },
                     new MemberPermission() { MemberId = CurrentMembers["Bar"]!.Id, Permission = currentPermissions["order.view"] },
                     new MemberPermission() { MemberId = CurrentMembers["Product"]!.Id, Permission = currentPermissions["order.product"] },
                     new MemberPermission() { MemberId = CurrentMembers["Goedkeur"]!.Id, Permission = currentPermissions["receipt.approve"] },
                     new MemberPermission() { MemberId = CurrentMembers["Betaal"]!.Id, Permission = currentPermissions["receipt.pay"] },
+                    new MemberPermission() { MemberId = CurrentMembers["PhotoAlbum"]!.Id, Permission = currentPermissions["photoAlbum.edit"] },
                 };
 
                 foreach (var memberPermission in memberPermissions) {

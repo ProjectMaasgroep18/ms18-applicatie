@@ -10,7 +10,7 @@ using Microsoft.IdentityModel.Tokens;
 
 using System.Text;
 using System.IdentityModel.Tokens.Jwt;
-using System.Data.Common;
+using Maasgroep.Interfaces;
 
 namespace Maasgroep.Controllers.Api;
 
@@ -23,14 +23,14 @@ public class UserController : EditableRepositoryController<IMemberRepository, Me
     protected readonly IConfiguration Config;
     public override string ItemName { get => "Gebruiker"; }
 
-    public UserController(IMemberRepository repository, IReceiptRepository receipts, IBillRepository bills, ITokenStoreRepository tokenStore, IPermissionRepository permissions, IConfiguration config) : base(repository)
+    public UserController(IMemberRepository repository, IReceiptRepository receipts, IBillRepository bills, ITokenStoreRepository tokenStore, IPermissionRepository permissions, IConfiguration config, IMaasgroepAuthenticationService maasgroepAuthenticationService) : base(repository, maasgroepAuthenticationService)
     {
         Receipts = receipts;
         Bills = bills;
         TokenStore = tokenStore;
         Permissions = permissions;
         Config = config;
-    }
+	}
 
     protected override bool AllowList()
         => HasPermission("admin");
@@ -104,7 +104,7 @@ public class UserController : EditableRepositoryController<IMemberRepository, Me
             NoAccess();
         return Ok(Bills.ListByMember(id, offset, limit, includeDeleted));
     }
-
+    
     [HttpGet("Bill")]
     public IActionResult BillsByEmail([FromQuery] string email, [FromQuery] int offset = default, [FromQuery] int limit = default, [FromQuery] bool includeDeleted = default)
     {   

@@ -3,6 +3,7 @@ using Maasgroep.Database.Interfaces;
 using Maasgroep.SharedKernel.ViewModels.Orders;
 using Maasgroep.SharedKernel.DataModels.Orders;
 using Microsoft.AspNetCore.Mvc;
+using Maasgroep.Interfaces;
 
 namespace Maasgroep.Controllers.Api;
 
@@ -10,7 +11,7 @@ public class ProductController : EditableRepositoryController<IProductRepository
 {
     protected IStockRepository Stock;
     public override string ItemName { get => "Product"; }
-    public ProductController(IProductRepository repository, IStockRepository stock) : base(repository)
+    public ProductController(IProductRepository repository, IStockRepository stock, IMaasgroepAuthenticationService maasgroepAuthenticationService) : base(repository, maasgroepAuthenticationService)
         => Stock = stock;
     
     protected override bool AllowCreate(ProductData product)

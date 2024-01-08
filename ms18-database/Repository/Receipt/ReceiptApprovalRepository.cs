@@ -7,11 +7,11 @@ namespace Maasgroep.Database.Receipts
 {
     public class ReceiptApprovalRepository : WritableRepository<ReceiptApproval, ReceiptApprovalModel, ReceiptApprovalData>, IReceiptApprovalRepository
     {
-        protected ReceiptRepository Receipts;
-        protected MemberRepository Members;
-        public ReceiptApprovalRepository(MaasgroepContext db) : base(db) {
-            Receipts = new(db);
-            Members = new(db);
+        protected IReceiptRepository Receipts;
+        protected IMemberRepository Members;
+        public ReceiptApprovalRepository(MaasgroepContext db, IReceiptRepository receiptRepository, IMemberRepository memberRepository) : base(db) {
+            Receipts = receiptRepository;
+            Members = memberRepository;
         }
 
         /** Create ReceiptApprovalModel from ReceiptApproval record */

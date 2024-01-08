@@ -2,18 +2,19 @@
 using Maasgroep.Database.Interfaces;
 using Maasgroep.SharedKernel.ViewModels.Receipts;
 using Maasgroep.SharedKernel.DataModels.Receipts;
+using System.Data.SqlTypes;
 
 namespace Maasgroep.Database.Receipts
 {
     public class ReceiptRepository : EditableRepository<Receipt, ReceiptModel, ReceiptData, ReceiptHistory>, IReceiptRepository
     {
-        protected readonly ReceiptStatusRepository Statuses;
-        protected readonly CostCentreRepository CostCentres;
-        protected readonly MemberRepository Members;
-        public ReceiptRepository(MaasgroepContext db) : base(db) {
-            Statuses = new ReceiptStatusRepository();
-            CostCentres = new CostCentreRepository(db);
-            Members = new MemberRepository(db);
+        protected readonly IReceiptStatusRepository Statuses;
+        protected readonly ICostCentreRepository CostCentres;
+        protected readonly IMemberRepository Members;
+        public ReceiptRepository(MaasgroepContext db, IReceiptStatusRepository receiptStatusRepository, ICostCentreRepository costCentreRepository, IMemberRepository memberRepository) : base(db) {
+            Statuses = receiptStatusRepository;
+            CostCentres = costCentreRepository;
+            Members = memberRepository;
         }
 
         /** Create ReceiptModel from Receipt record */
