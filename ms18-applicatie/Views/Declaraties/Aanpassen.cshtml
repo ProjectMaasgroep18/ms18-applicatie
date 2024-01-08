@@ -1,0 +1,273 @@
+<h1>Declaratie aanpassen</h1>
+
+<div id="login-user" class="hidden">
+    <p id="login-info">Hallo <span rel="name"></span>!</p>
+
+    <div id="receipt-approval-list" class="hidden">
+        <p id="receipt-approval-previous" class="hidden">
+            Deze delaratie is
+            <b class="status-approved">Goedgekeurd</b>
+            <b class="status-rejected">Afgekeurd</b>
+            <b class="status-paid">Uitbetaald</b>
+            door
+            <b rel="memberCreated.name"></b>
+            op
+            <b rel="dateTimeCreated::dateTime"></b>
+            <br>
+            <i rel="note"></i>
+        </p>
+    </div>
+    
+    <p>Hier kan je je declaratie aanpassen of aanvullen:</p>
+
+    <form method="post" id="receipt-form" class="hidden">
+
+        <table class="data-table">
+            <tr>
+                <td>Bedrag: </td>
+                <td><input type="number" name="Amount" step="0.01" rel="amount:value"></td>
+            </tr>
+            <tr>
+                <td>Kostencentrum: </td>
+                <td><select id="cost-centres" name="CostCentreId" rel="costCentre.id:value:zero">
+                    <option value="0" disabled selected>Kies een kostencentrum...</option>
+                    <option value="" id="cost-centre"></option>
+                </select></td>
+            </tr>
+            <tr>
+                <td>Opmerkingen: </td>
+                <td><textarea name="Note" rel="note"></textarea></td>
+            </tr>
+            <tr>
+                <td>Status</td>
+                <td><b rel="statusString"></b></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td><input type="submit" value="Aanpassingen opslaan" class="btn btn-primary"></td>
+            </tr>
+        </table>
+    </form>
+
+    &nbsp;
+
+    <p>Vul alle gegevens volledig in om je declaratie in te dienen.</p>
+
+    <form id="receipt-photos-form" class="hidden">
+
+        <p><i>Foto's:</i></p>
+
+        <div id="receipt-photos">
+            <div class="result-item hidden">
+                <img class="drop-image">
+                <p class="user-actions">
+                    <a href="#" class="delete-photo">Verwijderen</a>
+                </p>
+            </div>
+            <p class="result-empty hidden">Er zijn geen foto's bij deze declaratie</p>
+            <p class="result-has-more hidden">
+                <a href="#" class="result-show-more">Toon meer</a>
+            </p>
+        </div>
+
+        <p><button type="button" class="btn btn-secondary" id="receipt-extra-photo">Extra foto toevoegen</button></p>
+        
+        <label for="FormFile" class="drop-container hidden" id="receipt-new-photos">
+            <span class="drop-title">Upload je foto</span>
+            <div class="drop-image-div"></div>
+            <span class="drop-hint">sleep of klik om een bestand te selecteren</span>
+            <input type="file" accept="image/*" required class="hidden" id="receipt-input" multiple>
+        </label>
+    </form>
+
+    <p><a href="/Declaraties">Terug naar Declaraties</a></p>
+</div>
+
+
+@section scripts {
+<script>
+    const receiptId = @ViewData["id"];
+    const photosDiv = document.querySelector('#receipt-photos');
+    const approvalDiv = document.querySelector('#receipt-approval-list');
+
+    async function deletePhoto(deleteId) {
+        // Delete photo by ID
+
+        if (!window.confirm('Weet je zeker dat je deze foto wilt verwijderen?'))
+            return;
+
+        const photoContainer = document.querySelector('#receipt-photo-' + deleteId);
+        hideElement(photoContainer.querySelector('.user-actions'));
+
+        setLoadMessage('Foto verwijderen...');
+        let result = await apiDelete('ReceiptPhoto/' + deleteId);
+        
+        if (!result)
+            return;
+
+        window.location.href = window.location.href.toString().replace(/#.*$/, '');
+    }
+
+    requireLogin(async member => {
+        // User session loaded
+     
+        showElement(document.querySelector('#login-user'));
+        showOutput(member, document.querySelector('#login-info'));
+
+        // Load all cost centres
+        let costCentrePage = 1;
+        let costCentres = [];
+        let newCostCentres;
+        do {
+            newCostCentres = await apiGetInfinite('CostCentre', null, null, null, costCentrePage);
+            newCostCentres.forEach(c => costCentres.push(c));
+            costCentrePage++;
+        } while (newCostCentres && newCostCentres.length > 0);
+
+        let select = document.querySelector('#cost-centres');
+        for (i in costCentres) {
+            // Populate cost centre <select>
+
+            let costCentre = document.querySelector('#cost-centre').cloneNode(true);
+            let id = costCentres[i].id;
+            costCentre.value = id;
+            costCentre.innerText = costCentres[i].name;
+            select.appendChild(costCentre);
+        }
+        select.value = 0;
+        document.querySelector('#cost-centre').remove();
+
+        apiGet('Receipt/' + receiptId).then(receipt => {
+            // Receipt loaded
+
+            if (!receipt.isEditable) {
+                // No longer editable, redirect to View page instead
+                window.location.href = '/Declaraties/Bekijken/' + receiptId;
+                return;
+            }
+
+            showOutput(receipt, document.querySelector('#receipt-form'));
+
+            apiGetInfinite('Receipt/' + receiptId + '/Photo', photosDiv, (elements, result) => {
+                // Load receipt photos
+                showElement(document.querySelector('#receipt-photos-form'));
+                for (i in result) {
+                    let photo = elements[i];
+                    let img = photo.querySelector('img');
+                    let deleteLink = photo.querySelector('.delete-photo');
+                    let id = result[i].id;
+                    photo.id = 'receipt-photo-' + id;
+                    deleteLink.addEventListener('click', event => {
+                        event.preventDefault();
+                        deletePhoto(id);
+                    });
+                    img.src = result[i].base64Image;
+                }
+            });
+
+            apiGet('Receipt/' + receiptId + '/Approve?limit=1').then(result => {
+                // Get the first (newest) receipt approval, if any
+
+                if (typeof result[0] == 'undefined')
+                    return;
+
+                showElement(approvalDiv);
+                let approval = document.querySelector('#receipt-approval-previous').cloneNode(true);
+                let id = result[0].id;
+                
+                if (result[0].paid) {
+                    // Uitbetaald
+                    approval.querySelector('.status-approved')?.remove();
+                    approval.querySelector('.status-rejected')?.remove();
+                } else if (result[0].approved) {
+                    // Goedgekeurd
+                    approval.querySelector('.status-paid')?.remove();
+                    approval.querySelector('.status-rejected')?.remove();
+                } else {
+                    // Afgekeurd
+                    approval.querySelector('.status-paid')?.remove();
+                    approval.querySelector('.status-approved')?.remove();
+                }
+                approval.id = 'receipt-approval-' + id;
+                showOutput(result[0], approval);
+                approvalDiv.appendChild(approval);
+            });
+        });
+    });
+
+    const receiptForm = document.querySelector('#receipt-form');
+    const receiptPhotosForm = document.querySelector('#receipt-photos-form');
+    const extraPhoto = document.querySelector('#receipt-extra-photo');
+    const dropInput = document.querySelector('#receipt-new-photos');
+
+    receiptForm.addEventListener('submit', event => {
+        // Submit form
+
+        event.preventDefault();
+        
+        let formData = {};
+        receiptForm.querySelectorAll('input[name],textarea[name],select[name]').forEach(input => {
+            formData[input.name] = input.value;
+            if (input.type == "number" || input.name.match(/Id$/))
+                formData[input.name] = isNaN(+formData[input.name]) ? 0 : +formData[input.name];
+        });
+        hideElement(receiptForm);
+        hideElement(receiptPhotosForm);
+
+        setLoadMessage('Bezig met opslaan...');
+
+        apiPut('Receipt/' + receiptId, formData).then(result => {
+            if (result) // PUT should not return a response body, just a success status
+                window.location.href = '/Declaraties/Lijst'; // Of: /Declaraties/Aanpassen?id=' + result.receipt.id;
+        });
+    });
+    
+    extraPhoto.addEventListener('click', event => {
+        // Select extra photos
+
+        document.querySelector('#receipt-input').click();
+    });
+
+    dropInput.addEventListener('photos-resized', async event => {
+        // Extra photos selected and resized (see site.js)
+
+        if (!event.detail || !event.detail.length)
+            return;
+        
+        let uploadsFinished = 0;
+        let uploadsTotal = event.detail.length;
+
+        for (id in event.detail) {
+            // Loop through all selected receipt photos
+
+            setLoadMessage('Foto\'s uploaden (' + Math.round(uploadsFinished/uploadsTotal * 100) + '%)...')
+
+            let fileData = event.detail[id];
+            let fileName = fileData.filename;
+            fileName = typeof fileName == 'string' ? fileName.split('.') : '';
+            let fileExt = fileName.pop();
+            fileName = fileName.join('.');
+
+            const formData = {
+                fileName: fileName,
+                fileExtension: fileExt,
+                base64Image: fileData.data,
+                ReceiptId: receiptId,
+            };
+
+            // Upload photo
+            let result = await apiPost('ReceiptPhoto', formData);
+        
+            if (result) {
+                uploadsFinished++;
+            } else {
+                handleError('Uploaden mislukt');
+            }
+        }
+        if (uploadsFinished == uploadsTotal)
+            window.location.href = window.location.href.toString().replace(/#.*$/, '');
+    });
+
+
+</script>
+}

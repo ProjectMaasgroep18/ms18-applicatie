@@ -1,0 +1,31 @@
+<h1>Declaraties</h1>
+
+<div id="login-user" class="hidden">
+    <p id="login-info">Hallo <span rel="name"></span>!</p>    
+
+    <p>Wat wil je doen met Declaraties?</p>
+
+    <ul>
+        <li><a asp-controller="Declaraties" asp-action="Lijst">Declaraties indienen</a></li>
+        <li><a asp-controller="Declaraties" asp-action="Goedkeuren">Declaraties goedkeuren</a></li>
+        <li><a asp-controller="Declaraties" asp-action="Uitbetalen">Declaraties uitbetalen</a></li>
+        <li><a asp-controller="Declaraties" asp-action="Kostencentra">Kostencentra aanpassen</a></li>
+    </ul>
+    
+    &nbsp;
+
+    <p><a href="/">Terug naar Home</a></p>
+</div>
+
+@section scripts {
+<script>
+    requireLogin(async member => {
+        // User session loaded
+     
+        const userId = member.id;
+        showElement(document.querySelector('#login-user'));
+        showOutput(member, document.querySelector('#login-info'));
+
+    });
+</script>
+}
