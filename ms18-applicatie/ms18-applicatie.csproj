@@ -20,6 +20,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="6.0.25" />
       <PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.11" />
       <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="7.0.11">
         <PrivateAssets>all</PrivateAssets>
@@ -33,7 +34,8 @@
       <PackageReference Include="Google.Apis.Auth" Version="1.64.0" />
       <PackageReference Include="Google.Apis.Auth.AspNetCore3" Version="1.64.0" />
       <PackageReference Include="Google.Apis.Calendar.v3" Version="1.64.0.3171" />
-      <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
     </ItemGroup>
+    
+    <ProjectExtensions><VisualStudio><UserProperties controllers_4team-a_4calendarids_1sample_1json__JsonSchema="https://json.schemastore.org/appsettings.json" /></VisualStudio></ProjectExtensions>
 
 </Project>

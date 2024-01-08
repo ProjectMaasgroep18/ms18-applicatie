@@ -1,0 +1,31 @@
+<h1>Producten</h1>
+
+<div id="login-user" class="hidden">
+    <p id="login-info">Hallo <span rel="name"></span>!</p>    
+
+    <p>Wat wil je doen met Producten?</p>
+
+    <ul>
+        <li><a asp-controller="Producten" asp-action="Bestellen">Producten bestellen</a></li>
+        <li><a asp-controller="Producten" asp-action="Beheren">Producten beheren</a></li>
+        <li><a asp-controller="Producten" asp-action="Bestellingen">Je bestellingen bekijken</a></li>
+        <li><a asp-controller="Producten" asp-action="AlleBestellingen">Alle bestellingen bekijken</a></li>
+    </ul>
+    
+    &nbsp;
+
+    <p><a href="/">Terug naar Home</a></p>
+</div>
+
+@section scripts {
+<script>
+    requireLogin(async member => {
+        // User session loaded
+     
+        const userId = member.id;
+        showElement(document.querySelector('#login-user'));
+        showOutput(member, document.querySelector('#login-info'));
+
+    });
+</script>
+}

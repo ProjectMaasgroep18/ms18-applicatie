@@ -375,3 +375,6 @@ FodyWeavers.xsd
 /ms18-database/bin
 /ms18-sharedKernel/obj
 /ms18-sharedKernel/bin
+/ms18-applicatie/Controllers/team-a/CalendarIds.json
+
+.db

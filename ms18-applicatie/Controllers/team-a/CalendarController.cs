@@ -214,7 +214,7 @@ namespace ms18_applicatie.Controllers.team_a
                     if (eventsItem == null)
                         continue;
 
-                    var calenderEvent = new CalendarEvent(eventsItem, calenderId);
+                    var calenderEvent = new CalendarEvent(eventsItem, Calendars.Global);
                     calenderEvents.Add(calenderEvent);
                 }
             }

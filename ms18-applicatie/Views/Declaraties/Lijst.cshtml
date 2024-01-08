@@ -1,0 +1,101 @@
+<h1>Je declaraties</h1>
+
+<div id="login-user" class="hidden">
+    <p id="login-info">Hallo <span rel="name"></span>!</p>    
+
+    <div id="user-receipts" class="hidden">
+
+        <p>Hier kan je je bonnetjes inleveren:</p>
+
+        <p><a asp-action="Nieuw"><button class="btn btn-primary">Nieuwe declaratie</button></a></p>
+
+        <p><i>Dit zijn je bestaande declaraties in de database:</i></p>
+
+        <p>Als de status op "Concept" staat, betekent dat dat de gegevens nog niet volledig zijn. Ook bonnen die "Afgekeurd" zijn kan je hier aanpassen en opnieuw indienen.</p>
+
+        <table class="data-table">
+            <tr>
+                <th>Bedrag</th>
+                <th>Opmerking</th>
+                <th>Status</th>
+                <th>Kostencentrum</th>
+                <th>Aangemaakt</th>
+                <th></th>
+            </tr>
+            
+            <tr class="result-empty hidden">
+                <td colspan="999">Je hebt nog geen bonnetjes ingeleverd.</td>
+            </tr>
+            
+            <tr class="result-item hidden">
+                <td rel="amount::euro"></td>
+                <td rel="note"></td>
+                <td rel="statusString,statusId:data-status"></td>
+                <td rel="costCentre.name,costCentreId:data-cost-centre"></td>
+                <td rel="dateTimeCreated::dateTime"></td>
+                <td class="user-actions">
+                    <a class="view-action" rel="id:href:viewUrl">Bekijken</a>
+                    <a class="edit-action" rel="id:href:editUrl">Aanpassen</a>
+                    <a class="edit-action delete-link" href="#">Verwijderen</a>
+                </td>
+            </tr>
+
+            <tr class="result-has-more hidden">
+                <td colspan="999"><a href="#" class="result-show-more">Toon meer</a></td>
+            </tr>
+        </table>
+
+        <p><a href="/Declaraties">Terug naar Declaraties</a></p>
+    </div>
+</div>
+
+@section scripts {
+<script>
+    requireLogin(member => {
+        // User session loaded
+     
+        const userId = member.id;
+        showElement(document.querySelector('#login-user'));
+        showOutput(member, document.querySelector('#login-info'));
+
+        const receiptsDiv = document.querySelector('#user-receipts');
+        
+        apiGetInfinite('User/' + userId + '/Receipt', receiptsDiv, (elements, receipts) => {
+            // Receipts data loaded
+
+            for (i in receipts) {
+                const element = elements[i];
+                if (!receipts[i].isEditable) {
+                    // Not editable (already approved/paid)
+                    element.querySelectorAll('.user-actions .edit-action').forEach(element => hideElement(element));
+                } else {
+                    // No need to have "view" if there's already "edit"
+                    element.querySelectorAll('.user-actions .view-action').forEach(element => hideElement(element));
+                }
+
+                element.querySelector('.delete-link')?.addEventListener('click', event => {
+                    // Click Delete link
+
+                    event.preventDefault();
+
+                    if (!window.confirm('Weet je zeker dat je deze declaratie wilt verwijderen?'))
+                        return;
+
+                    const deleteId = element.dataset.id;
+                    hideElement(element.querySelector('.user-actions'));
+
+                    apiDelete('Receipt/' + deleteId).then(result => {
+                        if (!result)
+                            return;
+
+                        // Receipt deleted in database, clean it up here too
+                        element.remove();
+                        if (receiptsTable.querySelectorAll('tr:not(.hidden)').length <= 1)
+                            showElement(receiptsDiv.querySelectorAll('.result-empty'));
+                    });
+                });
+            }
+        });
+    });
+</script>
+}

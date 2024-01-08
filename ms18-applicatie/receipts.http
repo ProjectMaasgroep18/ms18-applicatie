@@ -1,0 +1,51 @@
+
+GET https://localhost:7059/api/v1/Receipt/1
+###
+
+GET https://localhost:7059/api/v1/Receipt
+
+
+###
+
+POST https://localhost:7059/api/v1/Receipt
+Content-Type: application/json
+
+{
+    "Amount" : "60"
+,	"Note" : "Voor die kapotte boot"
+,	"Photos": [ 
+{
+   
+    "Base64Image" : "bestaatniet",
+	"FileExtension" : "png",
+	"FileName" : "kevinsTest1"
+    
+}, 
+{
+  
+    "Base64Image" : "nietopvragen",
+	"FileExtension" : "jpg",
+	"FileName" : "gewaagdefoto"
+    
+}
+]
+,   "CostCentre": "Penningmeester"
+}
+
+### 
+PUT https://localhost:7059/api/v1/Receipt
+Content-Type: application/json
+
+{
+  "id": 1,
+  "amount": null,
+  "location": null,
+  "note": "waar is put put nou?",
+  "status": 1,
+  "statusString": "Ingediend",
+  "costCentre": {
+    "id": 3,
+    "name": "Moeder van Joopie"
+  },
+  "photos": []
+}

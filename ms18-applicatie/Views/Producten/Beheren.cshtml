@@ -1,0 +1,96 @@
+<h1>Producten beheren</h1>
+
+<div id="login-user" class="hidden">
+    <p id="login-info">Hallo <span rel="name"></span>!</p>
+
+    <div id="products" class="hidden">
+        <p>Hier kan je de producten beheren:</p>
+
+        <p><a asp-action="Nieuw"><button class="btn btn-primary">Nieuw product</button></a></p>
+
+        <p><i>Dit zijn alle beschikbare producten:</i></p>
+
+        <table class="data-table">
+            <tr>
+                <th>Naam</th>
+                <th>Prijs</th>
+                <th>Icoon</th>
+                <th>Kleur</th>
+                <th>Aantal per prijs</th>
+                <th>Aantal op voorraad</th>
+                <th></th>
+            </tr>
+            
+            <tr class="result-empty hidden">
+                <td colspan="999">Er zijn geen producten.</td>
+            </tr>
+            
+            <tr class="result-item hidden">
+                <td rel="name"></td>
+                <td rel="price::euro"></td>
+                <td rel="icon"></td>
+                <td><div rel="color:data-color"></div> <span rel="color"></span></td>
+                <td rel="priceQuantity"></td>
+                <td rel="stock"></td>
+                <td class="user-actions">
+                    <a rel="id:href:productUrl">Aanpassen</a>
+                    <a href="#" class="delete-link" rel="id:data-id">Verwijderen</a>
+                </td>
+            </tr>
+
+            <tr class="result-has-more hidden">
+                <td colspan="999"><a href="#" class="result-show-more">Toon meer</a></td>
+            </tr>
+        </table>
+
+        &nbsp;
+
+        <p><a href="/">Terug naar Home</a></p>
+        
+    </div>
+</div>
+
+@section scripts {
+<script>
+    requireLogin(member => {
+        // User session loaded
+     
+        const userId = member.id;
+        showElement(document.querySelector('#login-user'));
+        showOutput(member, document.querySelector('#login-info'));
+
+        
+        const productsDiv = document.querySelector('#products');
+        
+        apiGetInfinite('Product', productsDiv, elements => {
+            productsDiv.querySelectorAll('[data-color]').forEach(color => {
+                color.style.backgroundColor = color.dataset.color;
+                color.style.width = '16px';
+                color.style.height = '16px';
+                color.style.borderRadius = '16px';
+                color.style.display = 'inline-block';
+            });
+            elements.forEach(el => {
+                el.querySelector('.delete-link')?.addEventListener('click', event => {
+                    // Click Delete link
+                    
+                    event.preventDefault();
+
+                    if (!window.confirm('Weet je zeker dat je dit product wilt verwijderen?'))
+                        return;
+
+                    const deleteId = event.target.dataset.id;
+                    hideElement(el.querySelector('.user-actions'));
+
+                    apiDelete('Product/' + deleteId).then(result => {
+                        if (!result)
+                            return;
+
+                        window.location.href = window.location.href.toString().replace(/#.*$/, '');
+                    });
+                });
+            });
+        });
+    });
+</script>
+}

@@ -1,0 +1,1 @@
+UserID=postgres;Password=postgres;Host=localhost;port=5432;Database=Maasgroep;Pooling=true
