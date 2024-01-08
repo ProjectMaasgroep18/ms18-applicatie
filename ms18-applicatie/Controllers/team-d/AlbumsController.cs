@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using ms18_applicatie.Attributes;
 using ms18_applicatie.Interfaces;
 using ms18_applicatie.Models.team_d;
 
@@ -18,6 +19,7 @@ public class AlbumsController : ControllerBase
     }
 
     [HttpPost]
+    [PhotoAlbumAuthorization("photoAlbum.edit")]
     [ProducesResponseType(typeof(CreateResponseModel), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(string), StatusCodes.Status500InternalServerError)]
@@ -48,6 +50,7 @@ public class AlbumsController : ControllerBase
     }
 
     [HttpGet("{id}", Name = "GetAlbum")]
+    [PhotoAlbumAuthorization("photoAlbum")]
     [ProducesResponseType(typeof(AlbumViewModel), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -72,6 +75,7 @@ public class AlbumsController : ControllerBase
     }
 
     [HttpGet]
+    [PhotoAlbumAuthorization("photoAlbum")]
     [ProducesResponseType(typeof(IEnumerable<AlbumSummaryViewModel>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<IEnumerable<AlbumSummaryViewModel>>> GetAllAlbums()
@@ -89,6 +93,7 @@ public class AlbumsController : ControllerBase
     }
 
     [HttpPut("{id}")]
+    [PhotoAlbumAuthorization("photoAlbum.edit")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -122,6 +127,7 @@ public class AlbumsController : ControllerBase
     }
 
     [HttpDelete("{id}")]
+    [PhotoAlbumAuthorization("photoAlbum.edit")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]

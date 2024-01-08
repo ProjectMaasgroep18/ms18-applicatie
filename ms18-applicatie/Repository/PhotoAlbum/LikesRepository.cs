@@ -33,7 +33,7 @@ public class LikesRepository : ILikesRepository
         }
     }
 
-    public async Task<IEnumerable<LikeViewModel>> GetAllLikesForPhoto(Guid photoId)
+    public async Task<List<LikeViewModel>> GetAllLikesForPhoto(Guid photoId)
     {
         return await _context.Likes
             .Where(like => like.PhotoId == photoId)
@@ -54,7 +54,7 @@ public class LikesRepository : ILikesRepository
             .FirstOrDefaultAsync();
     }
 
-    public async Task<IEnumerable<PhotoViewModel>> GetTopLikedPhotos(DateTime startDate, DateTime endDate, int topCount)
+    public async Task<List<PhotoViewModel>> GetTopLikedPhotos(DateTime startDate, DateTime endDate, int topCount)
     {
         return await _context.Likes
             .Where(like => like.LikedOn >= startDate && like.LikedOn <= endDate)
@@ -64,7 +64,7 @@ public class LikesRepository : ILikesRepository
             .Select(g => g.Key)
             .Join(_context.Photos, photoId => photoId, photo => photo.Id, (photoId, photo) => photo)
             .Select(p => new PhotoViewModel
-            {
+        {
                 Id = p.Id,
                 UploaderId = p.UploaderId,
                 UploadDate = p.UploadDate,
