@@ -144,6 +144,22 @@ namespace ms18_applicatie.Controllers.team_a
         }
 
         [HttpGet]
+        [Route("upcoming")]
+        public async Task<IActionResult> Upcoming()
+        {
+            try
+            {
+                var events = await GetCalendar(Calendars.Global, true, true);
+                return new OkObjectResult(events);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "upcoming call exception");
+                return new BadRequestResult();
+            }
+        }
+        
+        [HttpGet]
         [Route("global")]
         public async Task<IActionResult> Global()
         {
@@ -186,23 +202,36 @@ namespace ms18_applicatie.Controllers.team_a
             }
         }
 
-        private async Task<List<CalendarEvent>> GetCalendar(Calendars calenderId, bool filterGlobal = true)
+        private async Task<List<CalendarEvent>> GetCalendar(Calendars calenderId, bool filterGlobal = true, bool upcoming = false)
         {
             var calenderEvents = new List<CalendarEvent>();
 
             var request = _calendarService.Events.List(GetCalendarId(calenderId));
             var response = await request.ExecuteAsync();
             var listItems = response.Items.ToList();
+            var limit = 0; // Limit the query results to the first upcoming 2 events.
 
             foreach (var eventsItem in listItems)
-            {
-                if (eventsItem == null)
-                    continue;
+                {
+                    if (eventsItem == null)
+                    {
+                        continue;
+                    }
 
-                var calenderEvent = new CalendarEvent(eventsItem, calenderId);
-                calenderEvents.Add(calenderEvent);
-            }
+                    if (upcoming)
+                    {
+                        if (eventsItem.Start.DateTime < DateTime.Now)
+                            continue;
 
+                        limit++;
+                        
+                        if (limit >= 2)
+                            break;
+                    }
+                    var calenderEvent = new CalendarEvent(eventsItem, calenderId);
+                    calenderEvents.Add(calenderEvent);
+                } 
+            
             if (!filterGlobal)
             {
                 request = _calendarService.Events.List(GetCalendarId(Calendars.Global));
