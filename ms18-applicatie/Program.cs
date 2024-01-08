@@ -9,7 +9,6 @@ using Maasgroep.Database.Receipts;
 using Maasgroep.Database.Admin;
 using Maasgroep.Database.Orders;
 using Maasgroep.Middleware;
-
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
@@ -52,15 +51,17 @@ builder.Services.AddScoped<IPhotoRepository, PhotoRepository>();
 builder.Services.AddScoped<ILikesRepository, LikesRepository>();
 
 // Add services to the container.
-builder.Services.AddControllersWithViews(options => {
-    
+builder.Services.AddControllersWithViews(options =>
+{
+
     // Filter special MaasgroepExceptions that are thrown in our controllers
     options.Filters.Add<MaasgroepExceptionFilter>();
-    
+
 }).ConfigureApiBehaviorOptions(options =>
 {
     // Model validation error when posting/putting data
-    options.InvalidModelStateResponseFactory = context => new BadRequestObjectResult(new {
+    options.InvalidModelStateResponseFactory = context => new BadRequestObjectResult(new
+    {
         error = 400,
         message = "Ongeldige gegevens opgegeven",
     });
@@ -93,6 +94,16 @@ builder.Services.AddSwaggerGen(setup =>
         { jwtSecurityScheme, Array.Empty<string>() }
     });
 
+});
+builder.Host.ConfigureAppConfiguration((hostingContext, config) =>
+{
+    var appSettings = @"./Controllers/team-a/CalendarIds.json";
+    if (File.Exists(appSettings))
+    {
+        config.AddJsonFile(appSettings,
+            optional: false,
+            reloadOnChange: false);
+    }
 });
 
 builder.Services.AddAuthorization();
@@ -135,7 +146,7 @@ builder.Services.AddSingleton((x) =>
     using var stream =
            new FileStream(settings.FilePath, FileMode.Open, FileAccess.Read);
     var credential = GoogleCredential.FromStream(stream).CreateScoped(scopes);
-    
+
 
     //Create the Calendar service.
     return new CalendarService(new BaseClientService.Initializer()
