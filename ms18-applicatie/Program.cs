@@ -14,6 +14,17 @@ builder.Services.AddDbContext<MaasgroepContext>();
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
+builder.Host.ConfigureAppConfiguration((hostingContext, config) =>
+{
+    var appSettings = @"./Controllers/team-a/CalendarIds.json";
+    if (File.Exists(appSettings))
+    {
+        config.AddJsonFile(appSettings,
+            optional: false,
+            reloadOnChange: false);
+    }
+});
+
 builder.Services.AddSwaggerGen(s =>
 {
 
