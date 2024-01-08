@@ -1,0 +1,209 @@
+<h1>Kostencentra</h1>
+
+<div id="login-user" class="hidden">
+    <p id="login-info">Hallo <span rel="name"></span>!</p>
+
+    <p>Declaraties vallen altijd onder een bepaald “kostencentrum”.</p>
+
+    <div id="cost-centres" class="hidden">
+        <p><i>Dit zijn de kostencentra waar een declaratie onder kan vallen:</i></p>
+
+        <table class="data-table">
+            <tr>
+                <th>Kostencentrum</th>
+                <th></th>
+            </tr>
+            <tr class="result-empty">
+                <td colspan="999">Er zijn geen kostencentra</td>
+            </tr>    
+            <tr class="result-add">
+                <td colspan="999"><a href="#" id="cost-centres-add">Kostencentrum toevoegen</a></td>
+            </tr>
+            <tr class="result-item" class="hidden">
+                <td>
+                    <span rel="name" class="cost-centre-name"></span>
+                    <input rel="name:value" class="cost-centre-input hidden">
+                </td>
+                <td class="user-actions">
+                    <a href="#" class="edit-link">Aanpassen</a>
+                    <a href="#" class="save-link hidden">Opslaan</a>
+                    <a href="#" class="delete-link">Verwijderen</a>
+                </td>
+            </tr>
+            <tr class="result-has-more">
+                <td colspan="999"><a href="#" class="result-show-more">Toon meer</a></td>
+            </tr>
+        </table>
+        
+        &nbsp;
+
+        <p><a href="/Declaraties">Terug naar Declaraties</a></p>
+
+    </div>
+</div>
+
+@section scripts {
+<script>
+    requireLogin(member => {
+        // User session loaded
+     
+        const userId = member.id;
+        showElement(document.querySelector('#login-user'));
+        showOutput(member, document.querySelector('#login-info'));
+        const costCentreTable = document.querySelector('#cost-centres');
+
+        apiGetInfinite('CostCentre', costCentreTable, (elements, costCentres) => {
+            for (i in costCentres) {
+                // Newly loaded cost centre
+
+                let element = elements[i];
+                
+                element.querySelector('.cost-centre-input')?.addEventListener('keyup', event => {
+                    // Save on enter key
+
+                    if (event.which != 13)
+                        return
+
+                    element.querySelector('.save-link')?.dispatchEvent(new Event('click'));
+                });
+                
+                element.querySelector('.edit-link')?.addEventListener('click', event => {
+                    // Click Edit link
+                    
+                    event.preventDefault();
+
+                    const editId = element.dataset.id;
+                    const costCentreInput = element.querySelector('.cost-centre-input');
+
+                    hideElement(element.querySelector('.cost-centre-name'));
+                    hideElement(element.querySelector('.edit-link'));
+                    
+                    showElement(element.querySelector('.save-link'));
+                    showElement(costCentreInput);
+                    costCentreInput.focus();
+                });
+
+                element.querySelector('.save-link')?.addEventListener('click', event => {
+                    // Click Save link
+                    
+                    event.preventDefault();
+
+                    const editId = element.dataset.id;
+                    const costCentreInput = element.querySelector('.cost-centre-input');
+                    const newName = costCentreInput.value;
+
+                    costCentreInput.disabled = true;
+                    hideElement(element.querySelector('.user-actions'));
+
+                    apiPut('CostCentre/' + editId, { id: editId, name: newName }).then(result => {
+                        // Saved the updated cost centre: apply it here too
+
+                        if (!result)
+                            return;
+
+                        const costCentreName = element.querySelector('.cost-centre-name');
+                        showOutput({ id: editId, name: newName }, element);
+                        costCentreInput.disabled = false;
+
+                        showElement(costCentreName);
+                        showElement(element.querySelector('.edit-link'));
+                        showElement(element.querySelector('.user-actions'));
+
+                        hideElement(element.querySelector('.save-link'));
+                        hideElement(costCentreInput);
+                    });
+                });
+                
+                element.querySelector('.delete-link')?.addEventListener('click', event => {
+                    // Click Delete link
+
+                    event.preventDefault();
+
+                    if (!window.confirm('Weet je zeker dat je dit kostencentrum wilt verwijderen?'))
+                        return;
+
+                    const deleteId = element.dataset.id;
+                    hideElement(element.querySelector('.user-actions'));
+
+                    apiDelete('CostCentre/' + deleteId).then(result => {
+                        if (!result)
+                            return;
+
+                        window.location.href = window.location.href.toString().replace(/#.*$/, '');
+                    });
+                });
+            }
+        });
+
+        document.querySelector('#cost-centres-add')?.addEventListener('click', event => {
+            // Add cost centre link
+
+            event.preventDefault();
+
+            const baseRow = document.querySelector('#cost-centres .result-item');
+            const costCentreRow = baseRow.cloneNode(true);
+            showElement(costCentreRow);
+            baseRow.insertAdjacentElement('beforebegin', costCentreRow);
+            
+            hideElement(document.querySelector('#cost-centres .result-add'));
+
+            const costCentreInput = costCentreRow.querySelector('.cost-centre-input');
+            const saveLink = costCentreRow.querySelector('.save-link');
+            const deleteLink = costCentreRow.querySelector('.delete-link');
+
+            hideElement(costCentreRow.querySelector('.cost-centre-name'));
+            hideElement(costCentreRow.querySelector('.edit-link'));
+            
+            showElement(saveLink);
+            showElement(costCentreInput);
+            costCentreInput.focus();
+
+            costCentreInput.addEventListener('keyup', event => {
+                // Save on enter key
+
+                if (event.which != 13)
+                    return
+
+                saveLink.dispatchEvent(new Event('click'));
+            })
+
+            saveLink.addEventListener('click', event => {
+                // Click Save link of newly added cost centre
+                
+                event.preventDefault();
+                const newName = costCentreInput.value;
+
+                costCentreInput.disabled = true;
+                hideElement(costCentreRow.querySelector('.user-actions'));
+
+                // This newly added cost centre was never saved before, so create it in the database
+
+                apiPost('CostCentre/', { name: newName }).then(result => {    
+                    // Saved new cost centre
+
+                    if (!result)
+                        return;
+                    
+                    window.location.href = window.location.href.toString().replace(/#.*$/, '');
+                });
+                return;
+            });
+
+            deleteLink.addEventListener('click', event => {
+                // Click Delete link of newly added cost centre
+                
+                event.preventDefault();
+
+                if (!window.confirm('Weet je zeker dat je deze post wilt verwijderen?'))
+                    return;
+
+                // This newly added cost centre was never saved, just remove it here
+                costCentreRow.remove();
+                if (costCentreTable.querySelectorAll('tr:not(.hidden)').length <= 0)
+                    showElement(document.querySelector('#cost-centres-empty'));
+                return;
+            });
+        });
+    });
+</script>
+}
