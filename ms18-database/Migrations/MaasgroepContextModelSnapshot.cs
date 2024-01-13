@@ -359,7 +359,7 @@ namespace Maasgroep.Database.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("AlbumLocationId")
+                    b.Property<Guid?>("AlbumLocationId")
                         .HasColumnType("uuid");
 
                     b.Property<string>("ContentType")
@@ -385,7 +385,7 @@ namespace Maasgroep.Database.Migrations
                     b.Property<DateTime>("UploadDate")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<long>("UploaderId")
+                    b.Property<long?>("UploaderId")
                         .HasColumnType("bigint");
 
                     b.HasKey("Id");
@@ -1209,15 +1209,11 @@ namespace Maasgroep.Database.Migrations
                 {
                     b.HasOne("Maasgroep.Database.Context.Tables.PhotoAlbum.Album", "AlbumLocation")
                         .WithMany("Photos")
-                        .HasForeignKey("AlbumLocationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("AlbumLocationId");
 
                     b.HasOne("Maasgroep.Database.Admin.Member", "Uploader")
                         .WithMany()
-                        .HasForeignKey("UploaderId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("UploaderId");
 
                     b.Navigation("AlbumLocation");
 

@@ -3,6 +3,10 @@ using Google.Apis.Calendar.v3.Data;
 using Microsoft.AspNetCore.Mvc;
 using ms18_applicatie.Models.team_a;
 using Microsoft.Extensions.Options;
+using Maasgroep.Services;
+using Maasgroep.SharedKernel.ViewModels.Admin;
+using Maasgroep.Interfaces;
+using Maasgroep.Exceptions;
 
 namespace ms18_applicatie.Controllers.team_a
 {
@@ -12,17 +16,41 @@ namespace ms18_applicatie.Controllers.team_a
         private readonly CalendarSettings _calendarSettings;
         private readonly CalendarService _calendarService;
         private readonly ILogger<CalendarController> _logger;
-        public CalendarController(ILogger<CalendarController> logger, CalendarService calendarService, IOptions<CalendarSettings> calendarSettings)
+        private readonly IMaasgroepAuthenticationService _maasgroepAuthenticationService;
+
+        public CalendarController(ILogger<CalendarController> logger, CalendarService calendarService, IOptions<CalendarSettings> calendarSettings, IMaasgroepAuthenticationService maasgroepAuthenticationService)
         {
             _logger = logger;
             _calendarService = calendarService;
+            _maasgroepAuthenticationService = maasgroepAuthenticationService;
             _calendarSettings = calendarSettings.Value;
+        }
+
+        public virtual MemberModel? CurrentMember { get => _maasgroepAuthenticationService.GetCurrentMember(HttpContext); }
+
+        protected bool HasPermission(string permission)
+            => CurrentMember != null && (CurrentMember.Permissions.Contains("admin") || CurrentMember.Permissions.Contains(permission));
+
+        protected void NoAccess()
+        {
+            // Throw an Unauthorized or Forbidden error, depending on login state
+            if (CurrentMember == null)
+                throw new MaasgroepUnauthorized();
+            else
+                throw new MaasgroepForbidden();
+        }
+
+        private void CheckPermission()
+        {
+            if (!HasPermission("calendar.editor"))
+                NoAccess();
         }
 
         [HttpDelete]
         [Route("Event")]
         public async Task<IActionResult> RemoveEvent(Calendars calendarName, string id)
         {
+            CheckPermission();
             try
             {
                 var request = _calendarService.Events.Delete(GetCalendarId(calendarName), id);
@@ -40,6 +68,7 @@ namespace ms18_applicatie.Controllers.team_a
         [Route("Event")]
         public async Task<IActionResult> EditEvent(Calendars calendarName, CalendarEvent calendarEvent)
         {
+            CheckPermission();
             try
             {
                 var request = _calendarService.Events.Get(GetCalendarId(calendarName), calendarEvent.Id);
@@ -64,11 +93,12 @@ namespace ms18_applicatie.Controllers.team_a
         [Route("Event")]
         public async Task<IActionResult> AddEvent(Calendars calendarName, CalendarEvent calendarEvent)
         {
+            CheckPermission();
             try
             {
                 var googleEvent = calendarEvent.ToGoogleEvent();
                 EventsResource.InsertRequest request = _calendarService.Events.Insert(googleEvent, GetCalendarId(calendarName));
-                Event createdEvent = await request.ExecuteAsync();
+                _ = await request.ExecuteAsync();
                 return new OkResult();
             }
             catch (Exception ex)
@@ -144,6 +174,22 @@ namespace ms18_applicatie.Controllers.team_a
         }
 
         [HttpGet]
+        [Route("upcoming")]
+        public async Task<IActionResult> Upcoming()
+        {
+            try
+            {
+                var events = await GetCalendar(Calendars.Global, true, true);
+                return new OkObjectResult(events);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "upcoming call exception");
+                return new BadRequestResult();
+            }
+        }
+
+        [HttpGet]
         [Route("global")]
         public async Task<IActionResult> Global()
         {
@@ -186,19 +232,32 @@ namespace ms18_applicatie.Controllers.team_a
             }
         }
 
-        private async Task<List<CalendarEvent>> GetCalendar(Calendars calenderId, bool filterGlobal = true)
+        private async Task<List<CalendarEvent>> GetCalendar(Calendars calenderId, bool filterGlobal = true, bool upcoming = false)
         {
             var calenderEvents = new List<CalendarEvent>();
 
             var request = _calendarService.Events.List(GetCalendarId(calenderId));
             var response = await request.ExecuteAsync();
             var listItems = response.Items.ToList();
+            var limit = 0; // Limit the query results to the first upcoming 2 events.
 
             foreach (var eventsItem in listItems)
             {
                 if (eventsItem == null)
+                {
                     continue;
+                }
 
+                if (upcoming)
+                {
+                    if (eventsItem.Start.DateTime < DateTime.Now)
+                        continue;
+
+                    limit++;
+
+                    if (limit >= 2)
+                        break;
+                }
                 var calenderEvent = new CalendarEvent(eventsItem, calenderId);
                 calenderEvents.Add(calenderEvent);
             }
@@ -214,7 +273,7 @@ namespace ms18_applicatie.Controllers.team_a
                     if (eventsItem == null)
                         continue;
 
-                    var calenderEvent = new CalendarEvent(eventsItem, calenderId);
+                    var calenderEvent = new CalendarEvent(eventsItem, Calendars.Global);
                     calenderEvents.Add(calenderEvent);
                 }
             }

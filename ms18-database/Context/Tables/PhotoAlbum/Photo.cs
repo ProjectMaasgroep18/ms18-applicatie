@@ -8,7 +8,7 @@ public class Photo
     {
     }
 
-    public Photo(long uploaderId, byte[] imageData, string contentType, bool needsApproval, Guid albumLocationId)
+    public Photo(long? uploaderId, byte[] imageData, string contentType, bool needsApproval, Guid? albumLocationId)
     {
         UploaderId = uploaderId;
         UploadDate = DateTime.UtcNow;
@@ -19,8 +19,8 @@ public class Photo
     }
     public Guid Id { get; set; }
 
-    public long UploaderId { get; set; }
-    public Member Uploader { get; set; } = null!;
+    public long? UploaderId { get; set; }
+    public Member? Uploader { get; set; }
     public DateTime UploadDate { get; set; }
 
     public string? Title { get; set; }
@@ -30,8 +30,8 @@ public class Photo
     public string? Location { get; set; }
     public bool NeedsApproval { get; set; }
 
-    public Guid AlbumLocationId { get; set; }
-    public Album AlbumLocation { get; set; } = null!;
+    public Guid? AlbumLocationId { get; set; }
+    public Album? AlbumLocation { get; set; }
 
     public IEnumerable<Like> Likes { get; set; } = null!;
 }

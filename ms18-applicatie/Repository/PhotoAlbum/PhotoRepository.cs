@@ -15,7 +15,7 @@ public class PhotoRepository : IPhotoRepository
         _context = context;
     }
 
-    public async Task<Guid?> AddPhoto(long uploaderId, bool needsApproval, PhotoUploadModel photoUploadModel)
+    public async Task<Guid?> AddPhoto(long? uploaderId, bool needsApproval, PhotoUploadModel photoUploadModel)
     {
         var imageBytes = Convert.FromBase64String(photoUploadModel.ImageData);
 
@@ -66,17 +66,37 @@ public class PhotoRepository : IPhotoRepository
                 TakenOn = p.TakenOn,
                 Location = p.Location,
                 AlbumLocationId = p.AlbumLocationId,
-                LikesCount = p.Likes.Count()
+                LikesCount = p.Likes.Count(),
+                NeedsApproval = p.NeedsApproval,
             })
             .FirstOrDefaultAsync();
     }
 
-    public async Task<(IEnumerable<Photo> Photos, int TotalCount)> GetPhotosByAlbumId(Guid albumId, int pageNumber, int pageSize)
+    public async Task<(IEnumerable<Photo> Photos, int TotalCount)> GetPhotosByAlbumId(Guid albumId, int pageNumber, int pageSize, bool showUnapproved)
     {
         var query = _context.Photos.Where(p => p.AlbumLocationId == albumId);
 
+        if (!showUnapproved)
+        {
+            query = query.Where(p => !p.NeedsApproval);
+        }
+
         var totalCount = await query.CountAsync();
         var photos = await query.OrderBy(p => p.UploadDate)
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+
+        return (photos, totalCount);
+    }
+
+    public async Task<(IEnumerable<Photo> Photos, int TotalCount)> GetUnapprovedPhotos(int pageNumber, int pageSize)
+    {
+        var query = _context.Photos.Where(p => p.NeedsApproval);
+
+        var totalCount = await query.CountAsync();
+        var photos = await query
+            .OrderBy(p => p.UploadDate)
             .Skip((pageNumber - 1) * pageSize)
             .Take(pageSize)
             .ToListAsync();
