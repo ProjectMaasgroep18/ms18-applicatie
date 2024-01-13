@@ -104,7 +104,7 @@ public class UserController : EditableRepositoryController<IMemberRepository, Me
             NoAccess();
         return Ok(Bills.ListByMember(id, offset, limit, includeDeleted));
     }
-
+    
     [HttpGet("Bill")]
     public IActionResult BillsByEmail([FromQuery] string email, [FromQuery] int offset = default, [FromQuery] int limit = default, [FromQuery] bool includeDeleted = default)
     {   
