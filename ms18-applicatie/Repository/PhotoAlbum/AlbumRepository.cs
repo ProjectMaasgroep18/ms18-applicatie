@@ -67,15 +67,26 @@ public class AlbumRepository : IAlbumRepository
             .FirstOrDefaultAsync(a => a.Id == id);
     }
 
-    public async Task<List<AlbumSummaryViewModel>> GetAllAlbums()
+    public async Task<List<AlbumViewModel>> GetAllAlbums()
     {
         return await _context.Albums
-            .Select(a => new AlbumSummaryViewModel
+            .Include(a => a.ChildAlbums)
+            .ThenInclude(ca => ca.CoverPhoto)
+            .Include(a => a.Photos)
+            .Select(a => new AlbumViewModel
             {
                 Id = a.Id,
                 Name = a.Name,
                 Year = a.Year,
-                CoverPhotoId = a.CoverPhotoId
+                CoverPhotoId = a.CoverPhotoId,
+                ParentAlbumId = a.ParentAlbumId,
+                PhotoCount = a.Photos.Count(),
+                ChildAlbums = a.ChildAlbums.Select(ca => new ChildAlbumViewModel
+                {
+                    Id = ca.Id,
+                    Name = ca.Name,
+                    CoverPhotoId = ca.CoverPhotoId
+                }).ToList()
             })
             .ToListAsync();
     }

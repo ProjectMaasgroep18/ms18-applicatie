@@ -76,9 +76,9 @@ public class AlbumsController : ControllerBase
 
     [HttpGet]
     [PhotoAlbumAuthorization("photoAlbum")]
-    [ProducesResponseType(typeof(IEnumerable<AlbumSummaryViewModel>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(IEnumerable<AlbumViewModel>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<IEnumerable<AlbumSummaryViewModel>>> GetAllAlbums()
+    public async Task<ActionResult<IEnumerable<AlbumViewModel>>> GetAllAlbums()
     {
         try
         {
