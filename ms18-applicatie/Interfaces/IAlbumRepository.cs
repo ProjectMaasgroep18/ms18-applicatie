@@ -9,7 +9,7 @@ public interface IAlbumRepository
     Task<Guid?> AddAlbum(AlbumCreateModel album);
     Task<AlbumViewModel?> GetAlbumViewModelById(Guid id);
     Task<Album?> GetAlbumById(Guid id);
-    Task<List<AlbumSummaryViewModel>> GetAllAlbums();
+    Task<List<AlbumViewModel>> GetAllAlbums();
     Task UpdateAlbum(Album album);
     Task<bool> DeleteAlbum(Guid albumId);
 }

@@ -126,10 +126,10 @@ public class AlbumsControllerTests
     [Test]
     public async Task GetAllAlbums_ReturnsAllAlbums()
     {
-        var mockAlbums = new List<AlbumSummaryViewModel>
+        var mockAlbums = new List<AlbumViewModel>
     {
-        new AlbumSummaryViewModel(),
-        new AlbumSummaryViewModel()
+        new (),
+        new ()
     };
         _mockAlbumRepository.Setup(repo => repo.GetAllAlbums())
                             .ReturnsAsync(mockAlbums);
@@ -139,8 +139,8 @@ public class AlbumsControllerTests
         Assert.That(result.Result, Is.InstanceOf<OkObjectResult>());
         var okResult = result.Result as OkObjectResult;
         Assert.That(okResult, Is.Not.Null);
-        Assert.That(okResult.Value, Is.InstanceOf<List<AlbumSummaryViewModel>>());
-        var returnValue = okResult.Value as List<AlbumSummaryViewModel>;
+        Assert.That(okResult.Value, Is.InstanceOf<List<AlbumViewModel>>());
+        var returnValue = okResult.Value as List<AlbumViewModel>;
         Assert.That(returnValue, Is.EquivalentTo(mockAlbums));
     }
 
