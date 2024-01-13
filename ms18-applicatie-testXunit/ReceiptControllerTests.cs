@@ -14,9 +14,6 @@ namespace ms18_applicatie_test
 {
 	public class ReceiptControllerTests
 	{
-		private readonly Mock<IReceiptStatusRepository> receiptStatusRepository;
-		private readonly Mock<ICostCentreRepository> costCentreRepository;
-		private readonly Mock<IMemberRepository> memberRepository;
 		private readonly Mock<IReceiptRepository> receiptRepository;
 		private readonly Mock<IReceiptPhotoRepository> receiptPhotoRepository;
 		private readonly Mock<IReceiptApprovalRepository> receiptApprovalRepository;
@@ -24,9 +21,6 @@ namespace ms18_applicatie_test
 
 		public ReceiptControllerTests()
 		{
-			receiptStatusRepository = new Mock<IReceiptStatusRepository>();
-			costCentreRepository = new Mock<ICostCentreRepository>();
-			memberRepository = new Mock<IMemberRepository>();
 			receiptRepository = new Mock<IReceiptRepository>();
 			receiptPhotoRepository = new Mock<IReceiptPhotoRepository>();
 			receiptApprovalRepository = new Mock<IReceiptApprovalRepository>();

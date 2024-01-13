@@ -1,7 +1,5 @@
 ﻿using FluentAssertions;
-using Maasgroep.Database;
 using Maasgroep.Database.Receipts;
-using Maasgroep.Database.Test;
 using Microsoft.EntityFrameworkCore;
 using System.Text;
 

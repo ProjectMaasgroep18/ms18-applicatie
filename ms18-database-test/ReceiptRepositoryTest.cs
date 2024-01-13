@@ -28,26 +28,6 @@ namespace Maasgroep.Database.Test
 		private readonly Mock<ICostCentreRepository> costCentreRepository;
 		private readonly Mock<IMemberRepository> memberRepository;
 
-		/*
-		GetModel (int)		ReadRepository				Done
-		GetModel (model)	ReadRepository				Done
-		Exists				ReadRepository				Done
-		GetById				ReadRepository				Done
-		ListAll				ReadRepository				Done
-		GetRecord			WriteableRepository			Done
-		ListByMember		WriteableRepository			Done
-		Create				WriteableRepository			Partial, much cant be mocked
-		GetSaveAction		WriteableRepository
-		GetAfterSaveAction	WriteableRepository			Not necessary
-		Delete				DeletableRepository
-		ListAll				DeletableRepository			Done with read
-		ListByMember		DeletableRepository			Done with write
-		GetHistory			EditableRepository			Done
-		Update				EditableRepository			Done
-		ListByCostCentre	ReceiptRepository			Done
-		ListPayable			ReceiptRepository			Done
-		*/
-
 		#region GetById
 
 		[Fact]
