@@ -44,7 +44,7 @@ public class ReceiptController : EditableRepositoryController<IReceiptRepository
         var photo = Photos.Create(data, CurrentMember?.Id);
         if (photo == null)
             NotWritable();
-        return Created($"/api/v1/ReceiptPhotos/{photo!.Id}", photo);
+        return Created($"/api/v1/ReceiptPhotos/{photo!.Id}", Photos.GetModel(photo));
     }
 
     [HttpGet("{id}/Photo")]
